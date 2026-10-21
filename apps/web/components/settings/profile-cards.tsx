@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { InstallRow } from "@/components/pwa/install-row";
 import { Card } from "@/components/ui/card";
-import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
-import { Row } from "@/components/ui/row";
-import { SectionTitle } from "@/components/ui/section-title";
+import { SectionHeader } from "@/components/ui/section-title";
 import { Switch } from "@/components/ui/switch";
 import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
+import { SettingsRow } from "@/components/settings/settings-row";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
 import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
@@ -32,9 +31,72 @@ const SEX_OPTIONS: { value: SexType; label: string }[] = [
 // The same options as /training. Minutes are what the profile stores; 0 is a rest day.
 const TRAINING_OPTIONS = getTrainingDurations();
 
-// Each row sits in one card. Rows share left and right edges (see the alignment check).
-function RowGroup({ children }: { children: ReactNode }) {
-  return <div data-align-group="profile-row">{children}</div>;
+// V3 Hồ sơ: a field's one-line reason sits under its label (12 px, secondary)
+function Reason({ children }: { children: ReactNode }) {
+  return <span className="text-xs leading-snug text-secondary">{children}</span>;
+}
+
+interface ChoiceItem {
+  id: string;
+  label: ReactNode;
+  active: boolean;
+  onClick: () => void;
+  ariaLabel?: string;
+  disabled?: boolean;
+}
+
+/** The V3 Hồ sơ choice chips: 48 px pills in equal columns on the card, the picked one ink (no ring, so none jumps). */
+function ChoiceGrid({ items, columns }: { items: ChoiceItem[]; columns: number }) {
+  return (
+    <div style={{ "--choice-cols": columns } as CSSProperties} className="grid grid-cols-[repeat(var(--choice-cols),minmax(0,1fr))] gap-2">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          aria-pressed={item.active}
+          aria-label={item.ariaLabel}
+          disabled={item.disabled}
+          onClick={item.onClick}
+          className={`flex h-12 items-center justify-center rounded-full border-0 px-2 text-center text-callout active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+            item.active ? "bg-ink font-bold text-on-dark" : "bg-surface font-semibold text-text"
+          } ${item.disabled ? "cursor-default opacity-50 active:scale-100" : "cursor-pointer"}`}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// A labelled group of choices: the label (with a small unit at its right), its reason under it, then the chips.
+// The line above it (the card's header, or the group before) is its border; every row of Hồ sơ shares the "profile-row" edges.
+function ChoiceGroup({
+  labelId,
+  label,
+  unit,
+  reason,
+  children,
+}: {
+  labelId: string;
+  label: string;
+  unit?: string;
+  reason: string;
+  children: ReactNode;
+}) {
+  return (
+    <div data-align-group="profile-row" role="group" aria-labelledby={labelId} className="flex flex-col gap-2 border-t border-divider pb-4 pt-3">
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-baseline justify-between gap-3">
+          <span id={labelId} className="text-callout">
+            {label}
+          </span>
+          {unit && <span className="text-cap text-secondary">{unit}</span>}
+        </div>
+        <Reason>{reason}</Reason>
+      </div>
+      {children}
+    </div>
+  );
 }
 
 // Same rule as setup: a year from 1900 to this year. An invalid year keeps its error on screen.
@@ -70,15 +132,23 @@ function BirthYearField() {
 
   if (!editing) {
     return (
-      <RowGroup>
-        <Row label="Năm sinh" value={String(profile.birthYear)} onClick={() => setEditing(true)} />
-      </RowGroup>
+      <SettingsRow
+        tone="profile"
+        glyph={SETTINGS_ICONS.calendar}
+        label="Năm sinh"
+        hint="Dùng để chọn mức khuyến nghị theo tuổi."
+        value={String(profile.birthYear)}
+        onClick={() => setEditing(true)}
+        minHeight="16"
+        data-align-group="profile-row"
+      />
     );
   }
 
   return (
-    <RowGroup>
-      <FormRow label="Năm sinh" htmlFor="profile-birth-year" error={error} className="border-t border-divider py-3">
+    <div data-align-group="profile-row" className="border-t border-divider py-3">
+      <FormRow label="Năm sinh" htmlFor="profile-birth-year" error={error}>
+        <Reason>Dùng để chọn mức khuyến nghị theo tuổi.</Reason>
         <input
           id="profile-birth-year"
           type="text"
@@ -91,56 +161,61 @@ function BirthYearField() {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
           aria-invalid={error ? true : undefined}
-          className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-cobalt ${
-            error ? "border-destructive" : "border-grabber"
+          aria-describedby={error ? "profile-birth-year-error" : undefined}
+          className={`h-12 w-full rounded-xl border-0 bg-surface px-3 text-base font-semibold tabular-nums text-text outline-none focus:shadow-[inset_0_0_0_2px_var(--color-cobalt)] ${
+            error ? "shadow-[inset_0_0_0_2px_var(--color-destructive)]" : ""
           }`}
         />
       </FormRow>
-    </RowGroup>
+    </div>
   );
 }
 
 export function BodyCard({ alignGroup }: { alignGroup?: string }) {
   const { profile, updateProfile } = useDiary();
   return (
-    <Card as="section" aria-label="Cơ thể" data-align-group={alignGroup} className="flex flex-col gap-1">
-      <SectionTitle>Cơ thể</SectionTitle>
-      <RowGroup>
-        <div role="group" aria-labelledby="profile-sex-label" className="flex flex-col gap-2 border-t border-divider py-3">
-          <span id="profile-sex-label" className="text-callout">
-            Giới tính
-          </span>
-          <ChipGroup
-            size="lg"
-            columns={2}
-            items={SEX_OPTIONS.map((option) => ({
-              id: option.value,
-              label: option.label,
-              active: profile.sex === option.value,
-              onClick: () => updateProfile({ sex: option.value }),
-            }))}
+    <Card as="section" aria-label="Cơ thể" padding={false} data-align-group={alignGroup} className="flex flex-col px-4 pt-4">
+      <SectionHeader className="mb-2">Cơ thể</SectionHeader>
+      <ChoiceGroup labelId="profile-sex-label" label="Giới tính" reason="Chỉ dùng để chọn mức khuyến nghị vi chất cho bạn.">
+        <ChoiceGrid
+          columns={2}
+          items={SEX_OPTIONS.map((option) => ({
+            id: option.value,
+            label: option.label,
+            active: profile.sex === option.value,
+            onClick: () => updateProfile({ sex: option.value }),
+          }))}
+        />
+      </ChoiceGroup>
+      {profile.sex === "female" && (
+        <div data-align-group="profile-row" className="flex min-h-14 items-center gap-3 border-t border-divider py-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-callout">Gần/đang trong kỳ</span>
+            <Reason>Chỉ với nữ · Iron lên 28 mg/ngày</Reason>
+          </div>
+          <Switch
+            checked={profile.periodMode}
+            onCheckedChange={(periodMode) => updateProfile({ periodMode })}
+            aria-label="Gần/đang trong kỳ"
           />
         </div>
-      </RowGroup>
-      {profile.sex === "female" && (
-        <RowGroup>
-          <div className="flex min-h-[52px] items-center gap-3 border-t border-divider py-1">
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-callout">Gần/đang trong kỳ</span>
-              <span className="text-cap leading-tight text-secondary">Chỉ với nữ · Iron lên 28 mg/ngày</span>
-            </div>
-            <Switch
-              checked={profile.periodMode}
-              onCheckedChange={(periodMode) => updateProfile({ periodMode })}
-              aria-label="Gần/đang trong kỳ"
-            />
-          </div>
-        </RowGroup>
       )}
       <BirthYearField />
-      <RowGroup>
-        <Row label="Cân nặng" value={`${formatNumber(profile.weightKg)} kg`} href="/settings/profile/weight" />
-      </RowGroup>
+      <SettingsRow
+        tone="body"
+        glyph={SETTINGS_ICONS.scale}
+        label="Cân nặng"
+        hint="Dùng để tính kcal, đạm và chất béo."
+        value={
+          <span className="whitespace-nowrap">
+            <span className="font-display text-headline font-extrabold italic leading-8 tracking-[0.01em]">{formatNumber(profile.weightKg)}</span>
+            <span className="text-callout font-semibold"> kg</span>
+          </span>
+        }
+        href="/settings/profile/weight"
+        minHeight="16"
+        data-align-group="profile-row"
+      />
     </Card>
   );
 }
@@ -149,43 +224,31 @@ export function GoalCard() {
   const { profile, updateProfile } = useDiary();
   const options = goalOptions(profile.weightKg);
   return (
-    <Card as="section" aria-label="Mục tiêu" className="flex flex-col gap-1">
-      <SectionTitle>Mục tiêu</SectionTitle>
-      <RowGroup>
-        <div role="group" aria-labelledby="profile-goal-label" className="flex flex-col gap-2 border-t border-divider py-3">
-          <span id="profile-goal-label" className="text-callout">Mục tiêu</span>
-          <ChipGroup
-            size="lg"
-            columns={2}
-            columnsLg={2}
-            items={options.map((option) => ({
-              id: option.goal,
-              label: option.name,
-              active: profile.goal === option.goal,
-              onClick: () => updateProfile({ goal: option.goal }),
-            }))}
-          />
-        </div>
-      </RowGroup>
-      <RowGroup>
-        <div role="group" aria-labelledby="profile-training-label" className="flex flex-col gap-2 border-t border-divider py-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <span id="profile-training-label" className="text-callout">Ngày tập mặc định</span>
-            <span className="text-cap text-secondary">phút</span>
-          </div>
-          <ChipGroup
-            size="lg"
-            columns={5}
-            items={TRAINING_OPTIONS.map((option) => ({
-              id: option.id,
-              label: option.minutes === 0 ? "Nghỉ" : String(option.minutes),
-              ariaLabel: option.minutes === 0 ? "Nghỉ" : `${option.minutes} phút`,
-              active: profile.trainingMinutesDefault === option.minutes,
-              onClick: () => updateProfile({ trainingMinutesDefault: option.minutes }),
-            }))}
-          />
-        </div>
-      </RowGroup>
+    <Card as="section" aria-label="Mục tiêu" padding={false} className="flex flex-col px-4 pt-4">
+      <SectionHeader className="mb-2">Mục tiêu</SectionHeader>
+      <ChoiceGroup labelId="profile-goal-label" label="Mục tiêu" reason="Dùng để chọn số kcal mỗi kg cân nặng.">
+        <ChoiceGrid
+          columns={2}
+          items={options.map((option) => ({
+            id: option.goal,
+            label: option.name,
+            active: profile.goal === option.goal,
+            onClick: () => updateProfile({ goal: option.goal }),
+          }))}
+        />
+      </ChoiceGroup>
+      <ChoiceGroup labelId="profile-training-label" label="Ngày tập mặc định" unit="phút" reason="Dùng để tính lượng muối khi tập.">
+        <ChoiceGrid
+          columns={5}
+          items={TRAINING_OPTIONS.map((option) => ({
+            id: option.id,
+            label: option.minutes === 0 ? "Nghỉ" : String(option.minutes),
+            ariaLabel: option.minutes === 0 ? "Nghỉ" : `${option.minutes} phút`,
+            active: profile.trainingMinutesDefault === option.minutes,
+            onClick: () => updateProfile({ trainingMinutesDefault: option.minutes }),
+          }))}
+        />
+      </ChoiceGroup>
       <TrainingSizeRow />
     </Card>
   );
@@ -204,27 +267,19 @@ function TrainingSizeRow() {
     setSize(next);
   };
   return (
-    <RowGroup>
-      <div role="group" aria-labelledby="profile-training-size-label" className="flex flex-col gap-2 border-t border-divider py-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <span id="profile-training-size-label" className="text-callout">Nhóm Bự / Bé</span>
-          <span className="text-cap text-secondary">liều khi tập</span>
-        </div>
-        <ChipGroup
-          size="lg"
-          columns={2}
-          columnsLg={2}
-          items={(["be", "bu"] as const).map((option) => ({
-            id: option,
-            label: TRAINING_SIZE_NAME[option],
-            ariaLabel: `${TRAINING_SIZE_NAME[option]}, ${option === "be" ? "liều thấp" : "liều cao"}`,
-            active: size === option,
-            disabled: size === undefined,
-            onClick: () => choose(option),
-          }))}
-        />
-      </div>
-    </RowGroup>
+    <ChoiceGroup labelId="profile-training-size-label" label="Nhóm Bự / Bé" unit="liều khi tập" reason="Dùng để chọn liều khi tập.">
+      <ChoiceGrid
+        columns={2}
+        items={(["be", "bu"] as const).map((option) => ({
+          id: option,
+          label: TRAINING_SIZE_NAME[option],
+          ariaLabel: `${TRAINING_SIZE_NAME[option]}, ${option === "be" ? "liều thấp" : "liều cao"}`,
+          active: size === option,
+          disabled: size === undefined,
+          onClick: () => choose(option),
+        }))}
+      />
+    </ChoiceGroup>
   );
 }
 
@@ -266,60 +321,63 @@ export function AppCard() {
 
   return (
     <Card as="section" aria-label="Ứng dụng" className="flex flex-col gap-1">
-      <SectionTitle>Ứng dụng</SectionTitle>
-      <RowGroup>
-        <Row
-          icon={SETTINGS_ICONS.replay}
-          label="Xem lại hướng dẫn"
-          hint="Ghi bữa ăn đầu tiên · 1 phút"
-          onClick={replay}
-          withBorderTop={false}
-          className="min-h-14"
-        >
-          {flags && !flags.replayOpened && (
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>
-          )}
-        </Row>
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" className="min-h-14" />
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.tips} label="Mẹo trên từng màn hình" hint="Bật lại để xem mẹo lần đầu" showChevron={false} className="min-h-14">
-          <Switch
-            checked={flags ? !flags.tipsOff : true}
-            disabled={flags === null}
-            onCheckedChange={(on) => setTipsOff(!on)}
-            aria-label="Mẹo trên từng màn hình"
-          />
-        </Row>
-      </RowGroup>
+      <SectionHeader>Ứng dụng</SectionHeader>
+      <SettingsRow
+        dense
+        tone="app"
+        glyph={SETTINGS_ICONS.replay}
+        label="Xem lại hướng dẫn"
+        hint="Ghi bữa ăn đầu tiên · 1 phút"
+        onClick={replay}
+        divider={false}
+        minHeight="14"
+        data-align-group="profile-row"
+      >
+        {flags && !flags.replayOpened && (
+          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>
+        )}
+      </SettingsRow>
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow
+        dense
+        tone="app"
+        glyph={SETTINGS_ICONS.tips}
+        label="Mẹo trên từng màn hình"
+        hint="Bật lại để xem mẹo lần đầu"
+        chevron={false}
+        minHeight="14"
+        data-align-group="profile-row"
+      >
+        <Switch
+          checked={flags ? !flags.tipsOff : true}
+          disabled={flags === null}
+          onCheckedChange={(on) => setTipsOff(!on)}
+          aria-label="Mẹo trên từng màn hình"
+        />
+      </SettingsRow>
       {haptics !== null && (
-        <div data-align-group="profile-row" data-tour="haptics-switch">
-          <Row icon={SETTINGS_ICONS.vibrate} label="Rung khi chạm" hint="Rung nhẹ khi lưu, xóa hay hoàn tác" showChevron={false} className="min-h-14">
+        <div data-tour="haptics-switch">
+          <SettingsRow
+            dense
+            tone="app"
+            glyph={SETTINGS_ICONS.vibrate}
+            label="Rung khi chạm"
+            hint="Rung nhẹ khi lưu, xóa hay hoàn tác"
+            chevron={false}
+            minHeight="14"
+            data-align-group="profile-row"
+          >
             <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label="Rung khi chạm" />
-          </Row>
+          </SettingsRow>
         </div>
       )}
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" />
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" />
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" />
-      </RowGroup>
+      <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
+      <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" data-align-group="profile-row" />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" />
-      </RowGroup>
-      <RowGroup>
-        <Row icon={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" />
-      </RowGroup>
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" data-align-group="profile-row" />
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" data-align-group="profile-row" />
     </Card>
   );
 }

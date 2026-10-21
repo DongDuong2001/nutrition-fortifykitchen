@@ -100,7 +100,7 @@ def settings(browser, size_name, size):
     hero = pg.locator("main a[href='/settings/profile']").first
     check(hero.count() == 1, f"{w}: the profile card links to Hồ sơ")
     bg = hero.evaluate("e => getComputedStyle(e).backgroundColor")
-    check(bg == "rgb(26, 28, 34)", f"{w}: the profile card is the dark surface ({bg})")
+    check(bg == "rgb(17, 19, 23)", f"{w}: the profile card is the ink surface ({bg})")
     t = squash(hero.inner_text())
     check(re.search(r"\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
     big = hero.locator("span", has_text=re.compile(r"kcal$")).last
@@ -108,7 +108,7 @@ def settings(browser, size_name, size):
     dark = pg.evaluate(
         """() => [...document.querySelectorAll('main *')].filter(e => {
             const r = e.getBoundingClientRect();
-            return getComputedStyle(e).backgroundColor === 'rgb(26, 28, 34)' && r.width > 250 && r.height > 60;
+            return getComputedStyle(e).backgroundColor === 'rgb(17, 19, 23)' && r.width > 250 && r.height > 60;
         }).length"""
     )
     check(dark == 1, f"{w}: one dark accent card ({dark})")
@@ -120,7 +120,7 @@ def settings(browser, size_name, size):
     check(icons >= 6, f"{w}: rows carry icons ({icons})")
     danger = pg.locator("section[aria-labelledby='settings-danger-title']")
     dc = danger.locator("h2").evaluate("e => getComputedStyle(e).color")
-    check(dc != "rgb(20, 21, 25)", f"{w}: the danger title is not body text colour ({dc})")
+    check(dc != "rgb(17, 19, 23)", f"{w}: the danger title is not body text colour ({dc})")
     if size_name == "390":
         db = danger.bounding_box()
         last_bottom = pg.evaluate("() => Math.max(...[...document.querySelectorAll('main section, main a')].map(e => e.getBoundingClientRect().bottom))")

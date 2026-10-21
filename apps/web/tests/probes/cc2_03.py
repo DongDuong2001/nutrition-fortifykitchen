@@ -13,7 +13,7 @@ PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 INK = (0x11, 0x13, 0x17)  # --color-ink
 SURFACE_DARK = (0x1A, 0x1C, 0x22)  # --color-surface-dark (inset summary panel)
-DESTRUCTIVE_TEXT = "rgb(196, 55, 60)"  # --color-destructive-text #C4373C, 5.30:1 on white
+DESTRUCTIVE_TEXT = "rgb(233, 21, 45)"  # --color-destructive-text #E9152D (V3), 4.5:1 or better on white
 PROFILE_RED_LABELS = ["Vùng nguy hiểm", "Xóa tài khoản"]
 
 problems = []

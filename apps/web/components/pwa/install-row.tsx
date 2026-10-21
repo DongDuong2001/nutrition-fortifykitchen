@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { InstallSheet, type InstallSheetResult } from "@/components/pwa/install-sheet";
-import { Row } from "@/components/ui/row";
+import { SettingsRow } from "@/components/settings/settings-row";
 import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { markInstallDone, readStandalone } from "@/lib/install-browser";
 
@@ -25,9 +25,7 @@ export function InstallRow({ alignGroup }: { alignGroup: string }) {
 
   return (
     <>
-      <div data-align-group={alignGroup}>
-        <Row icon={SETTINGS_ICONS.install} label="Cài ứng dụng lên điện thoại" onClick={() => setOpen(true)} />
-      </div>
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Cài ứng dụng lên điện thoại" onClick={() => setOpen(true)} data-align-group={alignGroup} />
       <InstallSheet open={open} onClose={close} />
     </>
   );
