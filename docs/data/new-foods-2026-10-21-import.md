@@ -1,6 +1,6 @@
 # Import of the 21/10/2026 foods: Hao's server steps
 
-Data job `data/foods-1021` (PR for review, not merged, nothing imported). The file has 17 rows, all new: no row of the live catalogue is updated, so the importer only inserts (`ON CONFLICT (source, source_id)` never fires). Import it with the importer that is already on `main` (`apps/api/cmd/importfoods`, unchanged).
+Data job `data/foods-1021` (PR for review, not merged, nothing imported). The file has 18 rows, all new: no row of the live catalogue is updated, so the importer only inserts (`ON CONFLICT (source, source_id)` never fires). Import it with the importer that is already on `main` (`apps/api/cmd/importfoods`, unchanged).
 
 Where the server keeps the repo and the database: `/var/www/nutrition-meals`, database = Supabase through `DATABASE_URL` in `deploy/.env.prod` (`docs/deploy.md`). I did not log in to the server, so the paths and the tools below (`pg_dump`, `psql`, `go` or Docker) are not checked there. Do the steps in order and stop at the first one that fails.
 
@@ -18,7 +18,7 @@ git show origin/data/foods-1021:docs/data/new-foods-2026-10-21.json > ~/new-food
 python3 -c "import json; print(len(json.load(open('/home/deploy/new-foods-2026-10-21.json'))), 'rows')"
 ```
 
-It must print `17 rows`. (After the merge, `git pull --ff-only` and use `docs/data/new-foods-2026-10-21.json` instead.)
+It must print `18 rows`. (After the merge, `git pull --ff-only` and use `docs/data/new-foods-2026-10-21.json` instead.)
 
 ## 1. Back up `nutrition.foods` and `nutrition.food_portions` first
 
@@ -47,8 +47,8 @@ Expected (a dry run never opens the database):
 ```
 === H1T MICRO Food Catalog Importer ===
 Mode: DRY RUN (No database changes will be saved)
-Loaded 17 food records from /home/deploy/new-foods-2026-10-21.json
-Completeness Report: 78.6% average coverage of the 22 counted nutrients across 17 foods
+Loaded 18 food records from /home/deploy/new-foods-2026-10-21.json
+Completeness Report: 74.2% average coverage of the 22 counted nutrients across 18 foods
 ```
 
 If `go` is not installed on the server, the same command in Docker (the API image does not contain the importer):
@@ -69,7 +69,7 @@ export DATABASE_URL="$(grep -E '^DATABASE_URL=' ../../deploy/.env.prod | cut -d=
 go run ./cmd/importfoods --file ~/new-foods-2026-10-21.json
 ```
 
-Expected last line: `Successfully imported 17 foods into nutrition.foods`. A row that fails prints `Error inserting food ...` and the run goes on, so read the output; a re-run is safe (upsert on `source` + `source_id`, portions replaced per food). With Docker add `-e DATABASE_URL="$DATABASE_URL"` to the `docker run` above and drop `--dry-run`.
+Expected last line: `Successfully imported 18 foods into nutrition.foods`. A row that fails prints `Error inserting food ...` and the run goes on, so read the output; a re-run is safe (upsert on `source` + `source_id`, portions replaced per food). With Docker add `-e DATABASE_URL="$DATABASE_URL"` to the `docker run` above and drop `--dry-run`.
 
 ## 4. Check
 
@@ -87,6 +87,7 @@ psql "$DATABASE_URL" -c "SELECT source, count(*) FROM nutrition.foods WHERE (sou
   ('recipe_calc', 'recipe:cha-ram-quang-binh-chien-dau'),
   ('label', 'cocoavia.com/products/500mg-cocoa-flavanols-powder (đọc 2026-10-21)'),
   ('label', 'cocoavia.com/products/500mg-cocoa-flavanols-powder-stick-packs (đọc 2026-10-21)'),
+  ('label', 'easygym.vn/banh-bong-lean (đọc 2026-10-21)'),
   ('fortify_kitchen', 'fortify_kitchen:ga-ma-dui-nau-cham'),
   ('fortify_kitchen', 'fortify_kitchen:uc-ga-nau-cham'),
   ('fortify_kitchen', 'fortify_kitchen:tom-su-nau-cham'),
@@ -98,11 +99,11 @@ psql "$DATABASE_URL" -c "SELECT source, count(*) FROM nutrition.foods WHERE (sou
 ) GROUP BY source ORDER BY source;"
 ```
 
-Expected: `fortify_kitchen` 8, `label` 3, `recipe_calc` 2, `usda_sr_legacy` 4 (total 17). Running the grep count of step 1 again on a fresh dump gives the old number + 17.
+Expected: `fortify_kitchen` 8, `label` 4, `recipe_calc` 2, `usda_sr_legacy` 4 (total 18). Running the grep count of step 1 again on a fresh dump gives the old number + 18.
 
 ## Rolling back
 
-All 17 rows are new, so rolling back means deleting exactly those rows. Their portions go with them (`food_portions.food_id` is `ON DELETE CASCADE`).
+All 18 rows are new, so rolling back means deleting exactly those rows. Their portions go with them (`food_portions.food_id` is `ON DELETE CASCADE`).
 
 ```bash
 ssh deploy@14.225.210.185
@@ -118,6 +119,7 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "DELETE FROM nutrition.foods WHERE (s
   ('recipe_calc', 'recipe:cha-ram-quang-binh-chien-dau'),
   ('label', 'cocoavia.com/products/500mg-cocoa-flavanols-powder (đọc 2026-10-21)'),
   ('label', 'cocoavia.com/products/500mg-cocoa-flavanols-powder-stick-packs (đọc 2026-10-21)'),
+  ('label', 'easygym.vn/banh-bong-lean (đọc 2026-10-21)'),
   ('fortify_kitchen', 'fortify_kitchen:ga-ma-dui-nau-cham'),
   ('fortify_kitchen', 'fortify_kitchen:uc-ga-nau-cham'),
   ('fortify_kitchen', 'fortify_kitchen:tom-su-nau-cham'),
@@ -129,7 +131,7 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "DELETE FROM nutrition.foods WHERE (s
 );"
 ```
 
-It prints `DELETE 17`. Check the foods count (step 1's count on a fresh dump) is back to the number you noted.
+It prints `DELETE 18`. Check the foods count (step 1's count on a fresh dump) is back to the number you noted.
 
 - If a user has already logged one of these foods, the diary's foreign key (`ON DELETE RESTRICT`, migration 000001) refuses the delete of that row and the whole statement fails: leave that row, or ask Dong to hide it.
 - Nothing existing is modified by this import, so the dump from step 1 is only needed if something unexpected changed. It holds every `nutrition.foods` and `nutrition.food_portions` row as an `INSERT` with column names: find the row (`gunzip -c ~/backups/foods-before-1021.sql.gz | grep '<source_id>'`), delete the damaged live row, and run its `INSERT` lines again through `psql`. Do not restore the whole dump over the live tables: the rows are already there and the inserts would collide.
