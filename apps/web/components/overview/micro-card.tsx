@@ -41,7 +41,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
   const change = board.change;
 
   return (
-    <section id="ov-micro" aria-labelledby="ov-micro-title" className="overflow-hidden rounded-card bg-surface-dark text-on-dark">
+    <section id="ov-micro" aria-labelledby="ov-micro-title" className="overflow-hidden rounded-card bg-ink text-on-dark">
       <h2 id="ov-micro-title" className="sr-only">
         Vi chất đạt {board.achieved} trên {board.total}
       </h2>
@@ -56,8 +56,8 @@ export function MicroCard({ board }: { board: MicroBoard }) {
         <span aria-hidden="true" className="flex w-full items-baseline justify-between">
           <span className="text-callout font-bold">Vi chất đạt</span>
           <span>
-            <span className="font-display text-4xl font-extrabold leading-none tabular-nums tracking-display">{board.achieved}</span>
-            <span className="font-display text-4xl font-extrabold leading-none text-muted-subtitle tracking-display">/{board.total}</span>
+            <span className="font-display text-4xl font-black leading-none tabular-nums tracking-display">{board.achieved}</span>
+            <span className="font-display text-4xl font-black leading-none text-muted-subtitle tracking-display">/{board.total}</span>
             {change !== null && (
               <span className="ml-2 text-cap font-bold text-sky">
                 {change > 0 ? `▲ ${change}` : change < 0 ? `▼ ${Math.abs(change)}` : "Không đổi"}
