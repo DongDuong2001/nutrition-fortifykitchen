@@ -55,11 +55,13 @@ def explore(browser, size_name, size):
     w = f"{size_name} Khám phá"
     rich = pg.locator("section#explore-rich")
     check(rich.count() == 1, f"{w}: Món giàu vi chất section")
-    # Order under the chips (Hao 15/10, keeps Dong's order): leaderboard banner, coaches, Món giàu vi chất, Gần đây
+    # V3 order (design/v3 V3KhamPhaB): Món giàu vi chất, Nhóm món, Gần đây, Của bạn; the demo-only leaderboard banner and
+    # coaches are not in the design and sit below them
     body = pg.inner_text("body")
-    order = [body.find(t) for t in ("Bảng xếp hạng kỷ luật", "Huấn luyện viên tiêu biểu", "Món giàu vi chất", "Gần đây")]
+    # (the Saira section headers are uppercase on screen, so compare lower-cased)
+    order = [body.lower().find(t.lower()) for t in ("Món giàu vi chất", "Gần đây", "Của bạn", "Bảng xếp hạng kỷ luật", "Huấn luyện viên tiêu biểu")]
     check(all(i >= 0 for i in order) and order == sorted(order),
-          f"{w}: leaderboard, coaches, Món giàu vi chất, Gần đây in that order ({order})")
+          f"{w}: Món giàu vi chất, Gần đây, Của bạn, leaderboard, coaches in that order ({order})")
     tiles = rich.locator("ul[role='list'] > li a")
     check(tiles.count() == 8, f"{w}: eight tiles ({tiles.count()})")
     hrefs = [tiles.nth(i).get_attribute("href") for i in range(tiles.count())]
@@ -79,7 +81,8 @@ def explore(browser, size_name, size):
         ul.evaluate("e => { e.scrollLeft = 0; }")
     body = squash(pg.inner_text("body"))
     for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới"]:
-        check(label in body, f"{w}: shows {label}")
+        # Section headers are drawn in capitals (V3): compare without case
+        check(label.lower() in body.lower(), f"{w}: shows {label}")
     cb = pg.locator("a", has_text="Tạo món mới").first.bounding_box()
     check(cb["height"] >= 48, f"{w}: Tạo món mới is a 48 px button")
     no_h_scroll(pg, w)
@@ -111,7 +114,8 @@ def settings(browser, size_name, size):
     check(dark == 1, f"{w}: one dark accent card ({dark})")
     body = squash(pg.inner_text("body"))
     for label in ["Mục tiêu mỗi ngày", "Tài khoản", "Ngôn ngữ", "Nhắc nhở", "Nguồn dữ liệu", "Thêm vào màn hình chính", "Vùng nguy hiểm", "Xóa tài khoản", "H1T MICRO Pro"]:
-        check(label in body, f"{w}: shows {label}")
+        # Section headers are drawn in capitals (V3): compare without case
+        check(label.lower() in body.lower(), f"{w}: shows {label}")
     icons = pg.locator("main a svg[aria-hidden='true']").count()
     check(icons >= 6, f"{w}: rows carry icons ({icons})")
     danger = pg.locator("section[aria-labelledby='settings-danger-title']")

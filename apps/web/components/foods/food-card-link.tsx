@@ -5,7 +5,20 @@ import Link from "next/link";
  * One small card of a carousel that opens the food detail: name (two lines at most) and "portion · kcal", and when given a
  * `tag` (the source's small pill) under them.
  */
-export function FoodCardLink({ href, name, meta, tag }: { href: string; name: string; meta: string; tag?: React.ReactNode }) {
+export function FoodCardLink({
+  href,
+  name,
+  meta,
+  kcal,
+  tag,
+}: {
+  href: string;
+  name: string;
+  meta: string;
+  /** V3: the food's kcal after the portion, bold in the link colour ("60 g · 228 kcal") */
+  kcal?: string;
+  tag?: React.ReactNode;
+}) {
   return (
     <li className="w-[11rem] shrink-0 snap-start">
       <Link
@@ -15,7 +28,15 @@ export function FoodCardLink({ href, name, meta, tag }: { href: string; name: st
         <span title={name} className="line-clamp-2 break-words text-callout font-semibold leading-snug">
           {name}
         </span>
-        <span className="line-clamp-2 text-cap leading-tight text-secondary">{meta}</span>
+        <span className="line-clamp-2 text-cap leading-tight text-secondary">
+          {meta}
+          {kcal && (
+            <>
+              {" · "}
+              <span className="font-bold text-cobalt">{kcal}</span>
+            </>
+          )}
+        </span>
         {tag && <span className="mt-auto flex pt-1">{tag}</span>}
       </Link>
     </li>

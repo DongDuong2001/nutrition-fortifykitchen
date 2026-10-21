@@ -246,8 +246,11 @@ def check_saved_meals(browser, size_name, size):
     check(save_btn.is_disabled(), f"{size_name} save: an empty meal's item is disabled")
     pg.keyboard.press("Escape")
 
-    # listed in Khám phá
+    # Khám phá counts it in Của bạn, /explore/meals lists it
     go(pg, "/explore")
+    yours = re.sub(r"\s+", " ", pg.locator("section[aria-labelledby=explore-yours]").inner_text())
+    check("Bữa ăn của tôi · 1 bữa" in yours, f"{size_name} explore: Của bạn counts the saved meal ({yours[:100]!r})")
+    go(pg, "/explore/meals")
     section = pg.locator("section[aria-labelledby=explore-saved-meals]")
     body = re.sub(r"\s+", " ", section.inner_text())
     check("Sáng của tôi" in body, f"{size_name} explore: Bữa ăn của tôi lists the saved meal")
@@ -289,7 +292,7 @@ def check_saved_meals(browser, size_name, size):
     check(meal_food_count(pg, "Bữa trưa") == 2, f"{size_name} add sheet: one undo removes them")
 
     # rename, then delete with a confirm step
-    go(pg, "/explore")
+    go(pg, "/explore/meals")
     pg.locator("button[aria-label='Tùy chọn Sáng của tôi']:visible").first.click()
     pg.wait_for_timeout(300)
     pg.locator("#saved-meal-name").fill("Sáng nhanh")

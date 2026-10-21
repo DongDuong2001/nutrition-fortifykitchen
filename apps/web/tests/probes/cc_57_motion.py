@@ -32,7 +32,7 @@ CONTENT = {
     "/trends/energy": "main #ov-period, main [data-align-group]",
     "/trends/micros": "main",
     "/trends/body": "main",
-    "/explore": "[aria-label='Lọc món theo nhóm']",
+    "/explore": "#explore-rich",
     "/settings": "main [data-align-group='settings-row']",
 }
 

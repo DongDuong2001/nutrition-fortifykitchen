@@ -117,7 +117,8 @@ def main():
         pg.wait_for_url("**/explore")
         pg.wait_for_timeout(900)
         r = Rec(pg, "03-press-chip")
-        chip = pg.locator('[aria-label="Lọc món theo nhóm"] button:visible').nth(1)
+        # V3: Khám phá has no chip row on a phone; a Món giàu vi chất tile is the pressable that scales
+        chip = pg.locator('#explore-rich a:visible').nth(1)
         box = chip.bounding_box()
         pg.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         pg.mouse.down()
