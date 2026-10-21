@@ -12,7 +12,7 @@ export type AppHeaderVariant = "daily" | "sub" | "tab";
 export interface AppHeaderProps {
   /** "daily" screens move between days (date nav); "sub" and "tab" differ only in the default width. */
   variant?: AppHeaderVariant;
-  /** The screen's name (Saira Condensed). One h1 per page. */
+  /** The screen's name (Saira italic). One h1 per page. */
   title?: string;
   /** cc-55b: "p" when the screen is only a picture behind another one (Hôm nay behind /add): one h1 per page. */
   titleAs?: "h1" | "p";

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Saira } from "next/font/google";
+import { Manrope, Saira, Saira_Condensed } from "next/font/google";
 import "./globals.css";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
@@ -23,6 +23,14 @@ const saira = Saira({
   weight: ["800", "900"],
   style: ["italic"],
   variable: "--font-saira-face",
+  display: "swap",
+});
+
+// V3 keeps Saira Condensed for the tight numbers: the hero's macro grams and %, the meal kcal (font-condensed)
+const sairaCondensed = Saira_Condensed({
+  subsets: ["vietnamese", "latin"],
+  weight: ["800", "900"],
+  variable: "--font-saira-condensed-face",
   display: "swap",
 });
 
@@ -56,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${manrope.variable} ${saira.variable}`}>
+    <html lang="vi" className={`${manrope.variable} ${saira.variable} ${sairaCondensed.variable}`}>
       <head>
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />

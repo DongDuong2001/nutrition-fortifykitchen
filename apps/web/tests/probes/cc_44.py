@@ -95,7 +95,7 @@ def share_layout(browser, svg, tag):
     text = urllib.parse.unquote(svg.split(",", 1)[1])
     for fonts in (True, False):
         # Without fonts: no @font-face, and family names no machine has (this Mac has Manrope and Saira installed)
-        body = text if fonts else re.sub(r"Manrope|Saira Condensed", "No Such Face", re.sub(r"@font-face\s*{[^}]*}", "", text))
+        body = text if fonts else re.sub(r"Manrope|Saira", "No Such Face", re.sub(r"@font-face\s*{[^}]*}", "", text))
         ctx = browser.new_context(viewport={"width": 1080, "height": 900})
         pg = ctx.new_page()
         pg.set_content('<!doctype html><html><body style="margin:0">' + body + "</body></html>")

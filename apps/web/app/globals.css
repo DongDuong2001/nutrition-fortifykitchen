@@ -59,6 +59,8 @@
   /* V3-SPEC §2: Saira italic 800 for headers and key numbers (only the italic face is loaded, so display text is italic) */
   --font-display: var(--font-saira-face), sans-serif;
   --font-saira: var(--font-saira-face), sans-serif;
+  /* V3 keeps Saira Condensed for tight numbers (the hero's macro grams and %, the meal kcal) */
+  --font-condensed: var(--font-saira-condensed-face), var(--font-saira-face), sans-serif;
 
   /* V3 palette (design/v3/V3-SPEC.md §1, Hao 22/10). Light only in this run; every value is a token so the dark map
      (V3-SPEC's dark column) is one :root block later. The page is Apple's systemGroupedBackground and the cards are white. */

@@ -126,15 +126,15 @@ export function HomeHero({
             return (
               <div key={m.key} className="flex min-w-0 flex-col gap-1">
                 <span className="text-xs font-bold leading-tight">{m.label}</span>
-                {/* Amount/target and percent on one line, 8 px apart, 12 and 15 px (cc-44). Macro numbers in Saira Condensed (HANDOFF
-                    fonts) and no spaces around "/": "118/104 g 113%" fits the 77 px column at 390 */}
+                {/* Amount/target and percent on one line, 8 px apart, 12 and 15 px (cc-44). Macro numbers in Saira Condensed (V3
+                    keeps it for tight numbers) and no spaces around "/": "118/104 g 113%" fits the 77 px column at 390 */}
                 {/* Share image: in a wider face the percent goes under the amount instead of into the next column */}
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  <span className="whitespace-nowrap font-display text-xs font-extrabold leading-none text-muted-on-dark tabular-nums">
+                  <span className="whitespace-nowrap font-condensed text-xs font-extrabold leading-none text-muted-on-dark tabular-nums">
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  <span className="shrink-0 whitespace-nowrap font-display text-callout font-extrabold leading-none tabular-nums">
+                  <span className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none tabular-nums">
                     {pctLabel(value, target)}
                   </span>
                 </div>

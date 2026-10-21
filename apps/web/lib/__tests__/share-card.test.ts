@@ -198,7 +198,7 @@ describe("keepInShareImage", () => {
 describe("shareFontsEmbedded", () => {
   const face = (family: string, src: string) => `@font-face { font-family: ${family}; font-weight: 400; src: url(${src}) format("woff2"); }`;
   const manrope = face("Manrope", '"data:font/woff2;base64,d09GMgABAAAA"');
-  const saira = face("'Saira Condensed'", "data:application/font-woff;base64,d09GMgABAAAA");
+  const saira = face("'Saira'", "data:application/font-woff;base64,d09GMgABAAAA");
 
   it("is true when both families are there and every face is inlined", () => {
     expect(shareFontsEmbedded(manrope + saira)).toBe(true);

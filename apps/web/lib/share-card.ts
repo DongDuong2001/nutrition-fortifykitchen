@@ -173,7 +173,7 @@ export function buildShareModel({
 }
 
 /** The two families the share image is drawn in (app/layout.tsx). */
-export const SHARE_FONTS = ["manrope", "saira condensed"];
+export const SHARE_FONTS = ["manrope", "saira"];
 
 /**
  * Whether html-to-image's font CSS can draw the picture in its own fonts: both families have a face, and every face's
