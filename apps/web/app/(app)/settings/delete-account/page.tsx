@@ -25,7 +25,9 @@ export default function DeleteAccountPage() {
 
   const isConfirmed =
     confirmationText.trim().toUpperCase() === "XOÁ" ||
-    confirmationText.trim().toUpperCase() === "XOA";
+    confirmationText.trim().toUpperCase() === "XOA" ||
+    // the word the screen asks for ("Xóa") reads XÓA in capitals
+    confirmationText.trim().toUpperCase() === "XÓA";
 
   const handleDelete = () => {
     if (!isConfirmed) return;
