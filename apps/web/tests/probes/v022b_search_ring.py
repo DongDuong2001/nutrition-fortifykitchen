@@ -42,7 +42,11 @@ def verify(pg, tag):
     check(s["inputOutlineStyle"] == "none" or s["inputOutlineWidth"] in ("0px", "0"), f"{tag}: the input has no outline ({s['inputOutlineStyle']} {s['inputOutlineWidth']})")
     check(s["inputShadow"] == "none", f"{tag}: the input has no box-shadow ring ({s['inputShadow']})")
     check(s["labelShadow"] != "none", f"{tag}: the wrapper has the ring ({s['labelShadow'][:60]})")
-    check("rgb(36, 87, 245)" in s["labelShadow"] and s["labelBorder"] == "rgb(36, 87, 245)", f"{tag}: the ring and border are blue ({s['labelBorder']})")
+    if tag.startswith("add"):
+        # V3: the + sheet's field has no border; its ring is a 2 px cobalt inset shadow
+        check("rgb(36, 87, 245)" in s["labelShadow"] and "inset" in s["labelShadow"], f"{tag}: the ring is a cobalt inset ({s['labelShadow'][:60]})")
+    else:
+        check("rgb(36, 87, 245)" in s["labelShadow"] and s["labelBorder"] == "rgb(36, 87, 245)", f"{tag}: the ring and border are blue ({s['labelBorder']})")
 
 
 def run(browser, size, route, name):
