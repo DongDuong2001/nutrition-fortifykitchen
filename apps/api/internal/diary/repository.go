@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,6 +20,7 @@ type Repository interface {
 	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error)
 	GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error)
+	CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, entries []*DiaryEntryItem) ([]DiaryEntryItem, error)
 	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error)
 	SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
@@ -29,12 +31,25 @@ type Repository interface {
 	UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error
 }
 
+// PgxDB abstracts database interactions used by pgxDiaryRepo so it can be tested with mock transactions.
+type PgxDB interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+}
+
 type pgxDiaryRepo struct {
-	pool *pgxpool.Pool
+	pool PgxDB
 }
 
 func NewRepository(pool *pgxpool.Pool) Repository {
 	return &pgxDiaryRepo{pool: pool}
+}
+
+// NewRepositoryWithDB creates a repository with any PgxDB implementation (used for tests).
+func NewRepositoryWithDB(db PgxDB) Repository {
+	return &pgxDiaryRepo{pool: db}
 }
 
 func (r *pgxDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error) {
@@ -177,6 +192,50 @@ func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date s
 	return entry, nil
 }
 
+func (r *pgxDiaryRepo) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, entries []*DiaryEntryItem) ([]DiaryEntryItem, error) {
+	if len(entries) == 0 {
+		return []DiaryEntryItem{}, nil
+	}
+
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	parsedDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %w", err)
+	}
+
+	result := make([]DiaryEntryItem, 0, len(entries))
+	for _, entry := range entries {
+		nutrientsJSON, err := json.Marshal(entry.Nutrients)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal nutrients snapshot: %w", err)
+		}
+
+		err = tx.QueryRow(ctx, createEntrySQL,
+			entry.ID, userID, entry.FoodID, entry.Kind, entry.MealSlot,
+			entry.ServingLabel, entry.Grams, entry.Calories, entry.FoodName,
+			nutrientsJSON, parsedDate,
+		).Scan(&entry.CreatedAt)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, ErrIDConflict
+			}
+			return nil, fmt.Errorf("failed to insert diary entry: %w", err)
+		}
+		result = append(result, *entry)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return result, nil
+}
+
 func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {
 	query := `
 		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at, (deleted_at IS NOT NULL) AS is_deleted
@@ -226,13 +285,13 @@ func (r *pgxDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryI
 
 	query := `
 		UPDATE nutrition.diary_logs
-		SET meal_slot = $1, portion_label = $2, grams = $3, calories = $4, nutrients_snapshot = $5
-		WHERE id = $6 AND user_id = $7 AND deleted_at IS NULL
+		SET meal_slot = $1, portion_label = $2, grams = $3, calories = $4, nutrients_snapshot = $5, name_snapshot = $6
+		WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
 		RETURNING log_date, created_at
 	`
 	var logDate time.Time
 	err = r.pool.QueryRow(ctx, query,
-		entry.MealSlot, entry.ServingLabel, entry.Grams, entry.Calories, nutrientsJSON,
+		entry.MealSlot, entry.ServingLabel, entry.Grams, entry.Calories, nutrientsJSON, entry.FoodName,
 		entryID, userID,
 	).Scan(&logDate, &entry.CreatedAt)
 	if err != nil {

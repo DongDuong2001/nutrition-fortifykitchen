@@ -40,6 +40,7 @@ type CreateEntryRequest struct {
 	ID           uuid.UUID  `json:"id"`
 	Kind         string     `json:"kind"` // "food" or "quick"
 	FoodID       *uuid.UUID `json:"food_id,omitempty"`
+	FoodName     string     `json:"food_name,omitempty"`
 	MealSlot     string     `json:"meal_slot"`
 	Grams        float64    `json:"grams,omitempty"`
 	ServingSizeG float64    `json:"serving_size_g,omitempty"`
@@ -49,6 +50,7 @@ type CreateEntryRequest struct {
 }
 
 type UpdateEntryRequest struct {
+	FoodName     *string  `json:"food_name,omitempty"`
 	MealSlot     *string  `json:"meal_slot,omitempty"`
 	Grams        *float64 `json:"grams,omitempty"`
 	ServingSizeG *float64 `json:"serving_size_g,omitempty"`

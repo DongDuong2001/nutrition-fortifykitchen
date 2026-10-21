@@ -39,9 +39,16 @@ jobs:
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           BACKUP_FILE="backups/nutrition_backup_${TIMESTAMP}.sql.gz"
 
-          echo "Exporting nutrition schema to $BACKUP_FILE..."
+          echo "Exporting nutrition and auth schemas to $BACKUP_FILE..."
           pg_dump "$DATABASE_URL" \
             --schema=nutrition \
+            --schema=auth \
+            --exclude-table="auth.sessions" \
+            --exclude-table="auth.refresh_tokens" \
+            --exclude-table="auth.one_time_tokens" \
+            --exclude-table="auth.flow_state" \
+            --exclude-table="auth.mfa_challenges" \
+            --exclude-table="auth.audit_log_entries" \
             --no-owner \
             --no-acl \
             --clean \
@@ -53,9 +60,34 @@ jobs:
             exit 1
           fi
 
+          echo "BACKUP_RAW_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+
+      - name: Encrypt Database Dump
+        env:
+          GPG_PUBLIC_KEY: ${{ secrets.BACKUP_GPG_PUBLIC_KEY }}
+        run: |
+          BACKUP_FILE="$BACKUP_RAW_FILE"
+          if [ -z "$GPG_PUBLIC_KEY" ]; then
+            echo "Error: BACKUP_GPG_PUBLIC_KEY secret is missing. Never upload an unencrypted dump that includes auth." >&2
+            exit 1
+          fi
+
+          echo "Importing GPG public key for asymmetric encryption..."
+          echo "$GPG_PUBLIC_KEY" | gpg --batch --import
+          RECIPIENT=$(gpg --batch --list-keys --with-colons | grep '^pub:' | cut -d: -f5 | head -n1)
+          if [ -z "$RECIPIENT" ]; then
+            echo "Error: Could not determine key ID from BACKUP_GPG_PUBLIC_KEY" >&2
+            exit 1
+          fi
+          echo "Encrypting $BACKUP_FILE with public key $RECIPIENT..."
+          gpg --batch --yes --trust-model always --encrypt --recipient "$RECIPIENT" --output "${BACKUP_FILE}.gpg" "$BACKUP_FILE"
+          rm -f "$BACKUP_FILE"
+          BACKUP_FILE="${BACKUP_FILE}.gpg"
+
           FILE_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
           SHA256=$(sha256sum "$BACKUP_FILE" | awk '{print $1}')
-          echo "Backup created successfully."
+          echo "Archive prepared successfully."
+          echo "File: $BACKUP_FILE"
           echo "Size: $FILE_SIZE"
           echo "SHA256: $SHA256"
           echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
