@@ -36,7 +36,7 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 TOUCH = {"has_touch": True, "is_mobile": True}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-21b"
+RELEASE = "2026-10-21c"
 # Every tip that existed before 18c: a returning user has seen them
 OLD_TIPS = [
     "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
@@ -151,9 +151,9 @@ def start_tour(pg):
     check("Ghi theo lon, viên, phần" in text and text.index("Ghi theo lon, viên, phần") < text.index("Gần đây và Hay ăn"), "…and 18d above it (newest first)")
     check("Ngày tập ghi vào nhật ký" in text and text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần"), "…and cc-52's 18e above that")
     check("Khẩu phần theo gam" in text and text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký"), "…and cc-53b's 18f above that")
-    check("Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Giữ rồi kéo món sang bữa khác" in text and text.index("Mục tiêu rõ ràng hơn") < text.index("Bấm chữ H1T MICRO để về Hôm nay") < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam"), "…and the follow-ups' 21a, the overnight 20b, cc-70's 20a, cc-68's 19b and cc-67's 19a on top")
+    check("Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Giữ rồi kéo món sang bữa khác" in text and text.index("Thực phẩm bổ sung có thẻ riêng") < text.index("Mục tiêu rõ ràng hơn") < text.index("Bấm chữ H1T MICRO để về Hôm nay") < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam"), "…and 21c, 21b, the follow-ups' 21a, the overnight 20b, cc-70's 20a, cc-68's 19b and cc-67's 19a on top")
     check("Thực phẩm bổ sung\n" not in text + "\n" and "Đồng bộ ổn định hơn" not in text, "…not 18b or 18, which were seen")
-    check(sheet(pg).locator("section").count() == 10, "ten groups, one per release")
+    check(sheet(pg).locator("section").count() == 11, "eleven groups, one per release")
     try_now = sheet(pg).get_by_role("button", name="Thử ngay (1 phút)")
     check(try_now.count() == 1, "Thử ngay (1 phút): the unseen releases have a tour")
     shot(pg, "sheet")
@@ -167,7 +167,7 @@ def tour(browser):
     before = entries(pg)
     start_tour(pg)
     check(sheet(pg).count() == 0, "Thử ngay closes the sheet")
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (21b) is marked seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (21c) is marked seen")
     for i, (title, targets) in enumerate(STEPS):
         ok = visible(card(pg))
         text = step_text(pg)
@@ -352,7 +352,7 @@ def seen_18c(browser):
     shot(pg, "seen-18c")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(500)
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 21b seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 21c seen")
     ctx.close()
     # (A new account never sees it: cc_46.py new_account)
 
