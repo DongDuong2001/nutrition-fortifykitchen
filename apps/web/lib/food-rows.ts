@@ -1,6 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
-import type { FoodItem } from "./mock/foods";
-import { catalogChanged } from "./mock/foods";
+import type { FoodItem } from "./catalog";
+import { catalogChanged } from "./catalog";
 import { searchFoods } from "./search";
 import type { CookSwitch } from "./yield";
 

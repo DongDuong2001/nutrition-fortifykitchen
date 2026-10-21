@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { usePathname } from "next/navigation";
 import { currentAccountId } from "./auth-actions";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
-import { type FoodItem } from "./mock/foods";
+import { type FoodItem } from "./catalog";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { portionAmountText, withoutServingHint } from "./portion";
@@ -31,7 +31,7 @@ import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
-import { MOCK_FOODS, catalogVersion, subscribeCatalog } from "./mock/foods";
+import { CATALOG_FOODS, catalogFoodById, catalogVersion, subscribeCatalog } from "./catalog";
 import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "./recipe-store";
 import { withServerFoods } from "./recipe";
 import { personaPatch } from "./demo-persona";
@@ -1445,7 +1445,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
           ? mealPortions(edits, slot, samples, onlyDay(today))
           : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
       // Only foods the catalogue has: what is saved is what one tap can add back
-      return items.filter((item) => MOCK_FOODS.some((f) => f.id === item.foodId));
+      return items.filter((item) => catalogFoodById(item.foodId) !== undefined);
     },
     [edits, samples, todayIso, history, onlyDay]
   );
@@ -1487,8 +1487,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const day = targetDay(dayOpt);
       if (!day) return;
       const stamp = Date.now();
-      const entries = withNewIds(savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString()), day);
-      const skipped = savedMealSkipped(meal, MOCK_FOODS);
+      const entries = withNewIds(savedMealEntries(meal, CATALOG_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString()), day);
+      const skipped = savedMealSkipped(meal, CATALOG_FOODS);
       if (entries.length === 0) {
         // Nothing can be added: say why instead of doing nothing
         if (skipped > 0) setToast({ message: NO_ENERGY_MESSAGE, kind: "notice", mealSlot: null, durationMs: NOTICE_TOAST_MS });

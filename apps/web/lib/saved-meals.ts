@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { canLog, entryNumbers, type AddedDiaryEntry } from "./diary-edits";
 import { sumKcal } from "./kcal";
 import { getMealSlotNameVi, type MealSlot } from "./meal-slot";

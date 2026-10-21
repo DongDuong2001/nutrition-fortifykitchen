@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { nutrientName } from "./nutrients";

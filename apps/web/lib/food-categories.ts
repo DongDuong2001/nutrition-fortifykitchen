@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { resolveFavourites } from "./favourites";
 import { searchFoods } from "./search";
 import { searchRows } from "./food-rows";
