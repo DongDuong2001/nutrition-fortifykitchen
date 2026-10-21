@@ -21,12 +21,16 @@ const MOVE_LIMIT_PX = 10;
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
+// fix/dish-portion-label: the amount of every food row (Hôm nay, the share image, Chọn nhiều món) takes at most 40 % of
+// the row and wraps there, so a long amount never squeezes the name to one letter per line; a short one is unchanged
+const AMOUNT_GUARD = "max-w-[40%] shrink-0 text-right leading-none";
+
 /** The share image's row: the same row without the button, long press or dot. A long name wraps. */
 function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   return (
     <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
       <span data-share-wrap className="min-w-0 break-words text-cap font-semibold leading-snug">{entry.name}</span>
-      <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums text-text tracking-label">{portionLabel(entry)}</span>
+      <span className={`${AMOUNT_GUARD} font-display text-callout font-bold tabular-nums text-text tracking-label`}>{portionLabel(entry)}</span>
     </div>
   );
 }
@@ -187,7 +191,7 @@ function FoodRow({
         {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
         {detail && <span className={`basis-full text-micro leading-tight lg:text-cap ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
-      <span className={`shrink-0 font-display text-callout font-extrabold leading-none tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
+      <span className={`${AMOUNT_GUARD} font-display text-callout font-extrabold tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -253,7 +257,7 @@ function SelectList({ meals, select }: { meals: HomeMeal[]; select: SelectProps 
                       )}
                     </span>
                     <span className="min-w-0 flex-1 break-words text-cap font-semibold leading-snug">{entry.name}</span>
-                    <span className={`shrink-0 font-display text-callout font-medium leading-none tabular-nums ${checked ? "text-sky" : "text-secondary"}`}>
+                    <span className={`${AMOUNT_GUARD} font-display text-callout font-medium tabular-nums ${checked ? "text-sky" : "text-secondary"}`}>
                       {portionLabel(entry)}
                     </span>
                   </button>
