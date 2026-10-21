@@ -41,6 +41,8 @@ export const RELEASES: readonly Release[] = [
   // the Khám phá tab there (fallback) and at the carousel itself wherever it is on screen
   // feat/v3-redesign (Hao 22/10, V3 "vibrant + glass"): extends 21c, which is not live yet (no deploy since 20/10). The tour points at
   // Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab.
+  // feat/ngay-mau (Hao 22/10): Ngày ăn mẫu extends 21c too. Two tour steps on Hôm nay: the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero
+  // when the day has no food yet) and the "Chép ngày mẫu" pill of an empty day (the meals' headers when the day already has food)
   {
     id: "2026-10-21c",
     date: "21/10",
@@ -58,6 +60,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Tab Đồ ăn của Minh Hào", body: "Có tab Đồ ăn của Minh Hào để chọn nhanh các món của Fortify Kitchen. Khi thêm món, chip này nằm ngay sau Tất cả, và ở Khám phá có hàng thẻ riêng." },
       { icon: "home", title: "Chuyển nhóm, chuyển tab mượt hơn", body: "Đổi nhóm món, đổi thẻ hay chuyển tab ở thanh dưới thì nội dung trượt vào nhẹ nhàng, không còn đổi cái bụp. Mở danh sách Giàu … chỉ trượt một lần." },
       { icon: "meal", title: "Đổi nguyên liệu trong món", body: "Món có Thành phần cho đổi nguyên liệu, như sữa chua thường hay Hy Lạp, hạnh nhân hay hạt bí. Chọn ở dòng Đổi nguyên liệu, số gam giữ nguyên, và món ghi lại đúng theo bạn chọn." },
+      { icon: "meal", title: "Ngày ăn mẫu", body: "Lưu cả ngày thành mẫu ở nút ⋯ của Hôm nay. Ngày còn trống thì chạm Chép ngày mẫu để chép lại bằng một chạm, Hoàn tác được." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
@@ -66,6 +69,8 @@ export const RELEASES: readonly Release[] = [
       { target: "explore-minh-hao", fallback: "nav-explore", title: "Đồ ăn của Minh Hào", body: "Ở Khám phá có hàng thẻ Đồ ăn của Minh Hào. Khi thêm món, chạm chip cùng tên để chọn nhanh." },
       { target: "portion-compare", fallback: "portion-detail", title: "So sánh món", body: "Đang chọn khẩu phần, chạm So sánh để đặt món này cạnh món khác." },
       { target: "dish-parts", fallback: "meal-add", title: "Đổi nguyên liệu", body: "Mở Thành phần của món. Nguyên liệu nào đổi được thì có dòng Đổi nguyên liệu, chọn loại bạn dùng." },
+      { target: "day-menu", fallback: "home-hero", title: "Lưu cả ngày thành mẫu", body: "Mở nút ⋯ trên thẻ kcal rồi chọn Lưu ngày này thành mẫu. Cần ngày đã có món." },
+      { target: "day-template-pill", fallback: "meal-pill", title: "Chép ngày mẫu", body: "Ngày còn trống thì chạm Chép ngày mẫu ở đầu thẻ bữa ăn, chọn một mẫu hoặc Hôm qua." },
     ],
   },
   // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI

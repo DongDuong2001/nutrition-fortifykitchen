@@ -10,7 +10,7 @@ const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActi
 describe("the tips table", () => {
   it("has the 15 tips of the design boards, cc-49's Chưa lưu, the sheet, offline and cc-53b's portion tips, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "sheet-drag", "sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
+      "sheet-drag", "sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
       "food-new", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
@@ -219,8 +219,9 @@ describe("pickTip", () => {
     expect(ids(ctx(), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"] }))).toBeNull();
   });
 
-  it("Hôm nay tips wait for the first food, and the past-day tip is for a past day only", () => {
-    expect(ids(ctx({ foodsToday: 0 }))).toBeNull();
+  it("Hôm nay tips wait for the first food (an empty day has only Chép ngày mẫu), and the past-day tip is for a past day only", () => {
+    expect(ids(ctx({ foodsToday: 0 }))).toBe("day-template");
+    expect(ids(ctx({ foodsToday: 0 }), flags({ seen: ["day-template"] }))).toBeNull();
     expect(ids(ctx({ pastDay: true, foodsToday: 2 }))).toBe("past-day");
     expect(ids(ctx({ pastDay: true }), flags({ seen: ["past-day"] }))).toBeNull();
   });
@@ -303,7 +304,8 @@ describe("the share tip", () => {
 
   it("not at 2 foods, none, or on a past day or in select mode", () => {
     expect(ids(ctx({ foodsToday: 2 }), seenFirst)).toBe("nutrient-sources");
-    expect(ids(ctx({ foodsToday: 0 }), seenFirst)).toBeNull();
+    // An empty day has only the Chép ngày mẫu tip (seen here), never the share tip
+    expect(ids(ctx({ foodsToday: 0 }), flags({ seen: [...seenFirst.seen, "day-template"] }))).toBeNull();
     expect(ids(ctx({ foodsToday: 5, pastDay: true }), seenFirst)).toBe("past-day");
     expect(ids(ctx({ foodsToday: 5, pastDay: true }), flags({ seen: ["past-day"] }))).toBeNull();
     expect(ids(ctx({ foodsToday: 5, selectMode: true }), seenFirst)).toBe("multi-select");
@@ -365,5 +367,28 @@ describe("pickTip: one tip per 24 h", () => {
     expect(parseFlags({ tipShownAt: now }).tipShownAt).toBe(now);
     expect(parseFlags({ tipShownAt: "x" }).tipShownAt).toBeNull();
     expect(parseFlags({}).tipShownAt).toBeNull();
+  });
+});
+
+describe("the Chép ngày mẫu tip (feat/ngay-mau)", () => {
+  const tip = TIPS.find((t) => t.id === "day-template");
+
+  it("points at the pill and is done once the pill has been used", () => {
+    expect(tip?.target).toBe("day-template-pill");
+    expect(tip?.used).toEqual(["day-template"]);
+    expect(ids(ctx({ foodsToday: 0 }), flags({ used: ["day-template"] }))).toBeNull();
+  });
+
+  it("is for an empty day that can be added to: not a day with food, not a past day, not select mode, not a sheet over it", () => {
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 0, pastDay: true }))).toBe("past-day");
+    expect(ids(ctx({ foodsToday: 0, selectMode: true }))).toBe("multi-select");
+    expect(ids(ctx({ foodsToday: 0, sheetOpen: true }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 0, pathname: "/explore" }), flags({ seen: ["explore"] }))).toBeNull();
+  });
+
+  it("copy has no colon, like the other tips", () => {
+    expect(tip?.body).not.toContain(":");
+    expect(tip?.title).not.toContain(":");
   });
 });

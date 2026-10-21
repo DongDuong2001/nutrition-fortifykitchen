@@ -69,15 +69,17 @@ def shot(pg, name, size_name):
 
 
 def check_home(browser, size_name, size):
-    """Hôm nay: Chép hôm qua only shows when the day is empty and yesterday has entries (the sample day deleted)."""
+    """Hôm nay: the Chép ngày mẫu pill (feat/ngay-mau: it replaced the Chép hôm qua button, which is now the first card of its picker) only shows when the day is empty."""
     ctx, pg = new_page(browser, size)
     go(pg, "/app")
-    check("Chép hôm qua" not in text(pg), f"{size_name} home: no day-level Chép hôm qua when the day has entries")
+    check("Chép ngày mẫu" not in text(pg), f"{size_name} home: no Chép ngày mẫu pill when the day has entries")
+    check("Chép hôm qua" not in text(pg), f"{size_name} home: no day-level Chép hôm qua button")
     ctx.close()
     ctx, pg = new_page(browser, size)
     pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(json.dumps(SAMPLE_EDITS_EMPTY))}); }} catch (e) {{}}")
     go(pg, "/app")
-    check("Chép hôm qua" in text(pg), f"{size_name} home: an empty day offers Chép hôm qua")
+    check("Chép ngày mẫu" in text(pg), f"{size_name} home: an empty day offers Chép ngày mẫu")
+    check("Chép hôm qua" not in text(pg), f"{size_name} home: an empty day has no Chép hôm qua button (it is a card of the picker)")
     add = pg.locator("a[aria-label^='Thêm vào'] >> visible=true")
     check(add.count() == 4, f"{size_name} home: an empty day has one Thêm vào link per meal ({add.count()})")
     ctx.close()

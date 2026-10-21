@@ -88,14 +88,6 @@ def micros_vitamins(pg):
     pg.wait_for_timeout(400)
 
 
-def copy_yesterday(pg):
-    empty_today(pg)
-    pg.goto(BASE + "/app", wait_until="networkidle")
-    pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng'] >> visible=true").first.wait_for(state="visible", timeout=8000)
-    pg.locator('button:has-text("Chép hôm qua") >> visible=true').first.click(timeout=8000)
-    pg.wait_for_timeout(400)
-
-
 def calendar(pg):
     pg.goto(BASE + "/app", wait_until="networkidle")
     pg.locator('button[aria-label^="Chọn ngày"] >> visible=true').first.click()
@@ -134,7 +126,7 @@ SCREENS = [
     ("CreateFood", go("/foods/new"), "CreateFood.dc.html", None),
     ("EditEntry", go("/entry/item-5"), "EditEntry.dc.html", None),
     ("MealSwitcher", meal_switcher, "MealSwitcher.dc.html", None),
-    ("CopyYesterday", copy_yesterday, "CopyYesterday.dc.html", None),
+    # feat/ngay-mau: Chép hôm qua is the first card of the "Chọn ngày mẫu" picker (tests/probes/ngay_mau.py), no longer the CopyYesterday sheet
     ("CalendarPicker", calendar, "CalendarPicker.dc.html", None),
     ("PastDay", go(f"/app?date={YESTERDAY}"), "PastDay.dc.html", None),
     ("Profile", go("/settings/profile"), "Profile.dc.html", "DesktopProfile.dc.html"),

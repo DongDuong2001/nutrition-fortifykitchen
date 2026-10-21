@@ -146,26 +146,27 @@ def home_sheets(browser, name, size):
 
 
 def copy_yesterday_sheet(browser, name, size):
-    """An empty today with yesterday logged (the sample day deleted, as cc_22 does; demo history keeps yesterday)."""
+    """An empty today with yesterday logged (the sample day deleted, as cc_22 does; demo history keeps yesterday). Chép hôm qua is the first card of the picker the Chép ngày mẫu pill opens (feat/ngay-mau)."""
     ctx = browser.new_context(viewport=size)
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     pg = ctx.new_page()
     go(pg, "/app")
     settle(pg)
-    button = pg.get_by_role("button", name="Chép hôm qua").locator("visible=true")
-    check(button.count() == 1, f"{name}: Chép hôm qua is on an empty today with yesterday logged ({button.count()})")
+    button = pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true")
+    check(button.count() == 1, f"{name}: Chép ngày mẫu is on an empty today ({button.count()})")
     if button.count() == 1:
         button.first.click()
         pg.wait_for_timeout(400)
-        check(pg.locator("[role=dialog]:visible").count() == 1, f"{name}: Chép hôm qua opens the CopyYesterdaySheet")
+        check(pg.locator("[role=dialog]:visible").count() == 1, f"{name}: Chép ngày mẫu opens the picker")
+        check(pg.get_by_role("radio", name=re.compile("Hôm qua")).count() == 1, f"{name}: Hôm qua is a card of the picker")
         inside = pg.evaluate("() => { const d = document.querySelector('[role=dialog]'); return !!d && d.contains(document.activeElement); }")
-        check(inside, f"{name}: focus is inside the CopyYesterdaySheet")
+        check(inside, f"{name}: focus is inside the picker")
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(400)
-        check(pg.locator("[role=dialog]:visible").count() == 0, f"{name}: Esc closes the CopyYesterdaySheet")
+        check(pg.locator("[role=dialog]:visible").count() == 0, f"{name}: Esc closes the picker")
         label = pg.evaluate("() => (document.activeElement && document.activeElement.textContent || '').trim()")
-        check(label.startswith("Chép hôm qua"), f"{name}: focus returns to the Chép hôm qua button ({label[:40]!r})")
+        check(label.startswith("Chép ngày mẫu"), f"{name}: focus returns to the Chép ngày mẫu pill ({label[:40]!r})")
     ctx.close()
 
 
