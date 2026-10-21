@@ -28,7 +28,7 @@ One pan 20×20 cm = 1027.9 g raw = 10 miếng (102.8 g each). A portion scales e
 |---|---|---|---|
 | Khoai tím | vn_nin NIN 2008:khoai-tim-song | 300.0 |  |
 | Sữa chua thường (nguyên kem, không đường) | usda_sr_legacy FDC 171284 | 122.5 | Sữa chua Hy Lạp không đường (FDC 171304) |
-| Bột hạnh nhân | usda_foundation FDC 2261420 | 95.0 | Hạt bí (sấy khô) (FDC 170556) |
+| Bột hạnh nhân | usda_foundation FDC 2261420 | 95.0 | Bột mì (khô) (FDC 168894:bot-mi-kho) |
 | Chuối | usda_sr_legacy FDC 173944 | 200.0 |  |
 | Trứng gà (sống) | usda_sr_legacy FDC 171287 | 150.0 |  |
 | Chocolate đen 70–85 % | usda_sr_legacy FDC 170273 | 80.0 |  |
@@ -45,7 +45,7 @@ A person picks an alternative in the part's **Đổi nguyên liệu** select; th
 
 - Hao's "2 tbsp sweetener: the average of maple syrup and molasses" is two parts of 20 g each (USDA tbsp 20 g each), which adds up to the same numbers as the average. Maple syrup can be swapped for honey (Mật ong, already in the catalogue).
 - Yogurt ½ cup = 122.5 g (USDA cup 245 g, the same cup USDA lists for the Greek yogurt record, which has no cup weight of its own). The default is plain whole-milk yogurt (USDA SR 171284); the alternative is the catalogue's Sữa chua Hy Lạp không đường (whole milk, USDA SR 171304).
-- Almond flour 1 cup = 95 g, USDA's "cup, ground" for almonds (just under Hao's 96–112 g); values from the Foundation "Flour, almond" (15/22 counted micros). Its alternative, and the sliced almonds' alternative, is Hạt bí (sấy khô) (USDA SR 170556), already in the catalogue, at the same grams: pumpkin seed kernels stand in for ground ones.
+- Almond flour 1 cup = 95 g, USDA's "cup, ground" for almonds (just under Hao's 96–112 g); values from the Foundation "Flour, almond" (15/22 counted micros). Its alternative is Bột mì (khô) (USDA SR 168894, already in the catalogue) at the same grams (Hao 21/10: only the flour swaps for wheat flour). The sliced almonds' alternative is Hạt bí (sấy khô) (USDA SR 170556, in the catalogue), same grams.
 - Khoai tím: the catalogue has no baked row, so the raw NIN row is applied to the 300 g raw weight (no baking loss under the raw rule, so no change in grams).
 - Vanilla extract 13 g (USDA tbsp), cinnamon 7.8 g (USDA tbsp), baking powder 4.6 g (USDA tsp), eggs 3 × 50 g, banana 200 g, dark chocolate 80 g (USDA 70–85 %, 19/22 micros), sliced almonds 15 g.
 - A nutrient is kept only when the parts that have it make up at least 90 % of the mass (the rule of the earlier recipe rows): cholesterol, sugars, trans_fat, vitamin C and vitamin D are left out. The values of the whole row are the sum of its parts, so a changed cake's totals follow the same arithmetic.

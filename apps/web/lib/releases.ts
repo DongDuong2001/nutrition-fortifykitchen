@@ -32,7 +32,7 @@ export interface Release {
 
 export const RELEASES: readonly Release[] = [
   // swap-ingredients (Hao 21/10): in Thành phần a part with alternatives has "Đổi nguyên liệu" (Bánh khoai nướng: sữa chua Hy Lạp or thường,
-  // hạnh nhân or hạt bí, siro cây phong or mật ong). The select carries its own label in plain sight, so no tip; the tour points at Thành phần
+  // bột hạnh nhân or bột mì, hạnh nhân lát or hạt bí, siro cây phong or mật ong). The select carries its own label in plain sight, so no tip; the tour points at Thành phần
   {
     id: "2026-10-21d",
     date: "21/10",

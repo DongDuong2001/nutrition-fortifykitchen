@@ -238,4 +238,14 @@ export const DISH_DEMO_FOODS: FoodItem[] = [
     servings: [{ label: "100 g", grams: 100 }, { label: "1 muỗng canh", grams: 21 }],
     nutrients: {alcohol: 0, b1: 0, b12: 0, b2: 0.038, b3: 0.12, b5: 0.068, b6: 0.024, calcium: 6, carbs: 82.4, cholesterol: 0, copper: 0.036, energy: 304, fat: 0, fiber: 0.2, folate: 2, iron: 0.42, magnesium: 2, manganese: 0.08, monounsaturated_fat: 0, phosphorus: 4, polyunsaturated_fat: 0, potassium: 52, protein: 0.3, saturated_fat: 0, selenium: 0.8, sodium: 4, sugars: 82.1, vitamin_a: 0, vitamin_c: 0.5, vitamin_d: 0, vitamin_e: 0, vitamin_k: 0, water: 17.1, zinc: 0.22},
   },
+  {
+    id: "dish-demo-fdc-168894-bot-mi-kho",
+    nameVi: "Bột mì (khô)",
+    category: "tinh_bot",
+    source: "usda_sr_legacy" as FoodItem["source"],
+    sourceId: "FDC 168894:bot-mi-kho",
+    demoOnly: true,
+    servings: [{ label: "100 g", grams: 100 }, { label: "1 chén vừa", grams: 125 }, { label: "1 muỗng canh", grams: 8 }],
+    nutrients: {b1: 0.785, b12: 0, b2: 0.494, b3: 5.9, b5: 0.438, b6: 0.044, calcium: 15, carbs: 76.3, cholesterol: 0, copper: 0.144, energy: 364, fat: 1, fiber: 2.7, folate: 183, iron: 4.64, magnesium: 22, manganese: 0.682, monounsaturated_fat: 0.087, phosphorus: 108, polyunsaturated_fat: 0.413, potassium: 107, protein: 10.3, saturated_fat: 0.155, selenium: 33.9, sodium: 2, sugars: 0.27, vitamin_a: 0, vitamin_c: 0, vitamin_d: 0, vitamin_e: 0.06, vitamin_k: 0.3, water: 11.9, zinc: 0.7},
+  },
 ];

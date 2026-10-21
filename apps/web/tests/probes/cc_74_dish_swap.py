@@ -4,7 +4,7 @@ Bánh khoai nướng Minh Hào (the demo catalogue's dish, answering to fortify_
 names some ingredients its own way, so the probe reads the names from the selects instead of hard-coding them:
 - Thành phần opens on 12 parts; four of them (sữa chua, bột hạnh nhân, hạnh nhân, siro cây phong) have an "Đổi nguyên liệu" select
 - sữa chua → the Hy Lạp alternative: the part's name changes, the grams stay, "Đã chỉnh" shows and the Tổng kcal changes
-- hạnh nhân → hạt bí: same grams, the part is named Hạt bí; grams typed stay with the part through a swap
+- bột hạnh nhân → bột mì: the part is named Bột mì, same grams; hạnh nhân → hạt bí: same grams, the part is named Hạt bí; grams typed stay with the part through a swap
 - Khôi phục takes the swaps (and the "Đã chỉnh" line) away, the Tổng is back where it began
 - logging a swapped cake: ONE row "Bánh khoai nướng Minh Hào · đã chỉnh"
 - the parts rows still share edges (data-align-group dish-parts)
@@ -86,6 +86,9 @@ def main():
         check(len(yogurt_options) == 2 and yogurt_options[0] == names[0], f"yogurt: two options, the recipe's own first ({yogurt_options})")
         greek = yogurt_options[1]
         check("Hy Lạp" in greek, f"yogurt: the alternative is the Hy Lạp one ({greek!r})")
+        flour = selects.nth(1)
+        wheat = [o.inner_text() for o in flour.locator("option").all()][1]
+        check("mì" in wheat.lower(), f"bột hạnh nhân: the alternative is bột mì ({wheat!r})")
         seeds = [o.inner_text() for o in almond.locator("option").all()][1]
         check("bí" in seeds.lower(), f"hạnh nhân: the alternative is hạt bí ({seeds!r})")
         res = check_align_groups(pg, "dish-parts")
@@ -101,6 +104,10 @@ def main():
         check(greek_total is not None and greek_total != start, f"yogurt → Hy Lạp: the Tổng changes ({start} → {greek_total} kcal)")
         pg.screenshot(path=str(SHOTS / "cake-greek.png"))
 
+        flour_grams = section.get_by_label(f"Số gam {names[1]}").input_value()
+        flour.select_option(label=wheat)
+        pg.wait_for_timeout(500)
+        check(section.get_by_label(f"Số gam {wheat}").input_value() == flour_grams, f"bột hạnh nhân → bột mì: same grams ({flour_grams})")
         almond.select_option(label=seeds)
         pg.wait_for_timeout(500)
         check(section.get_by_label(f"Số gam {seeds}").count() == 1, f"hạnh nhân → hạt bí: the part is named {seeds}")

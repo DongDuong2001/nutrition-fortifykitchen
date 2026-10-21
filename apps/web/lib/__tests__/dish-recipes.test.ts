@@ -34,6 +34,8 @@ describe("the alternatives of an ingredient (Hao 21/10: a person can swap it)", 
     const withAlts = rows.filter((r) => r.length === 7);
     expect(withAlts.map((r) => r[3])).toEqual(["Sữa chua thường (nguyên kem, không đường)", "Bột hạnh nhân", "Hạnh nhân", "Siro cây phong"]);
     expect(rows.find((r) => r[3].startsWith("Sữa chua"))?.[6]).toEqual([["usda_sr_legacy|FDC 171304", "Sữa chua Hy Lạp không đường"]]);
+    expect(rows.find((r) => r[3] === "Bột hạnh nhân")?.[6]).toEqual([["usda_sr_legacy|FDC 168894:bot-mi-kho", "Bột mì (khô)"]]);
+    expect(rows.find((r) => r[3] === "Hạnh nhân")?.[6]).toEqual([["usda_sr_legacy|FDC 170556", "Hạt bí (sấy khô)"]]);
     // no other recipe changed shape: six elements everywhere else
     const others = Object.entries(recipes).filter(([k]) => !k.startsWith("fortify_kitchen|"));
     expect(others.every(([, [, r]]) => r.every((row) => row.length === 6))).toBe(true);
