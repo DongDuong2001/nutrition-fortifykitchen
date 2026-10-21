@@ -6,6 +6,7 @@ import { PwaRegister } from "@/components/pwa/pwa-register";
 import { UnsavedWorkWatch } from "@/components/unsaved-work-watch";
 import { RouteTransition } from "@/components/route-transition";
 import { TouchActive } from "@/components/touch-active";
+import { KeyboardGuard } from "@/components/keyboard-guard";
 import { Vitals } from "@/components/vitals";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
@@ -74,6 +75,7 @@ export default function RootLayout({
         <PwaRegister />
         <UnsavedWorkWatch />
         <TouchActive />
+        <KeyboardGuard />
         <Vitals />
         <RouteTransition>{children}</RouteTransition>
       </body>
