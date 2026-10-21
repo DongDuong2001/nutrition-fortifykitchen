@@ -43,6 +43,8 @@ export interface PortionPanelProps {
   notice?: string | null;
   /** The portion sheet's close: a visible ✕ (44 px, "Đóng") in the header, for a screen that cannot assume the person knows to drag or tap the scrim. */
   onClose?: () => void;
+  /** feat/compare-in-add: "So sánh" under the kcal card (V3Portion) opens the compare picker with this food locked. */
+  onCompare?: () => void;
 }
 
 /**
@@ -67,6 +69,7 @@ export function PortionPanel({
   onDishEdit,
   notice: addNotice,
   onClose,
+  onCompare,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
@@ -183,6 +186,7 @@ export function PortionPanel({
           <div className="flex shrink-0 flex-col items-end">
             <Link
               href={`/foods/${food.id}${mealSlot ? `?meal=${mealSlot}` : ""}`}
+              data-tour="portion-detail"
               className="inline-flex min-h-11 shrink-0 items-center text-cap font-semibold text-cobalt hover:underline"
             >
               Xem chi tiết →
@@ -265,6 +269,23 @@ export function PortionPanel({
         <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
           {addNotice}
         </p>
+      )}
+
+      {/* feat/compare-in-add (V3Portion): compare this food with others without leaving the add flow */}
+      {onCompare && (
+        <button
+          type="button"
+          onClick={onCompare}
+          aria-haspopup="dialog"
+          data-tour="portion-compare"
+          data-align-group="portion"
+          className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-transparent bg-card text-callout font-semibold text-text shadow-ring"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 8h12M12 4l4 4-4 4M20 16H8M12 12l-4 4 4 4" />
+          </svg>
+          So sánh
+        </button>
       )}
 
       {/* Side by side on a phone; stacked in the narrower desktop pane, the add on top */}
