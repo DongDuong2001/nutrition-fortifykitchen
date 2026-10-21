@@ -131,6 +131,7 @@ def part_a(browser, w, size):
     pg.wait_for_timeout(1800)
     check(pg.locator("[data-tour=dish-parts]").count() >= 1, f"A {w}: control, Phở bò does show Thành phần")
     # The cake is filed under Đồ ngọt & ăn vặt, not Món Việt, and has a recipe: Thành phần opens for any food that has one
+    open_add(pg)  # a fresh sheet: the portion sheet of Phở bò is still open over this list
     pg.locator("input[type=search]:visible, input[inputmode=search]:visible, [role=searchbox]:visible").first.fill("bánh khoai")
     pg.wait_for_timeout(500)
     pg.locator("[data-food-row]:visible").filter(has_text="Bánh khoai nướng Minh Hào").first.click()
