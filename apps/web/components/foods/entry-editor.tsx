@@ -17,9 +17,12 @@ import { hidesGrams, portionModeOf } from "../../lib/portion";
 import { PortionArea } from "../ui/portion-area";
 import { HOME_ROUTE } from "@/lib/nav";
 import { Card } from "@/components/ui/card";
+import { PillButton } from "@/components/ui/pill-button";
+import { nutrientDot } from "@/lib/nutrient-colors";
 
+// A field inside a white card (V3: #EEEEF3, the cobalt edge when it has focus)
 const quickFieldClass =
-  "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt";
+  "h-12 w-full rounded-xl border-0 bg-surface px-3 text-base text-text outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-cobalt)]";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -110,71 +113,76 @@ export function EntryEditor({ view }: { view: EntryView }) {
         }
         backHref={homeHref}
       />
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <Card as="section" className="flex flex-col gap-4">
-          {quick && (
-            <div data-align-group="entry" className="flex w-full flex-col gap-3">
-              <FormRow label="Tên" htmlFor="entry-quick-name">
-                <input
-                  id="entry-quick-name"
-                  type="text"
-                  value={quickName}
-                  onChange={(e) => setQuickName(e.target.value)}
-                  autoComplete="off"
-                  className={quickFieldClass}
-                />
-              </FormRow>
-              <FormRow label="Năng lượng (kcal)" htmlFor="entry-quick-kcal" required error={quickValues.kcal === null || Math.round(quickValues.kcal) < 1 ? "Nhập kcal lớn hơn 0" : undefined}>
-                <input
-                  id="entry-quick-kcal"
-                  type="text"
-                  inputMode="decimal"
-                  value={quickKcal}
-                  onChange={(e) => setQuickKcal(e.target.value)}
-                  autoComplete="off"
-                  className={`${quickFieldClass} text-right font-bold tabular-nums`}
-                />
-              </FormRow>
-              <div className="grid grid-cols-3 gap-2">
-                <FormRow label="Đạm (g)" htmlFor="entry-quick-protein">
-                  <input id="entry-quick-protein" placeholder="—" aria-invalid={macroBad(quickProtein, quickValues.protein) ? true : undefined} type="text" inputMode="decimal" value={quickProtein} onChange={(e) => setQuickProtein(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-6 px-4 pb-8 pt-4">
+        {/* The amount (or, for a quick kcal entry, its name and numbers): a white card on the grey page */}
+        {(quick || food) && (
+          <Card data-align-group="entry" className="flex flex-col gap-2">
+            {quick && (
+              <div data-align-group="entry-card" className="flex w-full flex-col gap-3">
+                <FormRow label="Tên" htmlFor="entry-quick-name">
+                  <input
+                    id="entry-quick-name"
+                    type="text"
+                    value={quickName}
+                    onChange={(e) => setQuickName(e.target.value)}
+                    autoComplete="off"
+                    className={quickFieldClass}
+                  />
                 </FormRow>
-                <FormRow label="Tinh bột (g)" htmlFor="entry-quick-carbs">
-                  <input id="entry-quick-carbs" placeholder="—" aria-invalid={macroBad(quickCarbs, quickValues.carbs) ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                <FormRow label="Năng lượng (kcal)" htmlFor="entry-quick-kcal" required error={quickValues.kcal === null || Math.round(quickValues.kcal) < 1 ? "Nhập kcal lớn hơn 0" : undefined}>
+                  <input
+                    id="entry-quick-kcal"
+                    type="text"
+                    inputMode="decimal"
+                    value={quickKcal}
+                    onChange={(e) => setQuickKcal(e.target.value)}
+                    autoComplete="off"
+                    className={`${quickFieldClass} text-right font-bold tabular-nums`}
+                  />
                 </FormRow>
-                <FormRow label="Chất béo (g)" htmlFor="entry-quick-fat">
-                  <input id="entry-quick-fat" placeholder="—" aria-invalid={macroBad(quickFat, quickValues.fat) ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
-                </FormRow>
+                <div className="grid grid-cols-3 gap-2">
+                  <FormRow label="Đạm (g)" htmlFor="entry-quick-protein">
+                    <input id="entry-quick-protein" placeholder="—" aria-invalid={macroBad(quickProtein, quickValues.protein) ? true : undefined} type="text" inputMode="decimal" value={quickProtein} onChange={(e) => setQuickProtein(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  </FormRow>
+                  <FormRow label="Tinh bột (g)" htmlFor="entry-quick-carbs">
+                    <input id="entry-quick-carbs" placeholder="—" aria-invalid={macroBad(quickCarbs, quickValues.carbs) ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  </FormRow>
+                  <FormRow label="Chất béo (g)" htmlFor="entry-quick-fat">
+                    <input id="entry-quick-fat" placeholder="—" aria-invalid={macroBad(quickFat, quickValues.fat) ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  </FormRow>
+                </div>
+                <p className="m-0 text-sm text-secondary">Món thêm nhanh không tính vào 22 vi chất. Ô bỏ trống sẽ hiện là — (chưa có dữ liệu), không tính là 0.</p>
               </div>
-              <p className="m-0 text-sm text-secondary">Món thêm nhanh không tính vào 22 vi chất. Ô bỏ trống sẽ hiện là — (chưa có dữ liệu), không tính là 0.</p>
-            </div>
-          )}
-
-          {/* Portion: PortionArea with unit/gram tabs and steppers */}
-          {!quick && food && (
-          <div data-align-group="entry" className="flex w-full flex-col gap-2">
-            {/* A gram or egg portion names its own fields (Bao nhiêu gam?); a unit one keeps the heading */}
-            {portionModeOf(food) === "units" && <span className="text-sm font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>}
-            <PortionArea
-              food={food}
-              gramsInput={gramsInput}
-              setGramsInput={setGramsInput}
-              selectedServingLabel={servingLabel}
-              setSelectedServingLabel={setServingLabel}
-              disabled={!canPortion}
-              data-align-group="entry"
-            />
-            {energyUnknown && view.canChangePortion ? (
-              <p role="note" className="m-0 text-sm text-secondary">{NO_ENERGY_MESSAGE}</p>
-            ) : (
-              view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>
             )}
-          </div>
-          )}
 
-          {/* Meal: inline chips, as in the design. The meal changes on Lưu. 3 columns on phone, 5 on desktop. */}
-          <fieldset data-align-group="entry" className="m-0 flex w-full min-w-0 flex-col gap-2 border-0 p-0">
-            <legend className="mb-2 p-0 text-sm font-bold">Chuyển sang bữa</legend>
+            {/* Portion: PortionArea with unit/gram tabs and steppers */}
+            {!quick && food && (
+              <>
+                {/* A gram or egg portion names its own fields (Bao nhiêu gam?); a unit one keeps the heading */}
+                {portionModeOf(food) === "units" && <span className="text-cap font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>}
+                <PortionArea
+                  food={food}
+                  gramsInput={gramsInput}
+                  setGramsInput={setGramsInput}
+                  selectedServingLabel={servingLabel}
+                  setSelectedServingLabel={setServingLabel}
+                  disabled={!canPortion}
+                  data-align-group="entry-card"
+                />
+                {energyUnknown && view.canChangePortion ? (
+                  <p role="note" data-align-group="entry-card" data-align-edge="left" className="m-0 text-sm text-secondary">{NO_ENERGY_MESSAGE}</p>
+                ) : (
+                  view.portionNote && <p data-align-group="entry-card" data-align-edge="left" className="m-0 text-sm text-secondary">{view.portionNote}</p>
+                )}
+              </>
+            )}
+          </Card>
+        )}
+
+        {/* Meal: inline chips, as in the design. The meal changes on Lưu. 3 columns on phone, 5 on desktop. */}
+        <Card data-align-group="entry">
+          <fieldset className="m-0 flex w-full min-w-0 flex-col gap-2 border-0 p-0">
+            <legend className="mb-2 p-0 text-cap font-bold">Chuyển sang bữa</legend>
             <ChipGroup
               columns={3}
               columnsLg={5}
@@ -186,51 +194,56 @@ export function EntryEditor({ view }: { view: EntryView }) {
               }))}
             />
           </fieldset>
+        </Card>
 
-          {/* Preview of the portion: kcal, Đạm, Béo, Iron (a quick entry has its own fields above) */}
-          {!quick && (
-            <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-surface p-3">
-              <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
-              <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
-              <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />
-              <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label={nutrientName("iron")} />
-            </div>
-          )}
+        {/* Preview of the portion: kcal, Đạm, Béo, Iron (a quick entry has its own fields above) */}
+        {!quick && (
+          <div
+            role="group"
+            aria-label="Xem trước khẩu phần"
+            data-align-group="entry"
+            className="grid w-full grid-cols-4 gap-2 rounded-card border border-transparent bg-card p-3 text-text shadow-ring"
+          >
+            <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
+            <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
+            <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />
+            <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label={nutrientName("iron")} dot={nutrientDot("iron")} />
+          </div>
+        )}
 
-          {/* Actions */}
-          <div data-align-group="entry" className="flex w-full flex-col gap-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={!canSave}
-              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-cobalt text-base font-bold text-on-accent disabled:opacity-50"
-            >
-              Lưu thay đổi
-            </button>
+        {/* Actions: the save, then the delete as the last control (destructive red) */}
+        <div data-align-group="entry" className="flex w-full flex-col gap-3">
+          <PillButton type="button" onClick={handleSave} disabled={!canSave}>
+            Lưu thay đổi
+          </PillButton>
+          <div className="flex flex-col items-center gap-1">
             <button
               type="button"
               onClick={handleDelete}
-              className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-callout font-bold text-destructive-text "
+              className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-card border border-transparent bg-card text-callout font-bold text-destructive-text shadow-ring transition-press active:scale-[0.97] motion-reduce:active:scale-100"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
               </svg>
               Xóa món này
             </button>
             <p className="m-0 text-center text-xs text-secondary">Sau khi xóa sẽ có nút “Hoàn tác” trong 5 giây.</p>
           </div>
-        </Card>
+        </div>
       </main>
 
     </div>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label, dot }: { value: string; label: string; dot?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       <div className="text-body-lg font-bold tabular-nums">{value}</div>
-      <div className="text-cap text-secondary">{label}</div>
+      <div className="text-cap text-secondary">
+        {dot && <span aria-hidden="true" className="mr-2 inline-block h-2 w-2 rounded-full align-[1px]" style={{ backgroundColor: dot }} />}
+        {label}
+      </div>
     </div>
   );
 }
