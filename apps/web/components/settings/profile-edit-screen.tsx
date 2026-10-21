@@ -3,7 +3,8 @@
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
-import { Row } from "@/components/ui/row";
+import { SettingsRow } from "@/components/settings/settings-row";
+import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { BodyCard, GoalCard } from "@/components/settings/profile-cards";
 import { profileSummary } from "@/components/settings/profile-summary";
 import { useDiary } from "@/lib/diary-store";
@@ -31,10 +32,15 @@ export function ProfileEditScreen() {
             </div>
             <div className="flex flex-col gap-4">
               <GoalCard />
-              <Card as="section" aria-label="Mục tiêu mỗi ngày" className="flex flex-col gap-1">
-                <div data-align-group="profile-row">
-                  <Row label="Mục tiêu mỗi ngày tính từ hồ sơ này" href="/settings/targets" />
-                </div>
+              <Card as="section" aria-label="Mục tiêu mỗi ngày" padding={false} className="px-4">
+                <SettingsRow
+                  tone="targets"
+                  glyph={SETTINGS_ICONS.target}
+                  label="Mục tiêu mỗi ngày tính từ hồ sơ này"
+                  href="/settings/targets"
+                  divider={false}
+                  data-align-group="profile-row"
+                />
               </Card>
             </div>
           </>
