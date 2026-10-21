@@ -41,7 +41,7 @@ RECORDER = """
       const row = document.querySelector('[data-food-row]:not([hidden])');
       r.frames.push({
         t, found: !!el, op: cs ? Number(cs.opacity) : 1, tx: m ? m.m41 : 0,
-        h: el ? el.getBoundingClientRect().height : 0,
+        h: el ? el.getBoundingClientRect().height : 0, sw: document.documentElement.scrollWidth, vw: window.innerWidth,
         sig: el ? (el.textContent || '').slice(0, 60) + '|' + el.childElementCount : '',
         id: el ? (el.getAttribute('data-glide') || el.getAttribute('data-glide-enter')) : null,
       });
@@ -96,6 +96,7 @@ def summary(res):
         "end_op": fr[-1]["op"] if fr else None,
         "end_tx": fr[-1]["tx"] if fr else None,
         "min_h": min((f["h"] for f in fr), default=0),
+        "overflow": max((f["sw"] - f["vw"] for f in fr), default=0),
         "vt": res["vt"],
     }
 
@@ -182,6 +183,7 @@ def part_tabs(browser):
     s = summary(sample(pg, sel, lambda: nav("Khám phá").tap(), 700))
     check(s["animated"] >= 4 and s["vt"] == 0, f"tabs Hôm nay → Khám phá: it glides ({s['animated']} frames in motion), no view transition ({s['vt']})")
     check(0 < s["peak_tx"] <= 12.5, f"tabs Hôm nay → Khám phá: from the right, at most 12 px (peak {s['peak_tx']:.1f})")
+    check(s["overflow"] <= 0, f"tabs Hôm nay → Khám phá: the page is never wider than the phone (overflow {s['overflow']} px), so nothing zooms out")
     check(0.4 < s["min_op"] < 0.6 and s["end_op"] == 1 and abs(s["end_tx"]) < 0.01, f"tabs Hôm nay → Khám phá: fades in and ends in place (lowest {s['min_op']:.2f}, end {s['end_op']}, {s['end_tx']})")
     check(pg.evaluate("() => document.querySelectorAll('.m-tab-in').length") == 1 and settled(pg, sel)[1] == 0, "tabs: nothing is left running or held after it")
     s = summary(sample(pg, sel, lambda: nav("Hôm nay").tap(), 700))
@@ -192,6 +194,7 @@ def part_tabs(browser):
     pg.wait_for_timeout(1500)
     inner = "main [data-glide-enter]"
     s = summary(sample(pg, inner, lambda: pg.get_by_role("link", name="Năng lượng", exact=True).locator("visible=true").first.tap(), 800))
+    check(s["overflow"] <= 0, f"Tổng quan Tóm tắt → Năng lượng: the page is never wider than the phone (overflow {s['overflow']} px)")
     check(s["animated"] >= 4 and 0 < s["peak_tx"] <= 12.5 and s["vt"] == 0, f"Tổng quan Tóm tắt → Năng lượng: glides from the right ({s['animated']} frames, peak {s['peak_tx']:.1f}, vt {s['vt']})")
     ctx.close()
 

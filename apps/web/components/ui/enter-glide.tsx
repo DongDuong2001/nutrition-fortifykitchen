@@ -13,15 +13,20 @@ type Dir = -1 | 0 | 1;
 export function EnterGlide({ id, order = 0, children, className = "" }: { id: string; order?: number; children: React.ReactNode; className?: string }) {
   const [state, setState] = useState<{ id: string; order: number; dir: Dir; changed: boolean }>({ id, order, dir: 0, changed: false });
   if (state.id !== id) setState({ id, order, dir: glideDirection(state.order, order), changed: true });
+  // The outer wrapper never changes and clips what the glide pushes past the side of the screen: a screen 12 px off to the side is
+  // wider than the phone for 200 ms, and a mobile browser zooms the page out for that long (the bottom nav moved 26 px). `clip`
+  // makes no scroll container, so a sticky header inside still sticks. The inner one is new for every tab and carries the glide.
   return (
-    <div
-      key={id}
-      data-glide-enter={id}
-      data-glide-dir={state.changed ? state.dir : undefined}
-      style={state.changed ? ({ "--m-tab-dir": state.dir } as React.CSSProperties) : undefined}
-      className={`${className} ${state.changed ? "m-tab-in" : ""}`.trim()}
-    >
-      {children}
+    <div className={`${className} overflow-x-clip`.trim()}>
+      <div
+        key={id}
+        data-glide-enter={id}
+        data-glide-dir={state.changed ? state.dir : undefined}
+        style={state.changed ? ({ "--m-tab-dir": state.dir } as React.CSSProperties) : undefined}
+        className={`${className} ${state.changed ? "m-tab-in" : ""}`.trim()}
+      >
+        {children}
+      </div>
     </div>
   );
 }

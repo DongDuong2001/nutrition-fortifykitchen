@@ -25,7 +25,8 @@ describe("EnterGlide, first render", () => {
       </EnterGlide>
     );
     expect(html).toContain('data-glide-enter="explore"');
-    expect(html).toContain('class="flex flex-col"');
+    // an outer wrapper that clips the sideways push (no zoom-out on a phone), an inner one that carries the glide
+    expect(html).toContain('<div class="flex flex-col overflow-x-clip"><div data-glide-enter="explore" class="flex flex-col">');
     expect(html).not.toContain("m-tab-in");
     expect(html).not.toContain("data-glide-dir");
     expect(html).not.toContain("--m-tab-dir");
