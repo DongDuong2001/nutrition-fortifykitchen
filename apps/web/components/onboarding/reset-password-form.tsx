@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { NewPasswordFields, type NewPasswordErrors } from "@/components/auth/new-password-fields";
+import { AuthNewPasswordFields, type AuthPasswordErrors } from "@/components/onboarding/auth-field";
 import { PillButton } from "@/components/ui/pill-button";
 import { setAuthNotice, updatePassword, validateNewPassword, validatePasswordConfirm } from "@/lib/auth-actions";
 
@@ -11,7 +11,7 @@ export function ResetPasswordForm() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [errors, setErrors] = useState<NewPasswordErrors>({});
+  const [errors, setErrors] = useState<AuthPasswordErrors>({});
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -36,7 +36,7 @@ export function ResetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <NewPasswordFields
+      <AuthNewPasswordFields
         password={password}
         confirm={confirm}
         errors={errors}

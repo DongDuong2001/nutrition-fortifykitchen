@@ -3,9 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EmailField } from "@/components/auth/email-field";
-import { NewPasswordFields } from "@/components/auth/new-password-fields";
-import { PasswordField } from "@/components/auth/password-field";
+import { AuthEmailField, AuthNewPasswordFields, AuthPasswordField } from "@/components/onboarding/auth-field";
 import { PillButton } from "@/components/ui/pill-button";
 import {
   requestMagicLink,
@@ -123,9 +121,9 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <EmailField value={email} onChange={setEmail} error={errors.email} />
+      <AuthEmailField value={email} onChange={setEmail} error={errors.email} />
       {signup ? (
-        <NewPasswordFields
+        <AuthNewPasswordFields
           newLabel="Mật khẩu"
           password={password}
           confirm={confirm}
@@ -135,14 +133,15 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
         />
       ) : (
         <>
-          <PasswordField
+          <AuthPasswordField
             label="Mật khẩu"
+            placeholder="Mật khẩu của bạn"
             autoComplete="current-password"
             value={password}
             onChange={setPassword}
             error={errors.password}
           />
-          <Link href="/signin/forgot" className="inline-flex min-h-11 items-center self-end px-2 text-callout font-semibold text-cobalt">
+          <Link href="/signin/forgot" className="-mt-1 inline-flex min-h-11 items-center self-end px-2 text-callout font-semibold text-cobalt">
             Quên mật khẩu?
           </Link>
         </>
