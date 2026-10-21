@@ -252,6 +252,12 @@ def tip(pg, label, title, target):
 def got_it(pg):
     card(pg).get_by_role("button", name="Đã hiểu").click()
     pg.wait_for_timeout(300)
+    # design-floor (V3 22/10): one tip per 24 h. This walk-through meets several tips in one sitting, so the last tip's
+    # time moves back a day; cc_42_onboarding checks the 24 h rule itself.
+    pg.evaluate("""() => {
+      const v = JSON.parse(localStorage.getItem('%s') || '{}');
+      if (v.onboarding) { v.onboarding.tipShownAt = Date.now() - 25 * 3600 * 1000; localStorage.setItem('%s', JSON.stringify(v)); }
+    }""" % (SETTINGS_KEY, SETTINGS_KEY))
 
 
 def portion_tips(browser):
