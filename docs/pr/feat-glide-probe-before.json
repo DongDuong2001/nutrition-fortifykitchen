@@ -1,0 +1,66 @@
+{
+ "chip@1x": {
+  "first_ms": 12.1,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0
+ },
+ "chip@4x": {
+  "first_ms": 9.6,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0
+ },
+ "giau-open@1x": {
+  "first_ms": 28.7,
+  "animated": 42,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 0,
+  "vt": 2
+ },
+ "giau-open@4x": {
+  "first_ms": 42.9,
+  "animated": 20,
+  "jank25": 1,
+  "jank33": 1,
+  "pop": 0,
+  "vt": 1
+ },
+ "giau-tab@1x": {
+  "first_ms": 30.8,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0
+ },
+ "giau-tab@4x": {
+  "first_ms": 28.3,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0
+ },
+ "nav-tab@1x": {
+  "first_ms": 29.8,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0
+ },
+ "nav-tab@4x": {
+  "first_ms": 45.8,
+  "animated": 0,
+  "jank25": 1,
+  "jank33": 1,
+  "pop": 1,
+  "vt": 0
+ }
+}

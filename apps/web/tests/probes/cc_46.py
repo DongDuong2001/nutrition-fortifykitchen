@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-21c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
+ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
 ITEMS_2010B = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
