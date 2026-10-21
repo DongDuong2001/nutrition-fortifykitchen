@@ -172,7 +172,7 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
         data-align-edge="left"
         className="flex w-full flex-col gap-3"
       >
-        <div className="flex w-full flex-col rounded-2xl border border-card-border bg-card">
+        <div className="flex w-full flex-col rounded-card border border-transparent bg-card shadow-ring">
           <button
             type="button"
             aria-expanded={open}

@@ -1018,13 +1018,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       </>
       )}
 
-      {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
+      {/* The portion sheet (phone): V3, the page grey behind the panel's white cards (V3Portion) */}
       <Sheet
         open={selectedFood !== null && !isDesktop}
         onClose={closePortionSheet}
         labelledBy="portion-sheet-title"
         stacked
         quick
+        className="bg-page!"
       >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">

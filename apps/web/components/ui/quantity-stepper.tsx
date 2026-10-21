@@ -81,7 +81,7 @@ export function QuantityStepper({ servings, label, grams, onChange, disabled = f
       data-tour="unit-stepper"
       className={`flex items-center justify-between gap-2 ${className}`}
     >
-      <span className="text-sm font-semibold text-secondary">Số lượng</span>
+      <span className="text-cap font-bold text-text">Số lượng</span>
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -93,7 +93,7 @@ export function QuantityStepper({ servings, label, grams, onChange, disabled = f
           <span aria-hidden="true">−</span>
         </button>
         <div
-          className="flex h-11 min-w-[72px] items-center justify-center rounded-xl border px-2 focus-within:ring-2 border-card-border bg-card focus-within:ring-cobalt text-text"
+          className="flex h-11 min-w-[72px] items-center justify-center rounded-xl bg-surface px-2 shadow-[inset_0_0_0_2px_var(--color-cobalt)] focus-within:ring-2 focus-within:ring-cobalt text-text"
         >
           <span className="sr-only">{`×${count}`}</span>
           <span aria-hidden="true" className="font-bold select-none text-base mr-0.5 text-secondary">
@@ -136,7 +136,7 @@ export interface TimesStepperProps {
   min?: number;
   max: number;
   onChange: (value: number) => void;
-  /** panel: the portion sheet's row on paper with white buttons; tray: the label left, a paper pill right, no hint */
+  /** panel: the portion card's row (label and hint left, grey round − ×N + right); tray: the label left, a paper pill right, no hint */
   variant?: "panel" | "tray";
   disabled?: boolean;
   /** The usage event its tip waits for */
@@ -154,26 +154,31 @@ export function TimesStepper({ label, hint, value, valueText, min = 1, max, onCh
     onChange(Math.min(max, Math.max(min, next)));
   };
   const panel = variant === "panel";
-  const button = stepButton(panel ? "bg-card text-xl text-text" : "bg-transparent text-xl text-text");
+  const button = stepButton(panel ? "bg-fill p-0 text-text" : "bg-transparent text-xl text-text");
+  const glyph = (d: string) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
   const controls = (
     <div role="group" aria-label={label} className={`ml-auto flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
       <button type="button" aria-label={`Giảm ${label.toLowerCase()}`} disabled={disabled || value <= min} onClick={() => step(value - 1)} className={button}>
-        <span aria-hidden="true">−</span>
+        {panel ? glyph("M5 12h14") : <span aria-hidden="true">−</span>}
       </button>
-      <output aria-live="polite" className={`text-center font-display font-bold tabular-nums ${panel ? "min-w-[52px] text-title" : "min-w-10 text-xl"}`}>
+      <output aria-live="polite" className={`text-center tabular-nums ${panel ? "min-w-9 text-callout font-bold" : "min-w-10 font-display text-xl font-bold"}`}>
         {valueText}
       </output>
       <button type="button" aria-label={`Tăng ${label.toLowerCase()}`} disabled={disabled || value >= max} onClick={() => step(value + 1)} className={button}>
-        <span aria-hidden="true">+</span>
+        {panel ? glyph("M12 5v14M5 12h14") : <span aria-hidden="true">+</span>}
       </button>
     </div>
   );
   return (
     // At large text sizes the label keeps at least 7.5rem and the buttons move to a line of their own, at the right
-    <div data-tour={dataTour} className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
+    <div data-tour={dataTour} className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${panel ? "min-h-14" : ""}`}>
       <span className="flex min-w-0 grow basis-[7.5rem] flex-col gap-0.5">
         <span className="text-cap font-bold text-text">{label}</span>
-        {panel && hint && <span className="text-cap text-secondary">{hint}</span>}
+        {panel && hint && <span className="text-xs tabular-nums text-secondary">{hint}</span>}
       </span>
       {controls}
     </div>

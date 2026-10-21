@@ -69,9 +69,18 @@ def actions(pg, name):
     if name == "AddSearch":  # the + sheet with "gà" typed, as design/v3/renders/V3Add.png shows it (V3_SHOTS="AddSearch=/add")
         pg.locator("[data-add-panel] [data-testid=food-search]").first.fill("gà")
         pg.wait_for_timeout(800)
-    if name == "EditEntry":
-        pg.locator("section[aria-label*='Bữa'] button[aria-label*=', ']").first.click()
-        pg.wait_for_timeout(600)
+    if name == "EditEntry":  # a page of its own: V3_SHOTS="EditEntry=/entry/item-1" (no tap needed)
+        pg.wait_for_selector("text=Chuyển sang bữa", timeout=8000)
+        pg.wait_for_timeout(300)
+
+
+    if name == "CreateFood":  # as design/v3/renders/V3CreateFood.png: Tự nhập, the kcal error shown, the micros open
+        pg.get_by_role("button", name="Tự nhập", exact=True).click()
+        pg.locator("#cf-name").fill("Bánh tráng trộn")
+        pg.locator("#cf-kcal").focus()
+        pg.locator("#cf-kcal").blur()
+        pg.get_by_role("button", name="+ Thêm vi chất", exact=False).click()
+        pg.wait_for_timeout(500)
 
 
 def main():

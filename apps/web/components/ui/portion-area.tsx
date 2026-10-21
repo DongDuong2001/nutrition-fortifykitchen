@@ -72,6 +72,9 @@ function usePresent(name: Presence, on: boolean) {
   }, [name, on]);
 }
 
+/** The − and + beside the gram field step by this many grams */
+const GRAM_STEP = 10;
+
 function GramPortionArea({
   food,
   gramsInput,
@@ -139,18 +142,48 @@ function GramPortionArea({
   const ids = useId();
   const align = { "data-align-group": alignGroup, "data-align-edge": "left" } as const;
 
+  // V3 segmented control: a seg-track with a raised, ringed pill for the picked side (44 px hit areas)
   const segment = (on: boolean) =>
-    `${panel ? "h-11 rounded-[10px] text-callout" : "h-11 rounded-[9px] text-sm"} cursor-pointer border-0      disabled:opacity-50 ${
-      on ? "bg-ink font-bold text-on-dark" : "bg-transparent font-semibold text-text"
+    `h-11 ${panel ? "rounded-[10px] text-callout" : "rounded-[9px] text-sm"} cursor-pointer border-0 disabled:opacity-50 ${
+      on ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]" : "bg-transparent font-semibold text-secondary"
     }`;
-  const track = `grid grid-cols-2 gap-1 bg-divider p-1 ${panel ? "rounded-[14px]" : "rounded-xl"}`;
+  const track = `grid grid-cols-2 gap-1 bg-seg-track p-1 ${panel ? "rounded-xl" : "rounded-xl"}`;
+  // The gram field's edge: cobalt while it is fine, destructive when the amount is over the limit or too small
+  const gramsBad = overLimit || gramsTooSmall(text, touched);
+  // ±10 g on the field (the design's − and +): the same write as typing the new amount
+  const stepGrams = (delta: number) => {
+    if (p.kind !== "grams") return;
+    const typed = Math.max(0, Math.round((p.base + delta) * 10) / 10);
+    const next = withBase(p, typed);
+    setText(fieldText(typed));
+    emit(next, overGramLimit(fieldText(typed)) || next.base < typed);
+  };
+  const gramStep = "flex h-15 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[14px] border-0 bg-surface p-0 text-text disabled:opacity-40";
+
+  const chip100 =
+    p.kind === "grams" ? (
+      <button
+        type="button"
+        aria-pressed={p.base === 100}
+        disabled={disabled}
+        onClick={() => {
+          setText("100");
+          emit(withBase(p, 100));
+        }}
+        className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full border-0 disabled:opacity-50 ${
+ panel ? "min-h-11 min-w-[72px] px-4 text-callout" : "h-12 px-3 text-sm"
+ } ${p.base === 100 ? "bg-ink font-bold text-on-dark" : "bg-surface font-semibold text-text"}`}
+      >
+        100 g
+      </button>
+    ) : null;
 
   return (
-    <div className={`flex w-full flex-col ${panel ? "gap-4" : "gap-3"} ${className}`}>
+    <div className={`flex w-full flex-col gap-2 ${className}`}>
       {/* Sống | Chín: where raw or cooked matters and something true can be logged for both */}
       {p.kind === "grams" && sw && (
-        <div {...align} className="flex flex-col gap-2">
-          {panel && <span className="text-cap font-bold text-text">Bạn cân lúc nào?</span>}
+        <div {...align} className="flex flex-col">
+          {panel && <span className="flex min-h-11 items-center text-cap font-bold text-text">Bạn cân lúc nào?</span>}
           <div role="group" aria-label="Sống hoặc chín" data-tour={panel ? "cook-state" : undefined} className={track}>
             {(["raw", "cooked"] as const).map((s) => (
               <button
@@ -223,12 +256,12 @@ function GramPortionArea({
                         markUsed("egg-mode");
                         emit({ ...p, size: z.size });
                       }}
-                      className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text disabled:opacity-50 ${
+                      className={`flex cursor-pointer flex-col justify-center rounded-xl border-0 disabled:opacity-50 ${
  panel ? "min-h-[52px] items-start px-3 py-2 text-left" : "h-11 items-center px-1 text-cap"
- } ${on ? `border-2 border-cobalt ${panel ? "" : "bg-cobalt-tint font-bold text-cobalt"}` : "border border-card-border"}`}
+ } ${on ? "bg-ink text-on-dark" : "bg-surface text-text"}`}
                     >
                       <span className={panel ? `text-callout ${on ? "font-bold" : "font-semibold"}` : ""}>{z.label}</span>
-                      {panel && z.hint && <span className="text-xs text-secondary">{z.hint}</span>}
+                      {panel && z.hint && <span className={`text-xs ${on ? "text-muted-subtitle" : "text-secondary"}`}>{z.hint}</span>}
                     </button>
                   );
                 })}
@@ -250,8 +283,8 @@ function GramPortionArea({
               onClick={() => {
                 if (!part.active) onFoodChange?.(part.food);
               }}
-              className={`min-h-11 cursor-pointer rounded-full px-2 text-cap disabled:opacity-50 ${
- part.active ? "border-0 bg-ink font-bold text-on-dark" : "border border-card-border bg-card font-semibold text-text"
+              className={`min-h-11 cursor-pointer rounded-full border-0 px-2 text-cap disabled:opacity-50 ${
+ part.active ? "bg-ink font-bold text-on-dark" : "bg-surface font-semibold text-text"
  }`}
             >
               {part.label}
@@ -260,17 +293,27 @@ function GramPortionArea({
         </div>
       )}
 
-      {/* The gram field and its one chip, 100 g */}
+      {/* The gram field and its one chip, 100 g. Panel: the label and the chip on one row, then − field +. Tray: field and chip in a row. */}
       {p.kind === "grams" && (
         <div {...align} className="flex flex-col gap-2">
           {panel && (
-            <label htmlFor={`${ids}-grams`} className="text-cap font-bold text-text">
-              Bao nhiêu gam?
-            </label>
+            <div className="flex min-h-11 items-center justify-between gap-2">
+              <label htmlFor={`${ids}-grams`} className="text-cap font-bold text-text">
+                Bao nhiêu gam?
+              </label>
+              {chip100}
+            </div>
           )}
           <div className="flex items-stretch gap-2">
+            {panel && (
+              <button type="button" aria-label="Giảm 10 gam" disabled={disabled || p.base <= 0} onClick={() => stepGrams(-GRAM_STEP)} className={gramStep}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M5 12h14" />
+                </svg>
+              </button>
+            )}
             <div
-              className={`flex min-w-0 flex-1 items-center gap-1 border-2 border-cobalt bg-card focus-within:ring-2 focus-within:ring-cobalt/30 ${
+              className={`flex min-w-0 flex-1 items-center gap-1 bg-surface focus-within:ring-2 focus-within:ring-cobalt/30 ${gramsBad ? "shadow-[inset_0_0_0_2px_var(--color-destructive-text)]" : "shadow-[inset_0_0_0_2px_var(--color-cobalt)]"} ${
  panel ? "h-15 rounded-[14px] px-4" : "h-12 rounded-xl px-3"
  }`}
             >
@@ -279,6 +322,7 @@ function GramPortionArea({
                 data-tour={panel ? "portion-grams-input" : undefined}
                 type="text"
                 inputMode="decimal"
+                enterKeyHint="done"
                 aria-label={panel ? "Số gam" : `Số gam ${food.nameVi}`}
                 value={text}
                 disabled={disabled}
@@ -291,26 +335,21 @@ function GramPortionArea({
                   setText(e.target.value);
                   emit(next, overGramLimit(e.target.value) || next.base < typed);
                 }}
-                className={`h-full w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-display" : "text-2xl"}`}
+                className={`h-full w-full min-w-0 border-0 bg-transparent p-0 text-right font-display font-extrabold text-text tabular-nums outline-none ${panel ? "text-display" : "text-2xl"}`}
               />
               <span className={`font-semibold text-secondary ${panel ? "text-base" : "text-sm"}`}>g</span>
             </div>
-            <button
-              type="button"
-              aria-pressed={p.base === 100}
-              disabled={disabled}
-              onClick={() => {
-                setText("100");
-                emit(withBase(p, 100));
-              }}
-              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px] disabled:opacity-50 ${
- panel ? "w-23 text-base" : "h-12 rounded-xl px-3 text-sm"
- } ${p.base === 100 ? "border-2 border-cobalt bg-cobalt-tint font-bold text-cobalt" : "border border-card-border bg-card font-semibold text-text"}`}
-            >
-              100 g
-            </button>
+            {panel ? (
+              <button type="button" aria-label="Tăng 10 gam" disabled={disabled} onClick={() => stepGrams(GRAM_STEP)} className={gramStep}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+            ) : (
+              chip100
+            )}
           </div>
-          <AlertLine show={overLimit || gramsTooSmall(text, touched)} gap={2} id={`${ids}-grams-error`} className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
+          <AlertLine show={gramsBad} gap={2} id={`${ids}-grams-error`} className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
             {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
           </AlertLine>
         </div>
@@ -475,7 +514,7 @@ function UnitPortionArea({
           role="group"
           aria-label="Đơn vị khẩu phần"
           data-tour="unit-toggle"
-          className="grid gap-1 p-1 rounded-2xl w-full border bg-card-border/20 border-card-border/40"
+          className="grid w-full gap-1 rounded-xl bg-seg-track p-1"
           style={{ gridTemplateColumns: `repeat(${tabsInfo.tabs.length}, minmax(0, 1fr))` }}
         >
           {tabsInfo.tabs.map((tab) => {
@@ -487,10 +526,10 @@ function UnitPortionArea({
                 aria-pressed={isActive}
                 disabled={disabled}
                 onClick={() => handleTabChange(tab.id)}
-                className={`min-h-11 rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${
+                className={`min-h-11 rounded-[10px] border-0 text-sm flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${
  isActive
- ? "bg-ink text-on-dark shadow-xs"
- : "text-secondary hover:text-text"
+ ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]"
+ : "bg-transparent font-semibold text-secondary hover:text-text"
  }`}
               >
                 {tab.label}
@@ -545,8 +584,8 @@ function UnitPortionArea({
                     }}
                     className={`min-h-11 rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border disabled:opacity-50 ${
  isActive
- ? "bg-ink text-on-dark font-bold shadow-xs border-transparent"
- : "bg-surface text-text border-card-border hover:bg-paper-dark"
+ ? "bg-ink text-on-dark font-bold border-transparent"
+ : "bg-surface text-text border-transparent hover:bg-paper-dark"
  }`}
                   >
                     {chipText}
@@ -578,7 +617,7 @@ function UnitPortionArea({
             columns={Math.max(1, gramServings.length + 1)}
             leadingInput={
               <label
-                className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 bg-card border-cobalt text-text focus-within:ring-cobalt"
+                className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border focus-within:ring-2 bg-surface shadow-[inset_0_0_0_2px_var(--color-cobalt)] text-text focus-within:ring-cobalt"
               >
                 <input
                   id={`${gramsId}-grams`}
