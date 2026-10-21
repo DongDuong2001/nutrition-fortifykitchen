@@ -50,3 +50,7 @@ jobs:
       - name: Build
         working-directory: apps/web
         run: npm run build
+      # perf/live-bundle: a live build (NEXT_PUBLIC_API_MODE=live, into .next-live) ships no sample day or sample food
+      - name: Live bundle has no sample data (check:live-bundle)
+        working-directory: apps/web
+        run: npm run check:live-bundle

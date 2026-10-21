@@ -220,7 +220,10 @@ export function dropMockCatalog(): void {
   catalogChanged();
 }
 
-/** The catalogue, changed in place (setCatalogFoods, addCatalogFood, the recipes): read it through browsableFoods or catalogFoodById. */
+/**
+ * The catalogue, changed in place (setCatalogFoods, addCatalogFood, the recipes): read it through browsableFoods or catalogFoodById.
+ * Every in-place change must call catalogChanged(): it is what tells the screens, the id index and the browsable list.
+ */
 export const CATALOG_FOODS: FoodItem[] = SAMPLE_FOODS.map(weighedFruit);
 
 /** The ids of the sample foods above, taken before the live mode drops them or a database catalogue arrives. */
