@@ -13,9 +13,10 @@ describe("buildNutrientRows", () => {
   it("reads amount, range and percentage for calcium from the sample day", () => {
     const row = rowFor(SAMPLE_DAY, "calcium");
     expect(row?.consumed).toBe(331);
-    expect(row?.targetMin).toBe(1200);
-    expect(row?.targetMax).toBe(1500);
-    expect(row?.percentage).toBe(28);
+    // V3-SPEC §6: the sample user's target from lib/rda (US DRI, a man of 23): 1.000 mg
+    expect(row?.targetMin).toBe(1000);
+    expect(row?.targetMax).toBeUndefined();
+    expect(row?.percentage).toBe(33);
     expect(row?.formattedAmount).toBe("331 mg");
   });
 

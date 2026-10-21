@@ -56,6 +56,13 @@ export interface FoodListProps {
   limits?: FoodListLimits;
   /** The list's own element, for a caller that scrolls it (the add dialog's list on a desktop). */
   scrollRef?: React.Ref<HTMLDivElement>;
+  /**
+   * "add": the + sheet's V3 rows (V3-SPEC §3.8): each category's label sits on the page above its white card, the dividers are
+   * inset, and a row has up to three lines (name, meta, the group's macro). Every other list keeps the default look.
+   */
+  variant?: "default" | "add";
+  /** Third line of a row, bold (the "add" variant): the group's own macro for the serving, or null for no line. */
+  getMacro?: (food: FoodItem) => string | null;
 }
 
 /**
@@ -83,7 +90,10 @@ function FoodListView({
   dataTour,
   limits = DEFAULT_FOOD_LIST_LIMITS,
   scrollRef,
+  variant = "default",
+  getMacro,
 }: FoodListProps) {
+  const add = variant === "add";
   // cc-58: rows past the limit wait behind "Xem thêm", per list (a new list, from a query or a filter, starts again)
   const [more, setMore] = useState<{ list: FoodListData; extra: Record<string, number> }>({ list, extra: {} });
   const extra = more.list === list ? more.extra : {};
@@ -125,10 +135,13 @@ function FoodListView({
     const disabled = !!disabledIds?.some((id) => ids.includes(id));
     const name = rowName(food);
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
+    const macro = add ? getMacro?.(food) : null;
     const showHeart = list.grouped && !!isFavourite?.(food);
     const carried = !!tray?.ids.some((id) => ids.includes(id));
     return (
-      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-cobalt/10" : ""}`}>
+      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center ${
+        add ? "relative before:absolute before:left-4 before:right-0 before:top-0 before:h-px before:bg-divider first:before:hidden" : "border-t border-divider first:border-t-0"
+      } ${carried ? "bg-cobalt-tint" : ""}`}>
         <button
           type="button"
           data-food-row
@@ -139,9 +152,9 @@ function FoodListView({
           onPointerDown={() => prefetchDishParts(food)}
           className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen || tray ? "pr-1" : "pr-4"
-          } ${selected && !carried ? "bg-cobalt/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
+          } ${selected && !carried ? "bg-cobalt-tint" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className={`flex min-w-0 flex-1 flex-col ${add ? "gap-0.5" : "gap-1"}`}>
             <span title={name} className="line-clamp-2 break-words text-callout font-semibold leading-snug">
               {name}
               {showHeart && (
@@ -157,7 +170,8 @@ function FoodListView({
                 </svg>
               )}
             </span>
-            <span className="line-clamp-2 text-cap leading-tight text-secondary">{meta}</span>
+            <span className={`line-clamp-2 text-cap leading-tight text-secondary ${add ? "tabular-nums" : ""}`}>{meta}</span>
+            {macro && <span data-food-macro className="text-cap font-bold leading-tight tabular-nums text-text">{macro}</span>}
           </span>
           {showSourceTag && <SourceTag food={food} />}
           {selected && (
@@ -187,11 +201,11 @@ function FoodListView({
             data-testid="tray-toggle"
             data-tour="tray-toggle"
             onClick={() => tray.onToggle(food)}
-            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            className={`${add ? "mr-1" : "mr-2"} inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100`}
           >
             <span
               // cc-64 (A5): the fill and the glyph colour cross over (the press timing), instead of snapping
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-[var(--m-press)] ease-out motion-reduce:transition-none ${carried ? "bg-cobalt text-on-accent" : "bg-cobalt/10 text-cobalt"}`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-[var(--m-press)] ease-out motion-reduce:transition-none ${carried ? "bg-cobalt text-on-accent" : "bg-cobalt-tint text-cobalt"}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {carried ? <path d="m5 12.5 4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
@@ -218,7 +232,7 @@ function FoodListView({
   const cardClass = "rounded-card border border-transparent shadow-ring lg:shadow-card bg-card";
 
   return (
-    <div ref={scrollRef} data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
+    <div ref={scrollRef} data-tour={dataTour} className={`flex flex-col ${add ? "gap-4" : "gap-3"} ${className}`}>
       {list.foods.length === 0 ? (
         empty
       ) : list.grouped ? (
@@ -229,12 +243,18 @@ function FoodListView({
             aria-label={group.label}
             data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
             data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
-            className={cardClass}
+            className={add ? "flex flex-col" : cardClass}
           >
-            <div className="sticky top-0 z-sticky rounded-t-card border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
-              {group.label} · {group.foods.length}
-            </div>
-            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-card p-0">
+            {add ? (
+              <h2 className="m-0 pb-1 text-cap font-bold text-secondary">
+                {group.label} · {group.foods.length}
+              </h2>
+            ) : (
+              <div className="sticky top-0 z-sticky rounded-t-card border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
+                {group.label} · {group.foods.length}
+              </div>
+            )}
+            <ul className={`m-0 flex list-none flex-col overflow-hidden p-0 ${add ? cardClass : "rounded-b-card"}`}>
               {shownOf(group.key, group.foods).map((food) => renderRow(food, false))}
               {moreRow(group.key, group.foods, group.label)}
             </ul>

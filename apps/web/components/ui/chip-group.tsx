@@ -9,6 +9,8 @@ export interface ChipGroupItem {
   ariaLabel?: string;
   /** Read-only chip: not pressable, dimmed (a past day) */
   disabled?: boolean;
+  /** A 20 px IconTile before the label (only the `scroll` row draws it: the V3 filter chips) */
+  icon?: React.ReactNode;
 }
 
 export interface ChipGroupProps {
@@ -27,6 +29,8 @@ export interface ChipGroupProps {
   "data-align-edge"?: string;
   /** A tab switch (one choice changes what the screen lists): role tablist / tab and aria-selected, not aria-pressed; needs ariaLabel */
   tabs?: boolean;
+  /** `scroll` row inside a sheet's glass header: edge to edge, no fades */
+  sheet?: boolean;
 }
 
 /**
@@ -46,8 +50,9 @@ export function ChipGroup({
   ariaLabel = "",
   "data-align-edge": dataAlignEdge,
   tabs = false,
+  sheet = false,
 }: ChipGroupProps) {
-  if (scroll) return <ChipScroller items={items} ariaLabel={ariaLabel} data-align-group={dataAlignGroup} data-align-edge={dataAlignEdge} />;
+  if (scroll) return <ChipScroller items={items} ariaLabel={ariaLabel} data-align-group={dataAlignGroup} data-align-edge={dataAlignEdge} sheet={sheet} />;
   const totalCount = (leadingInput ? 1 : 0) + items.length;
   const colCount = columns || (totalCount > 0 ? totalCount : 4);
   const colCountLg = columnsLg || colCount;

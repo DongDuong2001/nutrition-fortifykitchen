@@ -78,7 +78,7 @@ describe("nutrientOnDay", () => {
   it("reads the row for a day with entries", () => {
     const row = nutrientOnDay(SAMPLE_DAY, calcium);
     expect(row?.consumed).toBe(331);
-    expect(row?.percentage).toBe(28);
+    expect(row?.percentage).toBe(33);
   });
 
   it("shows a dash, never 0, for a day with nothing logged", () => {

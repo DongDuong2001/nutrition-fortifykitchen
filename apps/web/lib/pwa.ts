@@ -4,8 +4,9 @@
 
 import { HOME_ROUTE } from "./home-route";
 
-/** Manifest colours, the same values as --color-page and --color-ink in globals.css (a manifest cannot read CSS). */
-export const PAPER_COLOR = "#FFFFFF";
+/** Manifest colours, the same values as --color-page and --color-ink in globals.css (a manifest cannot read CSS). The
+ * launch background is the V3 page grey #F2F2F7 (design-floor). */
+export const PAPER_COLOR = "#F2F2F7";
 export const INK_COLOR = "#111317";
 
 /** The app shell, precached when the service worker installs. */
