@@ -166,14 +166,15 @@ def add_sheet():
             return {
               belowOk: below ? onRow(below[0], below[1].top + 2) : true,
               aboveOk: above ? onRow(above[0], above[1].bottom - 2) : true,
-              headerAbove: (() => { const e = at(cx, hb.top - 3); return !!e && (e === h || h.contains(e)); })(),
+              // V3: the header is a 44 px target on its own, so a tap on its top edge or its bottom edge lands on it
+              headerAbove: (() => { const a = at(cx, hb.top + 2), z = at(cx, hb.bottom - 2); return hb.height >= 43.5 && !!a && (a === h || h.contains(a)) && !!z && (z === h || h.contains(z)); })(),
               headerHeight: hb.height,
             };
           })"""
         for i, r in enumerate(pg.evaluate(probe_js)):
             which = ["first", "second"][i]
             check(r["belowOk"] and r["aboveOk"], f"5: the {which} meal: the rows above and below it are hit at their own edge (the header takes none of their pixels)")
-            check(r["headerAbove"], f"5: the {which} meal: a tap on the paper just above the header still lands on it ({round(r['headerHeight'])} px element, 28 px hit area)")
+            check(r["headerAbove"], f"5: the {which} meal: the header is a 44 px target and a tap on either of its edges lands on it ({round(r['headerHeight'])} px element)")
 
         # ---- 3: the add list
         pg.locator("#mobile-add-fab").tap()
@@ -183,10 +184,11 @@ def add_sheet():
         rows = pg.locator("[data-add-panel] button[data-food-row]").count()
         stops = pg.evaluate("() => [...document.querySelectorAll('[data-add-panel] button, [data-add-panel] a[href], [data-add-panel] input')].filter((e) => !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]')).length")
         nodes = pg.evaluate("() => document.querySelectorAll('[data-add-panel] *').length")
-        # Measured on the demo catalogue (43 foods) at 390 px: 34 rows, 112 Tab stops, 488 nodes (before: 49, 140, 616); a small margin each
+        # Measured on the demo catalogue (43 foods) at 390 px: 34 rows, 112 Tab stops, 598 nodes with the V3 glass header, grabber, switcher and
+        # shortcut carousels (before the trim: 49, 140, 616); a small margin each
         check(rows <= 40, f"3: the add list draws {rows} food rows first (measured 34; a few per category, not the whole catalogue)")
         check(stops <= 125, f"3: Tab has {stops} stops in the sheet (measured 112; before 140)")
-        check(nodes <= 540, f"3: the sheet is {nodes} nodes (measured 488; before 616)")
+        check(nodes <= 650, f"3: the sheet is {nodes} nodes (measured 598 with the V3 header; the whole catalogue drew 616 before the per-category trim, and 49 rows)")
         more = pg.get_by_role("button", name=re.compile(r"^Xem thêm .+ \(\d+ món\)$")).first
         check(more.count() == 1, "3: a category with more foods ends in Xem thêm <category> (n món)")
         label = more.inner_text()

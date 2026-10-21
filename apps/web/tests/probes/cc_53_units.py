@@ -220,7 +220,7 @@ def exceptions(pg):
     amount.fill("2")
     amount.dispatch_event("blur")
     pg.wait_for_timeout(300)
-    text = pg.locator("main").inner_text()
+    text = pg.locator("main").inner_text().lower()  # V3 section labels are uppercase on screen ("VI CHẤT TRONG 2 VIÊN"); the label note still says 0 kcal
     check("2 viên" in text and "0 kcal" in text, "CanPrev: 2 viên, 0 kcal")
 
     go(pg, "/foods/food-red-bull", 700)

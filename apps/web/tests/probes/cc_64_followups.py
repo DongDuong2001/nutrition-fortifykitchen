@@ -100,7 +100,7 @@ def dish_parts(browser):
     pg = ctx.new_page()
     pg.goto(BASE + "/add?meal=lunch", wait_until="networkidle")
     pg.wait_for_timeout(700)
-    chip = pg.get_by_role("button", name="Món Việt")
+    chip = pg.locator('button[data-chip-id="mon_viet"]')  # the filter chip (not the "Xem thêm Món Việt" row in the list)
     if chip.count():
         chip.first.click()
         pg.wait_for_timeout(500)
