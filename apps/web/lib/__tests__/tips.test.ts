@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { canVibrate } from "../haptics";
-import { DEFAULT_FLAGS, markSeenIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
+import { DEFAULT_FLAGS, markSeenIn, markTipShownIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
 import { TIPS, pickTip, type TipContext } from "../tips";
 
 const ctx = (over: Partial<TipContext> = {}): TipContext => ({ pathname: "/app", pastDay: false, foodsToday: 2, ...over });
@@ -238,7 +238,7 @@ describe("pickTip", () => {
 
 describe("the flags", () => {
   it("start empty: tour not done, tips on, nothing seen or used", () => {
-    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null });
+    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null, tipShownAt: null });
   });
 
   it("read from storage, with anything wrong ignored", () => {
@@ -250,6 +250,7 @@ describe("the flags", () => {
       replayOpened: true,
       tourStartedIso: null,
       whatsNewSeen: null,
+      tipShownAt: null,
     });
     expect(parseFlags({ whatsNewSeen: "2026-10-17" }).whatsNewSeen).toBe("2026-10-17");
     expect(parseFlags(null)).toEqual(DEFAULT_FLAGS);
@@ -331,5 +332,38 @@ describe("the share tip", () => {
     expect(tip?.tryLabel).toBe("Thử ngay");
     expect(tip?.round).toBe(true);
     expect(tip?.target).toBe("home-share");
+  });
+});
+
+// design-floor (V3, 22/10): at most one tip a day. The same tips, triggers and "used" events; only how often changes.
+describe("pickTip: one tip per 24 h", () => {
+  const HOUR = 3600_000;
+  const now = Date.parse("2026-10-22T10:00:00+07:00");
+
+  it("picks as before when no clock is given (the old behaviour holds)", () => {
+    const before = ids(ctx());
+    expect(pickTip({ ctx: ctx(), flags: flags({ tipShownAt: now - HOUR }), tourActive: false })?.id ?? null).toBe(before);
+  });
+
+  it("picks as before when no tip was shown yet", () => {
+    expect(pickTip({ ctx: ctx(), flags: flags(), tourActive: false, now })?.id ?? null).toBe(ids(ctx()));
+  });
+
+  it("shows nothing within 24 h of the last tip, and the next one after", () => {
+    expect(pickTip({ ctx: ctx(), flags: flags({ tipShownAt: now - 23 * HOUR }), tourActive: false, now })).toBeNull();
+    expect(pickTip({ ctx: ctx(), flags: flags({ tipShownAt: now - 24 * HOUR }), tourActive: false, now })?.id ?? null).toBe(ids(ctx()));
+  });
+
+  it("marking a tip shown adds it to seen and stamps the time; markSeenIn is unchanged", () => {
+    const shown = markTipShownIn(flags(), "meal-add", now);
+    expect(shown.seen).toEqual(["meal-add"]);
+    expect(shown.tipShownAt).toBe(now);
+    expect(markSeenIn(flags(), "meal-add")).toEqual({ ...flags(), seen: ["meal-add"] });
+  });
+
+  it("reads the stamp back from storage, and anything else as none", () => {
+    expect(parseFlags({ tipShownAt: now }).tipShownAt).toBe(now);
+    expect(parseFlags({ tipShownAt: "x" }).tipShownAt).toBeNull();
+    expect(parseFlags({}).tipShownAt).toBeNull();
   });
 });

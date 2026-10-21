@@ -304,13 +304,18 @@ export const TIPS: readonly Tip[] = [
   },
 ];
 
+/** design-floor: at most one tip in this long (V3, 22/10). */
+export const TIP_GAP_MS = 24 * 3600_000;
+
 /**
  * The one tip to show on this visit, or null. A tip shows when tips are on, no tour is running, the user has not seen
  * it and has never used what it explains. At most one: the first of the table that fits (the next fits next visit).
- * While a sheet is open only the sheet's own tips can show (the page's would point under it).
+ * While a sheet is open only the sheet's own tips can show (the page's would point under it). Given `now`, nothing
+ * shows within TIP_GAP_MS of the last tip shown (without it the pick is as before).
  */
-export function pickTip({ ctx, flags, tourActive }: { ctx: TipContext; flags: OnboardingFlags; tourActive: boolean }): Tip | null {
+export function pickTip({ ctx, flags, tourActive, now }: { ctx: TipContext; flags: OnboardingFlags; tourActive: boolean; now?: number }): Tip | null {
   if (tourActive || flags.tipsOff) return null;
+  if (now !== undefined && flags.tipShownAt != null && now - flags.tipShownAt < TIP_GAP_MS) return null;
   return TIPS.find((t) => tipDue(t, ctx, flags)) ?? null;
 }
 

@@ -181,8 +181,8 @@ def tour(browser):
         last = i == len(STEPS) - 1
         button = card(pg).get_by_role("button", name="Xong" if last else "Tiếp")
         check(button.count() == 1, f"step {i + 1}: {'Xong' if last else 'Tiếp'}")
-        if not last:
-            check(card(pg).get_by_role("button", name="Bỏ qua").count() == 1, f"step {i + 1}: Bỏ qua")
+        # design-floor: Bỏ qua on every step, the last one included
+        check(card(pg).get_by_role("button", name="Bỏ qua").count() == 1, f"step {i + 1}: Bỏ qua")
         button.click()
         pg.wait_for_timeout(700)
     check(card(pg).count() == 0, "Xong ends the tour")

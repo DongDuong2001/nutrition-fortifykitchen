@@ -1,7 +1,7 @@
 import { onboardingSwitchHonoured } from "./demo";
 import { loadSettings, saveSettings } from "./settings";
 import {
-  markSeenIn,
+  markTipShownIn,
   markTourStartedIn,
   markUsedIn,
   setTipsOffIn,
@@ -57,7 +57,8 @@ function update(change: (flags: OnboardingFlags) => OnboardingFlags): Onboarding
   return next;
 }
 
-export const markTipSeen = (id: string) => update((f) => markSeenIn(f, id));
+/** A tip was shown: seen, and its time starts the 24 h until the next tip (design-floor). */
+export const markTipSeen = (id: string) => update((f) => markTipShownIn(f, id, Date.now()));
 /** A feature was used (long-press edit, meal + Thêm, tray add, compare, create food, 7/30 toggle …): its tip stops. */
 export const markUsed = (event: string) => update((f) => markUsedIn(f, event));
 export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));

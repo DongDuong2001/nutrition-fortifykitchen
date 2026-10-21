@@ -152,11 +152,10 @@ function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTou
           ))}
         </span>
         <div className="flex items-center gap-1">
-          {!last && (
-            <button type="button" onClick={onSkip} className={quietButton}>
-              Bỏ qua
-            </button>
-          )}
+          {/* design-floor: Bỏ qua on every step, the last one included (D-ONB-01) */}
+          <button type="button" onClick={onSkip} className={quietButton}>
+            Bỏ qua
+          </button>
           <button type="button" onClick={onNext} className={primaryButton}>
             {last ? "Xong" : "Tiếp"}
           </button>
@@ -334,7 +333,7 @@ export function OnboardingLayer() {
   // The tip this screen would show now (null when none is due)
   const dueTip = useCallback((): Tip | null => {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
-    return pickTip({ ctx: tipContext(), flags, tourActive });
+    return pickTip({ ctx: tipContext(), flags, tourActive, now: Date.now() });
   }, [tourActive, wnActive, wnSheet, tipContext, flags]);
 
   // Opening a sheet, or a portion control turning up, is a new visit for its own tip (when that tip is still due)
