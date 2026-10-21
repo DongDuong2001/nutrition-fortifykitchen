@@ -38,7 +38,7 @@ export const RELEASES: readonly Release[] = [
     id: "2026-10-21c",
     date: "21/10",
     items: [
-      { icon: "bars", title: "Thực phẩm bổ sung có thẻ riêng", body: "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung thành hai thẻ trong Khám phá, nên viên uống không còn đứng đầu danh sách món ăn." },
+      { icon: "bars", title: "Danh sách Giàu … có hai thẻ", body: "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung thành hai thẻ trong Khám phá, nên viên uống không còn đứng đầu danh sách món ăn." },
     ],
   },
   // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI

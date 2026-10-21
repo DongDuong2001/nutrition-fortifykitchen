@@ -177,7 +177,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toContain("Thực phẩm bổ sung có thẻ riêng");
+    expect(r?.items.map((i) => i.title)).toContain("Danh sách Giàu … có hai thẻ");
     expect(r?.tour).toBeUndefined();
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
