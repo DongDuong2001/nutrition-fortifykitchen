@@ -3,7 +3,7 @@
  * result (searchTag). Both read it, so a source the catalogue gains is named in one place and the two cannot drift.
  */
 
-export type SearchTagLabel = "USDA" | "Nhãn" | "VN" | "Canada" | "ASEAN" | "Tài liệu" | "Ước tính" | "Của tôi" | "Tự nhập" | "Chưa rõ";
+export type SearchTagLabel = "USDA" | "Nhãn" | "VN" | "Canada" | "ASEAN" | "Tài liệu" | "Fortify Kitchen" | "Ước tính" | "Của tôi" | "Tự nhập" | "Chưa rõ";
 
 export interface SourceName {
   /** The food page and the source sheet ("CNF (Canada)"). */
@@ -29,6 +29,7 @@ export const SOURCE_NAMES: Readonly<Record<string, SourceName>> = {
   cnf: { label: "CNF (Canada)", tag: "Canada" },
   asean: { label: "ASEAN", tag: "ASEAN" },
   literature: { label: "Tài liệu", tag: "Tài liệu" },
+  "fortify-kitchen": { label: "Fortify Kitchen", tag: "Fortify Kitchen" },
   community: ESTIMATE,
   "recipe-calc": ESTIMATE,
   user: OWN,
