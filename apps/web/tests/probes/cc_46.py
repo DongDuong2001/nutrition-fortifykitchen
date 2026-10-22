@@ -41,7 +41,7 @@ RELEASE = "2026-10-23a"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
 ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn", "Chia sẻ ngày ăn bằng một chạm"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients, share-spotlight (2026-10-22a)
-ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự tạo ngày ăn mẫu"]  # the night of 22→23/10 (2026-10-23a, shared by its PRs): no tour
+ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự tạo ngày ăn mẫu", "Kcal từ đạm, tinh bột, béo"]  # the night of 22→23/10 (2026-10-23a, shared by its PRs): no tour
 ITEMS_2210C = ["Món ghi theo gam", "Tổng quan đếm vi chất như Hôm nay", "Số trung bình ghi rõ"]  # overnight 22→23/10 (2026-10-22c), no tour
 ITEMS_2210B = ["Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy"]  # backend-sync-1022 (2026-10-22b): one item, no tour
 ITEMS_2110C = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add, polish, rich-tabs, minh-hao-tab, glide, swap-ingredients (2026-10-21c, live)

@@ -82,6 +82,7 @@ import { formatDayLabel } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
+import type { HeroMacro } from "@/lib/macro-kcal";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
@@ -446,6 +447,14 @@ function HomeContent() {
     markShareNudgeDay(todayIso);
     notify(SHARE_NUDGE_TEXT, "share");
   }, [nudgePending, toast, pathname, isPast, todayIso, notify]);
+  // feat/hero-macro-kcal: a macro tapped on the hero shows its kcal; a change of day or of the selected meal clears it
+  const [heroMacro, setHeroMacro] = useState<HeroMacro | null>(null);
+  const heroMacroKey = `${viewIso} ${JSON.stringify(mode)}`;
+  const [heroMacroFor, setHeroMacroFor] = useState(heroMacroKey);
+  if (heroMacroFor !== heroMacroKey) {
+    setHeroMacroFor(heroMacroKey);
+    setHeroMacro(null);
+  }
   const macroTargets = useMemo(
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
@@ -823,6 +832,11 @@ function HomeContent() {
             selected={selected}
             kcalNote={unknownKcalNote(modeEntries(mode, entries))}
             countKey={`${viewIso} ${JSON.stringify(mode)}`}
+            macro={heroMacro}
+            onMacro={(m) => {
+              if (m) markUsed("hero-macro");
+              setHeroMacro(m);
+            }}
           />
           {coach && !selecting && (
             <div className="mt-2 flex min-h-11 flex-none items-center justify-end px-3 lg:px-0">
