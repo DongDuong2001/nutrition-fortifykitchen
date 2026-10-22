@@ -19,7 +19,8 @@ import _demo  # noqa: F401
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 SEED = "try { localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({installPrompt:{dismissCount:0,snoozeUntil:0,done:true,firstSeenIso:'2026-01-01'}})) } catch (e) {}"
-COUNTS = re.compile(r"/ 1 (củ|bìa|nắm|dĩa|muỗng|chén|cái|lòng)")
+COUNTS = re.compile(r"/ 1 (củ|bìa|nắm|dĩa|muỗng|chén|cái|lòng|miếng)")
+WEIGHED = {"Mật mía", "Bánh tráng nướng", "Bánh khoai nướng Minh Hào", "Đậu hũ trắng", "Rau muống", "Khoai lang", "Hạt điều rang", "Hạnh nhân", "Bông cải xanh", "Lòng trắng trứng gà", "Lòng đỏ trứng gà", "Dầu ăn"}
 problems = []
 
 
@@ -52,8 +53,11 @@ with sync_playwright() as p:
     go(pg, "/add?meal=dinner", 1500)
     pg.locator("[data-add-panel] button[data-food-row]").first.wait_for(state="visible", timeout=15000)
     rows = rows_text(pg)
-    counted = [r.replace("\n", " / ") for r in rows if COUNTS.search(r.replace("\n", " "))]
-    check(not counted, f"1: no row of the list is shown by a count ({counted[:4]})")
+    # The demo foods weighed in grams whose data lists a count first (dishes, supplements and cans keep their unit)
+    counted = [r.replace("\n", " / ") for r in rows if r.split("\n")[0] in WEIGHED and COUNTS.search(r.replace("\n", " "))]
+    check(not counted, f"1: no food weighed in grams is shown by a count ({counted[:4]})")
+    kept = [r.replace("\n", " / ") for r in rows if r.split("\n")[0] in ("Cơm tấm sườn", "Whey Protein Isolate", "Red Bull")]
+    check(kept and all(re.search(r"/ 1 (dĩa|muỗng|lon)", k) for k in kept), f"1: dishes, supplements and cans keep their unit ({kept})")
     pg.locator("[data-add-panel] input").first.fill("khoai lang")
     pg.wait_for_timeout(800)
     khoai = " ".join(rows_text(pg)[:1]).replace("\n", " ")
@@ -91,8 +95,8 @@ with sync_playwright() as p:
     link.click()
     pg.wait_for_url(re.compile(r"/trends/micros"), timeout=8000)
     pg.wait_for_timeout(1500)
-    hero = pg.locator("#mi-hero-number").inner_text()
-    check(f"/{home_total}" in hero.replace(" ", ""), f"2: the Vi chất tab's hero is over the Level's list too ({hero!r})")
+    hero = pg.locator("[data-tour='trends-summary']").get_attribute("aria-label") or ""
+    check(f"trên {home_total} vi chất" in hero, f"2: the Vi chất tab's hero is over the Level's list too ({hero!r})")
     check(pg.get_by_role("heading", name="Đủ 22 vi chất").count() == 1, "2: the lists of all 22 stay under Đủ 22 vi chất")
 
     # ---- 4: the footnote ----
