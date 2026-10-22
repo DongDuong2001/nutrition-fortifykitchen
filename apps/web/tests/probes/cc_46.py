@@ -208,7 +208,13 @@ def comes_before_tips(browser):
     check(card(pg).count() == 0, "no tip beside it")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(3000)
-    check(card(pg).count() == 0, "no tip after it in the same app open (one interruption per open)")
+    # share-spotlight (Hao 22/10): the share tip is the one tip that may follow Có gì mới in the same app open; no other tip does
+    texts = card(pg).all_inner_texts()
+    check(card(pg).count() == 0 or (len(texts) == 1 and "Chia sẻ ngày ăn của bạn" in texts[0]), f"after it in the same app open only the share tip may follow ({texts[:1]})")
+    if card(pg).count():
+        card(pg).get_by_role("button", name="Để sau").click()
+        pg.wait_for_timeout(2500)
+    check(card(pg).count() == 0, "and no tip after that (one interruption per open, plus the share tip)")
     ctx.close()
 
 
