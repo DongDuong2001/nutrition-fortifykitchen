@@ -2,8 +2,8 @@
 
 Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, sizes 390x844 and 1440x900.
 - Hero: sentence case label ("Cả ngày · 7 món"); every text 11 px or more; the kcal percent sits right after the
-  target on the same line (the kcal number's 34 px, 10 px gap; V3 22/10); each macro reads amount then percent with an 8 px gap; on a
-  past day the level word follows the kcal percent.
+  target on the same line (the kcal number's 40 px since C3, 10 px gap; V3 22/10); each of the three macros (C3) reads amount then
+  percent with an 8 px gap; on a past day the level word follows the kcal percent (C3: at 390 it starts the next line).
 - Nutrient column: no caption; "Khoáng chất" and "Vitamin" are Saira 17 px section headers under an inset hairline (V3 22/10,
   no ink band), the meal header is a 44 px row; food rows and nutrient rows share the name size.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27f.py
@@ -76,10 +76,13 @@ def run(browser, size, tag):
         gap = pct["r"]["left"] - target["r"]["right"]
         check(abs(pct["r"]["top"] + pct["r"]["height"] - (target["r"]["top"] + target["r"]["height"])) < 10, f"{t}: kcal percent on the target's line")
         check(abs(gap - 10) <= 1, f"{t}: 10 px between target and percent ({gap:.1f} px)")
-        check(pct["fs"] == 34 and pct["st"] == "italic", f"{t}: percent 34 px Saira italic ({pct['fs']} {pct['st']})")
+        # C3 (homnay-c2.md item 1): the big kcal and its percent are 40 px (were 34)
+        check(pct["fs"] == 40 and pct["st"] == "italic", f"{t}: percent 40 px Saira italic ({pct['fs']} {pct['st']})")
         if past:
             word = [s for s in geo if s["t"] in ("Thiếu", "Trung bình", "Gần đủ", "Đạt")]
-            check(len(word) == 1 and word[0]["r"]["left"] >= pct["r"]["right"] - 1, f"{t}: the level word follows the percent ({[s['t'] for s in geo]})")
+            # C3 (item 1): with 40 px numbers the line is full at 390, so the word may start the next line, under the kcal
+            after = len(word) == 1 and (word[0]["r"]["left"] >= pct["r"]["right"] - 1 or (word[0]["r"]["top"] > pct["r"]["top"] + pct["fs"] / 2 and abs(word[0]["r"]["left"] - geo[0]["r"]["left"]) <= 1))
+            check(after, f"{t}: the level word follows the percent ({[s['t'] for s in geo]})")
         else:
             check(not [s for s in geo if s["t"] in ("Thiếu", "Trung bình", "Gần đủ", "Đạt")], f"{t}: no level word on today")
 
@@ -93,7 +96,8 @@ def run(browser, size, tag):
             }""",
             HERO,
         )
-        check(len(macro) == 4 and all(m["order"] and abs(m["gap"] - 8) <= 1.5 for m in macro), f"{t}: macro amount then percent, 8 px gap {[(m['amount'], m['pct'], round(m['gap'], 1)) for m in macro]}")
+        # C3 (item 1): three macros; Chất xơ has its own row in the nutrient column
+        check(len(macro) == 3 and all(m["order"] and abs(m["gap"] - 8) <= 1.5 for m in macro), f"{t}: macro amount then percent, 8 px gap {[(m['amount'], m['pct'], round(m['gap'], 1)) for m in macro]}")
 
         # nutrient column: no caption, V3 section headers (Saira 17 px, no ink band) and a 44 px meal header row
         aside = pg.locator("aside[aria-label='Vi chất'] >> visible=true").first

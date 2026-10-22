@@ -1,8 +1,8 @@
 """cc-45 review: the Hôm nay hero's macro cells with target grams ("133/254 g", AG 17/10) keep the cc-44 rules.
 
 At 390 and 1440, today and a past day (where macros run over target, "118/104 g"): each cell's grams line is one line
-box, amount then percent 8 px apart, and the line ends inside its cell (no overflow into the next column); the four
-bars share one grid (same widths, same top). Prints each cell's widths so a tight fit shows up before it breaks.
+box, amount then percent 8 px apart, and the line ends inside its cell (no overflow into the next column); the three
+bars (C3: Tinh bột, Đạm, Chất béo) share one grid (same widths, same top). Prints each cell's widths so a tight fit shows up before it breaks.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_45_hero.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/**
@@ -63,10 +63,11 @@ with sync_playwright() as p:
             cells = pg.evaluate(CELLS_JS, HERO)
             for c in cells:
                 print(f"  {t} {c['amount']!r} {c['pct']!r}: cell {c['cell']:.1f}, used {c['used']:.1f}, gap {c['gap']:.1f}, {c['amountPx']}/{c['pctPx']} px")
-            check(len(cells) == 4 and all(c["lines"] == 1 for c in cells), f"{t}: each grams line is one line {[c['lines'] for c in cells]}")
+            # C3 (homnay-c2.md item 1): three macro cells (Tinh bột, Đạm, Chất béo); Chất xơ moved to the nutrient column
+            check(len(cells) == 3 and all(c["lines"] == 1 for c in cells), f"{t}: each grams line is one line {[c['lines'] for c in cells]}")
             check(all(abs(c["gap"] - 8) <= 1.5 for c in cells), f"{t}: amount then percent 8 px apart {[round(c['gap'], 1) for c in cells]}")
             check(all(c["overflow"] <= 0.5 for c in cells), f"{t}: no line runs past its cell {[round(c['overflow'], 1) for c in cells]}")
-            check(len({c["barW"] for c in cells}) == 1 and len({c["barTop"] for c in cells}) == 1, f"{t}: four bars on one grid {[(c['barW'], c['barTop']) for c in cells]}")
+            check(len({c["barW"] for c in cells}) == 1 and len({c["barTop"] for c in cells}) == 1, f"{t}: three bars on one grid {[(c['barW'], c['barTop']) for c in cells]}")
             check(all(c["amountPx"] >= 11 for c in cells), f"{t}: grams 11 px or more")
             ctx.close()
     browser.close()
