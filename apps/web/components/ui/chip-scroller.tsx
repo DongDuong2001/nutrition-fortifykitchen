@@ -17,7 +17,7 @@ export interface ChipScrollerProps {
   ariaLabel: string;
   "data-align-group"?: string;
   "data-align-edge"?: string;
-  /** The row sits in a sheet's glass header: it runs from edge to edge of the sheet (16 px padding, scrolls under the gutters) and has no fades. */
+  /** The row sits in a sheet's glass header: it runs from edge to edge of the sheet (16 px padding, scrolls under the gutters), with the same fades. */
   sheet?: boolean;
 }
 
@@ -30,28 +30,28 @@ export interface ChipScrollerProps {
  */
 export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge, sheet = false }: ChipScrollerProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  // Which edges have more row behind them (only the phone's one-line row scrolls; the sheet header's row has no fades)
+  // Which edges have more row behind them (only the phone's one-line row scrolls; the page's row and the sheet header's alike)
   const [edges, setEdges] = useState({ left: false, right: false });
   const activeId = items.find((it) => it.active)?.id;
 
   const measure = useCallback(() => {
     const scroller = scrollerRef.current;
-    if (!scroller || sheet) return;
+    if (!scroller) return;
     const left = scroller.scrollLeft > 0;
     const right = scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
     setEdges((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
-  }, [sheet]);
+  }, []);
 
   // Measured on mount, on resize of the row or of its chips (a label that loads late, a larger text size) and after each scroll
   useEffect(() => {
     const scroller = scrollerRef.current;
-    if (!scroller || sheet) return;
+    if (!scroller) return;
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(scroller);
     for (const child of Array.from(scroller.children)) observer.observe(child);
     return () => observer.disconnect();
-  }, [measure, sheet, items.length]);
+  }, [measure, items.length]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -67,7 +67,7 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
   }, [activeId]);
 
   // The mask of the row (only its alpha counts, so currentColor is the opaque stop): opaque in the middle, 24 px of fade at each edge that has more behind it; none when nothing overflows
-  const mask = sheet || (!edges.left && !edges.right)
+  const mask = !edges.left && !edges.right
     ? "none"
     : `linear-gradient(to right, ${edges.left ? "transparent 0, currentColor 24px" : "currentColor 0"}, ${edges.right ? "currentColor calc(100% - 24px), transparent 100%" : "currentColor 100%"})`;
 
@@ -78,7 +78,7 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
         role="group"
         aria-label={ariaLabel}
         onScroll={measure}
-        data-fade-edges={sheet ? undefined : `${edges.left ? "left" : ""}${edges.left && edges.right ? " " : ""}${edges.right ? "right" : ""}` || "none"}
+        data-fade-edges={`${edges.left ? "left" : ""}${edges.left && edges.right ? " " : ""}${edges.right ? "right" : ""}` || "none"}
         style={{ "--chip-mask": mask } as React.CSSProperties}
         className={`relative flex flex-nowrap gap-2 overflow-x-auto scrollbar-none [-webkit-mask-image:var(--chip-mask)] [mask-image:var(--chip-mask)] lg:flex-wrap lg:overflow-visible lg:[-webkit-mask-image:none] lg:[mask-image:none] ${
           sheet ? "-mx-4 scroll-px-4 px-4 lg:mx-0 lg:px-0" : "pr-8 lg:pr-0"
