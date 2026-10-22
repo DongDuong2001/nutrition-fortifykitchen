@@ -14,7 +14,6 @@ import {
   Plus as MynaPlus,
   Ribbon as MynaRibbon,
   Search as MynaSearch,
-  Share as MynaShare,
   Sparkles as MynaSparkles,
   Star as MynaStar,
   Target as MynaTarget,
@@ -81,7 +80,16 @@ export const IconChevronLeft = createH1TIcon(MynaChevronLeft);
 export const IconChevronDown = createH1TIcon(MynaChevronDown);
 export const IconSearch = createH1TIcon(MynaSearch);
 export const IconTrash = createH1TIcon(MynaTrash);
-export const IconShare = createH1TIcon(MynaShare);
+/** V3's share glyph (the iOS one: an arrow rising from an open box) in place of Myna's three joined dots. One share icon for the app. */
+export const SHARE_ICON_PATH = "M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7";
+function ShareGlyph({ size = 24, color = "currentColor", stroke = 1.8, ...rest }: MynaIconsProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" {...rest}>
+      <path d={SHARE_ICON_PATH} />
+    </svg>
+  );
+}
+export const IconShare = createH1TIcon(ShareGlyph);
 
 // Domain & Feature Icons
 export const IconTarget = createH1TIcon(MynaTarget);
