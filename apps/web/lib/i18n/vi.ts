@@ -24,6 +24,39 @@ export const vi = {
   "settings.danger": "Vùng nguy hiểm",
   "settings.delete": "Xóa tài khoản",
   "settings.delete.hint": "Có bước xác nhận trước khi xóa",
+
+  // Cài đặt › Ứng dụng (components/settings/profile-cards.tsx AppCard, components/pwa/install-row.tsx)
+  "settings.app": "Ứng dụng",
+  "settings.app.replay": "Xem lại hướng dẫn",
+  "settings.app.replay.hint": "Ghi bữa ăn đầu tiên · 1 phút",
+  "settings.app.new": "Mới",
+  "settings.app.whatsNew": "Có gì mới",
+  "settings.app.tips": "Mẹo trên từng màn hình",
+  "settings.app.tips.hint": "Bật lại để xem mẹo lần đầu",
+  "settings.app.haptics": "Rung khi chạm",
+  "settings.app.haptics.hint": "Rung nhẹ khi lưu, xóa hay hoàn tác",
+  "settings.app.language": "Ngôn ngữ",
+  "settings.app.language.vi": "Tiếng Việt",
+  "settings.app.language.en": "English",
+  "settings.app.appearance": "Giao diện",
+  "settings.app.reminders": "Nhắc nhở",
+  "settings.app.reminders.on": "Đã bật",
+  "settings.app.reminders.off": "Đã tắt",
+  "settings.app.dataSources": "Nguồn dữ liệu",
+  "settings.app.addToHome": "Thêm vào màn hình chính",
+  "settings.app.install": "Cài ứng dụng lên điện thoại",
+  "settings.app.terms": "Điều khoản dịch vụ",
+  "settings.app.privacy": "Chính sách bảo mật",
+
+  // Đăng xuất with writes still waiting (components/settings/sign-out-confirm.tsx)
+  "settings.signOut.title": "Đăng xuất?",
+  "settings.signOut.body": "Còn {count} món chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này.",
+  "settings.signOut.progress": "Đang đồng bộ… {done}/{total}",
+  "settings.signOut.syncing": "Đang đồng bộ…",
+  "settings.signOut.failure": "Còn {count} món chưa đồng bộ được: {reason}.",
+  "settings.signOut.syncThenLeave": "Đồng bộ rồi đăng xuất",
+  "settings.signOut.seeItems": "Xem các món",
+  "settings.signOut.leave": "Vẫn đăng xuất (mất {count} món)",
 } satisfies Record<string, Message>;
 
 export type MessageKey = keyof typeof vi;
