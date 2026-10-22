@@ -789,10 +789,6 @@ export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams:
 }
 
 /**
- * The portion a food starts at when nothing was logged for it before: its first portion for a unit food, one medium
- * egg (or the first size), else its first gram portion or 100 g, weighed in the food's own state.
- */
-/**
  * The serving a list shows a food by, and what its kcal there are for (Hao, overnight 22→23/10: grams everywhere). A food
  * weighed in grams shows its gram (or ml) serving, else 100 g, whatever unit its data lists first ("1 củ", "1 bìa", "1 nắm");
  * eggs, chanh and the foods logged by their unit (supplements, dishes, cans) show their first serving. A recent keeps the
@@ -804,6 +800,10 @@ export function defaultServing(food: Pick<FoodItem, "nameVi" | "category" | "sou
   return food.servings.find((s) => GRAM_OR_VOLUME_LABEL.test(s.label.trim()) && s.grams > 0) ?? { label: /\bml\b/i.test(first.label) ? "100 ml" : "100 g", grams: 100 };
 }
 
+/**
+ * The portion a food starts at when nothing was logged for it before: its first portion for a unit food, one medium
+ * egg (or the first size), else the grams of its default serving (defaultServing), weighed in the food's own state.
+ */
 export function defaultPortionOf(food: FoodItem): { label: string; grams: number } {
   const mode = portionModeOf(food);
   if (mode === "units") return food.servings[0] ?? { label: "100 g", grams: 100 };
