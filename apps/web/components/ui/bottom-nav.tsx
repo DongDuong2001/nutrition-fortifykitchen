@@ -48,7 +48,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
 
   return (
     <nav aria-label="Điều hướng chính" className={`m-vt-nav w-full select-none box-border ${className}`}>
-      <div className="glass mx-auto grid h-16 w-full max-w-[528px] grid-cols-5 items-center rounded-full px-1">
+      <div className="glass-tab mx-auto grid h-16 w-full max-w-[528px] grid-cols-5 items-center rounded-full px-1">
         {renderTab(first)}
         {renderTab(second)}
 

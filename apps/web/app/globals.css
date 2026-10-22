@@ -41,6 +41,25 @@
     box-shadow: 0 0 0 1px var(--color-card-border), 0 8px 24px rgb(0 0 0 / 0.12);
   }
 }
+/* The tab bar's glass (Hao 22/10): denser than the other glass so the content behind it does not show through the labels, and a
+   longer shadow. Same blur and the same fallbacks. */
+@utility glass-tab {
+  background-color: var(--color-glass-tab);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-glass-tab);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-contrast: more) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 0 0 1px var(--color-card-border), 0 10px 28px rgb(0 0 0 / 0.16);
+  }
+}
 /* A glass bar inside a surface (the sheet's header): the blur and the fill, no lift */
 @utility glass-bar {
   background-color: var(--color-glass-sheet);
@@ -248,6 +267,9 @@
   /* The sheet header's glass (V3 sheetGlass) */
   --color-glass-sheet: rgba(255, 255, 255, 0.8);
   --color-glass-tab-off: #3C3C43;
+  /* The tab bar's fill: 0.86 white in light, 0.82 of rgb(28 28 30) in dark (the dark column is not built yet, the value waits here) */
+  --color-glass-tab: rgba(255, 255, 255, 0.86);
+  --color-glass-tab-dark: rgba(28, 28, 30, 0.82);
   /* The + button's tinted glass and its glow */
   --color-glass-cobalt: rgba(36, 87, 245, 0.88);
 
@@ -270,6 +292,8 @@
   /* V3: a field or chip on the grey page is white with a 0.5 px ring */
   --shadow-field: inset 0 0 0 0.5px rgb(17 19 23 / 0.1);
   /* V3-SPEC §4 glass edge: a top highlight, a hairline and a soft lift */
+  --shadow-glass-tab: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 10px 28px rgb(0 0 0 / 0.16);
+  --shadow-glass-tab-dark: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 0.5px rgb(255 255 255 / 0.1), 0 10px 28px rgb(0 0 0 / 0.5);
   --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12);
   /* The food-group icon tile (IconTile.dc.html): a top highlight and a soft shadow; Tất cả (ink) adds a faint ring */
   --shadow-tile: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
