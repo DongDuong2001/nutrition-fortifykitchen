@@ -10,9 +10,12 @@ import {
   targetRangeText,
   targetsFor,
   type Profile,
-  LOCAL_ONLY_PROFILE_KEYS,
-  withLocalOnly,
+  TARGET_SETTING_KEYS,
+  mergeServerProfile,
+  targetSettingsOf,
+  touchesTargetSettings,
 } from "../profile";
+import { mapApiProfileToProfile } from "../api-client";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
 // Expected values come from the coach rules (energy: the upper end, 35 kcal/kg for Giữ cân) and from the US DRI (the micros), not from lib/targets.ts.
@@ -211,48 +214,112 @@ describe("applyProfileTargets", () => {
   });
 });
 
-// fix/macro-split-save: the macro split, the custom energy and the custom micro targets live on the device only (the API has
-// no columns for them yet). Adopting the server's profile keeps them from the local one; the server wins for every other key.
-describe("withLocalOnly", () => {
-  const local: Profile = {
-    ...SAMPLE_PROFILE,
-    weightKg: 70,
-    macroMode: "ratios",
+// backend-sync-1022: the macro split, the custom energy and the custom micro targets are stored on the server (migration 000015).
+// Adopting the server's profile (when no profile write is waiting) takes them from the server, except settings this device made
+// before they were stored there: those are uploaded once, unless the server's are newer.
+describe("mergeServerProfile", () => {
+  const split = {
+    macroMode: "ratios" as const,
     macroRatios: { proteinPct: 30, carbsPct: 40, fatPct: 30 },
     macroFixed: { proteinGrams: 150, carbsGrams: 200, fatGrams: 60 },
     customEnergyKcal: 2100,
     customTargets: { iron: 20 },
   };
+  const SERVER_AT = "2026-10-22T03:00:00.000Z";
+  const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68, goal: "cut", displayName: "Lan", updatedAt: SERVER_AT };
 
-  it("lists the five device-only keys", () => {
-    expect([...LOCAL_ONLY_PROFILE_KEYS].sort()).toEqual(
-      ["customEnergyKcal", "customTargets", "macroFixed", "macroMode", "macroRatios"].sort(),
-    );
+  it("names the five synced settings", () => {
+    expect([...TARGET_SETTING_KEYS].sort()).toEqual(["customEnergyKcal", "customTargets", "macroFixed", "macroMode", "macroRatios"]);
+    expect(Object.keys(targetSettingsOf(SAMPLE_PROFILE)).sort()).toEqual([...TARGET_SETTING_KEYS].sort());
+    expect(touchesTargetSettings({ macroMode: undefined })).toBe(true);
+    expect(touchesTargetSettings({ weightKg: 70, displayName: "A" })).toBe(false);
   });
 
-  it("keeps the local macro fields when the server profile has none", () => {
-    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68 };
-    const merged = withLocalOnly(server, local);
-    expect(merged.macroMode).toBe("ratios");
-    expect(merged.macroRatios).toEqual({ proteinPct: 30, carbsPct: 40, fatPct: 30 });
-    expect(merged.macroFixed).toEqual({ proteinGrams: 150, carbsGrams: 200, fatGrams: 60 });
-    expect(merged.customEnergyKcal).toBe(2100);
-    expect(merged.customTargets).toEqual({ iron: 20 });
+  it("takes every other key from the server, as before", () => {
+    const { profile } = mergeServerProfile(server, { ...SAMPLE_PROFILE, weightKg: 70, targetsSynced: true });
+    expect(profile).toMatchObject({ weightKg: 68, goal: "cut", displayName: "Lan", updatedAt: SERVER_AT, targetsSynced: true });
   });
 
-  it("takes every other key from the server", () => {
-    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68, goal: "cut", displayName: "Lan", trainingMinutesDefault: 90 };
-    const merged = withLocalOnly(server, local);
-    expect(merged).toMatchObject({ weightKg: 68, goal: "cut", displayName: "Lan", trainingMinutesDefault: 90 });
+  it("no local profile: the server's, marked synced", () => {
+    expect(mergeServerProfile({ ...server, ...split }, null)).toEqual({ profile: { ...server, ...split, targetsSynced: true, targetsChangedAt: undefined }, upload: false });
   });
 
-  it("keeps the server profile as it is when there is no local one", () => {
-    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68 };
-    expect(withLocalOnly(server, null)).toEqual(server);
+  it("a device that has synced: the server's settings win, a clear on another device included", () => {
+    const local: Profile = { ...SAMPLE_PROFILE, ...split, targetsSynced: true, targetsChangedAt: Date.parse("2026-10-22T05:00:00Z") };
+    const { profile, upload } = mergeServerProfile(server, local);
+    expect(upload).toBe(false);
+    for (const key of TARGET_SETTING_KEYS) expect(profile[key], key).toBeUndefined();
+    const other = mergeServerProfile({ ...server, macroMode: "keto" }, local).profile;
+    expect(other.macroMode).toBe("keto");
+    expect(other.targetsChangedAt).toBe(local.targetsChangedAt);
   });
 
-  it("does not add keys the local profile does not have", () => {
-    const merged = withLocalOnly({ ...SAMPLE_PROFILE }, { ...SAMPLE_PROFILE });
-    expect(Object.keys(merged).sort()).toEqual(Object.keys(SAMPLE_PROFILE).sort());
+  it("device-only settings from before, none on the server: kept and uploaded once", () => {
+    const local: Profile = { ...SAMPLE_PROFILE, ...split };
+    const { profile, upload } = mergeServerProfile(server, local);
+    expect(upload).toBe(true);
+    expect(profile).toMatchObject({ ...split, weightKg: 68, targetsSynced: true });
+    // The next load is a synced device: the server (which now has them) wins, nothing is uploaded again
+    expect(mergeServerProfile({ ...server, ...split }, profile).upload).toBe(false);
+  });
+
+  it("both have settings and the server's are newer (or the device's are undated): the server's win", () => {
+    const serverSplit: Profile = { ...server, macroMode: "fixed", macroFixed: { proteinGrams: 120, carbsGrams: 250, fatGrams: 70 } };
+    const older: Profile = { ...SAMPLE_PROFILE, ...split, targetsChangedAt: Date.parse("2026-10-22T02:59:59Z") };
+    const { profile, upload } = mergeServerProfile(serverSplit, older);
+    expect(upload).toBe(false);
+    expect(profile.macroMode).toBe("fixed");
+    expect(profile.macroRatios).toBeUndefined();
+    expect(profile.customTargets).toBeUndefined();
+    expect(mergeServerProfile(serverSplit, { ...SAMPLE_PROFILE, ...split }).upload).toBe(false);
+  });
+
+  it("both have settings and the device's were changed after the server's update: the device's are kept and uploaded", () => {
+    const serverSplit: Profile = { ...server, macroMode: "fixed", customEnergyKcal: 3000 };
+    const newer: Profile = { ...SAMPLE_PROFILE, macroMode: "ratios", macroRatios: split.macroRatios, targetsChangedAt: Date.parse("2026-10-22T03:00:01Z") };
+    const { profile, upload } = mergeServerProfile(serverSplit, newer);
+    expect(upload).toBe(true);
+    // All five come from the device, so the server's custom kcal is not mixed in
+    expect(profile).toMatchObject({ macroMode: "ratios", macroRatios: split.macroRatios, targetsSynced: true });
+    expect(profile.customEnergyKcal).toBeUndefined();
+  });
+
+  it("a device with no settings has nothing to upload", () => {
+    expect(mergeServerProfile(server, { ...SAMPLE_PROFILE }).upload).toBe(false);
+  });
+
+  it("the stored profile keeps the sync fields", () => {
+    const stored = { ...SAMPLE_PROFILE, ...split, updatedAt: SERVER_AT, targetsChangedAt: 123, targetsSynced: true };
+    expect(parseStoredProfile(JSON.stringify(stored), YEAR)).toMatchObject({ updatedAt: SERVER_AT, targetsChangedAt: 123, targetsSynced: true, ...split });
+  });
+});
+
+describe("mapApiProfileToProfile: the target settings of GET /me", () => {
+  const base = { sex: "male", birth_year: 2000, weight_kg: 70, goal: "maintain", updatedAt: "2026-10-22T03:00:00Z" };
+
+  it("reads them, and updatedAt", () => {
+    expect(
+      mapApiProfileToProfile({
+        ...base,
+        macroMode: "fixed",
+        macroRatios: { proteinPct: 25, carbsPct: 55, fatPct: 20 },
+        macroFixed: { proteinGrams: 150, carbsGrams: 200, fatGrams: 60 },
+        customEnergyKcal: 2400,
+        customTargets: { calcium: 1200 },
+      })
+    ).toMatchObject({
+      macroMode: "fixed",
+      macroRatios: { proteinPct: 25, carbsPct: 55, fatPct: 20 },
+      macroFixed: { proteinGrams: 150, carbsGrams: 200, fatGrams: 60 },
+      customEnergyKcal: 2400,
+      customTargets: { calcium: 1200 },
+      updatedAt: "2026-10-22T03:00:00Z",
+    });
+  });
+
+  it("null, missing or malformed is not set", () => {
+    const p = mapApiProfileToProfile({ ...base, macroMode: null, macroRatios: { proteinPct: 25 }, macroFixed: null, customEnergyKcal: "2400", customTargets: {} });
+    for (const key of TARGET_SETTING_KEYS) expect(p[key], key).toBeUndefined();
+    expect(mapApiProfileToProfile({ ...base, macroMode: "high" }).macroMode).toBeUndefined();
   });
 });

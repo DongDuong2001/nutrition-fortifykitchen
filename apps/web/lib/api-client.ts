@@ -12,14 +12,16 @@ import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
 import type { OutboxItem } from "./outbox";
-import { readStoredProfile, type Profile } from "./profile";
+import { readStoredProfile, TARGET_SETTING_KEYS, type Profile, type TargetSettings } from "./profile";
+import { parseCustomTargets } from "./custom-targets";
+import type { DayTemplate } from "./day-templates";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
 // The device's copy of the catalogue (and IndexedDB behind it) is loaded when the catalogue is read or written, not with the page
 const catalogCache = () => import("./catalog-cache");
 import { normaliseCoaching } from "./coaching-link";
-import type { GoalType, SexType } from "./targets";
+import type { GoalType, MacroFixedGrams, MacroRatios, MacroTargetMode, SexType } from "./targets";
 
 // perf/live-bundle: no `export *` of the nutrients, the catalogue, the coaches or the ranking any more: every screen
 // imports those from their own module, and re-exporting them here pulled the sample data into every page that talks
@@ -86,8 +88,24 @@ export function mapApiProfileToProfile(raw: any): Profile {
     trainingMinutesDefault: Number(data.training_minutes_default ?? data.trainingMinutesDefault) || 60,
     displayName: data.display_name ?? data.displayName ?? "",
     trainingPrefs: data.training_prefs ?? data.trainingPrefs ?? undefined,
+    // Target settings (migration 000015): null on the server = not set
+    macroMode: MACRO_MODES.includes(data.macroMode) ? data.macroMode : undefined,
+    macroRatios: numbersOf<MacroRatios>(data.macroRatios, ["proteinPct", "carbsPct", "fatPct"]),
+    macroFixed: numbersOf<MacroFixedGrams>(data.macroFixed, ["proteinGrams", "carbsGrams", "fatGrams"]),
+    customEnergyKcal: typeof data.customEnergyKcal === "number" ? data.customEnergyKcal : undefined,
+    customTargets: parseCustomTargets(data.customTargets),
+    updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : undefined,
     ...normaliseCoaching(data),
   };
+}
+
+const MACRO_MODES: readonly MacroTargetMode[] = ["default", "ratios", "fixed", "keto"];
+
+/** An object with these number keys, else undefined. */
+function numbersOf<T>(value: unknown, keys: readonly (keyof T & string)[]): T | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const v = value as Record<string, unknown>;
+  return keys.every((k) => typeof v[k] === "number" && Number.isFinite(v[k])) ? (Object.fromEntries(keys.map((k) => [k, v[k]])) as T) : undefined;
 }
 
 export interface NutrientValues {
@@ -490,6 +508,9 @@ export const pendingWriteIds = (): Set<string> => engine?.pendingWriteIds() ?? n
 export const writesInFlight = (): number => engine?.writesInFlight() ?? 0;
 /** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
 export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWrite(entity) ?? false;
+/** The Ngày ăn mẫu writes waiting to be sent: template id to "put" or "delete" (the newest). Kept over a list read from the server. */
+export const pendingTemplateOps = (): Map<string, "put" | "delete"> =>
+  new Map(outboxItems().flatMap((item): Array<[string, "put" | "delete"]> => (item.kind === "template" && item.entity ? [[item.entity.slice("template:".length), item.method === "DELETE" ? "delete" : "put"]] : [])));
 /** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
 export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
 
@@ -553,8 +574,15 @@ export function resetWriteMemory(): void {
 }
 
 /** The body of PUT /me/profile. */
-function profileBody(profile: SetupProfile): Record<string, unknown> {
+/** The target settings for PUT /me/profile: all five keys, null for one that is not set (the server clears it). */
+function targetSettingsBody(targets: TargetSettings): Record<string, unknown> {
+  return Object.fromEntries(TARGET_SETTING_KEYS.map((key) => [key, targets[key] ?? null]));
+}
+
+function profileBody(profile: SetupProfile, targets?: TargetSettings): Record<string, unknown> {
   return {
+    // Only when they changed: a save from another screen leaves the server's as they are
+    ...(targets ? targetSettingsBody(targets) : {}),
     sex: profile.sex,
     birth_year: profile.birthYear,
     weight_kg: profile.weightKg,
@@ -895,10 +923,47 @@ export const apiClient = {
     return readStoredProfile(new Date().getFullYear());
   },
 
-  /** A profile change from Hồ sơ or a name edit: through the outbox (S6), the newest one wins. Setup uses saveSetup. */
-  async queueProfile(profile: SetupProfile): Promise<WriteResult> {
+  /**
+   * A profile change from Hồ sơ, a name edit or the target settings (`targets`, when they changed): through the outbox (S6), the
+   * newest one wins. The target settings of a write still waiting are carried into the new one, so a later name change does not
+   * drop a split that has not been sent yet. Setup uses saveSetup.
+   */
+  async queueProfile(profile: SetupProfile, targets?: TargetSettings): Promise<WriteResult> {
     if (!isLiveMode()) return { state: "saved" };
-    return withEngine((e) => e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: profileBody(profile) }));
+    return withEngine((e) => {
+      const waiting = e.outboxItems().find((item) => item.entity === "profile");
+      const carried = waiting ? Object.fromEntries(TARGET_SETTING_KEYS.filter((key) => key in waiting.payload).map((key) => [key, waiting.payload[key]])) : {};
+      return e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: { ...carried, ...profileBody(profile, targets) } });
+    });
+  },
+
+  /** Ngày ăn mẫu as the server has them (GET /day-templates, newest first). Null in live mode when they could not be read. */
+  async getDayTemplates(): Promise<unknown[] | null> {
+    if (!isLiveMode()) return null;
+    try {
+      const res = await apiFetch(`/day-templates`, { signal: diaryTimeout() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const items = (json.data ?? json)?.items;
+      return Array.isArray(items) ? items : null;
+    } catch {
+      return null;
+    }
+  },
+
+  /** A template saved or changed: through the outbox, PUT by its id (idempotent), the newest write of a template wins. */
+  async queueDayTemplate(template: DayTemplate): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(template.id)) return { state: "saved" };
+    const { name, tag, meals, createdAt } = template;
+    return withEngine((e) =>
+      e.sideWrite({ kind: "template", entity: `template:${template.id}`, method: "PUT", path: `/day-templates/${template.id}`, payload: { name, tag, meals, createdAt } })
+    );
+  },
+
+  /** A template deleted: through the outbox, after any save of it that still waits (it replaces it). */
+  async deleteDayTemplate(id: string): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({ kind: "template", entity: `template:${id}`, method: "DELETE", path: `/day-templates/${id}`, payload: {} }));
   },
 
   /** Saves the profile (setup). Live mode throws when the API cannot be reached or says no: the person sees it and tries again. */

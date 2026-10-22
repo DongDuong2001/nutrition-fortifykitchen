@@ -77,6 +77,7 @@ import {
 } from "./saved-meals";
 import { quickDetail, quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
+import { syncDayTemplates } from "./day-template-store";
 import {
   SAMPLE_PROFILE,
   applyProfileTargets,
@@ -84,7 +85,10 @@ import {
   normaliseProfile,
   readStoredProfile,
   targetsFor,
-  withLocalOnly,
+  mergeServerProfile,
+  setupFieldsOf,
+  targetSettingsOf,
+  touchesTargetSettings,
   writeStoredProfile,
   type Profile,
 } from "./profile";
@@ -778,6 +782,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         if (currentAccountId() === account && Object.keys(found).length > 0) setArchive((prev) => ({ ...prev, ...found }));
       })();
 
+      // Ngày ăn mẫu follow the account: the server's list merged in, and the device's first sync uploads what it made before
+      void syncDayTemplates().catch(() => {});
+
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
           // S6: a favourite changed here and not sent yet is applied on top of the server's list
@@ -810,10 +817,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       .getProfile()
       .then((serverProfile) => {
         if (!serverProfile || hasPendingWrite("profile")) return;
-        // The macro split and the custom targets are kept on the device only; the server's profile has none of them
-        const adopted = withLocalOnly(serverProfile, readStoredProfile(new Date().getFullYear()));
+        // The target settings follow the server, except settings this device made before they were stored there: sent once
+        const { profile: adopted, upload } = mergeServerProfile(serverProfile, readStoredProfile(new Date().getFullYear()));
         writeStoredProfile(adopted);
         setProfile(adopted);
+        if (upload) void apiClient.queueProfile(setupFieldsOf(adopted), targetSettingsOf(adopted));
       })
       .catch(() => {});
   }, []);
@@ -1653,23 +1661,19 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = useCallback(
     (patch: Partial<Profile>) => {
-      const next = normaliseProfile({ ...profile, ...patch });
+      // A change of the target settings is dated (lib/profile mergeServerProfile) and sent with them; other changes leave them out
+      const targetsChanged = touchesTargetSettings(patch);
+      const live = isLiveMode();
+      const next = normaliseProfile({
+        ...profile,
+        ...patch,
+        ...(targetsChanged ? { targetsChangedAt: Date.now(), ...(live ? { targetsSynced: true } : {}) } : {}),
+      });
       setProfile(next);
       writeStoredProfile(next);
-      if (isLiveMode()) {
+      if (live) {
         // S6: through the outbox (an offline change is sent later, the newest wins), not fire-and-forget
-        track(
-          "side",
-          apiClient.queueProfile({
-            sex: next.sex,
-            birthYear: next.birthYear,
-            weightKg: next.weightKg,
-            goal: next.goal,
-            periodMode: next.periodMode,
-            trainingMinutesDefault: next.trainingMinutesDefault,
-            displayName: next.displayName,
-          })
-        );
+        track("side", apiClient.queueProfile(setupFieldsOf(next), targetsChanged ? targetSettingsOf(next) : undefined));
         // S14: the day of the weight is worked out now, not the date the screen last showed
         if (patch.weightKg !== undefined) track("side", apiClient.queueWeight(getTodayIsoVN(), patch.weightKg));
       }

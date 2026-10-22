@@ -8,7 +8,7 @@ import {
   type SexType,
   type TargetRange,
 } from "./targets";
-import { DRAFT_KEY, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
+import { DRAFT_KEY, readDraft, validateSetupDraft, type SetupDraft, type SetupProfile } from "./onboarding";
 import { applyProfileTargets } from "./day-targets";
 
 export { applyProfileTargets };
@@ -38,22 +38,59 @@ export interface Profile extends CoachingState {
   customEnergyKcal?: number;
   /** cc-73b: a custom daily target per vitamin or mineral (lib/custom-targets). Read only while the flag is on. */
   customTargets?: CustomTargets;
+  /** The server's updatedAt of the profile this device last adopted (GET /me). */
+  updatedAt?: string;
+  /** When the target settings were last changed on this device (ms). */
+  targetsChangedAt?: number;
+  /** This device's target settings have been sent to or taken from the server once: from then on the server's are the truth. */
+  targetsSynced?: boolean;
 }
 
-/**
- * fix/macro-split-save: the profile keys that live on this device only. The API has no columns for them yet (OPEN_QUESTIONS,
- * Dong), so the server's profile never carries them and adopting it must not wipe them.
- */
-export const LOCAL_ONLY_PROFILE_KEYS = ["macroMode", "macroRatios", "macroFixed", "customEnergyKcal", "customTargets"] as const;
+/** The target settings: the macro split, the custom kcal and the custom micro targets. Stored on the server since migration 000015. */
+export const TARGET_SETTING_KEYS = ["macroMode", "macroRatios", "macroFixed", "customEnergyKcal", "customTargets"] as const;
+export type TargetSettings = Pick<Profile, (typeof TARGET_SETTING_KEYS)[number]>;
 
-/** The server's profile with the device-only keys taken from the local one. The server wins for every other key. */
-export function withLocalOnly(server: Profile, local: Profile | null): Profile {
-  if (!local) return server;
-  const merged: Profile = { ...server };
-  for (const key of LOCAL_ONLY_PROFILE_KEYS) {
-    if (local[key] !== undefined) (merged as unknown as Record<string, unknown>)[key] = local[key];
-  }
-  return merged;
+/** The five settings of a profile, every key present (undefined = not set), so a spread of them also clears. */
+export function targetSettingsOf(profile: Profile): TargetSettings {
+  return {
+    macroMode: profile.macroMode,
+    macroRatios: profile.macroRatios,
+    macroFixed: profile.macroFixed,
+    customEnergyKcal: profile.customEnergyKcal,
+    customTargets: profile.customTargets,
+  };
+}
+
+/** The fields every PUT /me/profile carries (the target settings travel only when they changed). */
+export function setupFieldsOf(profile: Profile): SetupProfile {
+  return {
+    sex: profile.sex,
+    birthYear: profile.birthYear,
+    weightKg: profile.weightKg,
+    goal: profile.goal,
+    periodMode: profile.periodMode,
+    trainingMinutesDefault: profile.trainingMinutesDefault,
+    displayName: profile.displayName,
+  };
+}
+
+export const touchesTargetSettings = (patch: Partial<Profile>): boolean => TARGET_SETTING_KEYS.some((key) => key in patch);
+
+const hasTargetSettings = (profile: Profile): boolean => TARGET_SETTING_KEYS.some((key) => profile[key] !== undefined);
+
+/**
+ * The server's profile (GET /me) against the one on this device, when no profile write is waiting to be sent. The server wins
+ * for every key, the target settings too, once this device has synced them. Before that (they were device-only until the API
+ * stored them), the device's settings are kept and uploaded once (`upload`) when the server has none, or when they were changed
+ * here after the server's profile was last updated; otherwise the server's are taken.
+ */
+export function mergeServerProfile(server: Profile, local: Profile | null): { profile: Profile; upload: boolean } {
+  const fromServer: Profile = { ...server, targetsSynced: true, targetsChangedAt: local?.targetsChangedAt };
+  if (!local || local.targetsSynced || !hasTargetSettings(local)) return { profile: fromServer, upload: false };
+  const serverAt = server.updatedAt ? Date.parse(server.updatedAt) : Number.NaN;
+  const changedHereLater = local.targetsChangedAt !== undefined && !(serverAt >= local.targetsChangedAt);
+  if (hasTargetSettings(server) && !changedHereLater) return { profile: fromServer, upload: false };
+  return { profile: { ...fromServer, ...targetSettingsOf(local) }, upload: true };
 }
 
 // The sample-day user. Used when nothing is saved and no setup has started.
@@ -134,6 +171,9 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
         : undefined,
     customEnergyKcal: typeof stored.customEnergyKcal === "number" ? stored.customEnergyKcal : undefined,
     customTargets: parseCustomTargets(stored.customTargets),
+    updatedAt: typeof stored.updatedAt === "string" ? stored.updatedAt : undefined,
+    targetsChangedAt: typeof stored.targetsChangedAt === "number" ? stored.targetsChangedAt : undefined,
+    targetsSynced: stored.targetsSynced === true ? true : undefined,
     // Role, Level, coach: a profile saved before they existed loads as user, Level 0, no coach
     ...normaliseCoaching(stored),
   };
