@@ -31,6 +31,7 @@ Before the fix, C failed: "0 món · 0 kcal", PUT /day-templates with no items, 
 **Tests**
 - Unit (lib/__tests__/day-templates.test.ts): savableFood (a uuid without the catalogue, a one-off id with and without it, an empty id), templateSaveSummary (null kcal until every food is known, the same kcal as templateTotals once it is), the toast without kcal.
 - Probe: template_foods.py A, B, C green on a live build; backend_sync.py still green on the same build.
-- gate:full: see the PR.
+- gate:full: all green (795 s, 145 probes; design-floor-landing quarantined as on main).
+- Screenshots of the save sheet at 390, 360 and 360 at 150 % text: `apps/web/.screenshots/audit-1023/saveday-*.png` (`_audit_shots.py saveday`).
 
 No release item: it is a fix of 22b's saves, with no new control. Nothing changes on the demo build (its catalogue is always there).
