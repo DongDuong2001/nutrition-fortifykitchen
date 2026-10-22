@@ -18,3 +18,12 @@ export function clampTrainingMinutes(minutes: number): number {
  */
 const SERVER_TRAINING_MINUTES = [0, 45, 60, 90, 120, 240];
 export const serverAcceptsTrainingMinutes = (minutes: number): boolean => SERVER_TRAINING_MINUTES.includes(minutes);
+
+/**
+ * The value the API takes that is nearest to `minutes` (the lower one on a tie): what PUT /me/profile carries for a Tùy chỉnh default.
+ * Leaving the field out does not keep the server's value (profile/service.go defaults it to 60), so a custom 150 sends 120, and the
+ * device keeps its 150 (mergeServerProfile).
+ */
+export function nearestServerTrainingMinutes(minutes: number): number {
+  return SERVER_TRAINING_MINUTES.reduce((best, m) => (Math.abs(m - minutes) < Math.abs(best - minutes) ? m : best));
+}

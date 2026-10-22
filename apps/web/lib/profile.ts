@@ -18,7 +18,7 @@ import { ageOf } from "./rda";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
 import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
 import { cleanDisplayName, validateDisplayName } from "./display-name";
-import { serverAcceptsTrainingMinutes } from "./training-limits";
+import { nearestServerTrainingMinutes, serverAcceptsTrainingMinutes } from "./training-limits";
 
 export { PROFILE_KEY, cleanDisplayName };
 
@@ -70,8 +70,8 @@ export function setupFieldsOf(profile: Profile): SetupProfile {
     weightKg: profile.weightKg,
     goal: profile.goal,
     periodMode: profile.periodMode,
-    // A Tùy chỉnh default the API does not take yet stays on this device (left out of PUT /me/profile, the server keeps its own)
-    trainingMinutesDefault: serverAcceptsTrainingMinutes(profile.trainingMinutesDefault) ? profile.trainingMinutesDefault : undefined,
+    // A Tùy chỉnh default the API does not take yet: the server gets the nearest value it takes, the device keeps its own
+    trainingMinutesDefault: nearestServerTrainingMinutes(profile.trainingMinutesDefault),
     displayName: profile.displayName,
   };
 }
@@ -87,7 +87,15 @@ const hasTargetSettings = (profile: Profile): boolean => TARGET_SETTING_KEYS.som
  * here after the server's profile was last updated; otherwise the server's are taken.
  */
 export function mergeServerProfile(server: Profile, local: Profile | null): { profile: Profile; upload: boolean } {
-  const fromServer: Profile = { ...server, targetsSynced: true, targetsChangedAt: local?.targetsChangedAt };
+  // A Tùy chỉnh default (150) is stored on the server as its nearest value (120): while the server still holds that, the device's own stays
+  const customDefault =
+    local && !serverAcceptsTrainingMinutes(local.trainingMinutesDefault) && server.trainingMinutesDefault === nearestServerTrainingMinutes(local.trainingMinutesDefault);
+  const fromServer: Profile = {
+    ...server,
+    ...(customDefault ? { trainingMinutesDefault: local.trainingMinutesDefault } : {}),
+    targetsSynced: true,
+    targetsChangedAt: local?.targetsChangedAt,
+  };
   if (!local || local.targetsSynced || !hasTargetSettings(local)) return { profile: fromServer, upload: false };
   const serverAt = server.updatedAt ? Date.parse(server.updatedAt) : Number.NaN;
   const changedHereLater = local.targetsChangedAt !== undefined && !(serverAt >= local.targetsChangedAt);

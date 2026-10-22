@@ -287,8 +287,9 @@ export function GoalCard() {
         />
       </ChoiceGroup>
       <ChoiceGroup labelId="profile-training-label" label="Ngày tập mặc định" unit="phút" reason="Dùng để tính lượng muối khi tập.">
+        {/* Three columns (two rows): six 48 px pills in one row left "Tùy chỉnh" no room at 150 % text */}
         <ChoiceGrid
-          columns={6}
+          columns={3}
           items={[
             ...TRAINING_OPTIONS.map((option) => ({
               id: option.id,

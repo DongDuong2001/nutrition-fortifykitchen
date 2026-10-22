@@ -10,7 +10,8 @@ import {
   serverAcceptsTrainingMinutes,
 } from "../training";
 import { calculateFastCarbsTarget, calculateSodiumTarget } from "../targets";
-import { setupFieldsOf, SAMPLE_PROFILE } from "../profile";
+import { mergeServerProfile, setupFieldsOf, SAMPLE_PROFILE } from "../profile";
+import { nearestServerTrainingMinutes } from "../training-limits";
 
 // The coach's rules (HANDOFF.md, lib/targets): salt 4–6 g + 1–1,5 g per 20 min, a salt dose every 20 min, fast carbs 30–45 g per hour
 const saltDoses = (minutes: number) =>
@@ -75,8 +76,19 @@ describe("a value the API does not take yet (needs Dong: 0 or 30–480 in 30-min
     expect([30, 150, 210, 480].some(serverAcceptsTrainingMinutes)).toBe(false);
   });
 
-  it("the profile save leaves out a default the API would refuse, so the server keeps its own and nothing is held", () => {
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }).trainingMinutesDefault).toBeUndefined();
+  it("the profile save sends the nearest value the API takes (leaving it out would reset the server to 60)", () => {
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }).trainingMinutesDefault).toBe(120);
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 30 }).trainingMinutesDefault).toBe(45);
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 210 }).trainingMinutesDefault).toBe(240);
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 480 }).trainingMinutesDefault).toBe(240);
     expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 90 }).trainingMinutesDefault).toBe(90);
+    expect(nearestServerTrainingMinutes(180)).toBe(120);
+  });
+
+  it("a reload keeps the device's custom default while the server holds its nearest value, and takes a real change from another device", () => {
+    const local = { ...SAMPLE_PROFILE, trainingMinutesDefault: 150 };
+    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 120 }, local).profile.trainingMinutesDefault).toBe(150);
+    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 60 }, local).profile.trainingMinutesDefault).toBe(60);
+    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 90 }, { ...SAMPLE_PROFILE, trainingMinutesDefault: 45 }).profile.trainingMinutesDefault).toBe(90);
   });
 });
