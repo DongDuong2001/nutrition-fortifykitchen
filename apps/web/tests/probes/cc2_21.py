@@ -2,8 +2,8 @@
 
 - Năng lượng: dark hero with the average kcal, five scoreboard rows (one open at a time, a bar updates the day line),
   the kcal split, training vs rest days, best and worst day, Cần chú ý
-- Vi chất: x/22 hero with 22 squares (a square names the nutrient and links to its detail), four collapsible
-  sections, Cần chú ý with the lowest three and the foods that gave the most
+- Vi chất: x/N hero over the Level's list (8 for the demo account, overnight 22→23/10) with its bars, four collapsible
+  sections of all 22 under "Đủ 22 vi chất", Cần chú ý with the lowest three and the foods that gave the most
 - Cơ thể: latest weight hero, the weight line (a point and the stepper update the line), weigh-ins n/6, targets
   before -> now
 Screenshots: .screenshots/cc2-21-*.png
@@ -103,10 +103,11 @@ def micros(browser, size_name, size):
     ctx, pg = new_page(browser, size, "/trends/micros")
     w = f"{size_name} Vi chất"
     hero = squash(pg.locator("#mi-hero").inner_text())
-    check(re.search(r"\d+\s*/22", hero) is not None, f"{w}: hero reads n/22 ({hero[:60]!r})")
+    check(re.search(r"\d+\s*/8(?!\d)", hero) is not None, f"{w}: hero reads n/8, the Level's list ({hero[:60]!r})")
     # V3: every nutrient is a bar on the hero (lowest first), named and with its share; no tap needed
     bars = pg.locator("#mi-grid > li")
-    check(bars.count() == 22, f"{w}: 22 nutrient bars ({bars.count()})")
+    check(bars.count() == 8, f"{w}: the Level's 8 nutrient bars ({bars.count()})")
+    check(pg.get_by_role("heading", name="Đủ 22 vi chất").count() == 1, f"{w}: the sections of all 22 sit under Đủ 22 vi chất")
     name = (bars.nth(2).get_attribute("aria-label") or "")
     check(re.search(r"%, (Thiếu|Trung bình|Gần đủ|Đạt)$", name) is not None or name.endswith("chưa có dữ liệu"), f"{w}: a bar names the nutrient, share and level ({name!r})")
     legend = squash(pg.locator("#mi-hero").inner_text())

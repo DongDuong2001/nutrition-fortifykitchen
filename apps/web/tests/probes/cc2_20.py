@@ -90,12 +90,14 @@ def run(browser, size_name, size):
     # Vi chất card
     micro = pg.locator("#ov-micro")
     mt = re.sub(r"\s+", " ", micro.inner_text())
-    check(re.search(r"Vi chất đạt \d+/22", mt) is not None, f"{size_name} Vi chất: 'Vi chất đạt n/22' ({mt[:70]!r})")
+    # Overnight 22→23/10: the count is over the Level's list, as Hôm nay (the demo account is Level 1: 8 micros)
+    check(re.search(r"Vi chất đạt \d+/8(?!\d)", mt) is not None, f"{size_name} Vi chất: 'Vi chất đạt n/8' ({mt[:70]!r})")
     check("Thiếu nhiều nhất:" in mt, f"{size_name} Vi chất: hint names the lowest")
     micro.locator("button[aria-expanded]").click()
     pg.wait_for_timeout(500)
     squares = pg.locator("#ov-micro-grid ul button")
-    check(squares.count() == 22, f"{size_name} Vi chất: 22 squares ({squares.count()})")
+    check(squares.count() == 8, f"{size_name} Vi chất: the Level's 8 squares ({squares.count()})")
+    check(micro.get_by_role("link", name=re.compile("Đủ 22 vi chất")).count() == 1, f"{size_name} Vi chất: Đủ 22 vi chất ›")
     sizes = [squares.nth(i).bounding_box() for i in range(squares.count())]
     check(all(b and b["height"] >= 44 and b["width"] >= 40 for b in sizes), f"{size_name} Vi chất: squares are tap-sized")
     squares.nth(5).click()
