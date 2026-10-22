@@ -6,7 +6,7 @@
 import type { MealSlot } from "@/lib/meal-slot";
 import type { ToastInfo } from "@/lib/diary-store";
 
-/** How long the toast, and with it the chance to undo, stays (4 s; a delete's Hoàn tác, UNDO_TOAST_MS in lib/diary-store, keeps 8 s). */
+/** How long an add toast, and with it the chance to undo, stays: every toast that adds food (one add, a tray, a copy, a saved meal, a Ngày ăn mẫu, Chỉ ghi kcal). A delete's Hoàn tác, UNDO_TOAST_MS in lib/diary-store, keeps 8 s. */
 export const ADD_TOAST_MS = 4000;
 
 export interface AddedFact {

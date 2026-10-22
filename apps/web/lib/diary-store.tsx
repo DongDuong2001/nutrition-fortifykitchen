@@ -88,7 +88,7 @@ import {
   writeStoredProfile,
   type Profile,
 } from "./profile";
-import { addedToast, toastAfterAction, undoIdsOf } from "./add-toast";
+import { ADD_TOAST_MS, addedToast, toastAfterAction, undoIdsOf } from "./add-toast";
 import type { CompleteTargets } from "./targets";
 import { subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
 import {
@@ -158,6 +158,7 @@ export interface ParkedToast {
 const ADDED_TOAST_MS = 4000;
 /** Ids for the in-place "added" toast (ToastInfo.groupId). */
 let toastGroupSeq = 0;
+// A delete's Hoàn tác (and a move's) keeps 8 s; every toast that adds food (a portion, a tray, a copy, a saved meal, a Ngày ăn mẫu, Chỉ ghi kcal) is ADD_TOAST_MS
 const UNDO_TOAST_MS = 8000;
 const NOTICE_TOAST_MS = 6000;
 
@@ -1243,7 +1244,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}${onDayText(day, getTodayIsoVN())}`,
         kind: "undoable",
         mealSlot,
-        durationMs: UNDO_TOAST_MS,
+        durationMs: ADD_TOAST_MS,
         undoIds: entries.map((e) => e.id),
       });
       items.forEach(({ food, label }) => addRecentFood(food, label));
@@ -1426,7 +1427,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       message,
       kind: "undoable",
       mealSlot: null,
-      durationMs: UNDO_TOAST_MS,
+      durationMs: ADD_TOAST_MS,
       undoIds: entries.map((e) => e.id),
     });
     if (isLiveMode()) entries.forEach((e) => sendAdd(e));
@@ -1512,7 +1513,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         }`,
         kind: "undoable",
         mealSlot: slot,
-        durationMs: UNDO_TOAST_MS,
+        durationMs: ADD_TOAST_MS,
         undoIds: entries.map((e) => e.id),
       });
       if (isLiveMode()) entries.forEach((e) => sendAdd(e));
@@ -1536,7 +1537,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}${onDayText(day, getTodayIsoVN())}`,
         kind: "undoable",
         mealSlot: slot,
-        durationMs: UNDO_TOAST_MS,
+        durationMs: ADD_TOAST_MS,
         undoIds: [entry.id],
       });
       if (isLiveMode()) sendAdd(entry);

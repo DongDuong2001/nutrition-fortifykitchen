@@ -1,5 +1,6 @@
 """The add toast (390 x 844 phone, demo build).
 
+0  Every add toast lasts 4 s (a portion, a tray, a copy, a saved meal, a Ngày ăn mẫu, Chỉ ghi kcal); a delete's Hoàn tác keeps 8 s.
 1  Every add shows "Đã thêm … · Hoàn tác": a tray of 2, a portion sheet, a second portion add into the same meal (one grouped toast,
    "Đã thêm 2 món"). Hoàn tác removes exactly the entries that add made: both rows of the tray add are gone from Hôm nay and the kcal is back; the
    grouped toast undoes both, and a row that was there before stays.
@@ -91,6 +92,11 @@ def bar_scale(pg):
     return pg.evaluate("(() => { const b = document.querySelector('.m-toast:not([data-state=closed]) .m-countdown'); return b ? new DOMMatrix(getComputedStyle(b).transform).a : null })()")
 
 
+def bar_seconds(pg):
+    """How long the toast on screen lasts: its countdown bar's animation duration, in seconds."""
+    return pg.evaluate("(() => { const b = document.querySelector('.m-toast:not([data-state=closed]) .m-countdown'); return b ? parseFloat(getComputedStyle(b).animationDuration) : null })()")
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -108,6 +114,7 @@ def main():
         t = toast(pg)
         text = t.inner_text()
         check("Đã thêm 2 món" in text and "Hoàn tác" in text and "Xem" not in text.replace("Xem lý do", ""), f"tray add of 2: 'Đã thêm 2 món … Hoàn tác' (not Xem) ({text!r})")
+        check(bar_seconds(pg) == 4, f"a tray add lasts 4 s ({bar_seconds(pg)})")
         added = [r for r in rows(pg) if r not in before_rows]
         check(len(added) == 2, f"…and two rows rose on Hôm nay ({len(added)})")
         t.get_by_role("button", name="Hoàn tác").tap()
@@ -124,6 +131,7 @@ def main():
         t = toast(pg)
         text = t.inner_text()
         check("Đã thêm" in text and "Hoàn tác" in text, f"portion sheet add: Đã thêm … Hoàn tác ({text!r})")
+        check(bar_seconds(pg) == 4, f"a portion add lasts 4 s ({bar_seconds(pg)})")
         portion_add(pg, "cơm")
         t = toast(pg)
         text = t.inner_text()
@@ -133,6 +141,15 @@ def main():
         t.get_by_role("button", name="Hoàn tác").tap()
         pg.wait_for_timeout(1200)
         check(rows(pg) == before_rows and kcal(pg) == before_kcal, "Hoàn tác on the grouped toast: both are gone, the rows that were there stay")
+        ctx.close()
+
+        # ---- 2b: a delete's Hoàn tác keeps 8 s
+        ctx, pg = new_page(browser)
+        pg.goto(BASE + "/entry/item-2", wait_until="networkidle")
+        pg.get_by_role("button", name="Xóa món này").first.click()
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=7000)
+        pg.wait_for_timeout(600)
+        check(bar_seconds(pg) == 8, f"a delete's Hoàn tác lasts 8 s ({bar_seconds(pg)})")
         ctx.close()
 
         # ---- 3: a tap on the toast does not freeze the clock; the keyboard pauses it
