@@ -97,10 +97,10 @@ const YESTERDAY_OPTION = "yesterday";
 
 /** share-spotlight (Hao 22/10): the share button says Chia sẻ (people missed the bare icon). C3: the visible pill is 34 px (light glass,
  *  14 px semibold, a 17 px glyph, 10 px before it and 12 px after the word) inside a transparent 44 px tap area, so it sits lighter
- *  next to the wordmark; the button (and its spotlight target) is the 44 px area */
+ *  next to the wordmark; the button (and its spotlight target) is the 44 px area. The pill is in rem (2.125) so it grows with the text */
 const SHARE_BUTTON =
   "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-0 bg-transparent p-0 text-cobalt cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
-const SHARE_PILL = "inline-flex h-[34px] items-center gap-1.5 rounded-full pl-2.5 pr-3 text-sm font-semibold glass-light lg:bg-card lg:shadow-ring";
+const SHARE_PILL = "inline-flex h-[2.125rem] items-center gap-1.5 rounded-full pl-2.5 pr-3 text-sm font-semibold glass-light lg:bg-card lg:shadow-ring";
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component

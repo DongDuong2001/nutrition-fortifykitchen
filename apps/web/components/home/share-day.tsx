@@ -75,8 +75,9 @@ function ShareMicros({ model, largeText }: { model: ShareModel; largeText: boole
       data-share-keep-lines
       className="flex w-[180px] flex-none flex-col overflow-hidden rounded-card bg-card"
     >
-      {/* C3, as the page: the count 40 px cobalt, the lacking names in full ink; Chất xơ in its own row above the groups (not counted) */}
-      <p data-level-summary className="m-0 flex flex-col gap-1 px-3 pb-2 pt-3 text-text">
+      {/* C3, as the page (nutrient-column: why 8 px under the count, why the space is outside the label): the count 40 px cobalt,
+          the lacking names in full ink; Chất xơ in its own row above the groups (not counted) */}
+      <p data-level-summary className="m-0 flex flex-col gap-2 px-3 pb-2 pt-3 text-text">
         <span className="block whitespace-nowrap text-body-lg font-bold leading-none">
           <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
             {summary.reached}/{summary.total}
@@ -85,7 +86,7 @@ function ShareMicros({ model, largeText }: { model: ShareModel; largeText: boole
         </span>
         {summary.lacking.length > 0 && (
           <span data-share-wrap className="text-sm leading-5">
-            <span className="text-text/75">Thiếu nhiều nhất: </span>
+            <span className="text-text/75">Thiếu nhiều nhất:</span>{" "}
             <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
           </span>
         )}

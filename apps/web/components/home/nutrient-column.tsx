@@ -54,7 +54,9 @@ export const NutrientColumn = memo(function NutrientColumn({
       {summary && (
         // C3: the count is the column's biggest number (40 px, cobalt), "đạt" 17 px; the lacking names in full ink and bolder than
         // their label (Hao's canvas comment). Only the label is at 75 %: an opacity on the parent would fade the names too.
-        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 pb-2 pt-3 text-text">
+        // 8 px under the count: the 40 px Saira glyph box reaches about 11 px below its 40 px line. The space after the label is
+        // outside it, so the names can go to the next line where the share image keeps the label on one line (share-sheet markLines).
+        <p data-level-summary className="m-0 flex flex-none flex-col gap-2 px-3 pb-2 pt-3 text-text">
           <span className="block text-body-lg font-bold leading-none">
             <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
               {summary.reached}/{summary.total}
@@ -63,7 +65,7 @@ export const NutrientColumn = memo(function NutrientColumn({
           </span>
           {summary.lacking.length > 0 && (
             <span className="text-sm leading-5">
-              <span className="text-text/75">Thiếu nhiều nhất: </span>
+              <span className="text-text/75">Thiếu nhiều nhất:</span>{" "}
               <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
             </span>
           )}
