@@ -74,6 +74,9 @@ def source_scan():
         for f in files:
             text = f.read_text(encoding="utf8")
             for bad in ["Bữa " + "của tôi", "số " + "liệu", "Xoá", "xoá", "Tuỳ", "tuỳ", "Huỷ", "huỷ"]:
+                # feedback-mailto (Hao 22/10, newer than this voice pass): the empty search's approved line says "tự nhập số liệu"
+                if bad == "số " + "liệu" and f.name == "food-empty-state.tsx":
+                    continue
                 if bad in text:
                     hits.append(f"{f.relative_to(ROOT)}: {bad}")
     check(not hits, f"source: no old meal-list name or 'số liệu' in the voice-pass files ({hits})")
