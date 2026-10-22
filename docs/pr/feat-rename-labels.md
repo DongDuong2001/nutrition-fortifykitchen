@@ -26,4 +26,5 @@ Found by grep over all of `apps/web` and docs; the text of past release entries 
 Screenshots in `docs/screenshots/rename-labels/`: `cua-ban-{360,360-text150,390}.png`, `food-page-{360,360-text150}.png`, `recipe-page-360.png`, `pill-{360,390,360-text150}.png`; the full set is in `apps/web/.screenshots/v3-rename/` (gitignored).
 
 ## Gates
-gate:fast after each commit: green. gate:full: see below.
+- gate:fast after each commit: green.
+- **gate:full on the final state: all green, 1408 s** (the machine was busy; the gates ran longer than usual). typecheck, lint:design, vitest (all unit tests), build:demo, test:align, test:hydration, probe:all (135 PASS, 4 REPORT, 1 QUAR = design-floor-landing.py, 0 FAIL, 1 SKIP), check:live-bundle.
