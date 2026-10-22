@@ -146,7 +146,7 @@ def main():
         field.fill("CanPrev")
         pg.wait_for_timeout(700)
         pg.locator("[data-add-panel] button[data-food-row]").filter(has_text="CanPrev").first.tap()
-        panel = pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]')
+        panel = pg.locator('[aria-labelledby="portion-sheet-title"]')
         panel.locator('[data-testid="portion-add"]').wait_for(state="visible", timeout=5000)
         amount = panel.locator('[data-tour="unit-amount"]')
         amount.fill("5")

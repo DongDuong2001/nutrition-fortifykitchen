@@ -54,7 +54,7 @@ def pick(pg, query):
     first = pg.locator("button[data-food-row]:visible").first
     first.wait_for(state="visible", timeout=5000)
     first.click()
-    sheet = pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]')
+    sheet = pg.locator('[aria-labelledby="portion-sheet-title"]')
     sheet.locator('[data-testid="portion-add"]').wait_for(state="visible", timeout=5000)
     return sheet
 

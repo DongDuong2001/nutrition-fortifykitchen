@@ -228,22 +228,23 @@ def add_sheet():
         pg.locator('[data-testid="portion-add"]:visible').first.wait_for(state="visible", timeout=6000)
         pg.wait_for_timeout(500)
         close = pg.get_by_role("button", name="Đóng").locator("visible=true").filter(has=pg.locator("svg")).first
-        sheet_close = pg.locator('[data-testid="portion-close"]:visible').first
+        # One sheet in the + flow (overnight 22→23/10): the portion is a step inside the + sheet; its ‹ goes back to the list
+        sheet_close = pg.locator('[data-testid="sheet-view-back"]:visible').first
         box = sheet_close.bounding_box()
-        check(sheet_close.count() == 1 and box is not None and box["width"] >= 44 and box["height"] >= 44, f"4: the portion sheet has a visible ✕ named Đóng, 44 px ({box and (round(box['width']), round(box['height']))})")
+        check(sheet_close.count() == 1 and sheet_close.get_attribute("aria-label") == "Quay lại" and box is not None and box["width"] >= 44 and box["height"] >= 44, f"4: the portion step has a visible ‹ named Quay lại, 44 px ({box and (round(box['width']), round(box['height']))})")
         no_hint = "Bấm + để nhân" not in pg.locator("body").inner_text()
         check(no_hint, "7: the \"Bấm + để nhân…\" line is gone")
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(700)
-        check(pg.locator('[data-testid="portion-add"]:visible').count() == 0, "4: Esc closes the portion sheet")
+        check(pg.locator('[data-testid="portion-add"]:visible').count() == 0, "4: Esc goes back from the portion step")
         focused_row = pg.evaluate("(id) => { const a = document.activeElement; return !!a && a.getAttribute('data-food-id') === id }", row_id)
         check(focused_row, "4: focus is back on the row that opened it")
         row.tap()
         pg.locator('[data-testid="portion-add"]:visible').first.wait_for(state="visible", timeout=6000)
         pg.wait_for_timeout(400)
-        pg.locator('[data-testid="portion-close"]:visible').first.tap()
+        pg.locator('[data-testid="sheet-view-back"]:visible').first.tap()
         pg.wait_for_timeout(700)
-        check(pg.locator('[data-testid="portion-add"]:visible').count() == 0, "4: the ✕ closes it too")
+        check(pg.locator('[data-testid="portion-add"]:visible').count() == 0, "4: the ‹ goes back too")
         tag = pg.evaluate("document.activeElement && document.activeElement.tagName")
         check(tag == "BUTTON", f"4: after a touch, focus is on a button, never on an input that would raise the keyboard ({tag})")
         # a row that was behind "Xem thêm"
