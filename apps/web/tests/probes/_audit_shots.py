@@ -7,6 +7,7 @@ Not a check (the name starts with _, so probe:all skips it); the assertions are 
   home      Hôm nay (the nutrient column and the footnote)
   groups    Khám phá › Nhóm món
   addlist   + sheet with no search (Gần đây, the list's kcal / grams)
+  saveday   Hôm nay › ⋯ › Lưu ngày này thành mẫu (the sheet's summary)
 Shots: .screenshots/audit-1023/<scenario>-<390|360|360-text150>.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/_audit_shots.py portion compare back
 """
@@ -86,6 +87,12 @@ def run(browser, scenario, tag, size, big):
             pg.wait_for_timeout(400)
     elif scenario == "addlist":
         open_add(pg)
+    elif scenario == "saveday":
+        go(pg, "/app", 1500)
+        pg.get_by_role("button", name="Tùy chọn ngày").locator("visible=true").first.click()
+        pg.wait_for_timeout(500)
+        pg.get_by_role("dialog").locator("visible=true").first.get_by_role("button", name="Lưu ngày này thành mẫu").click()
+        pg.wait_for_timeout(800)
     shot(pg, scenario, tag)
     ctx.close()
 
