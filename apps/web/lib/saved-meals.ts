@@ -11,7 +11,7 @@ export interface SavedMealItem {
   grams: number;
 }
 
-/** Bữa ăn của tôi: a named set of foods with portions, logged in one tap. */
+/** Bữa ăn đã lưu: a named set of foods with portions, logged in one tap. */
 export interface SavedMeal {
   id: string;
   name: string;

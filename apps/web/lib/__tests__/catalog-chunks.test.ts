@@ -64,13 +64,13 @@ describe("the catalogue copy in chunks", () => {
   it("a food just made goes first, keeps the copy's age, and a food with that id is not doubled", async () => {
     await writeCatalogCache(A, catalogue(400));
     const before = (await readCatalogCache(A))!.at;
-    await addToCatalogCache(A, { ...food(7), nameVi: "Món của tôi" });
+    await addToCatalogCache(A, { ...food(7), nameVi: "Món ăn của tôi" });
     await addToCatalogCache(A, { ...food(9999), nameVi: "Mới" });
     const back = (await readCatalogCache(A))!;
     expect(back.at).toBe(before);
     expect(back.foods[0].id).toBe("food-9999");
     expect(back.foods.filter((f) => f.id === "food-7")).toHaveLength(1);
-    expect(back.foods.find((f) => f.id === "food-7")?.nameVi).toBe("Món của tôi");
+    expect(back.foods.find((f) => f.id === "food-7")?.nameVi).toBe("Món ăn của tôi");
     expect(back.foods).toHaveLength(401);
   });
 

@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-21c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món", "Ngày ăn mẫu"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
+ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
 ITEMS_2010B = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
@@ -49,7 +49,7 @@ ITEMS_1910A = ["Tìm món gọn hơn", "Trái cây chỉ tính phần ăn đư�
 ITEMS_1810F = ["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]
 ITEMS_1810E = ["Ngày tập ghi vào nhật ký", "Mở và đóng màn hình mượt hơn"]  # cc-55 adds the second
 ITEMS_1810D = ["Ghi theo lon, viên, phần"]
-ITEMS_1810C = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo viên"]
+ITEMS_1810C = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món ăn của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo viên"]
 ITEMS_1810B = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
 ITEMS_1810 = ["Đồng bộ ổn định hơn"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]

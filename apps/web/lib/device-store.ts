@@ -2,7 +2,7 @@ import { accountStorage, type KeyValueStore } from "./storage-keys";
 
 /**
  * A small value kept on this device only, under the signed-in account's key (lib/storage-keys accountStorage; demo has its own
- * twin), like the macro split and Bữa ăn của tôi. Read through useSyncExternalStore: `get` hands back the same object until the
+ * twin), like the macro split and Bữa ăn đã lưu. Read through useSyncExternalStore: `get` hands back the same object until the
  * stored text changes, so a render never sees a new list for nothing. A write that storage refuses (full or blocked) still holds
  * for this page view. Another tab's write arrives through the storage event.
  */

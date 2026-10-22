@@ -35,7 +35,7 @@ export interface FoodItem {
   match?: FoodMatch;
   /** Where the numbers come from: the database, the id of the original food there and a link to it. */
   sourceRef?: FoodSourceRef;
-  /** A dish made from ingredients (grams of each, the cooked weight): its food page offers "Tùy chỉnh thành món của tôi". */
+  /** A dish made from ingredients (grams of each, the cooked weight): its food page offers "Tùy chỉnh món này". */
   recipe?: FoodRecipe;
   /** cc-53b: whether the numbers are for the food raw or cooked, when the name does not say (lib/yield ownCookState) */
   cookState?: "raw" | "cooked";

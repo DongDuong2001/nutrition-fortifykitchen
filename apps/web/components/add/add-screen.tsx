@@ -720,7 +720,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     [catalogPending, catalogFailed, retryCatalog, query, listFilter, noFavourites, similarFoods, newFoodHref]
   );
 
-  // Chỉ ghi kcal, Gần đây and Bữa ăn của tôi: shared by the phone sheet and the desktop dialog
+  // Chỉ ghi kcal, Gần đây and Bữa ăn đã lưu: shared by the phone sheet and the desktop dialog
   const shortcuts = (
     <AddShortcuts
       recents={recentShortcuts}

@@ -1,6 +1,6 @@
 """cc2-19b: the two journeys cc2-19 did not walk, at 390 and 1280.
 
-- (f) Hôm nay › a meal header › ⋯ › Lưu thành Bữa ăn của tôi: the name field opens with the default name selected, so a typed name replaces it; the saved meal appears in Khám phá › Bữa ăn của tôi with its foods, and one tap adds it to the current meal.
+- (f) Hôm nay › a meal header › ⋯ › Lưu vào Bữa ăn đã lưu: the name field opens with the default name selected, so a typed name replaces it; the saved meal appears in Khám phá › Bữa ăn đã lưu with its foods, and one tap adds it to the current meal.
 - (g) Hồ sơ › Cân nặng: the kcal and protein targets change as the weight changes (before Lưu), and the new ranges are the ones Mục tiêu shows after saving.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_19b.py
 """
@@ -69,7 +69,7 @@ def run(browser, size_name, size):
     pg.wait_for_timeout(200)
     pg.locator("button[aria-label='Tùy chọn Bữa sáng']:visible").first.click()
     pg.wait_for_timeout(300)
-    pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi")).click()
+    pg.get_by_role("button", name=re.compile("Lưu vào Bữa ăn đã lưu")).click()
     pg.wait_for_timeout(200)
     field = pg.locator("#save-meal-name")
     check(field.input_value() != "", f"{w}: name field starts with the default name")
@@ -79,8 +79,8 @@ def run(browser, size_name, size):
     pg.get_by_role("button", name="Lưu", exact=True).click()
     pg.wait_for_timeout(400)
 
-    go("/explore/meals")  # V3: Khám phá has the Bữa ăn của tôi row; the saved meals are listed on the pushed screen
-    w = f"{size_name} Bữa ăn của tôi"
+    go("/explore/meals")  # V3: Khám phá has the Bữa ăn đã lưu row; the saved meals are listed on the pushed screen
+    w = f"{size_name} Bữa ăn đã lưu"
     check("Sáng nhanh" in text(pg), f"{w}: saved meal listed by name")
     check(pg.locator("button[aria-label^='Thêm Sáng nhanh']").count() == 1, f"{w}: one tap add button present")
     no_h_scroll(pg, w)

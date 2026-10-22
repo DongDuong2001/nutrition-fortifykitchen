@@ -61,6 +61,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "home", title: "Chuyển nhóm, chuyển tab mượt hơn", body: "Đổi nhóm món, đổi thẻ hay chuyển tab ở thanh dưới thì nội dung trượt vào nhẹ nhàng, không còn đổi cái bụp. Mở danh sách Giàu … chỉ trượt một lần." },
       { icon: "meal", title: "Đổi nguyên liệu trong món", body: "Món có Thành phần cho đổi nguyên liệu, như sữa chua thường hay Hy Lạp, hạnh nhân hay hạt bí. Chọn ở dòng Đổi nguyên liệu, số gam giữ nguyên, và món ghi lại đúng theo bạn chọn." },
       { icon: "meal", title: "Ngày ăn mẫu", body: "Lưu cả ngày thành mẫu ở nút ⋯ của Hôm nay. Ngày còn trống thì chạm Chép ngày mẫu để chép lại bằng một chạm, Hoàn tác được." },
+      { icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },

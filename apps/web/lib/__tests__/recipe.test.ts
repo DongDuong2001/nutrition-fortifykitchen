@@ -244,7 +244,7 @@ describe("storage", () => {
   });
 });
 
-describe("recipeDraftFromFood (Tùy chỉnh thành món của tôi)", () => {
+describe("recipeDraftFromFood (Tùy chỉnh món này)", () => {
   const dish = {
     id: "food-com-dau-do",
     nameVi: "Cơm đậu đỏ",

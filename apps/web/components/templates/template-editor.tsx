@@ -70,7 +70,7 @@ export function TemplateEditor({ id }: { id: string }) {
     return (
       <Frame title="Ngày ăn mẫu">
         <Card className="flex flex-col items-start gap-3">
-          <p className="m-0 text-callout font-semibold">Không tìm thấy ngày mẫu này.</p>
+          <p className="m-0 text-callout font-semibold">Không tìm thấy ngày ăn mẫu này.</p>
           <Link href="/explore/ngay-mau" className="flex min-h-11 items-center text-cap font-bold text-cobalt no-underline">
             Về Ngày ăn mẫu
           </Link>
@@ -273,7 +273,7 @@ function EditorForm({ template, onDeleted }: { template: DayTemplate; onDeleted:
       <Sheet open={confirmDelete} onClose={() => setConfirmDelete(false)} title={`Xóa ${template.name}?`} titleId="tpl-delete-title" desktopDialog>
         <div className="flex flex-col gap-3">
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
-            Ngày mẫu này ({foodCount} món) sẽ bị xóa. Các món đã ghi trong nhật ký không đổi.
+            Ngày ăn mẫu này ({foodCount} món) sẽ bị xóa. Các món đã ghi trong nhật ký không đổi.
           </p>
           <PillButton type="button" variant="tertiary" onClick={() => setConfirmDelete(false)}>
             Hủy

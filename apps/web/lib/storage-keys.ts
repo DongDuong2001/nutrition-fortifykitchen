@@ -45,7 +45,7 @@ export interface KeyValueStore {
   removeItem(key: string): void;
 }
 
-/** Every key that belongs to an account: the diary, sample edits, Gần đây, favourites and Bữa ăn của tôi. */
+/** Every key that belongs to an account: the diary, sample edits, Gần đây, favourites and Bữa ăn đã lưu. */
 export const ACCOUNT_KEYS = [ADDED_ENTRIES_KEY, SAMPLE_EDITS_KEY, RECENT_FOODS_KEY, FAVOURITES_KEY, SAVED_MEALS_KEY, DAY_ARCHIVE_KEY];
 
 /**

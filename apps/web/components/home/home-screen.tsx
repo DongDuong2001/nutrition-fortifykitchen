@@ -810,7 +810,7 @@ function HomeContent() {
                           setIsPickerOpen(true);
                         },
                         onHide: pillHidden.hide,
-                        hideLabel: `Ẩn gợi ý ngày mẫu ${editablePast ? "hôm qua" : "hôm nay"}`,
+                        hideLabel: `Ẩn gợi ý ngày ăn mẫu ${editablePast ? "hôm qua" : "hôm nay"}`,
                       }
                     : null
                 }

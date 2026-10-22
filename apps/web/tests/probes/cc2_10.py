@@ -233,7 +233,7 @@ def check_past_day(browser, size_name, size):
         with_food.first.click()
         pg.wait_for_timeout(300)
         check(pg.locator('button[aria-label^="Tùy chọn"]:visible').count() == 1,
-              f"{size_name} past home: a meal with food keeps a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
+              f"{size_name} past home: a meal with food keeps a ⋯ menu (Lưu vào Bữa ăn đã lưu, cc2-12)")
     check(pg.locator(f'a[href="/micros?date={YESTERDAY}"]:visible').count() >= 1, f"{size_name} past home: Vi chất link keeps the date")
     pg.locator('button:has-text("Xem cả ngày"):visible').first.click()
     pg.wait_for_timeout(300)
@@ -269,8 +269,8 @@ def check_delete_meal(browser, size_name, size):
     pg.locator("button[aria-label='Tùy chọn Bữa sáng']:visible").first.click()
     pg.wait_for_timeout(300)
     dialog = pg.locator('[role="dialog"]:visible').first
-    check("Lưu thành Bữa ăn của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has Lưu thành Bữa ăn của tôi")
-    check(dialog.locator('button:has-text("Lưu thành Bữa ăn của tôi")').is_enabled(), f"{size_name} delete: Lưu thành Bữa ăn của tôi is enabled for a meal with food")
+    check("Lưu vào Bữa ăn đã lưu" in dialog.inner_text(), f"{size_name} delete: the menu has Lưu vào Bữa ăn đã lưu")
+    check(dialog.locator('button:has-text("Lưu vào Bữa ăn đã lưu")').is_enabled(), f"{size_name} delete: Lưu vào Bữa ăn đã lưu is enabled for a meal with food")
     dialog.locator('button:has-text("Xóa bữa này")').click()
     pg.wait_for_timeout(500)
     check("Xóa Bữa sáng?" not in text(pg), f"{size_name} delete: no confirm step (cc-62, undo instead)")

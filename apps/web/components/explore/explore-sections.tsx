@@ -29,7 +29,7 @@ import { isLiveMode } from "@/lib/api-mode";
 
 const SHOWN = 8;
 
-/** The groups of Nhóm món: every category but Món của tôi, which is a row of Của bạn. */
+/** The groups of Nhóm món: every category but Món ăn của tôi, which is a row of Của bạn. */
 const GROUPS = FOOD_CATEGORIES.filter((c) => c.key !== "cua_toi");
 
 /**
@@ -76,7 +76,7 @@ function GroupGrid() {
   );
 }
 
-// V3-SPEC §3.4 tile colours by meaning: Yêu thích pink (the heart), Bữa ăn của tôi orange, Món của tôi blue
+// V3-SPEC §3.4 tile colours by meaning: Yêu thích pink (the heart), Bữa ăn đã lưu orange, Món ăn của tôi blue
 // Yêu thích has no page of its own in the app yet (the design's row would need a new route), so its row only counts and the
 // favourites stay a carousel of cards below Gần đây
 const OWN_ROWS: { id: string; label: string; href: string | null; tone: SettingsTileTone; glyph: React.ReactNode }[] = [
@@ -89,14 +89,14 @@ const OWN_ROWS: { id: string; label: string; href: string | null; tone: Settings
   },
   {
     id: "meals",
-    label: "Bữa ăn của tôi",
+    label: "Bữa ăn đã lưu",
     href: "/explore/meals",
     tone: "targets",
     glyph: <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1z" />,
   },
   {
     id: "mine",
-    label: "Món của tôi",
+    label: "Món ăn của tôi",
     href: "/explore/cua_toi",
     tone: "profile",
     glyph: <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8v8M8 12h8" />,
@@ -111,7 +111,7 @@ const OWN_ROWS: { id: string; label: string; href: string | null; tone: Settings
   },
 ];
 
-/** Gần đây, Yêu thích, Của bạn (Yêu thích, Bữa ăn của tôi, Món của tôi) and the "Giàu …" index: the Khám phá home when nothing is searched. */
+/** Gần đây, Yêu thích, Của bạn (Yêu thích, Bữa ăn đã lưu, Món ăn của tôi) and the "Giàu …" index: the Khám phá home when nothing is searched. */
 export function ExploreSections() {
   const { recentFoods, favouriteIds, hydrated } = useDiary();
   // Re-renders when the catalogue arrives: Gần đây and Yêu thích are looked up in it

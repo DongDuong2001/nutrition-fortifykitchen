@@ -49,7 +49,7 @@ function CreateFoodInner() {
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   // Tính từ nguyên liệu (a recipe, the default) or Tự nhập (typed from a label). ?recipe=<id> edits a saved recipe;
-  // ?from=<food id> starts a recipe from a catalogue dish that has one (Tùy chỉnh thành món của tôi).
+  // ?from=<food id> starts a recipe from a catalogue dish that has one (Tùy chỉnh món này).
   const editId = searchParams.get("recipe");
   const fromId = searchParams.get("from");
   const requestedMode = searchParams.get("mode");

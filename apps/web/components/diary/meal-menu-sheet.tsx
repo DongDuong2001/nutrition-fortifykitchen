@@ -10,14 +10,14 @@ export interface MealMenuSheetProps {
   open: boolean;
   onClose: () => void;
   mealName: string;
-  /** A day older than yesterday is read-only: only Lưu thành Bữa ăn của tôi is offered. */
+  /** A day older than yesterday is read-only: only Lưu vào Bữa ăn đã lưu is offered. */
   readOnly?: boolean;
   /** Yesterday (cc-68): it can be edited, but "Như hôm qua" would copy the day before it, so that row is left out. */
   hideYesterday?: boolean;
   /** What the meal holds on the day shown */
   itemCount: number;
   kcal: number | null;
-  /** How many foods Lưu thành Bữa ăn của tôi would keep. 0 disables it. */
+  /** How many foods Lưu vào Bữa ăn đã lưu would keep. 0 disables it. */
   savableCount: number;
   /** The name the save step starts with, "<Bữa> <dd/mm>". */
   defaultSaveName: string;
@@ -35,7 +35,7 @@ const optionClass =
 type Step = "menu" | "name" | "copy";
 
 /**
- * The ⋯ menu of one meal: Chép hôm qua (today), Lưu thành Bữa ăn của tôi (any day, asks for a name) and
+ * The ⋯ menu of one meal: Chép hôm qua (today), Lưu vào Bữa ăn đã lưu (any day, asks for a name) and
  * Xóa bữa này (today), which deletes at once: the toast's Hoàn tác takes it back (cc-62, S9). A bottom sheet on a phone,
  * a centred dialog on desktop.
  */
@@ -69,7 +69,7 @@ export function MealMenuSheet({
 
   const title =
     step === "name"
-      ? "Lưu thành Bữa ăn của tôi"
+      ? "Lưu vào Bữa ăn đã lưu"
       : step === "copy"
         ? `Thêm ${yesterdayItemCount} món như hôm qua?`
         : mealName;
@@ -158,7 +158,7 @@ export function MealMenuSheet({
               }}
               className={optionClass}
             >
-              <span className={`text-base font-bold ${canSave ? "text-text" : "text-secondary"}`}>Lưu thành Bữa ăn của tôi</span>
+              <span className={`text-base font-bold ${canSave ? "text-text" : "text-secondary"}`}>Lưu vào Bữa ăn đã lưu</span>
               <span className="text-cap text-secondary">
                 {canSave ? `Lưu ${savableCount} món để thêm lại bằng một chạm` : "Bữa này chưa có món để lưu"}
               </span>

@@ -126,7 +126,7 @@ SCREENS = [
     ("CreateFood", go("/foods/new"), "CreateFood.dc.html", None),
     ("EditEntry", go("/entry/item-5"), "EditEntry.dc.html", None),
     ("MealSwitcher", meal_switcher, "MealSwitcher.dc.html", None),
-    # feat/ngay-mau: Chép hôm qua is the first card of the "Chọn ngày mẫu" picker (tests/probes/ngay_mau.py), no longer the CopyYesterday sheet
+    # feat/ngay-mau: Chép hôm qua is the first card of the "Chọn ngày ăn mẫu" picker (tests/probes/ngay_mau.py), no longer the CopyYesterday sheet
     ("CalendarPicker", calendar, "CalendarPicker.dc.html", None),
     ("PastDay", go(f"/app?date={YESTERDAY}"), "PastDay.dc.html", None),
     ("Profile", go("/settings/profile"), "Profile.dc.html", "DesktopProfile.dc.html"),

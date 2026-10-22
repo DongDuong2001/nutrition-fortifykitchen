@@ -132,8 +132,8 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
 /**
  * The one toast of the app. "added" is a move that cannot be undone and offers Xem (jump to the meal), "deleted" offers Hoàn tác,
- * "undoable" offers Hoàn tác for the entries one action added (undoIds: every add: a tray, a portion, a recent, a Bữa ăn của tôi, a copy),
- * "saved" offers Xem (Bữa ăn của tôi in Khám phá), and "unsaved" offers Thử lại (the server refused a write).
+ * "undoable" offers Hoàn tác for the entries one action added (undoIds: every add: a tray, a portion, a recent, a Bữa ăn đã lưu, a copy),
+ * "saved" offers Xem (Bữa ăn đã lưu in Khám phá), and "unsaved" offers Thử lại (the server refused a write).
  */
 export interface ToastInfo {
   message: string;
@@ -220,10 +220,10 @@ interface DiaryContextValue {
   copyEntries: (entries: AddedDiaryEntry[], message: string, day?: string) => void;
   /** Takes out the entries of the last add or copy. Only works while the "undoable" toast is shown. */
   undoCopy: () => void;
-  /** Bữa ăn của tôi, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
+  /** Bữa ăn đã lưu, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
   savedMeals: SavedMeal[];
   /**
-   * Saves the foods of a meal (today or a past day) as a Bữa ăn của tôi. Returns false when the meal holds
+   * Saves the foods of a meal (today or a past day) as a Bữa ăn đã lưu. Returns false when the meal holds
    * no food to save (empty, or only quick kcal entries).
    */
   saveMealAs: (slot: MealSlot, iso: string, name: string) => boolean;
@@ -1469,7 +1469,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setSavedMeals((prev) => [meal, ...prev]);
       setEdits((prev) => dismissUndoIn(prev));
       setToast({
-        message: `Đã lưu ${meal.name} vào Bữa ăn của tôi · ${meal.items.length} món`,
+        message: `Đã lưu ${meal.name} vào Bữa ăn đã lưu · ${meal.items.length} món`,
         kind: "saved",
         mealSlot: null,
         durationMs: ADDED_TOAST_MS,

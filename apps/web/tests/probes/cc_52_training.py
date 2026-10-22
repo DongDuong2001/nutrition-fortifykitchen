@@ -7,7 +7,7 @@
 - Untick: the entry goes with Hoàn tác (which ticks it again); the entry deleted on Hôm nay unticks the item.
 - Tinh bột nhanh is grams of carbs (Bự 45 g): Red Bull resolves, 1,5 lon in half-can steps; mật mía ≈ 60 g; the
   Red Bull + mật mía mix pre-fills 1 lon + 23 g = 45 g carbs, logs two entries, and untick removes both.
-- + Thêm món: "Nước dừa" (made in Món của tôi first; the demo catalogue has none) in Trước tập stays after a reload, only
+- + Thêm món: "Nước dừa" (made in Món ăn của tôi first; the demo catalogue has none) in Trước tập stays after a reload, only
   in Trước tập; it can be removed.
 - Cài đặt › Hồ sơ › Bé: salt rows 1 g, header 7 g. A past day: no chip, no + Thêm món, ticks disabled.
 - New controls are 44 px or more; no horizontal scroll.
@@ -281,7 +281,7 @@ def flows(browser):
 
 
 def own_items(pg):
-    # The demo catalogue has no Nước dừa: make it in Món của tôi (Tự nhập)
+    # The demo catalogue has no Nước dừa: make it in Món ăn của tôi (Tự nhập)
     go(pg, "/foods/new?meal=breakfast", 800)
     pg.get_by_role("button", name="Tự nhập").click()
     pg.locator("#cf-name").fill("Nước dừa")

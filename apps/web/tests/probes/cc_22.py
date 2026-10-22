@@ -219,7 +219,7 @@ def run(browser, size, tag):
     # Chép hôm qua is the first card of the pill's picker, no longer a button of the day
     check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 1, f"{tag} Chép ngày mẫu pill on the empty day")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{tag} no Chép hôm qua button on the empty day")
-    pg.get_by_role("button", name="Ẩn gợi ý ngày mẫu hôm nay").first.click()
+    pg.get_by_role("button", name="Ẩn gợi ý ngày ăn mẫu hôm nay").first.click()
     pg.wait_for_timeout(500)
     check("Chưa có món nào hôm nay" in pg.inner_text("body"), f"{tag} empty day line after the pill's ×")
     add = pg.get_by_role("link", name=re.compile("^Thêm vào Bữa sáng"))

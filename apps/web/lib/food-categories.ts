@@ -37,7 +37,7 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "an_vat", label: "Đồ ngọt & ăn vặt" },
   { key: "bo_sung", label: "Thực phẩm bổ sung" },
   { key: "gia_vi", label: "Gia vị" },
-  { key: "cua_toi", label: "Món của tôi" },
+  { key: "cua_toi", label: "Món ăn của tôi" },
 ];
 
 /** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts), "minh_hao" = Đồ ăn của Minh Hào (lib/fortify-kitchen). */
@@ -66,14 +66,14 @@ export function isKnownCategory(key: unknown): key is FoodCategory {
   return typeof key === "string" && FOOD_CATEGORIES.some((c) => c.key === key);
 }
 
-/** Foods without a category, or with one this app does not know (for example, from the API), count as Món của tôi: they never vanish from a list. */
+/** Foods without a category, or with one this app does not know (for example, from the API), count as Món ăn của tôi: they never vanish from a list. */
 export function categoryOf(food: FoodItem): FoodCategory {
   return isKnownCategory(food.category) ? food.category : "cua_toi";
 }
 
-/** One definition of Món của tôi: the category, or a food the user made. */
+/** One definition of Món ăn của tôi: the category, or a food the user made. */
 export function isOwnFood(food: FoodItem): boolean {
-  // A food with an unknown (non-empty) category is listed under Món của tôi but is not the user's own
+  // A food with an unknown (non-empty) category is listed under Món ăn của tôi but is not the user's own
   return food.category === "cua_toi" || !food.category || food.source === "user";
 }
 

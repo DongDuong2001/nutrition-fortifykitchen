@@ -36,7 +36,7 @@ export interface AddShortcutsProps {
   onOpenRecent: (item: RecentShortcut) => void;
   onAddSavedMeal: (meal: SavedMeal) => void;
   onQuickKcal: () => void;
-  /** Gần đây, Hay ăn, Yêu thích and Bữa ăn của tôi: nothing here while searching (default true) */
+  /** Gần đây, Hay ăn, Yêu thích and Bữa ăn đã lưu: nothing here while searching (default true) */
   showCarousels?: boolean;
   /** Chỉ thêm kcal (default true): V3 keeps it one tap away while searching too, only a category chip takes it away */
   showQuick?: boolean;
@@ -96,7 +96,7 @@ function ShortcutCard({
 
 /**
  * Faster logging in the add sheet, above the food list: Gần đây and Yêu thích (card body = portion panel,
- * + = add with that portion) and Bữa ăn của tôi (+ adds every food), as carousels; then Chỉ thêm kcal.
+ * + = add with that portion) and Bữa ăn đã lưu (+ adds every food), as carousels; then Chỉ thêm kcal.
  * Nothing here is shown while searching.
  */
 export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal, showCarousels = true, showQuick = true }: AddShortcutsProps) {
@@ -131,7 +131,7 @@ export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, o
           {frequent.length > 0 && <Carousel title="Hay ăn">{frequent.map(foodCard)}</Carousel>}
           {favourites.length > 0 && <Carousel title="Yêu thích">{favourites.map(foodCard)}</Carousel>}
           {savedMeals.length > 0 && (
-            <Carousel title="Bữa ăn của tôi">
+            <Carousel title="Bữa ăn đã lưu">
               {savedMeals.map(({ meal, itemCount, kcal }) => (
                 <ShortcutCard
                   key={meal.id}

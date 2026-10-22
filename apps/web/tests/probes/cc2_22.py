@@ -83,7 +83,7 @@ def add_sheet(browser):
     pg.wait_for_timeout(100)
 
     # Carousels
-    sections = dlg.locator("section[aria-label='Gần đây'], section[aria-label='Yêu thích'], section[aria-label='Bữa ăn của tôi']")
+    sections = dlg.locator("section[aria-label='Gần đây'], section[aria-label='Yêu thích'], section[aria-label='Bữa ăn đã lưu']")
     check(sections.count() >= 1, f"{w}: at least one carousel ({sections.count()})")
     for i in range(sections.count()):
         label = sections.nth(i).get_attribute("aria-label")

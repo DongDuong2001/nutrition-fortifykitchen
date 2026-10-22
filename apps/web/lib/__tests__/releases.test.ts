@@ -175,7 +175,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món", "Ngày ăn mẫu"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu"]);
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([
       ["meal-add", "nav-add", null, "Thêm vào từng bữa"],
       ["training-pill", "day-date", null, "Ngày tập"],
@@ -187,8 +187,10 @@ describe("unseenReleases (what Có gì mới lists)", () => {
       ["day-template-pill", "meal-pill", null, "Chép ngày mẫu"],
     ]);
     // The item of Ngày ăn mẫu (feat/ngay-mau): a title and a body, no colon inside a sentence
-    expect(r?.items.at(-1)?.icon).toBe("meal");
-    expect(r?.items.at(-1)?.body).toContain("Chép ngày mẫu");
+    expect(r?.items.at(-2)?.icon).toBe("meal");
+    expect(r?.items.at(-2)?.body).toContain("Chép ngày mẫu");
+    // The rename line (feat/rename-labels): the three new names in one item
+    expect(r?.items.at(-1)).toEqual({ icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." });
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
     for (const s of r?.tour ?? []) expect(s.body).not.toContain(":");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");

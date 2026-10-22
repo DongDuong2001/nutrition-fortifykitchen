@@ -14,7 +14,7 @@ export interface SavedMealManageSheetProps {
   onDelete: () => void;
 }
 
-/** Rename or delete one Bữa ăn của tôi. Delete asks for a confirm step first. Sheet on a phone, dialog on desktop. */
+/** Rename or delete one Bữa ăn đã lưu. Delete asks for a confirm step first. Sheet on a phone, dialog on desktop. */
 export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename, onDelete }: SavedMealManageSheetProps) {
   const [draft, setDraft] = useState(name);
   const [confirming, setConfirming] = useState(false);
@@ -32,7 +32,7 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
       {confirming ? (
         <div className="flex flex-col gap-3">
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
-            Bữa ăn của tôi này ({itemCount} món) sẽ bị xóa. Các món đã ghi trong Nhật ký không đổi.
+            Bữa ăn đã lưu này ({itemCount} món) sẽ bị xóa. Các món đã ghi trong Nhật ký không đổi.
           </p>
           <PillButton type="button" variant="tertiary" onClick={() => setConfirming(false)}>
             Hủy
@@ -45,7 +45,7 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
               onClose();
             }}
           >
-            Xóa Bữa ăn của tôi
+            Xóa Bữa ăn đã lưu
           </PillButton>
         </div>
       ) : (

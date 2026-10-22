@@ -80,7 +80,7 @@ def explore(browser, size_name, size):
         check(ul.evaluate("e => e.scrollLeft") > 0, f"{w}: carousel scrolled")
         ul.evaluate("e => { e.scrollLeft = 0; }")
     body = squash(pg.inner_text("body"))
-    for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới"]:
+    for label in ["Gần đây", "Yêu thích", "Món ăn của tôi", "Tạo món mới"]:
         # Section headers are drawn in capitals (V3): compare without case
         check(label.lower() in body.lower(), f"{w}: shows {label}")
     cb = pg.locator("a", has_text="Tạo món mới").first.bounding_box()
