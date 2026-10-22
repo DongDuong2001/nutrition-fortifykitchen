@@ -100,7 +100,7 @@ Updated for the V3 look, each with its V3 equivalent (review-0230 checked none w
 - components/keyboard-guard: a focused field the keyboard covers scrolls into view (design-floor).
 - lib/use-touch-drag.ts: the auto-scroll scrolls the page when the card no longer scrolls (needed by Hôm nay's page scroll).
 - fix(delete-account) dc3da8c: "Xóa" (what the screen asks for) unlocks the button; on main it never did. Own commit, droppable.
-- The macro-split fix from #44 (4214324, c1ae0b9, 760f3db), so Đa lượng keeps it and the two PRs merge in either order.
+- Merged with main after #44 landed (69b3330): #44's macro-split fix comes from main. The Mục tiêu đa lượng screen is V3's, and its form mounts only after the diary store has loaded (#44's fix), so a saved split is never overwritten. macro-split.py and #44's unit tests pass on the merge.
 
 ## Field reasons and new copy for Hao to approve (drafts, review-0210)
 Field reasons (copied from V3Profile / V3Weight):

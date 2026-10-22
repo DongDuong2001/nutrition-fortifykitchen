@@ -34,10 +34,10 @@ REPORT_ONLY = {"ag04_audit.py", "screenshots.py", "cc_66_shots.py", "cc_66_weigh
 # QUAR and does not fail the run, so a red probe:all means a regression. Past its expiry date it counts again.
 # name: (reason, expires YYYY-MM-DD)
 QUARANTINE = {
-    # feat/v3-redesign: the design floor's auto rules run on every route; the screens not yet ported to V3 still fail some
-    # (ink-era tabs on the grey page, 28 px meal headers, two h1 on a few screens, the landing mock's 10 px text). The
-    # list shrinks with each port; the PR lists what is left. Remove this line once it is green.
-    "design-floor.py": ("V3 port in progress (feat/v3-redesign): screens not yet ported fail D-COL-01/D-CTL-01/D-TYPE-01/D-A11Y-03", "2026-10-29"),
+    # feat/v3-redesign: every screen is ported; what still fails is /landing (cobalt text on ink 3,0–3,3:1, 11–13 px text
+    # and nav links 20 px tall, all there before V3) and, at 200 % text, targets under 44 px wide on /app, /settings/profile
+    # and /trends* (day bars, minute chips). Remove this line once it is green.
+    "design-floor.py": ("/landing fails D-COL-01/D-TYPE-01/D-CTL-01/D-LAY-04 (before V3); at 200 % text /app, /settings/profile, /trends* fail D-CTL-01", "2026-10-29"),
 }
 TIMEOUT_S = 180
 DEFAULT_WORKERS = 6
