@@ -102,7 +102,8 @@ def check_explore(browser, size_name, size):
     if size_name == "390":
         # a phone shows the 11 groups as Nhóm món (Món ăn của tôi is a row of Của bạn); the chips are desktop-only
         groups = [t.split("\n")[0].strip() for t in pg.locator("nav[aria-label='Nhóm món'] a >> visible=true").all_inner_texts()]
-        check(len(groups) == 11 and "Đồ uống" in groups, f"{size_name} explore: 11 groups in Nhóm món, Đồ uống included ({len(groups)})")
+        # Overnight 22→23/10: a group with no food is left out (the demo has no Đồ uống to list)
+        check(len(groups) == 10 and "Đồ uống" not in groups, f"{size_name} explore: 10 groups in Nhóm món, the empty Đồ uống left out ({len(groups)})")
     else:
         chip_names = [t.strip() for t in pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true").all_inner_texts()]
         # Huấn luyện viên and Bảng xếp hạng are Dong's chips (task-04); the food categories are the rest
