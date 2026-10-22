@@ -27,6 +27,7 @@ import { foodServingMeta } from "@/lib/food-meta";
 import { groupMacroLine } from "@/lib/food-group-macro";
 import { IconTile } from "@/components/ui/icon-tile";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
+import { openFeedback } from "@/lib/feedback";
 import { isCategoryFilter, type FoodFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
 import { dedupeTwins, twinIdsOf } from "@/lib/food-rows";
@@ -759,6 +760,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // The live catalogue is not here yet (or did not come): say that, never "no foods"
   const onPickSimilar = useCallback((food: FoodItem) => pickFood(food), [pickFood]);
   const clearFilter = useCallback(() => setFilter("all"), [setFilter]);
+  const requestFood = useCallback((search: string) => openFeedback({ type: "food", screen: "Thêm món", search, stacked: true }), []);
   // Memoised with the list's other props (listPick): a keystroke in the grams field must not redraw the list
   const emptyState = useMemo(
     () =>
@@ -774,6 +776,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           onPickSimilar={onPickSimilar}
           onClearFilter={clearFilter}
           newFoodHref={newFoodHref}
+          onRequestFood={requestFood}
         />
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

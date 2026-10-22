@@ -17,6 +17,8 @@ export interface FoodEmptyStateProps {
   onPickSimilar: (food: FoodItem) => void;
   onClearFilter: () => void;
   newFoodHref: string;
+  /** Yêu cầu thêm món: the Góp ý sheet with the search words (feedback-mailto board 4) */
+  onRequestFood?: (query: string) => void;
 }
 
 /** Empty results for the food list: no favourites yet, or a search with no match (with fuzzy suggestions). */
@@ -29,6 +31,7 @@ export function FoodEmptyState({
   onPickSimilar,
   onClearFilter,
   newFoodHref,
+  onRequestFood,
 }: FoodEmptyStateProps) {
   const clearFilterButton = (
     <PillButton variant="tertiary" size="md" type="button" onClick={onClearFilter}>
@@ -74,12 +77,18 @@ export function FoodEmptyState({
           <path d="M20 20l-3.5-3.5M8 8l6 6M14 8l-6 6" />
         </svg>
       }
-      title={<>Không có “{query}”</>}
+      title={<>Chưa có “{query.trim()}”</>}
       actions={
         <>
           {filter !== "all" && clearFilterButton}
-          <div className="mt-2 w-full">
-            <CreateFoodButton href={newFoodHref} helper={null} />
+          {/* feedback-mailto board 4: two equal buttons, enter it yourself now or ask for it to be added */}
+          <div className="mt-2 grid w-full grid-cols-2 gap-2">
+            <PillButton variant="primary" href={newFoodHref}>
+              Tự nhập
+            </PillButton>
+            <PillButton variant="secondary" type="button" onClick={() => onRequestFood?.(query.trim())} aria-haspopup="dialog">
+              Yêu cầu thêm món
+            </PillButton>
           </div>
 
           {/* Fuzzy matches */}
@@ -102,7 +111,7 @@ export function FoodEmptyState({
         </>
       }
     >
-      Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.
+      Bạn tự nhập số liệu ngay, hoặc gửi yêu cầu để mình thêm vào app.
     </EmptyState>
   );
 }

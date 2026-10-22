@@ -5,6 +5,21 @@ import React from "react";
  * its coloured tile (18 px, stroke 1,8). Decorative: the row label names the action.
  */
 export const SETTINGS_ICONS = {
+  chat: (
+    <>
+      <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+      <path d="M8.5 11h7M8.5 14h4.5" />
+    </>
+  ),
+  bug: (
+    <>
+      <path d="M8 7V5a4 4 0 0 1 8 0v2M6 9h12v5a6 6 0 0 1-12 0zM12 13v4M3 12h3M18 12h3M4 19l3-2M20 19l-3-2" />
+    </>
+  ),
+  chart: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
+  copy: <path d="M9 9h10v12H9zM5 15V3h10" />,
   replay: (
     <>
       <path d="M4 12a8 8 0 1 0 2.6-5.9" />

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-title";
 import { SettingsRow } from "@/components/settings/settings-row";
 import Link from "next/link";
-import { AppCard } from "@/components/settings/profile-cards";
+import { AppCard, SupportCard } from "@/components/settings/profile-cards";
 import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { profileSummary, profileTitle } from "@/components/settings/profile-summary";
 import { useAccount } from "@/components/settings/use-account";
@@ -65,7 +65,7 @@ function ProOffer() {
   );
 }
 
-/** The Cài đặt tab (IA v2): the profile card, "Của bạn" (targets, account), app settings, Pro and the danger zone. */
+/** The Cài đặt tab (IA v2): the profile card, "Của bạn" (targets, account), app settings, Hỗ trợ, Pro and the danger zone. */
 export function SettingsHomeScreen() {
   const { hydrated } = useDiary();
   const { account, loaded: accountLoaded } = useAccount();
@@ -116,6 +116,7 @@ export function SettingsHomeScreen() {
                 />
               </Card>
               <AppCard />
+              <SupportCard />
             </div>
 
             {/* Desktop: the danger zone ends the right column, level with the end of the left one */}
