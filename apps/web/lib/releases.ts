@@ -31,6 +31,19 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // backend-sync-1022 (Hao 22/10): the macro split and Ngày ăn mẫu are stored with the account (migrations 000015/000016), on top of
+  // 22a, which is live. One item, as the brief asks, and no tour or tip: no new control, the same screens now follow the account.
+  {
+    id: "2026-10-22b",
+    date: "22/10",
+    items: [
+      {
+        icon: "target",
+        title: "Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy",
+        body: "Cách chia đa lượng và các ngày ăn mẫu bạn đã lưu giờ đi theo tài khoản. Mở app trên máy khác là thấy ngay.",
+      },
+    ],
+  },
   // feat/v3-redesign + feat/compare-in-add + feat/ngay-mau + feat/rename-labels (Hao 22/10): one entry for the stack, on top of 21c, which is live. The
   // tour points at Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab,
   // So sánh in the portion panel, the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero when the day has no food yet) and the "Chép ngày ăn mẫu"

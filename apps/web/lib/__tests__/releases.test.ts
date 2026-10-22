@@ -135,26 +135,27 @@ describe("unseenReleases (what Có gì mới lists)", () => {
   const ids = (seen: string | null) => unseenReleases(seen).map((r) => r.id);
 
   it("every release newer than the last one seen, newest first", () => {
-    expect(ids("2026-10-18b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(ids("2026-10-17")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
+    expect(ids("2026-10-18b")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids("2026-10-17")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
   });
 
-  it("seen 18c: 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d; … seen 20a: 21b, 21a and 20b; seen 20b: 21b and 21a; seen 21a: only 21b; seen 21c: only 22a; seen the newest: nothing", () => {
-    expect(ids("2026-10-18c")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
-    expect(ids("2026-10-18e")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
-    expect(ids("2026-10-18f")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
-    expect(ids("2026-10-19a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
-    expect(ids("2026-10-19b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
-    expect(ids("2026-10-20a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
-    expect(ids("2026-10-20b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a"]);
-    expect(ids("2026-10-21a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b"]);
-    expect(ids("2026-10-21b")).toEqual(["2026-10-22a", "2026-10-21c"]);
-    expect(ids("2026-10-21c")).toEqual(["2026-10-22a"]);
-    expect(ids("2026-10-22a")).toEqual([]);
+  it("seen 18c: 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d; … seen 20a: 21b, 21a and 20b; seen 20b: 21b and 21a; seen 21a: only 21b; seen 21c: 22b and 22a; seen 22a: only 22b; seen the newest: nothing", () => {
+    expect(ids("2026-10-18c")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
+    expect(ids("2026-10-18e")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
+    expect(ids("2026-10-18f")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
+    expect(ids("2026-10-19a")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
+    expect(ids("2026-10-19b")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
+    expect(ids("2026-10-20a")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
+    expect(ids("2026-10-20b")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a"]);
+    expect(ids("2026-10-21a")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b"]);
+    expect(ids("2026-10-21b")).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c"]);
+    expect(ids("2026-10-21c")).toEqual(["2026-10-22b", "2026-10-22a"]);
+    expect(ids("2026-10-22a")).toEqual(["2026-10-22b"]);
+    expect(ids("2026-10-22b")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-22a"]);
+    expect(ids(null)).toEqual(["2026-10-22b"]);
   });
 
   it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
@@ -172,8 +173,17 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-22a) is the stack on top of 21c (V3, the + on each meal, coloured groups, quiet tips, So sánh, Ngày ăn mẫu, the new names), every nutrient on a label in Tự nhập (custom-food-nutrients) and the Chia sẻ button (share-spotlight): plain words and an 8-step tour (on Hôm nay: the ⋯ of the day, the Chép ngày ăn mẫu pill, + Thêm vi chất khác as the + of the bar, then the share button)", () => {
+  it("the newest release (2026-10-22b, backend-sync-1022) is one item: the macro split and Ngày ăn mẫu follow the account; no tour (no new control)", () => {
     const r = latestRelease();
+    expect(r?.id).toBe("2026-10-22b");
+    expect(r?.date).toBe("22/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy"]);
+    expect(r?.tour).toBeUndefined();
+    for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
+  });
+
+  it("2026-10-22a (live) is the stack on top of 21c (V3, the + on each meal, coloured groups, quiet tips, So sánh, Ngày ăn mẫu, the new names), every nutrient on a label in Tự nhập (custom-food-nutrients) and the Chia sẻ button (share-spotlight): plain words and an 8-step tour (on Hôm nay: the ⋯ of the day, the Chép ngày ăn mẫu pill, + Thêm vi chất khác as the + of the bar, then the share button)", () => {
+    const r = RELEASES.find((x) => x.id === "2026-10-22a");
     const item = (title: string) => r?.items.find((i) => i.title === title);
     expect(r?.id).toBe("2026-10-22a");
     expect(r?.date).toBe("22/10");
@@ -336,7 +346,7 @@ describe("joinedTour (what Thử ngay runs)", () => {
 
   it("seen 18b, on Hôm nay: the steps on the page, so the cap keeps the newest 8 of those", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
-    expect(ids).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids).toEqual(["2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
     // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place: 22a's 7 and 21c's first on the page
     expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([T21C[0], ...T22A.filter((t) => t !== "So sánh món")]);
   });
