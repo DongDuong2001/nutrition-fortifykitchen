@@ -25,7 +25,7 @@ import {
   mealNamesLine,
   mealsKcalLine,
   templateSavedMessage,
-  templateTotals,
+  templateSaveSummary,
   yesterdayCopyMessage,
   yesterdayCopySlots,
   type DayTemplateTag,
@@ -533,12 +533,8 @@ function HomeContent() {
     }
     return options;
   }, [dayBeforeEntries, yesterdaySlots, templateRows, editablePast]);
-  // The day as a template: every meal's foods (the ones the catalogue still has), empty meals left out
+  // The day as a template: every meal's foods (lib/day-templates savableFood), empty meals left out
   const saveMeals = useMemo(() => dayTemplateMeals((slot) => mealFoods(slot, viewIso)), [mealFoods, viewIso]);
-  const saveTotals = useMemo(
-    () => templateTotals({ id: "", name: "", tag: "khac", meals: saveMeals, createdAt: "" }, CATALOG_FOODS),
-    [saveMeals]
-  );
 
   function saveDayAsTemplate(name: string, tag: DayTemplateTag) {
     const template = buildDayTemplate({
@@ -552,7 +548,7 @@ function HomeContent() {
     });
     if (!template) return;
     setTemplates([template, ...savedTemplates]);
-    const totals = templateTotals(template, CATALOG_FOODS);
+    const totals = templateSaveSummary(template.meals, CATALOG_FOODS);
     notify(templateSavedMessage(template.name, totals.itemCount, totals.kcal));
   }
 
@@ -932,7 +928,7 @@ function HomeContent() {
         <sheets.SaveDaySheet
           open={isSaveDayOpen}
           onClose={() => setIsSaveDayOpen(false)}
-          summary={`${saveTotals.itemCount} món · ${kcalLabel(saveTotals.kcal)}`}
+          meals={saveMeals}
           mealsText={mealNamesLine(saveMeals)}
           defaultName={defaultTemplateName(day.user.trainingMinutes)}
           defaultTag={defaultTemplateTag(day.user.trainingMinutes)}

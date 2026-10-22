@@ -78,6 +78,7 @@ import {
 import { quickDetail, quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import { syncDayTemplates } from "./day-template-store";
+import { savableFood } from "./day-templates";
 import {
   SAMPLE_PROFILE,
   applyProfileTargets,
@@ -1458,8 +1459,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         iso === today
           ? mealPortions(edits, slot, samples, onlyDay(today))
           : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
-      // Only foods the catalogue has: what is saved is what one tap can add back
-      return items.filter((item) => catalogFoodById(item.foodId) !== undefined);
+      // What one tap can add back on any device: a server food even before this device's catalogue has come, a food made
+      // here when the catalogue has it (lib/day-templates savableFood)
+      return items.filter((item) => savableFood(item.foodId, catalogFoodById));
     },
     [edits, samples, todayIso, history, onlyDay]
   );
