@@ -112,3 +112,16 @@ func ValidationError(w http.ResponseWriter, fields map[string]string) {
 		},
 	})
 }
+
+// FieldErrors writes an error envelope with a message per field, with the given status (400 for the profile's target settings).
+func FieldErrors(w http.ResponseWriter, status int, message string, fields map[string]string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(ErrorEnvelope{
+		Error: ErrorDetail{
+			Code:    CodeValidationFailed,
+			Message: message,
+			Fields:  fields,
+		},
+	})
+}
