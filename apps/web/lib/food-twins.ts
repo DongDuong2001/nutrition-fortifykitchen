@@ -17,9 +17,26 @@ const REFUSE_RE = new RegExp(`\\s*(?<=^|[\\s(,/])(?:${REFUSE_WORDS.join("|")})(?
  * "Cá lóc", "Khoai lang (luộc, bỏ vỏ)" is "Khoai lang"), and so does a state word on its own ("Khoai lang luộc", "Tôm luộc").
  */
 export function stripCookState(nameVi: string): string {
-  const kept = nameVi.replace(/\s*\(([^)]*)\)/g, (all, inner: string) => (STRIP_PAREN_RE.test(inner) ? "" : all));
-  const bare = kept.replace(STRIP_BARE_RE, (all) => all.slice(0, all.length - all.trimStart().length));
+  return stripWords(nameVi, STRIP_PAREN_RE, STRIP_BARE_RE);
+}
+
+function stripWords(nameVi: string, parenRe: RegExp, bareRe: RegExp): string {
+  const kept = nameVi.replace(/\s*\(([^)]*)\)/g, (all, inner: string) => (parenRe.test(inner) ? "" : all));
+  const bare = kept.replace(bareRe, (all) => all.slice(0, all.length - all.trimStart().length));
   return bare.replace(/\s+/g, " ").replace(/\s+([),])/g, "$1").trim() || nameVi;
+}
+
+// The states the Sống | Chín switch says by itself; a cooking word that changes the food (nướng, chiên, xào …) stays in the name
+const SWITCH_WORDS = ["nấu chín", "chín", "luộc", "hấp", "sống", "hạt khô"];
+const SWITCH_PAREN_RE = wordRe(SWITCH_WORDS);
+const SWITCH_BARE_RE = wordRe(SWITCH_WORDS, "giu");
+
+/**
+ * The portion sheet's title for a food with a Sống | Chín switch: the name without the state the switch shows ("Thịt bò
+ * thăn", not "Thịt bò thăn (chín)"). The list's name for a food with a twin.
+ */
+export function switchName(food: Pick<FoodItem, "id" | "nameVi">): string {
+  return twinGroupOf(food)?.name ?? stripWords(tidyName(food.nameVi), SWITCH_PAREN_RE, SWITCH_BARE_RE);
 }
 
 /**

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { MOCK_FOODS, catalogChanged, type FoodItem } from "../mock/foods";
-import { collapseTwins, dedupeTwins, rowName, stripCookState, tidyName, twinGroupOf, twinIdsOf } from "../food-twins";
+import { collapseTwins, dedupeTwins, rowName, stripCookState, switchName, tidyName, twinGroupOf, twinIdsOf } from "../food-twins";
 import { searchFoods } from "../search";
 import { searchRows } from "../food-twins";
 import { buildFoodList } from "../food-categories";
@@ -84,6 +84,21 @@ describe("stripCookState", () => {
   it("keeps a bracket that names the variety", () => {
     expect(stripCookState("Khoai lang (tím)")).toBe("Khoai lang (tím)");
     expect(stripCookState("Bơ (trái)")).toBe("Bơ (trái)");
+  });
+});
+
+describe("switchName (the portion title beside a Sống | Chín switch)", () => {
+  it("leaves out the state the switch shows", () => {
+    expect(switchName({ id: "x1", nameVi: "Thịt bò thăn (chín)" })).toBe("Thịt bò thăn");
+    expect(switchName({ id: "x2", nameVi: "Cá lóc (cá quả, sống)" })).toBe("Cá lóc");
+    expect(switchName({ id: "x3", nameVi: "Rau muống luộc" })).toBe("Rau muống");
+    expect(switchName({ id: "x4", nameVi: "Đậu xanh (hạt khô)" })).toBe("Đậu xanh");
+  });
+
+  it("keeps a cooking word that changes the food, and the variety", () => {
+    expect(switchName({ id: "x5", nameVi: "Khoai lang (nướng, cả vỏ)" })).toBe("Khoai lang (nướng)");
+    expect(switchName({ id: "x6", nameVi: "Khoai lang (tím)" })).toBe("Khoai lang (tím)");
+    expect(switchName({ id: "x7", nameVi: "Mực khô" })).toBe("Mực khô");
   });
 });
 

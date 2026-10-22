@@ -44,6 +44,9 @@ export const cookSwitchFor = (food: FoodItem, catalog: readonly FoodItem[], canS
 /** A list's name for a food: without its state and without bỏ vỏ, cả vỏ, thịt quả. */
 export const rowName = (food: Pick<FoodItem, "id" | "nameVi">): string => rows?.rowName(food) ?? food.nameVi;
 
+/** The portion sheet's title when the food has a Sống | Chín switch: the name without the state the switch shows. */
+export const switchName = (food: Pick<FoodItem, "id" | "nameVi">): string => rows?.switchName(food) ?? food.nameVi;
+
 /** Every row id of the food a list row stands for. */
 export const twinIdsOf = (food: Pick<FoodItem, "id">): readonly string[] => rows?.twinIdsOf(food) ?? [food.id];
 

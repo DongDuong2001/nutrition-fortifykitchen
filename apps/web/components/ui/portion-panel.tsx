@@ -5,7 +5,7 @@ import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
-import { cookSwitchFor, rowName, useRowsReady } from "@/lib/food-rows";
+import { cookSwitchFor, rowName, switchName, useRowsReady } from "@/lib/food-rows";
 import { PortionArea } from "@/components/ui/portion-area";
 import { loadDishRecipes, recipeKnown, startsDishLoad, type DishEdit } from "@/lib/dish-recipes";
 import { loadDishPartsModule, loadedDishParts } from "@/components/ui/dish-parts-prefetch";
@@ -41,16 +41,14 @@ export interface PortionPanelProps {
   onDishEdit?: (edit: DishEdit | null) => void;
   /** Why the last add did not happen (the changed dish could not be stored on this device) */
   notice?: string | null;
-  /** The portion sheet's close: a visible ✕ (44 px, "Đóng") in the header, for a screen that cannot assume the person knows to drag or tap the scrim. */
-  onClose?: () => void;
   /** feat/compare-in-add: "So sánh" under the kcal card (V3Portion) opens the compare picker with this food locked. */
   onCompare?: () => void;
 }
 
 /**
- * The portion sheet (design/v3/screens/V3Portion.dc.html): a glass header (Close, "Khẩu phần"), the food, its portion card, a dark card with kcal
- * and macros, a note on how the amount is read, and the cobalt add. Phone: in a sheet; desktop: the add dialog's
- * right pane; Ngày tập: in the tick sheet.
+ * The portion (design/v3/screens/V3Portion.dc.html): the food, its portion card, a dark card with kcal and macros, a note on
+ * how the amount is read, and the cobalt add. Phone: a step inside the + sheet, whose header (‹, "Khẩu phần", ✕) is the
+ * step's (components/ui/sheet-view); desktop: the add dialog's right pane; Ngày tập: in the tick sheet.
  */
 export function PortionPanel({
   food,
@@ -68,7 +66,6 @@ export function PortionPanel({
   headingId,
   onDishEdit,
   notice: addNotice,
-  onClose,
   onCompare,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
@@ -153,25 +150,6 @@ export function PortionPanel({
 
   return (
     <div data-align-container="portion-panel" data-tour="portion-panel" className={`flex flex-col gap-4 text-text ${className}`}>
-      {/* The sheet's header (V3-SPEC §4): glass, Close as a 44 px circle on the leading side, the title centred. The desktop pane has none. */}
-      {onClose && (
-        <div className="glass-bar sticky top-0 z-sticky -mx-4 flex items-center gap-2 px-4 pt-1 pb-2">
-          <button
-            type="button"
-            aria-label="Đóng"
-            data-testid="portion-close"
-            onClick={onClose}
-            className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-fill p-0 text-text transition-press active:scale-[0.97] motion-reduce:active:scale-100"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-          <span className="min-w-0 flex-1 text-center text-body-lg font-bold leading-tight">Khẩu phần</span>
-          <span aria-hidden="true" className="h-11 w-11 shrink-0" />
-        </div>
-      )}
-
       {/* The meal, the food (a long name wraps to two lines), its page, and the food's tip under them */}
       <div className="flex w-full flex-col gap-2">
         <div className="flex w-full items-start justify-between gap-2">
@@ -180,7 +158,8 @@ export function PortionPanel({
             {/* No line-clamp here: its overflow clipping cut the stacked marks of capitals like Ắ, Ẫ, Ổ ("TRẮNG" read
                 "TRĂNG"). The line height leaves them room; a long name wraps. */}
             <h2 id={headingId} className="m-0 break-words font-display text-headline font-extrabold uppercase leading-[1.15] tracking-[0.01em]">
-              {rowName(food)}
+              {/* Beside a Sống | Chín switch the name leaves out the state: the switch says which */}
+              {sw ? switchName(food) : rowName(food)}
             </h2>
           </div>
           <div className="flex shrink-0 flex-col items-end">
