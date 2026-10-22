@@ -79,7 +79,14 @@ These are foods whose default serving was a count, and they now read per 100 g (
   - overview-board (the Level count at Levels 1, 2 and 4, the change and the lowest);
   - overview-detail (valueNote), tips (meal-focus last), releases;
   - food-group-macro, food-meta and fortify-kitchen follow the default serving.
-- **Probe:** units_counts.py (new). cc_46 and cc_tutorials know 22c.
+- **Probe:** units_counts.py (new). Probes that pinned the old behaviour follow it:
+  - cc_46 and cc_tutorials know 22c;
+  - cc2_20, cc2_21 and cc2_19 read Vi chất over the Level;
+  - cc2_07 and cc2_11 expect 10 groups;
+  - minh_hao_tab expects the cake per 100 g;
+  - cc_46, cc_tutorials, cc_51_haptics and polish_1020 mark meal-focus seen.
+- **gate:full:** all green, 798 s, 145 probes (design-floor-landing quarantined as on main).
+- **Screenshots** at 390, 360 and 360 at 150 % text: `apps/web/.screenshots/audit-1023/{overview,overview-summary,home,groups,addlist}-*.png`.
 
 ## Open questions
 1. Should supplements (1 viên), Món Việt dishes (1 tô, 1 phần) and cans (1 lon) also go by grams? I kept their unit, as cc-53 decided ("Ghi theo lon, viên, phần"); say if "grams everywhere" includes them.
