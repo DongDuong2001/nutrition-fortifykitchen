@@ -24,7 +24,7 @@ describe("the toast after an add", () => {
     expect(t.message).toBe("Đã thêm Trứng 1 quả vào Bữa trưa");
     expect(t.undoIds).toEqual(["e1"]);
     expect(t.durationMs).toBe(ADD_TOAST_MS);
-    expect(ADD_TOAST_MS).toBe(5000);
+    expect(ADD_TOAST_MS).toBe(4000);
   });
 
   it("adds into the same meal while the toast is up update it in place, and its Hoàn tác takes out both", () => {
