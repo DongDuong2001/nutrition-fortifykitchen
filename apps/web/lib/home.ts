@@ -53,7 +53,8 @@ export type HomeMode = { kind: "day" } | { kind: "food"; id: string } | { kind: 
 
 export const DAY_MODE: HomeMode = { kind: "day" };
 
-const SLOT_LABEL: Record<MealSlot, string> = {
+/** The short meal names of the headers on Hôm nay (Sáng, Trưa, Trước tập, Bữa phụ, Tối). */
+export const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: "Sáng",
   lunch: "Trưa",
   pre_workout: "Trước tập",

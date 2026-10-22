@@ -109,6 +109,15 @@ export const TIPS: readonly Tip[] = [
     used: ["share-day"],
     when: (c) => today(c) && c.foodsToday >= SHARE_TIP_MIN_FOODS,
   },
+  // Ngày ăn mẫu (feat/ngay-mau): the pill is on an empty day of Hôm nay that can be added to (today, yesterday), so the tip waits there
+  {
+    id: "day-template",
+    target: "day-template-pill",
+    title: "Chép cả ngày bằng một chạm",
+    body: "Chạm Chép ngày mẫu để chép một ngày đã lưu, hoặc Hôm qua, vào ngày còn trống này. Chạm × nếu hôm nay bạn muốn tự ghi.",
+    used: ["day-template"],
+    when: (c) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday === 0,
+  },
   {
     id: "pull-refresh",
     target: "meal-pill",

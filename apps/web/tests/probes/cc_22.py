@@ -215,8 +215,13 @@ def run(browser, size, tag):
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     go(pg, "/app")
-    check("Chưa có món nào hôm nay" in pg.inner_text("body"), f"{tag} empty day line")
-    check(pg.get_by_role("button", name="Chép hôm qua").count() == 1, f"{tag} Chép hôm qua when yesterday has entries")
+    # feat/ngay-mau: an empty day shows the Chép ngày mẫu pill in place of the "Chưa có món nào hôm nay" line (the line returns when its × hides the pill);
+    # Chép hôm qua is the first card of the pill's picker, no longer a button of the day
+    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 1, f"{tag} Chép ngày mẫu pill on the empty day")
+    check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{tag} no Chép hôm qua button on the empty day")
+    pg.get_by_role("button", name="Ẩn gợi ý ngày mẫu hôm nay").first.click()
+    pg.wait_for_timeout(500)
+    check("Chưa có món nào hôm nay" in pg.inner_text("body"), f"{tag} empty day line after the pill's ×")
     add = pg.get_by_role("link", name=re.compile("^Thêm vào Bữa sáng"))
     check(add.count() == 1 and "meal=breakfast" in (add.get_attribute("href") or ""), f"{tag} empty slot row links to /add with the meal")
     ctx.close()

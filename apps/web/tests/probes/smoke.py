@@ -34,7 +34,7 @@ DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sid
 # /dev/ui is the component showcase: a production build answers 404 for /dev (v0.2.1), so smoke skips it.
 SKIPPED_ROUTES: set[str] = {"/dev/ui"}
 # Mock id for each dynamic segment, keyed by the static segment in front of it
-MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh", "clients": "client-1", "join": "ABCDEFGH23"}
+MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh", "clients": "client-1", "join": "ABCDEFGH23", "ngay-mau": "dt-demo"}
 IGNORED_CONSOLE = ("data-gr-", "Grammarly")
 # Production builds report hydration failures as minified React errors (#418, #419, #423, #425)
 HYDRATION_RE = re.compile(r"hydrat|React error #(418|419|423|425)", re.IGNORECASE)

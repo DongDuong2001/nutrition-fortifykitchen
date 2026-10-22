@@ -42,7 +42,7 @@ describe("tutorial targets", () => {
 
   it("covers the 18c and 18f tours and the sheet, stepper, portion and offline tips", () => {
     const named = new Set(targets.map((t) => t.target));
-    for (const t of ["sync-status", "header-actions", "home-food-list", "meal-pill", "meal-add", "nav-add", "nutrient-column", "nav-explore", "sheet-handle", "unit-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]) {
+    for (const t of ["sync-status", "header-actions", "home-food-list", "meal-pill", "meal-add", "nav-add", "nutrient-column", "nav-explore", "sheet-handle", "unit-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row", "day-menu", "day-template-pill"]) {
       expect(named.has(t), t).toBe(true);
     }
   });

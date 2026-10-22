@@ -185,7 +185,7 @@ function TargetBody({
   );
 }
 
-/** The ⋯ of the day: for now one option, Chọn nhiều món. */
+/** The ⋯ of the day: Chọn nhiều món, and Lưu ngày này thành mẫu (Ngày ăn mẫu). */
 export function DayMenuSheet({
   open,
   onClose,
@@ -193,6 +193,7 @@ export function DayMenuSheet({
   past,
   hasEntries,
   onSelect,
+  onSaveTemplate,
 }: {
   open: boolean;
   onClose: () => void;
@@ -200,6 +201,8 @@ export function DayMenuSheet({
   past: boolean;
   hasEntries: boolean;
   onSelect: () => void;
+  /** Opens the save sheet (Lưu ngày này thành mẫu). */
+  onSaveTemplate: () => void;
 }) {
   return (
     <Sheet open={open} onClose={onClose} title={title} titleId="day-menu-title" desktopDialog>
@@ -216,6 +219,19 @@ export function DayMenuSheet({
         <span className="text-cap leading-tight text-secondary">
           {hasEntries ? (past ? "Chép nhiều món vào hôm nay" : "Chép, chuyển bữa hoặc xóa nhiều món cùng lúc") : "Chưa có món nào"}
         </span>
+      </button>
+      <button
+        type="button"
+        disabled={!hasEntries}
+        data-tour="day-menu-save"
+        onClick={() => {
+          onClose();
+          onSaveTemplate();
+        }}
+        className="flex min-h-14 w-full cursor-pointer flex-col items-start justify-center border-0 border-t border-divider bg-transparent px-1 py-2 text-left disabled:cursor-default disabled:opacity-50"
+      >
+        <span className="text-callout font-bold text-text">Lưu ngày này thành mẫu</span>
+        <span className="text-cap leading-tight text-secondary">{hasEntries ? "Chép lại cả ngày bằng một chạm" : "Chưa có món nào"}</span>
       </button>
       <PillButton type="button" variant="secondary" onClick={onClose}>
         Đóng
