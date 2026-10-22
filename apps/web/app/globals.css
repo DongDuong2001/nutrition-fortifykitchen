@@ -24,6 +24,25 @@
 /* V3-SPEC §4 Liquid Glass, for the navigation layer only (tab bar, sheet header, toast, Back and trailing circles), never
    content. Solid card colour under reduced transparency; solid with the card-border edge under more contrast. Never
    animate backdrop-filter (D-MAT-05). */
+/* C3: a small pill on the header (Chia sẻ): lighter glass, a hairline and a soft shadow, the same fallbacks as glass */
+@utility glass-light {
+  background-color: var(--color-glass-light);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-glass-light);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-contrast: more) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 0 0 1px var(--color-card-border);
+  }
+}
+
 @utility glass {
   background-color: var(--color-glass);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -312,6 +331,8 @@
   /* Liquid Glass (V3-SPEC §4): the navigation layer only (tab bar, sheet header, toast, Back and trailing circles).
      The .glass utility below applies it; prefers-reduced-transparency makes it the solid card colour. */
   --color-glass: rgba(255, 255, 255, 0.72);
+  /* C3 (Hao 22/10): the lighter glass of the Chia sẻ pill */
+  --color-glass-light: rgba(255, 255, 255, 0.86);
   --color-glass-text: #111317;
   /* The sheet header's glass (V3 sheetGlass) */
   --color-glass-sheet: rgba(255, 255, 255, 0.8);
@@ -362,6 +383,7 @@
   --shadow-glass-tab: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 10px 28px rgb(0 0 0 / 0.16);
   --shadow-glass-tab-dark: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 0.5px rgb(255 255 255 / 0.1), 0 10px 28px rgb(0 0 0 / 0.5);
   --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12);
+  --shadow-glass-light: inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.1);
   /* The food-group icon tile (IconTile.dc.html): a top highlight and a soft shadow; Tất cả (ink) adds a faint ring */
   --shadow-tile: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
   --shadow-tile-ink: inset 0 0 0 1px rgb(255 255 255 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);

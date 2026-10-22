@@ -274,7 +274,7 @@ export function AppHeader({
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-body-lg font-semibold leading-tight tracking-tight text-text cursor-pointer hover:text-cobalt focus-visible:outline-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-body-lg font-bold leading-tight tracking-tight text-text cursor-pointer hover:text-cobalt focus-visible:outline-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel ? (
                     // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)

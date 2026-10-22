@@ -112,6 +112,8 @@ def column(pg):
           const aside = [...document.querySelectorAll("aside[aria-label='Vi chất']")].find(a => a.getBoundingClientRect().width > 0);
           const out = {}; const extras = [];
           for (const sec of aside.querySelectorAll('section')) {
+            // C3: Chất xơ is a section of its own with no h3 (its title is the row's name) and no Level group: skip it
+            if (!sec.querySelector('h3')) continue;
             const title = sec.querySelector('h3').textContent.trim();  // cc-44: the pill draws it uppercase
             out[title] = [...sec.querySelectorAll('[data-align-group=home-nutrient]')].map(r => r.innerText.split('\\n')[0].trim());
             if (title.startsWith('Chi tiết')) for (const r of sec.querySelectorAll('[data-extra]')) extras.push({ text: r.innerText.replace(/\\s+/g, ' ').trim(), bars: r.querySelectorAll('[role=progressbar]').length, pct: /%/.test(r.innerText) });

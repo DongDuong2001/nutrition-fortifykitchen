@@ -116,7 +116,7 @@ def run(browser, size, tag):
         sizes = pg.evaluate(
             """() => {
               const food = document.querySelector("section[aria-label='Bữa sáng'] button[aria-pressed][aria-label*=', '] span span");
-              const nutri = document.querySelector("aside[aria-label='Vi chất'] [data-align-group=home-nutrient] span span");
+              const nutri = document.querySelector("aside[aria-label='Vi chất'] [data-align-group=home-nutrient]:not([data-nutrient-row=fiber]) span span");
               return [getComputedStyle(food).fontSize, getComputedStyle(nutri).fontSize, getComputedStyle(food).fontWeight, getComputedStyle(nutri).fontWeight];
             }"""
         )

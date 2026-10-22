@@ -1,8 +1,7 @@
 import { LevelBadge } from "@/components/profile/level-badge";
-import { LevelBar } from "@/components/ui/level-bar";
 import { formatAmount } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
-import { pctLabel, pctOf, portionLabel, type HomeMeal } from "@/lib/home";
+import { portionLabel, type HomeMeal } from "@/lib/home";
 import { isExtra } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import {
@@ -12,6 +11,7 @@ import {
   type ShareModel,
 } from "@/lib/share-card";
 import { HomeHero } from "./home-hero";
+import { MicroRow } from "./nutrient-column";
 
 /** One meal: dot, label and kcal on a 44 px header, then its foods, each on an inset divider (V3ShareB). */
 function ShareMeal({ meal }: { meal: HomeMeal }) {
@@ -29,7 +29,8 @@ function ShareMeal({ meal }: { meal: HomeMeal }) {
         <span className="font-display text-callout font-extrabold uppercase italic leading-[1.1] tracking-[0.01em] text-text">
           {meal.label}
         </span>
-        <span className="ml-0.5 font-condensed text-cap font-extrabold leading-none text-secondary tabular-nums">
+        {/* C3, as Hôm nay's meal card; the name stays ink here (nothing in the image can be tapped) */}
+        <span className="ml-0.5 font-condensed text-callout font-extrabold leading-none text-text/75 tabular-nums">
           {kcalValue(meal.kcal)}
         </span>
       </div>
@@ -46,7 +47,7 @@ function ShareMeal({ meal }: { meal: HomeMeal }) {
           >
             {entry.name}
           </span>
-          <span className="max-w-[40%] flex-none text-right font-condensed text-callout font-extrabold leading-none tabular-nums">
+          <span className="max-w-[40%] flex-none text-right font-condensed text-body-lg font-extrabold leading-none tabular-nums">
             {portionLabel(entry)}
           </span>
         </div>
@@ -74,22 +75,25 @@ function ShareMicros({ model, largeText }: { model: ShareModel; largeText: boole
       data-share-keep-lines
       className="flex w-[180px] flex-none flex-col overflow-hidden rounded-card bg-card"
     >
-      <p
-        data-level-summary
-        className="m-0 flex flex-col gap-1 px-3 pb-2 pt-3 text-cap leading-[1.125rem] text-secondary"
-      >
-        <span className="block h-6 font-semibold text-text">
-          <span className="font-condensed text-[1.5rem] font-extrabold leading-none tabular-nums">
+      {/* C3, as the page: the count 40 px cobalt, the lacking names in full ink; Chất xơ in its own row above the groups (not counted) */}
+      <p data-level-summary className="m-0 flex flex-col gap-1 px-3 pb-2 pt-3 text-text">
+        <span className="block whitespace-nowrap text-body-lg font-bold leading-none">
+          <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
             {summary.reached}/{summary.total}
           </span>{" "}
           đạt
         </span>
         {summary.lacking.length > 0 && (
-          <span data-share-wrap>
-            Thiếu nhiều nhất: {summary.lacking.join(", ")}
+          <span data-share-wrap className="text-sm leading-5">
+            <span className="text-text/75">Thiếu nhiều nhất: </span>
+            <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
           </span>
         )}
       </p>
+      <section aria-label="Chất xơ">
+        <div aria-hidden="true" className="mx-3 h-px bg-divider" />
+        <MicroRow id="fiber" name="Chất xơ" title share unit="g" value={values.fiber} target={model.macroTargets.fiber} />
+      </section>
       {groups.map((group) => (
         <section key={group.title} aria-label={group.title}>
           <div aria-hidden="true" className="mx-3 h-px bg-divider" />
@@ -122,37 +126,7 @@ function ShareMicros({ model, largeText }: { model: ShareModel; largeText: boole
                 </div>
               );
             }
-            const value = values.nutrients[id] ?? null;
-            const pct = pctOf(value, targets[id] ?? null);
-            return (
-              <div
-                key={id}
-                data-align-group="home-nutrient"
-                className="flex min-h-11 flex-col justify-center gap-1 px-3 py-1.5 text-text"
-              >
-                <div className="flex items-baseline justify-between gap-1">
-                  {/* When name and amount do not fit on one line the amount moves under the name */}
-                  <span className="flex min-w-0 flex-wrap items-baseline gap-x-1 gap-y-0.5">
-                    <span className="min-w-0 break-words text-callout font-semibold leading-tight">
-                      {def.name}
-                    </span>
-                    <span className="whitespace-nowrap text-xs leading-tight text-secondary tabular-nums">
-                      {value === null
-                        ? "chưa có dữ liệu"
-                        : `${formatAmount(value, def.unit)} ${def.unit}`}
-                    </span>
-                  </span>
-                  <span className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none tabular-nums">
-                    {value === null ? "" : pctLabel(value, targets[id] ?? null)}
-                  </span>
-                </div>
-                <LevelBar
-                  label={`${def.name} so với mục tiêu ngày`}
-                  pct={pct}
-                  heightClass="h-[9px]"
-                />
-              </div>
-            );
+            return <MicroRow key={id} id={id} name={def.name} unit={def.unit} share value={values.nutrients[id] ?? null} target={targets[id] ?? null} />;
           })}
         </section>
       ))}

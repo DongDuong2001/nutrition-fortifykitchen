@@ -25,6 +25,7 @@ export const NutrientColumn = memo(function NutrientColumn({
   microsHref,
   onNutrient,
   summary,
+  fiber,
 }: {
   values: HomeValues;
   /** Amounts of the extras by id (null = unknown). */
@@ -37,6 +38,8 @@ export const NutrientColumn = memo(function NutrientColumn({
   onNutrient?: (id: string) => void;
   /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
   summary?: { reached: number; total: number; lacking: string[] };
+  /** C3: Chất xơ in its own section above the first group (not counted in x/N đạt); its target is the day's fibre target */
+  fiber?: { value: number | null; target: number | null };
 }) {
   return (
     <aside
@@ -48,18 +51,39 @@ export const NutrientColumn = memo(function NutrientColumn({
       {/* cc-61: the verdict covers every group below (N is minerals plus vitamins), so it heads the column, above the first band.
           Whole-pixel heights (a 24 px numeral line, 18 px text lines) keep the whole-row cut of the area clean. */}
       {summary && (
-        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 pb-2 pt-3 text-cap leading-[1.125rem] text-secondary lg:text-callout lg:leading-5">
-          <span className="block h-6 font-semibold text-text lg:h-7">
-            <span className="font-condensed text-[1.5rem] font-extrabold leading-none tabular-nums lg:text-title">
+        // C3: the count is the column's biggest number (40 px, cobalt), "đạt" 17 px; the lacking names in full ink and bolder than
+        // their label (Hao's canvas comment). Only the label is at 75 %: an opacity on the parent would fade the names too.
+        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 pb-2 pt-3 text-text">
+          <span className="block text-body-lg font-bold leading-none">
+            <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
               {summary.reached}/{summary.total}
             </span>{" "}
             đạt
           </span>
-          {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
+          {summary.lacking.length > 0 && (
+            <span className="text-sm leading-5">
+              <span className="text-text/75">Thiếu nhiều nhất: </span>
+              <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
+            </span>
+          )}
         </p>
       )}
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
-      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "")}>
+      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "") + (fiber ? "+fiber" : "")}>
+        {fiber && (
+          <section aria-label="Chất xơ" className="flex shrink-0 flex-col">
+            <MicroRow
+              id="fiber"
+              name="Chất xơ"
+              title
+              unit="g"
+              value={fiber.value}
+              target={fiber.target}
+              onNutrient={onNutrient}
+              className="relative before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-divider before:content-['']"
+            />
+          </section>
+        )}
         {groups.map((group, groupIndex) => (
           <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex shrink-0 flex-col">
             {/* V3: an inset hairline, then the section header in Saira (no ink band). The hairline is part of the header so the area's row snap starts on it. */}
@@ -86,42 +110,7 @@ export const NutrientColumn = memo(function NutrientColumn({
                   </div>
                 );
               }
-              const value = values.nutrients[id] ?? null;
-              const pct = pctOf(value, targets[id] ?? null);
-              // cc-51 D4: today's rows are buttons that open the foods behind the number (a 44 px row)
-              const Row = onNutrient ? "button" : "div";
-              return (
-                <Row
-                  key={id}
-                  {...(Row === "button"
-                    ? {
-                        type: "button" as const,
-                        onClick: () => onNutrient?.(id),
-                        "aria-label": nutrientRowLabel({ name: def.name, unit: def.unit, value, target: targets[id] ?? null, level: pct === null ? null : getLevelLabel(getLevel(pct)) }),
-                        "aria-haspopup": "dialog" as const,
-                      }
-                    : {})}
-                  data-align-group="home-nutrient"
-                  data-snap-row
-                  className={`flex min-h-11 snap-start flex-col justify-center gap-1 px-3 py-1.5 lg:min-h-12 ${
-                    Row === "button" ? "w-full cursor-pointer border-0 bg-transparent text-left" : ""
-                  }`}
-                >
-                  <div className="flex items-baseline justify-between gap-1">
-                    {/* The full name always shows; when name and amount do not fit on one line (large text) the amount moves under the name */}
-                    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
-                      <span className="min-w-0 break-words text-callout font-semibold leading-tight text-text">{def.name}</span>
-                      <span className="whitespace-nowrap text-xs leading-tight text-secondary tabular-nums">
-                        {value === null ? "chưa có dữ liệu" : `${formatAmount(value, def.unit)} ${def.unit}`}
-                      </span>
-                    </span>
-                    <span className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none text-text tabular-nums lg:text-[1.125rem]">
-                      {value === null ? "" : pctLabel(value, targets[id] ?? null)}
-                    </span>
-                  </div>
-                  <LevelBar label={`${def.name} so với mục tiêu ngày`} pct={pct} heightClass="h-[9px] lg:h-[10px]" />
-                </Row>
-              );
+              return <MicroRow key={id} id={id} name={def.name} unit={def.unit} value={values.nutrients[id] ?? null} target={targets[id] ?? null} onNutrient={onNutrient} />;
             })}
           </section>
         ))}
@@ -138,3 +127,74 @@ export const NutrientColumn = memo(function NutrientColumn({
     </aside>
   );
 });
+
+/**
+ * One nutrient row (C3): the name on its own line (15 px; Chất xơ as a section title), the amount always on the line under it
+ * (13 px, ink at 70 %), the percent (16 px) centred against both lines, then the level bar. Today's rows are buttons that open
+ * the foods behind the number (cc-51 D4).
+ */
+export function MicroRow({
+  id,
+  name,
+  unit,
+  value,
+  target,
+  onNutrient,
+  title = false,
+  share = false,
+  className = "",
+}: {
+  id: string;
+  name: string;
+  unit: string;
+  value: number | null;
+  target: number | null;
+  onNutrient?: (id: string) => void;
+  /** Chất xơ: the name in the section-title style (Saira italic 800, 17 px, uppercase) and the target after the amount */
+  title?: boolean;
+  /** The share image (share-day): the name keeps the lines it had on the page (data-share-wrap) */
+  share?: boolean;
+  className?: string;
+}) {
+  const pct = pctOf(value, target);
+  const Row = onNutrient ? "button" : "div";
+  const amount = value === null ? "chưa có dữ liệu" : `${formatAmount(value, unit)} ${unit}${title && target !== null ? ` / ${formatAmount(target, unit)} ${unit}` : ""}`;
+  return (
+    <Row
+      {...(Row === "button"
+        ? {
+            type: "button" as const,
+            onClick: () => onNutrient?.(id),
+            "aria-label": nutrientRowLabel({ name, unit, value, target, level: pct === null ? null : getLevelLabel(getLevel(pct)) }),
+            "aria-haspopup": "dialog" as const,
+          }
+        : {})}
+      data-align-group="home-nutrient"
+      data-snap-row
+      data-nutrient-row={id}
+      className={`flex min-h-11 snap-start flex-col justify-center gap-1 px-3 lg:min-h-12 ${title ? "py-3" : "py-1.5"} ${
+        Row === "button" ? "w-full cursor-pointer border-0 bg-transparent text-left" : ""
+      } ${className}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span
+            data-share-wrap={share || undefined}
+            className={
+              title
+                ? "font-display text-body-lg font-extrabold uppercase leading-5 tracking-[0.01em] text-text"
+                : "min-w-0 break-words text-callout font-semibold leading-tight text-text"
+            }
+          >
+            {name}
+          </span>
+          <span className="text-cap leading-tight text-text/70 tabular-nums">{amount}</span>
+        </span>
+        <span className="shrink-0 whitespace-nowrap font-condensed text-base font-extrabold leading-none text-text tabular-nums lg:text-[1.125rem]">
+          {value === null ? "" : pctLabel(value, target)}
+        </span>
+      </div>
+      <LevelBar label={`${name} so với mục tiêu ngày`} pct={pct} heightClass="h-[9px] lg:h-[10px]" />
+    </Row>
+  );
+}

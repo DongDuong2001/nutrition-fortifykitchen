@@ -42,6 +42,7 @@ export const RELEASES: readonly Release[] = [
         title: "Góp ý & báo lỗi ngay trong app",
         body: "Cài đặt có mục Góp ý & hỗ trợ. Báo lỗi, báo sai số liệu hay yêu cầu thêm món, app soạn sẵn email cho bạn.",
       },
+      { icon: "home", title: "Hôm nay dễ đọc hơn", body: "Số to hơn, chữ đậm hơn. Chất xơ có dòng riêng ở đầu cột vi chất, ngay dưới số vi chất đạt." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
