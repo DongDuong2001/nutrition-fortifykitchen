@@ -12,7 +12,7 @@ on:
 jobs:
   api:
     name: Go tests and diary integration tests (Postgres 17)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17-alpine
@@ -27,7 +27,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version-file: apps/api/go.mod
@@ -46,9 +46,9 @@ jobs:
 
   web-image:
     name: Web image serves the link page at /
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build the production web image (as deploy/docker-compose.prod.yml does)
         run: |
           set -o pipefail
