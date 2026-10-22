@@ -11,7 +11,8 @@ At 390x844 and 1280x900, then again at 390 with the root font at 32 px (200 %), 
   D-CTL-08  every icon-only button or link has an accessible name
   D-A11Y-03 exactly one h1 per screen
 Each failure prints as "D-XXX-NN route width: detail"; the probe exits 1 on any failure.
-DF_ROUTES=/app,/explore limits the routes (default: every smoke route). DF_RULES=D-CTL-01,... limits the rules.
+DF_ROUTES=/app,/explore limits the routes (default: every smoke route except /landing, which design-floor-landing.py checks on
+its own, quarantined). DF_RULES=D-CTL-01,... limits the rules.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/design-floor.py
 """
 # PROBE_COVERS: app/** components/**
@@ -28,6 +29,8 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 NOW = "2026-10-15T10:00:00+07:00"
 PASSES = [("390", {"width": 390, "height": 844}, False), ("1280", {"width": 1280, "height": 900}, False), ("390@200%", {"width": 390, "height": 844}, True)]
 ONLY_RULES = set(filter(None, os.environ.get("DF_RULES", "").split(",")))
+# /landing was red on main before V3 (see QUARANTINE in run_all.py); it has its own probe so this one can fail the run
+OWN_PROBE_ROUTES = {"/landing"}
 
 CHECK_JS = r"""() => {
   const out = [];
@@ -137,7 +140,7 @@ CHECK_JS = r"""() => {
 def run_pass(index):
     name, size, big = PASSES[index]
     wanted = os.environ.get("DF_ROUTES")
-    routes = wanted.split(",") if wanted else [r for r in discover_routes() if r not in SKIPPED_ROUTES]
+    routes = wanted.split(",") if wanted else [r for r in discover_routes() if r not in SKIPPED_ROUTES | OWN_PROBE_ROUTES]
     failures = 0
     with sync_playwright() as p:
         browser = p.chromium.launch()

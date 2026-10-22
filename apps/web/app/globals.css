@@ -349,6 +349,21 @@
   }
 }
 
+/* A target that large text squeezes under 44 px wide (a day bar, a minute chip, a meal header) grows an invisible hit area
+   sideways up to 44 px; how it looks does not change, and a target that is already wide enough is untouched. DESIGN.md
+   D-CTL-01 counts the ::before. Neighbours that touch share the overlap, the later one wins it. The target must be positioned
+   (relative, or the absolute it already is). */
+@utility hit-44 {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(max(0px, (44px - 100%) / 2) * -1);
+    right: calc(max(0px, (44px - 100%) / 2) * -1);
+  }
+}
+
 :root {
   color-scheme: light;
 }

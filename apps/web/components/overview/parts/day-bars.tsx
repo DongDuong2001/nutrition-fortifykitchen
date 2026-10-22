@@ -96,7 +96,7 @@ export function DayBars({
                 aria-label={aria}
                 aria-pressed={isSel}
                 onClick={() => onSelect(i)}
-                className="flex min-h-11 min-w-0 flex-1 cursor-pointer flex-col items-stretch border-0 bg-transparent p-0"
+                className="hit-44 relative flex min-h-11 min-w-0 flex-1 cursor-pointer flex-col items-stretch border-0 bg-transparent p-0"
               >
                 <span className={`flex ${CHART_HEIGHT} items-end px-1`}>
                   {d.value !== null && metrics ? (

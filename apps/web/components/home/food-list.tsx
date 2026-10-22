@@ -393,7 +393,7 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
+                className="hit-44 relative flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
               >
                 <span aria-hidden="true" className={`h-2 w-2 flex-none rounded-full ${MEAL_DOT[meal.slot]}`} />
                 <span className="whitespace-nowrap font-display text-callout font-extrabold uppercase leading-[1.1] tracking-[0.01em]">{meal.label}</span>
@@ -413,7 +413,7 @@ export function FoodList({
                   data-export="hide"
                   data-tour="meal-add"
                   data-testid="meal-add"
-                  className="inline-flex h-11 w-11 flex-none items-center justify-center text-cobalt no-underline transition-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt active:scale-[0.97] motion-reduce:active:scale-100"
+                  className="relative inline-flex h-11 w-11 flex-none items-center justify-center text-cobalt no-underline transition-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt active:scale-[0.97] motion-reduce:active:scale-100"
                 >
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
                     <path d="M12 5v14M5 12h14" />

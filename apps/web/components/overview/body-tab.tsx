@@ -80,7 +80,7 @@ function WeightLine({
               aria-pressed={isSel}
               aria-label={`${weekdayShort(p.date)} ${dm(p.date)}: ${kg(p.kg)} kg`}
               onClick={() => onSelect(i)}
-              className="absolute top-0 h-full -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0"
+              className="hit-44 absolute top-0 h-full -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0"
               style={{ left: `${x(p.date)}%`, width: columnWidth }}
             >
               <span
