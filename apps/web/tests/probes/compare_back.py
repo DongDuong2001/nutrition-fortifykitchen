@@ -135,10 +135,56 @@ def run(browser):
     ctx.close()
 
 
+def desktop(browser):
+    """1440×900: the + dialog with the portion inline; Back from So sánh brings the same food back with the search."""
+    ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+    ctx.add_init_script(f"try {{ localStorage.setItem('h1t_settings_v1_demo', {json.dumps(SETTINGS)}); }} catch (e) {{}}")
+    pg = ctx.new_page()
+    pg.goto(BASE + "/app", wait_until="networkidle")
+    pg.wait_for_timeout(800)
+    pg.locator('a[href^="/add"]:visible').first.click()
+    pg.locator("button[data-food-row]:visible").first.wait_for(state="visible", timeout=15000)
+    pg.wait_for_timeout(500)
+    pg.locator("[data-add-panel] input:visible, [role=dialog] input[type=search]:visible").first.fill("gà")
+    pg.wait_for_timeout(800)
+    pg.locator("button[data-food-row]:visible").nth(1).click()
+    pg.wait_for_timeout(600)
+    title = pg.locator("[data-testid=portion-add]:visible").count()
+    name = pg.locator("button[data-food-row][aria-pressed=true]:visible").first.get_attribute("data-food-id")
+    to_compare(pg)
+    pg.go_back()
+    pg.wait_for_url(re.compile(r"/add"), timeout=8000)
+    pg.wait_for_timeout(1500)
+    picked = pg.locator("button[data-food-row][aria-pressed=true]:visible")
+    check(title == 1 and picked.count() >= 1 and picked.first.get_attribute("data-food-id") == name, f"1440: Back from So sánh shows the same food picked ({name})")
+    check(pg.locator("[data-add-panel] input:visible, [role=dialog] input[type=search]:visible").first.input_value() == "gà", "1440: …with the search")
+    ctx.close()
+
+
+def fresh_plus(browser):
+    """The + of the comparison page starts a new add: no old food, no old search."""
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    ctx.add_init_script(f"try {{ localStorage.setItem('h1t_settings_v1_demo', {json.dumps(SETTINGS)}); }} catch (e) {{}}")
+    pg = ctx.new_page()
+    open_portion(pg)
+    to_compare(pg)
+    plus = pg.locator('a[href^="/add"]:visible')
+    if plus.count():
+        plus.first.click()
+        pg.wait_for_url(re.compile(r"/add"), timeout=8000)
+        pg.wait_for_timeout(1200)
+        check(pg.locator("#portion-sheet-title:visible").count() == 0 and pg.locator("[data-add-panel] input").first.input_value() == "", "the + on the comparison page opens a new add (no old food or search)")
+    else:
+        print("[INFO] no + on the comparison page at 390")
+    ctx.close()
+
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     try:
         run(browser)
+        desktop(browser)
+        fresh_plus(browser)
     finally:
         browser.close()
 

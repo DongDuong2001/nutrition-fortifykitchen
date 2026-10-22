@@ -54,6 +54,7 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet, takeBackSheetEntries } from "@/lib/sheet-history";
 import { compareHref } from "@/lib/food-compare";
 import { catalogFoodById } from "@/lib/catalog";
+import { ADD_RETURN_KEY } from "@/components/ui/add-opener";
 import { ComparePicker } from "@/components/foods/compare-picker";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
@@ -80,7 +81,7 @@ const desktopNow = () => window.matchMedia(DESKTOP_QUERY).matches;
 // Back lands on the + sheet's own entry, a new AddScreen. A one-shot note (sessionStorage, read once by the next + sheet that came
 // from /foods/compare) brings it back as So sánh left it: the food's portion sheet with its amount, the search, the filter, the
 // meal, the Khay and the list's place. The portion sheet opens on a new entry, so Back then goes to the list, and once more closes.
-const RETURN_KEY = "h1t_add_return_v1";
+const RETURN_KEY = ADD_RETURN_KEY;
 interface AddReturn {
   meal: MealSlot | null;
   query: string;
