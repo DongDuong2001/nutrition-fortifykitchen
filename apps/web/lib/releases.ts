@@ -31,6 +31,18 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
+  // to this same entry, whichever merges second keeps both. No tour: no new control, and the one new hint, Xem riêng một bữa, is a tip
+  // (lib/tips meal-focus) where Hôm nay's footnote used to say it.
+  {
+    id: "2026-10-22c",
+    date: "22/10",
+    items: [
+      { icon: "meal", title: "Món ghi theo gam", body: "Danh sách món hiện kcal theo gam, không còn củ, bìa hay nắm. Trứng và chanh vẫn ghi theo quả." },
+      { icon: "bars", title: "Tổng quan đếm vi chất như Hôm nay", body: "Số vi chất đạt ở Tổng quan tính theo các chất của Level bạn, giống Hôm nay. Đủ 22 vi chất vẫn xem được ngay bên dưới." },
+      { icon: "bars", title: "Số trung bình ghi rõ", body: "Kcal và Đạm ở Tổng quan ghi TB/ngày, là trung bình mỗi ngày trong 7 hoặc 30 ngày." },
+    ],
+  },
   // backend-sync-1022 (Hao 22/10): the macro split and Ngày ăn mẫu are stored with the account (migrations 000015/000016), on top of
   // 22a, which is live. One item, as the brief asks, and no tour or tip: no new control, the same screens now follow the account.
   {

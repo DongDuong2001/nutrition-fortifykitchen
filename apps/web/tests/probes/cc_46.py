@@ -6,13 +6,13 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Comes before a tip (one interruption per app open, fix/polish-1020): opens first with no tip beside it, and no tip follows it in the same open
-- An account that has seen nothing gets the newest release only (2026-10-22b, backend-sync-1022: Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các
-  máy): one item and no tour (no new control), so the sheet has Để sau and no Thử ngay. An account that saw 21a gets 21b, 21c, 22a and 22b, and
-  Thử ngay runs their joined tour on /app (22b adds no step); cc_tutorials.py covers
+- An account that has seen nothing gets the newest release only (2026-10-22c, overnight 22→23/10: Món ghi theo gam, Tổng quan đếm vi chất như
+  Hôm nay, Số trung bình ghi rõ): no tour (no new control), so the sheet has Để sau and no Thử ngay. An account that saw 21a gets 21b, 21c, 22a,
+  22b and 22c, and Thử ngay runs their joined tour on /app (22b and 22c add no step); cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
-- /settings/whats-new lists 22/10 (22b, 22a), 21/10 (21c, 21b cc-73b, 21a follow-ups), 20/10 (20b overnight, 20a cc-70), 19/10 (19b cc-68, 19a cc-67), the six 18/10 releases (18f cc-53b, 18e cc-52, 18d cc-53, 18c, 18b, 18) and 17/10, newest first, and replays the tour on /app
+- /settings/whats-new lists 22/10 (22c, 22b, 22a), 21/10 (21c, 21b cc-73b, 21a follow-ups), 20/10 (20b overnight, 20a cc-70), 19/10 (19b cc-68, 19a cc-67), the six 18/10 releases (18f cc-53b, 18e cc-52, 18d cc-53, 18c, 18b, 18) and 17/10, newest first, and replays the tour on /app
 - 44 px targets, screen-reader names, reduced motion fades, 480 px centred dialog at 1440
 Screenshots: .screenshots/cc-46-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_46.py
@@ -37,10 +37,11 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-22b"
+RELEASE = "2026-10-22c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
 ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn", "Chia sẻ ngày ăn bằng một chạm"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients, share-spotlight (2026-10-22a)
+ITEMS_2210C = ["Món ghi theo gam", "Tổng quan đếm vi chất như Hôm nay", "Số trung bình ghi rõ"]  # overnight 22→23/10 (2026-10-22c), no tour
 ITEMS_2210B = ["Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy"]  # backend-sync-1022 (2026-10-22b): one item, no tour
 ITEMS_2110C = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add, polish, rich-tabs, minh-hao-tab, glide, swap-ingredients (2026-10-21c, live)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
@@ -152,9 +153,10 @@ def once(browser):
     pg.wait_for_timeout(200)
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
-    check(all(t in text for t in ITEMS_2210B) and ITEMS[0] not in text, "the release's item (22b), not 22a's")
-    # 22b's one title is long and may take two lines at 390 px, so there is no one-line check for it
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 0, "no Thử ngay: 22b has no tour (no new control)")
+    check(all(t in text for t in ITEMS_2210C) and ITEMS_2210B[0] not in text, "the release's items (22c), not 22b's")
+    wrapped = wrapped_titles(pg, ITEMS_2210C)
+    check(not wrapped, f"each item title of 22c fits on one line at 390 px (wrapped: {wrapped})")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 0, "no Thử ngay: 22c has no tour (no new control)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -298,7 +300,7 @@ def tour(browser):
 
 def home_tour(browser):
     """cc-73b: Thử ngay runs the 21b tour on /app: two steps, the kcal target (the hero), then the vitamin column (the hero when it is missing).
-    An account that saw 21a gets 21b, 21c, 22a and 22b: the tour is 21c's first and 22a's seven that are on Hôm nay (22b has none; cut to 8: see
+    An account that saw 21a gets 21b, 21c, 22a, 22b and 22c: the tour is 21c's first and 22a's seven that are on Hôm nay (22b and 22c have none; cut to 8: see
     lib/releases joinedTour)."""
     ctx, pg = new_page(browser, onboarding={**SEEN_TIPS, "whatsNewSeen": "2026-10-21a"})
     go(pg, "/app", 1200)
@@ -333,9 +335,9 @@ def history(browser):
     check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS_1810F + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
     check(text.count("Cập nhật 19/10") == 2 and all(t in text for t in ITEMS_1910B + ITEMS_1910A), "…and the two 19/10 releases (19b and 19a)")
     check(text.count("Cập nhật 20/10") == 2 and all(t in text for t in ITEMS_2010B + ITEMS_2010A), "…and the two 20/10 releases (20b and 20a)")
-    check(text.count("Cập nhật 22/10") == 2 and all(t in text for t in ITEMS_2210B + ITEMS), "the history lists the newest releases first: 22/10 (22b, then 22a)")
+    check(text.count("Cập nhật 22/10") == 3 and all(t in text for t in ITEMS_2210C + ITEMS_2210B + ITEMS), "the history lists the newest releases first: 22/10 (22c, 22b, then 22a)")
     check(text.count("Cập nhật 21/10") == 3 and all(t in text for t in ITEMS_2110C + ITEMS_2110B + ITEMS_2110A), "…and the three 21/10 releases (21c, 21b and 21a)")
-    check(text.index(ITEMS_2210B[0]) < text.index(ITEMS[0]) < text.index(ITEMS_2110C[0]) < text.index(ITEMS_2110B[0]) < text.index(ITEMS_2110A[0]) < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 22b, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d, 18c, 18b, 18")
+    check(text.index(ITEMS_2210C[0]) < text.index(ITEMS_2210B[0]) < text.index(ITEMS[0]) < text.index(ITEMS_2110C[0]) < text.index(ITEMS_2110B[0]) < text.index(ITEMS_2110A[0]) < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 22c, 22b, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d, 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
     check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 12, "Xem hướng dẫn on 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18c and 17/10 (18d's tour is retired)")
