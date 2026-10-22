@@ -921,8 +921,11 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   />
                 </SwitchGlide>
                 )}
+                {/* Desktop parity (23/10): pinned to the dialog's bottom edge, so the add stays in view when the dialog
+                    scrolls (at 1280×800 it sat 56 px below the fold); the phone's bar is already fixed under its list */}
                 {tray.length > 0 && (
                   <TrayBar
+                    className="sticky bottom-0 z-10"
                     totals={trayTotalsNow}
                     mealName={mealNameVi}
                     canAdd={trayAddable}

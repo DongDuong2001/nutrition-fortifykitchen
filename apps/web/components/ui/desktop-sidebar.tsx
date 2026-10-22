@@ -19,7 +19,8 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
   const [active, setActive] = useOptimistic(useActiveTab(currentTab));
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-card-border bg-card p-6 text-text box-border lg:flex">
+    // Desktop parity (23/10): pinned (sticky, one screen tall) so the nav stays in reach on long pages; it scrolled away
+    <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-card-border bg-card p-6 text-text box-border lg:sticky lg:top-0 lg:flex lg:h-dvh lg:self-start lg:overflow-y-auto">
       {/* The wordmark goes back to Hôm nay (Hao, 20/10) */}
       <Link
         href={HOME_ROUTE}
