@@ -27,11 +27,12 @@ At 360, at 360 with the root text at 150 % and at 390:
 - Headers: `/explore/cua_toi` "Món ăn của tôi", `/explore/meals` "Bữa ăn đã lưu" with its new subtitle, `/explore/ngay-mau` "Ngày ăn mẫu": one h1, not cut off, none of the old names on the page.
 - The button "Tùy chỉnh món này" and the recipe line are one line and not cut off at 100 %.
 - The pill: reported in the probe (see above), not asserted.
-Screenshots (`apps/web/.screenshots/v3-rename/`, gitignored): `cua-ban-{360,360-text150,390}.png` (the Của bạn card), `food-page-*.png` (the recipe dish with "Tùy chỉnh món này"), `recipe-page-*.png` (the page of the recipe it makes), `pill-*.png`.
+Screenshots in `docs/screenshots/rename-labels/`: `cua-ban-{360,360-text150,390}.png` (the Của bạn card), `food-page-{360,360-text150}.png` (the recipe dish with "Tùy chỉnh món này"), `recipe-page-360.png` (the page of the recipe it makes, with its one-line "Món ăn của tôi · N phần · N nguyên liệu"), `pill-360.png` ("Chép ngày mẫu", wrapping as before). The full set (390 and the 150 % shots of every case) is in `apps/web/.screenshots/v3-rename/` (gitignored).
 
 ## B. The add toast
 `lib/add-toast.ts`: `ADD_TOAST_MS` 8000 → **4000**. It is only the toast `addedToast` builds, the add of a portion or a recent. Kept: `UNDO_TOAST_MS` (8 s, the delete undo and its text "Hoàn tác trong 8 giây"), the notice, added and update toasts; consecutive adds into the same meal still update the toast in place and restart its timer; touch pauses it; swipe dismisses it (`toast_undo.py`, `lib/__tests__/toast-pause.test.ts`, `toast-swipe.test.ts` are green; they read the countdown, not 8 s). `add-toast.test.ts` asserts 5000. No probe waited on 8 s.
 Flag for review (OPEN_QUESTIONS): the tray add, a copy, a saved meal and a Ngày ăn mẫu also show an "undoable" toast, but they use `UNDO_TOAST_MS` and so stay at 8 s, as the brief says to keep it; a person sees a 4 s toast after one add and an 8 s one after a tray add.
 
 ## Gates
-gate:fast after each commit: green. gate:full: see the end of this file.
+- gate:fast after each commit: green.
+- **gate:full (5c84b21): all green, 763 s.** typecheck, lint:design, vitest (all unit tests), build:demo, test:align (73 s), test:hydration (107 s), probe:all (734 s: 135 PASS, 4 REPORT, 1 QUAR = design-floor-landing.py, 0 FAIL, 1 SKIP), check:live-bundle. Two earlier runs were red and fixed in their own commits: cc_22 (the meal menu's text is "Lưu vào …" now) and cc_46 (a past release's item name must stay "Món của tôi được lưu"); and the toast went from 5 s to 4 s, as corrected.
