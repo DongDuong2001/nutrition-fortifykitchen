@@ -32,6 +32,9 @@ import {
   updateDayTemplate,
   yesterdayCopySlots,
   type DayTemplate,
+  mergeDayTemplates,
+  templateWrites,
+  withUuidIds,
 } from "../day-templates";
 
 const oats = { foodId: "food-yen-mach", servingLabel: "60 g", grams: 60 };
@@ -303,5 +306,74 @@ describe("the words of the cards and toasts", () => {
   it("the Hôm qua copy toast is the one the copy sheet has always said", () => {
     expect(yesterdayCopyMessage(3, true)).toBe("Đã chép 3 bữa từ hôm qua");
     expect(yesterdayCopyMessage(2, false)).toBe("Đã chép 2 bữa từ hôm kia vào hôm qua");
+  });
+});
+
+// backend-sync-1022: the list follows the account through /day-templates
+describe("following the account", () => {
+  const T = (id: string, createdAt: string, name = id): DayTemplate => ({
+    id,
+    name,
+    tag: "tap",
+    meals: [{ slot: "breakfast", items: [{ foodId: "f-1", servingLabel: "1 tô", grams: 500 }] }],
+    createdAt,
+  });
+  const A = T("aaaaaaaa-0000-4000-8000-000000000001", "2026-10-20T08:00:00.000Z");
+  const B = T("aaaaaaaa-0000-4000-8000-000000000002", "2026-10-21T08:00:00.000Z");
+  const C = T("aaaaaaaa-0000-4000-8000-000000000003", "2026-10-22T08:00:00.000Z");
+  const none = new Map<string, "put" | "delete">();
+
+  it("templateWrites: a new or changed template is sent, a removed one deleted, an unchanged one left alone", () => {
+    expect(templateWrites([A, B], [C, { ...A, name: "Đổi" }])).toEqual({ put: [C, { ...A, name: "Đổi" }], remove: [B.id] });
+    expect(templateWrites([A, B], [A, B])).toEqual({ put: [], remove: [] });
+    expect(templateWrites([], [])).toEqual({ put: [], remove: [] });
+  });
+
+  it("withUuidIds: an old dt- id gets a uuid, uuids are kept, the list is the same object when nothing changes", () => {
+    const old = T("dt-1729-abcde", "2026-10-19T08:00:00.000Z");
+    const out = withUuidIds([A, old], () => "bbbbbbbb-0000-4000-8000-000000000009");
+    expect(out.map((t) => t.id)).toEqual([A.id, "bbbbbbbb-0000-4000-8000-000000000009"]);
+    expect(out[1]).toMatchObject({ name: old.name, meals: old.meals, createdAt: old.createdAt });
+    const list = [A, B];
+    expect(withUuidIds(list, () => "x")).toBe(list);
+  });
+
+  it("first sync: the device's own templates are kept and uploaded, the server's added, newest first", () => {
+    const { list, upload } = mergeDayTemplates([B], [A, C], none, true);
+    expect(list.map((t) => t.id)).toEqual([C.id, B.id, A.id]);
+    expect(upload.map((t) => t.id).sort()).toEqual([A.id, C.id]);
+  });
+
+  it("first sync of a template both have: the server's copy, nothing uploaded", () => {
+    const { list, upload } = mergeDayTemplates([{ ...A, name: "Máy kia" }], [A], none, true);
+    expect(list).toEqual([{ ...A, name: "Máy kia" }]);
+    expect(upload).toEqual([]);
+  });
+
+  it("later syncs: the server's list is the truth; one it no longer has was deleted elsewhere and goes", () => {
+    const { list, upload } = mergeDayTemplates([B, { ...C, name: "Sửa ở máy kia" }], [A, B, C], none, false);
+    expect(list.map((t) => [t.id, t.name])).toEqual([[C.id, "Sửa ở máy kia"], [B.id, B.name]]);
+    expect(upload).toEqual([]);
+  });
+
+  it("a write still waiting wins over the server's list: a save keeps the device's copy, a delete removes it", () => {
+    const pending = new Map<string, "put" | "delete">([
+      [A.id, "put"],
+      [B.id, "delete"],
+      [C.id, "put"],
+    ]);
+    const { list, upload } = mergeDayTemplates([B, { ...C, name: "Cũ" }], [A, { ...C, name: "Mới" }], pending, false);
+    expect(list.map((t) => [t.id, t.name])).toEqual([[C.id, "Mới"], [A.id, A.name]]);
+    expect(upload).toEqual([]);
+    // On the first sync a waiting save is not uploaded twice, and a waiting delete is not brought back
+    const first = mergeDayTemplates([], [A, B], new Map([[A.id, "put" as const], [B.id, "delete" as const]]), true);
+    expect(first.list.map((t) => t.id)).toEqual([A.id]);
+    expect(first.upload).toEqual([]);
+  });
+
+  it("orders by time even when the server writes another offset", () => {
+    const fromServer = { ...B, createdAt: "2026-10-21T15:30:00+07:00" }; // 08:30Z, after B's local 08:00Z
+    const { list } = mergeDayTemplates([fromServer], [A], none, true);
+    expect(list.map((t) => t.id)).toEqual([B.id, A.id]);
   });
 });

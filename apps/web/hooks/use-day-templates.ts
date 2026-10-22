@@ -3,25 +3,23 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { CATALOG_FOODS, catalogVersion, subscribeCatalog } from "@/lib/catalog";
 import { createDeviceStore } from "@/lib/device-store";
+import { dayTemplateStore as templateStore, saveDayTemplates } from "@/lib/day-template-store";
 import {
-  DAY_TEMPLATES_KEY,
   TEMPLATE_PILL_HIDDEN_KEY,
   hidePillFor,
   isPillHidden,
-  parseDayTemplates,
   parsePillHidden,
   templateMealKcal,
   templateTotals,
   type DayTemplate,
 } from "@/lib/day-templates";
 
-const templateStore = createDeviceStore<DayTemplate[]>({ key: DAY_TEMPLATES_KEY, parse: parseDayTemplates, empty: [] });
 const pillStore = createDeviceStore<string[]>({ key: TEMPLATE_PILL_HIDDEN_KEY, parse: parsePillHidden, empty: [] });
 
-/** The saved days of this device (newest first, as saved). Draws nothing until the page is on the client. */
+/** The saved days (newest first), synced with the account (lib/day-template-store). Draws nothing until the page is on the client. */
 export function useDayTemplates(): { templates: DayTemplate[]; setTemplates: (next: DayTemplate[]) => void } {
   const templates = useSyncExternalStore(templateStore.subscribe, templateStore.get, templateStore.getServer);
-  return { templates, setTemplates: templateStore.set };
+  return { templates, setTemplates: saveDayTemplates };
 }
 
 /** The saved days with what a copy adds ("N món · X kcal", each meal's kcal). The foods are looked up in the catalogue, which may still be on its way. */

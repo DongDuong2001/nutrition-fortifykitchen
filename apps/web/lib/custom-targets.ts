@@ -2,14 +2,14 @@
  * cc-73b: a custom daily target for one vitamin or mineral (Cronometer lets users change any target). A custom value
  * replaces the DRI amount for that nutrient and is marked "tự đặt" wherever the target shows.
  *
- * Behind a flag that stays off: the profile the API keeps has no field for it (a new column on nutrition.profiles, which is
- * Dong's, see docs/pr/cc-73b-custom-targets.md), and a target kept only on the device would disagree with the trends the
- * API works out. Pure.
+ * Behind a flag that stays off. The API stores the value with the profile since migration 000015 (customTargets, synced like the
+ * macro split), but its own targets (trends, the day summary) do not read it yet, so switching it on would make Hôm nay and the
+ * trends disagree (docs/pr/cc-73b-custom-targets.md, step 4). Pure.
  */
 import { DRI } from "./rda";
 import type { CompleteTargets } from "./targets";
 
-/** Off until the API stores it (docs/pr/cc-73b-custom-targets.md). While off, no row can be tapped and none is read. */
+/** Off until the API's targets use it (docs/pr/cc-73b-custom-targets.md). While off, no row can be tapped and none is read. */
 export const CUSTOM_TARGETS_ENABLED = false;
 
 /** Nutrient id to the daily amount the user set, in the nutrient's own unit. */

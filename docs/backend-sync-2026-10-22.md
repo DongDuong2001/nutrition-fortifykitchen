@@ -58,6 +58,39 @@ Tests:
   - Profile: set → get → a save without the fields → weigh-in (`updatedAt` moves) → invalid (400, nothing changed) → partial clear → clear all.
   - Templates: create, order, replay, replace, the other user (no rows, 409, a DELETE changes nothing), soft delete twice, revive, account delete cascade, and the limit of 50.
 
+## The web side (PR B, stacked on PR A)
+
+The web sends and adopts what PR A stores. `CUSTOM_TARGETS_ENABLED` stays off: only the storage changed.
+
+**Profile (`apps/web/lib/profile.ts`, `lib/api-client.ts`, `lib/diary-store.tsx`)**
+
+- `LOCAL_ONLY_PROFILE_KEYS` and `withLocalOnly` are gone. `TARGET_SETTING_KEYS` names the five synced settings.
+- **Sending:** a change of any of the five (Mục tiêu đa lượng, a custom target) sends all five in `PUT /me/profile`, with `null` for one not set, through the outbox. Any other profile change leaves them out, so a stale device cannot overwrite them. If a profile write is still waiting, its settings are carried into the next one (the outbox keeps only the newest profile write), so a name change made offline after a split does not lose the split.
+- **Adopting** (`mergeServerProfile`, on load and route changes, only when no profile write is waiting): the server's settings win once this device has synced them (`targetsSynced` on the stored profile). On the first adopt after this release, settings the device made while they were device-only are kept and uploaded once, when the server has none or when they were changed here after the server's `updatedAt` (`targetsChangedAt`). Otherwise the server's are taken.
+
+**Ngày ăn mẫu (`lib/day-templates.ts`, new `lib/day-template-store.ts`, `hooks/use-day-templates.ts`)**
+
+- New templates get a uuid id (they were `dt-<time>-<random>`).
+- Every save, edit and delete goes to the device at once. The difference to the previous list (`templateWrites`) goes through the outbox: `PUT /day-templates/{id}` for each new or changed template, `DELETE` for each removed one. The entity is `template:<id>`, so the newest write of a template wins and a delete replaces a waiting save.
+- On load (`syncDayTemplates`): `GET /day-templates`, merged by `mergeDayTemplates`. The server's list is the truth, except for a template with a write still waiting (its save is kept, its delete wins).
+- On the device's **first** sync (flag `h1t_day_templates_synced_v1` per account), templates only the device has are kept and uploaded. A `dt-…` id gets a new uuid first, and the template keeps its own `createdAt`. After that, a template the server no longer has was deleted on another device and goes.
+- The Chưa lưu list names these writes "Ngày ăn mẫu" or "Xóa ngày ăn mẫu".
+
+**Tests**
+
+- Unit (vitest):
+  - `profile.test.ts`: `mergeServerProfile`, every branch, and the mapping of `GET /me`.
+  - `day-templates.test.ts`: `templateWrites`, `withUuidIds`, `mergeDayTemplates`.
+  - `outbox.test.ts`: the five keys only when they changed, carried over a later name change; a template PUT replaced by a DELETE; a `dt-` id never sent.
+- `tests/probes/backend_sync.py`, live build only (it skips on the demo build of probe:all, like `cc_68.py`). Two contexts on one account and a stateful fake API:
+  - device 1 sets Tỉ lệ 30/40/30 and saves today as a template
+  - device 2 shows the split (form and Hôm nay's grams) and lists the template
+  - device 2 deletes it, and device 1 drops it after a reload
+  - a third device with a split and a `dt-` template from before uploads both once, and nothing on the next load
+- Release: 2026-10-22b, one Có gì mới item "Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy". `sw.js` VERSION 2026-10-22.2 (pick the next free one on `origin/main` right before the merge).
+
+**Rollout:** merge and deploy after PR A is merged and deployed (migrations first). Against an API without PR A, `GET /day-templates` answers 404 and the web keeps the device's list as it is. A template save is then refused (404): the write is held and shows in Chưa lưu until the API has the endpoint. The profile settings are sent, and the old API ignores keys it does not know. So deploy the web only after the API. Rollback: `deploy/deploy.sh <previous-tag>`. The devices keep their own copies, and nothing on the server has to change.
+
 ## Order of the rollout
 
 1. **Migrations first**, on staging (`hitmicro-staging`), then on production. The new API reads the new columns, so an API deployed before 000015 answers 500 on `GET /me`.

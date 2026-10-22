@@ -14,7 +14,7 @@ import { postTab, onTab } from "./tab-sync";
  */
 
 export type OutboxState = "queued" | "sending" | "held";
-export type OutboxKind = "diary" | "profile" | "weight" | "favourite";
+export type OutboxKind = "diary" | "profile" | "weight" | "favourite" | "template";
 
 export interface OutboxItem {
   /** This one write (an entry can have several queued). Absent before cc-49: `${id}:${createdAt}`. */
@@ -25,7 +25,7 @@ export interface OutboxItem {
   id: string;
   /** Absent = a diary write. */
   kind?: OutboxKind;
-  /** A side write that replaces the one before it for the same thing (last write wins): "profile", "weight:<date>", "fav:<foodId>". */
+  /** A side write that replaces the one before it for the same thing (last write wins): "profile", "weight:<date>", "fav:<foodId>", "template:<id>". */
   entity?: string;
   /** The day an add is for. "" for an edit or delete (they name the entry by id). */
   date: string;
