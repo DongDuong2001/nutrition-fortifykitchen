@@ -221,13 +221,17 @@ describe("cc-57 motion details", () => {
     expect(css).toMatch(/@custom-variant active \{\s*&:is\(:active, \[data-pressed\]\)/);
   });
 
-  it("/add and the portion sheet come up in 300 ms (m-quick); every other sheet keeps 350", () => {
+  it("/add comes up in 300 ms (m-quick); every other sheet keeps 350; the portion is a step inside it that enters like a tab", () => {
     expect(css).toMatch(/\.m-sheet\.m-quick,\s*\.m-scrim\.m-quick \{\s*--m-sheet-in: 300ms;/);
     expect(motion).toMatch(/--m-sheet-in: 350ms;/);
     const add = readFileSync(path.join(ROOT, "components/add/add-screen.tsx"), "utf8");
     expect(add).toMatch(/m-sheet m-quick/);
     expect(add).toMatch(/m-scrim m-scrim-dialog m-quick/);
-    expect(add).toMatch(/stacked\s+quick/);
+    // One sheet in the + flow (overnight 22→23/10): no portion sheet stacked over /add; its steps glide in (.m-tab-in) and leave in --m-switch-out
+    expect(add).not.toMatch(/stacked\s+quick/);
+    expect(add).toMatch(/<SheetView/);
+    expect(readFileSync(path.join(ROOT, "components/ui/sheet-view.tsx"), "utf8")).toMatch(/m-tab-in absolute inset-0/);
+    expect(css).toMatch(/\.m-tab-in\[data-state="closed"\] \{\s*transform: translateX\(calc\(var\(--m-tab-dir, 1\) \* var\(--m-tab-shift\)\)\);\s*opacity: 0;\s*transition-duration: var\(--m-switch-out\);/);
   });
 
   it("the hold tint takes as long as the hold before a row lifts, and the lift is the 160 ms press transition", () => {

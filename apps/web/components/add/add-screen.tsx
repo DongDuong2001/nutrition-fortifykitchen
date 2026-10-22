@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDiary } from "@/lib/diary-store";
 import { canLog } from "@/lib/diary-edits";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
-import { previousInAppPath, useBack } from "@/hooks/use-back";
+import { lastInAppPath, previousInAppPath, useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { lastPortionOf, resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
@@ -16,7 +16,8 @@ import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
 import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
 import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
 import { QuickAddSheet } from "@/components/add/quick-add-sheet";
-import { Sheet } from "@/components/ui/sheet";
+import { Presence } from "@/components/ui/presence";
+import { SHEET_VIEW_EXIT_MS, SheetView } from "@/components/ui/sheet-view";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { SwitchGlide } from "@/components/ui/switch-glide";
 import { ADD_LIST_LIMITS, FoodList } from "@/components/foods/food-list";
@@ -53,11 +54,12 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet, takeBackSheetEntries } from "@/lib/sheet-history";
 import { compareHref } from "@/lib/food-compare";
-import { ComparePicker } from "@/components/foods/compare-picker";
+import { ComparePicker, ComparePickerBody } from "@/components/foods/compare-picker";
+import { catalogFoodById } from "@/lib/catalog";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import { useUnsavedWork } from "@/lib/unsaved-work";
-import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
+import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag, useSheetEntry } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
 import { IconButton } from "@/components/ui/icon-button";
@@ -74,6 +76,34 @@ function subscribeDesktop(onChange: () => void) {
   return () => mq.removeEventListener("change", onChange);
 }
 const desktopNow = () => window.matchMedia(DESKTOP_QUERY).matches;
+
+// So sánh from the + sheet goes to the comparison page; Back from it comes back to the + sheet as it was: the food in its
+// portion step, the search, the filter, the tray and the place in the list. Kept for that one way back (sessionStorage,
+// read once by the next + sheet).
+const RETURN_KEY = "h1t_add_return_v1";
+interface AddReturn {
+  /** The sheet entry Back lands on (the portion step's on a phone), null for the sheet's own */
+  entry: number | null;
+  meal: MealSlot | null;
+  query: string;
+  filter: FoodFilter;
+  tray: { id: string; grams: number; label: string }[];
+  food: string;
+  grams: string;
+  label: string;
+  scroll: number;
+}
+function takeAddReturn(cameFrom: string | null): AddReturn | null {
+  try {
+    const raw = sessionStorage.getItem(RETURN_KEY);
+    sessionStorage.removeItem(RETURN_KEY);
+    if (!raw || !cameFrom?.startsWith("/foods/compare")) return null;
+    const saved = JSON.parse(raw) as AddReturn;
+    return saved.entry === (window.history.state?.h1tSheet ?? null) ? saved : null;
+  } catch {
+    return null;
+  }
+}
 
 function AddFoodInner({ standalone }: { standalone: boolean }) {
   const router = useRouter();
@@ -308,15 +338,15 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       document.removeEventListener("keydown", note, true);
     };
   }, []);
-  // feat/compare-in-add: So sánh in the portion panel opens the compare picker with this food locked (one sheet at a time,
-  // D-SHT-01: on a phone the portion sheet closes first). Confirming goes to the comparison the way the food page does
-  // (navigateFromSheet: the picker's entry becomes the comparison, so Back comes back to the add sheet).
+  // feat/compare-in-add: So sánh in the portion panel opens the compare picker with this food locked. On a phone it is a step
+  // inside the + sheet over the portion step (one sheet in the + flow, overnight 22→23/10); ‹ goes back to the portion. Confirming
+  // goes to the comparison the way the food page does (navigateFromSheet: the step's entry becomes the comparison), and Back
+  // from it brings the + sheet back as it was (RETURN_KEY).
   const [compareFoodId, setCompareFoodId] = useState<string | null>(null);
   const openCompare = useCallback(() => {
-    if (!selectedFood) return;
-    setCompareFoodId(selectedFood.id);
-    if (!isDesktop) setSelectedFood(null);
-  }, [selectedFood, isDesktop]);
+    if (selectedFood) setCompareFoodId(selectedFood.id);
+  }, [selectedFood]);
+  const closeCompare = useCallback(() => setCompareFoodId(null), []);
   const closePortionSheet = useCallback(() => {
     const id = selectedFood?.id;
     const { el: opener, touch } = portionOpener.current;
@@ -330,6 +360,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       else if (!touch) phoneSearchInputRef.current?.focus({ preventScroll: true });
     });
   }, [selectedFood]);
+
+  // Phone: the portion and So sánh are steps inside the + sheet, not sheets over it. Each has a history entry, so Back goes
+  // back one step; `restoredStep` makes the portion step take the entry Back landed on after the comparison.
+  const portionStep = !isDesktop && selectedFood !== null;
+  const compareStep = !isDesktop && compareFoodId !== null;
+  const restoredStep = useRef(false);
+  const portionEntry = useSheetEntry(portionStep, closePortionSheet, restoredStep);
+  useSheetEntry(compareStep, closeCompare);
 
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
   // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
@@ -391,6 +429,58 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     phoneScrollRef.current?.scrollTo({ top: 0 });
     desktopListRef.current?.scrollTo({ top: 0 });
   }, [query, filter]);
+
+  // Back from the comparison: the + sheet as So sánh left it. Where the screen came from is read in the first render, before
+  // the root layout files this route in the in-app history.
+  const [cameFrom] = useState(lastInAppPath);
+  const pendingScroll = useRef<number | null>(null);
+  useEffect(() => {
+    const back = takeAddReturn(cameFrom);
+    if (!back) return;
+    if (back.meal) setOverrideSlot(back.meal);
+    setQuery(back.query);
+    setFilter(back.filter);
+    setTray(back.tray.flatMap((t) => {
+      const food = catalogFoodById(t.id);
+      return food ? [{ food, grams: t.grams, label: t.label }] : [];
+    }));
+    pendingScroll.current = back.scroll;
+    const food = catalogFoodById(back.food);
+    if (!food) return;
+    restoredStep.current = back.entry !== null;
+    setSelectedFood(food);
+    setGramsInput(back.grams);
+    setSelectedServingLabel(back.label);
+    // Once, on the mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const el = isDesktop ? desktopListRef.current : phoneScrollRef.current;
+    if (pendingScroll.current === null || !ready || list.foods.length === 0 || !el) return;
+    el.scrollTop = pendingScroll.current;
+    pendingScroll.current = null;
+  }, [ready, list, isDesktop]);
+  const confirmCompare = (ids: string[]) => {
+    const back: AddReturn = {
+      entry: isDesktop ? null : portionEntry.current,
+      meal: overrideSlot,
+      query,
+      filter,
+      tray: tray.map((t) => ({ id: t.food.id, grams: t.grams, label: t.label })),
+      food: selectedFood?.id ?? ids[0],
+      grams: gramsInput,
+      label: selectedServingLabel,
+      scroll: (isDesktop ? desktopListRef.current : phoneScrollRef.current)?.scrollTop ?? 0,
+    };
+    try {
+      sessionStorage.setItem(RETURN_KEY, JSON.stringify(back));
+    } catch {
+      // Storage unavailable: Back finds the + sheet as a new one
+    }
+    // The desktop picker is a sheet of its own: it closes first. On a phone the step stays drawn until the route goes.
+    if (isDesktop) setCompareFoodId(null);
+    navigateFromSheet(router, compareHref(ids));
+  };
 
   // The tour's search step starts with "phở" typed, so the results are already there to tap
   useEffect(() => {
@@ -612,8 +702,9 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         if (dialogRef.current) dialogRef.current.inert = true;
         if (panelRef.current) setInertExceptDrag(panelRef.current, true);
         if (href === null || previousInAppPath() === HOME_ROUTE) {
-          // Back lands on the page under the sheet, and takes the entries of any sheet over this one with it
-          if (href === null) goBack();
+          // Back lands on the page under the sheet, and takes the entries of any sheet or step over this one with it
+          // (✕ or a drag down on the portion step closes the whole sheet)
+          if (href === null && (sheetEntries === 0 || previousInAppPath() === null)) goBack();
           else window.history.go(-(1 + sheetEntries));
         } else router.replace(href);
       };
@@ -672,20 +763,23 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        // An open sheet (Chỉ ghi kcal, meal switcher) closes itself on Esc; the add screen stays
-        if (quickOpen || switcherOpen || reviewOpen || (selectedFood && !isDesktop)) return;
+        // An open sheet (Chỉ ghi kcal, meal switcher, the desktop picker) closes itself on Esc; the add screen stays
+        if (e.defaultPrevented || quickOpen || switcherOpen || reviewOpen || (isDesktop && compareFoodId !== null)) return;
         e.preventDefault();
-        handleClose(true);
+        // A step inside the sheet goes back one step
+        if (compareFoodId !== null) closeCompare();
+        else if (selectedFood && !isDesktop) closePortionSheet();
+        else handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
-        // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && loggedGrams > 0 && !quickOpen) {
+        // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter; the picker's search is not an add)
+        if (selectedFood && loggedGrams > 0 && !quickOpen && compareFoodId === null) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, loggedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
+  }, [handleClose, selectedFood, loggedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop, compareFoodId, closeCompare, closePortionSheet]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -919,10 +1013,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           data-add-panel
           data-sheet-route
           data-state={sheetState}
-          data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
           className="m-sheet m-quick m-vt-sheet fixed inset-x-2 bottom-[var(--add-keyboard,max(8px,env(safe-area-inset-bottom)))] top-[8dvh] z-nav flex flex-col overflow-hidden rounded-sheet bg-page shadow-sheet"
         >
-          <div className="relative min-h-0 flex-1">
+          {/* The list step stays mounted under the portion step (its search, scroll and tray as they were), out of reach */}
+          <div inert={portionStep} className="relative min-h-0 flex-1">
             {/* One scroll region: carousels, the food list and the create button (the last item stays reachable). It runs under the
                 glass header, so it starts below the header's own height. */}
             <div
@@ -1011,6 +1105,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           {/* The tray bar, under the list while the tray holds a food. cc-64 (A1): it opens and closes with Expand, so the
               list above eases instead of jumping */}
           <div
+            inert={portionStep}
             className={`relative shrink-0 ${
               tray.length > 0 ? "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-page before:to-transparent" : ""
             }`}
@@ -1026,51 +1121,52 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
               />
             </Expand>
           </div>
+
+          {/* The portion step (V3Portion), then So sánh over it: inside this sheet, never a sheet of their own. ✕ and a drag
+              down on their header close the whole sheet; ‹, Esc and Back go back one step. */}
+          <Presence exitMs={SHEET_VIEW_EXIT_MS}>
+            {portionStep && selectedFood && (
+              <SheetView
+                title="Khẩu phần"
+                titleId="portion-step-title"
+                labelledBy="portion-sheet-title"
+                covered={compareStep}
+                onBack={closePortionSheet}
+                onClose={() => handleClose()}
+                dragHandlers={panelDrag.handlers}
+              >
+                <PortionPanel
+                  onCompare={openCompare}
+                  food={selectedFood}
+                  gramsInput={gramsInput}
+                  setGramsInput={setGramsInput}
+                  selectedServingLabel={selectedServingLabel}
+                  setSelectedServingLabel={setSelectedServingLabel}
+                  onFoodChange={(newFood) => setSelectedFood(newFood)}
+                  mealSlot={mealSlot}
+                  onAdd={handleAddFood}
+                  onAddAndContinue={handleAddAndContinue}
+                  onDishEdit={onDishEdit}
+                  notice={dishNotice}
+                  isSubmitting={isSubmitting}
+                  headingId="portion-sheet-title"
+                />
+              </SheetView>
+            )}
+          </Presence>
+          <Presence exitMs={SHEET_VIEW_EXIT_MS}>
+            {compareStep && compareFoodId && (
+              <SheetView title="Chọn món để so sánh" titleId="compare-picker-title" onBack={closeCompare} onClose={() => handleClose()} dragHandlers={panelDrag.handlers}>
+                <ComparePickerBody pushed lockedIds={[compareFoodId]} onClose={closeCompare} onConfirm={confirmCompare} />
+              </SheetView>
+            )}
+          </Presence>
         </div>
       </>
       )}
 
-      <ComparePicker
-        open={compareFoodId !== null}
-        onClose={() => setCompareFoodId(null)}
-        lockedIds={compareFoodId ? [compareFoodId] : []}
-        onConfirm={(ids) => {
-          setCompareFoodId(null);
-          navigateFromSheet(router, compareHref(ids));
-        }}
-      />
-
-      {/* The portion sheet (phone): V3, the page grey behind the panel's white cards (V3Portion) */}
-      <Sheet
-        open={selectedFood !== null && !isDesktop}
-        onClose={closePortionSheet}
-        labelledBy="portion-sheet-title"
-        stacked
-        quick
-        className="bg-page!"
-      >
-        {selectedFood && (
-          <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
-            <PortionPanel
-              onCompare={openCompare}
-              food={selectedFood}
-              gramsInput={gramsInput}
-              setGramsInput={setGramsInput}
-              selectedServingLabel={selectedServingLabel}
-              setSelectedServingLabel={setSelectedServingLabel}
-              onFoodChange={(newFood) => setSelectedFood(newFood)}
-              mealSlot={mealSlot}
-              onAdd={handleAddFood}
-              onAddAndContinue={handleAddAndContinue}
-              onDishEdit={onDishEdit}
-                    notice={dishNotice}
-              isSubmitting={isSubmitting}
-              headingId="portion-sheet-title"
-              onClose={closePortionSheet}
-            />
-          </div>
-        )}
-      </Sheet>
+      {/* Desktop: the picker is a dialog over the add dialog (the phone has it as a step of the sheet) */}
+      <ComparePicker open={isDesktop && compareFoodId !== null} onClose={closeCompare} lockedIds={compareFoodId ? [compareFoodId] : []} onConfirm={confirmCompare} />
 
       <TrayReviewSheet
         open={reviewOpen}

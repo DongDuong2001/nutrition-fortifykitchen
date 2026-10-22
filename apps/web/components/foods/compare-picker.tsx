@@ -27,13 +27,17 @@ export interface ComparePickerProps {
 export function ComparePicker({ open, onClose, lockedIds, onConfirm }: ComparePickerProps) {
   return (
     <Sheet open={open} onClose={onClose} title="Chọn món để so sánh" titleId="compare-picker-title" desktopDialog>
-      <PickerBody lockedIds={lockedIds} onClose={onClose} onConfirm={onConfirm} />
+      <ComparePickerBody lockedIds={lockedIds} onClose={onClose} onConfirm={onConfirm} />
     </Sheet>
   );
 }
 
-// Mounted only while the sheet is open, so each opening starts with a blank search and no new picks
-function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, "open">) {
+/**
+ * The picker's content. Mounted only while it is open, so each opening starts with a blank search and no new picks. `pushed`:
+ * a step inside the + sheet (components/ui/sheet-view): the list fills the step and its ‹ is the way back, so there is no Hủy
+ * beside So sánh (D-SHT-05: never Cancel, Done and Back together).
+ */
+export function ComparePickerBody({ lockedIds, onClose, onConfirm, pushed = false }: Omit<ComparePickerProps, "open"> & { pushed?: boolean }) {
   const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood } = useFoodBrowse();
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -55,13 +59,13 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
   const canConfirm = picked.length > 0 && selected.length >= MIN_COMPARE_FOODS;
 
   return (
-    <div className="flex min-h-0 flex-col gap-3">
+    <div className={`flex min-h-0 flex-col gap-3 ${pushed ? "h-full" : ""}`}>
       <p aria-live="polite" className="m-0 px-1 text-cap leading-snug text-secondary">
         Đã chọn {selected.length}/{MAX_COMPARE_FOODS} món{full ? ". Bỏ một món để chọn món khác." : "."}
       </p>
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
-      <div data-compare-picker-list className="max-h-[44dvh] overflow-y-auto">
+      <div data-compare-picker-list className={pushed ? "min-h-0 flex-1 overflow-y-auto overscroll-contain" : "max-h-[44dvh] overflow-y-auto"}>
         <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
           <FoodList
             list={list}
@@ -89,10 +93,12 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
           />
         </SwitchGlide>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <PillButton variant="secondary" onClick={onClose}>
-          Hủy
-        </PillButton>
+      <div className={pushed ? "grid" : "grid grid-cols-2 gap-3"}>
+        {!pushed && (
+          <PillButton variant="secondary" onClick={onClose}>
+            Hủy
+          </PillButton>
+        )}
         <PillButton variant="primary" disabled={!canConfirm} onClick={() => onConfirm(selected)}>
           So sánh ({selected.length})
         </PillButton>

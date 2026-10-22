@@ -173,22 +173,16 @@ describe("PortionPanel size chips (cc-61)", () => {
   });
 });
 
-describe("PortionPanel close (fix/polish-1020 item 4)", () => {
-  const render = (onClose?: () => void) =>
+describe("PortionPanel buttons (fix/polish-1020 item 4)", () => {
+  const render = () =>
     renderToString(
       <DiaryProvider>
-        <PortionPanel food={MOCK_FOODS[0]} gramsInput="100" setGramsInput={vi.fn()} selectedServingLabel="100 g" setSelectedServingLabel={vi.fn()} mealSlot="lunch" onAdd={vi.fn()} onClose={onClose} />
+        <PortionPanel food={MOCK_FOODS[0]} gramsInput="100" setGramsInput={vi.fn()} selectedServingLabel="100 g" setSelectedServingLabel={vi.fn()} mealSlot="lunch" onAdd={vi.fn()} />
       </DiaryProvider>
     );
 
-  it("a sheet gets a visible ✕: a 44 px button named Đóng", () => {
-    const html = render(vi.fn());
-    expect(html).toMatch(/<button[^>]*aria-label="Đóng"[^>]*data-testid="portion-close"|<button[^>]*data-testid="portion-close"[^>]*aria-label="Đóng"/);
-    expect(html).toMatch(/aria-label="Đóng"[^>]*class="[^"]*\bh-11 w-11\b/);
-  });
-
-  it("the desktop pane, which has no sheet to close, gets none", () => {
-    expect(render()).not.toContain("portion-close");
+  it("has no Close of its own: the + sheet's portion step (components/ui/sheet-view) holds ‹ and ✕", () => {
+    expect(render()).not.toContain('aria-label="Đóng"');
   });
 
   it("the primary buttons may wrap to two lines (min-h-14, not h-14) so a long label never clips at 360 px and 150 % text", () => {
