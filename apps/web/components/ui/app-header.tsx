@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { previousInAppPath } from "@/hooks/use-back";
 import { formatDayLabel } from "@/lib/format";
 import { HOME_ROUTE } from "@/lib/home-route";
 import { StepBars } from "@/components/ui/step-bars";
@@ -148,13 +150,27 @@ export function AppHeader({
     return "";
   }, [date, clientNow]);
 
+  const router = useRouter();
   const hasDateNav = Boolean(onPrev || onNext);
   const showSync = variant !== "sub" && Title === "h1";
   const prevDisabled = !onPrev;
   const nextDisabled = !onNext || canGoNext === false || (canGoNext === undefined && dateLabel.startsWith("Hôm nay"));
 
+  // fix/training-close-motion: a back link to the screen this one was opened from goes Back in the history, so the change is a Back
+  // (lib/nav-direction) and plays the push slide in reverse. A link to anywhere else (opened from a link or a reload) stays a link.
+  const backLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!backHref || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (previousInAppPath() === backHref.split("?")[0]) {
+      e.preventDefault();
+      router.back();
+      return;
+    }
+    // Opened from a link or a reload: the link goes on, and lib/nav-direction reads this mark to play it as a Back all the same
+    document.documentElement.dataset.navBack = "1";
+  };
+
   const back = backHref ? (
-    <Link href={backHref} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
+    <Link href={backHref} onClick={backLink} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </Link>
   ) : onBack ? (
