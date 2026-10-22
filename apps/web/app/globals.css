@@ -43,6 +43,11 @@
   }
 }
 
+/* Food icons are the phone's own emoji (lib/food-emoji): its colour emoji font first, whatever the text font */
+@utility font-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
 @utility glass {
   background-color: var(--color-glass);
   -webkit-backdrop-filter: blur(24px) saturate(180%);

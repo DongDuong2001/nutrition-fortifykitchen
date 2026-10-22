@@ -5,6 +5,7 @@ import { rowName, twinIdsOf } from "@/lib/food-rows";
 import { IconButton } from "@/components/ui/icon-button";
 import { prefetchDishParts } from "@/components/ui/dish-parts-prefetch";
 import { SourceTag } from "@/components/foods/source-tag";
+import { FoodEmojiTile } from "@/components/foods/food-emoji-tile";
 
 /** A list shows this many rows first (the live catalogue has thousands); "Xem thêm" adds as many again. */
 export const FOOD_LIST_LIMIT = 50;
@@ -58,7 +59,7 @@ export interface FoodListProps {
   scrollRef?: React.Ref<HTMLDivElement>;
   /**
    * "add": the + sheet's V3 rows (V3-SPEC §3.8): each category's label sits on the page above its white card, the dividers are
-   * inset, and a row has up to three lines (name, meta, the group's macro). Every other list keeps the default look.
+   * inset, and a row has up to three lines (name, meta, the group's macro) after the food's emoji tile (lib/food-emoji). Every other list keeps the default look.
    */
   variant?: "default" | "add";
   /** Third line of a row, bold (the "add" variant): the group's own macro for the serving, or null for no line. */
@@ -154,6 +155,7 @@ function FoodListView({
             onOpen || tray ? "pr-1" : "pr-4"
           } ${selected && !carried ? "bg-cobalt-tint" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
+          {add && <FoodEmojiTile food={food} />}
           <span className={`flex min-w-0 flex-1 flex-col ${add ? "gap-0.5" : "gap-1"}`}>
             <span title={name} className="line-clamp-2 break-words text-callout font-semibold leading-snug">
               {name}
