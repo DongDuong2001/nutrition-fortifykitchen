@@ -773,10 +773,6 @@
     transform var(--m-sheet-in) var(--ease-drawer),
     scale var(--m-sheet-in) var(--ease-drawer);
 }
-/* cc-62 (S14): a sheet with another sheet over it steps back (the scale property, so it never clashes with its slide) */
-.m-sheet[data-under-sheet] {
-  scale: 0.97;
-}
 .m-sheet[data-state="closed"] {
   transform: translateY(100%);
   transition-duration: var(--m-sheet-out);
@@ -1019,6 +1015,12 @@
     transform: translateX(calc(var(--m-tab-dir, 1) * var(--m-tab-shift)));
     opacity: 0.5;
   }
+}
+/* A step pushed inside a sheet (components/ui/sheet-view) leaves the way it came, in --m-switch-out (it is drawn for that long by Presence) */
+.m-tab-in[data-state="closed"] {
+  transform: translateX(calc(var(--m-tab-dir, 1) * var(--m-tab-shift)));
+  opacity: 0;
+  transition-duration: var(--m-switch-out);
 }
 /* Pull to refresh: the indicator waits above the list, follows the finger with no transition (data-dragging, the
    transform is written on the element), then eases back or settles at 12 px while the day is fetched */
@@ -1266,9 +1268,6 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-scrim[data-dragging] {
     transition: none;
   }
-  .m-sheet[data-under-sheet] {
-    scale: none;
-  }
   /* the closing rules above set their own, longer durations: the 120 ms cap holds for them too */
   .m-sheet[data-state="closed"],
   .m-scrim[data-state="closed"],
@@ -1332,6 +1331,9 @@ button.m-drag-lift[data-touch-drag="dragging"] {
       transform: none;
       opacity: 0.5;
     }
+  }
+  .m-tab-in[data-state="closed"] {
+    transform: none;
   }
   .m-pull {
     transition: opacity var(--m-fade) var(--ease-out);

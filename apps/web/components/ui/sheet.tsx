@@ -3,7 +3,7 @@
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import React, { useEffect, useRef, useState } from "react";
 import { markUsed } from "@/lib/onboarding-store";
-import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
+import { adoptSheetEntry, closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
 import { setPresent } from "@/lib/tour-bus";
 import { haptic } from "@/lib/haptics";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
@@ -43,6 +43,39 @@ export const SHEET_CATCH_UP_MS = 16;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Back (the phone's back gesture or button) closes the sheet, or a view pushed inside one, instead of leaving the page.
+ * The entry copies the router's own state, so Next restores the same page. Closed another way, the entry is taken back,
+ * unless a navigation is pending, the route changed or another sheet sits above it (lib/sheet-history). `adopt`: true
+ * when the view opens again on the entry it had (adoptSheetEntry); it is read once and cleared. Returns the entry's id.
+ */
+export function useSheetEntry(open: boolean, onClose: () => void, adopt?: React.RefObject<boolean>): React.RefObject<number | null> {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const entry = useRef<number | null>(null);
+  useEffect(() => {
+    if (!open || typeof window === "undefined") return;
+    const href = window.location.href;
+    const adopted = adopt?.current ? adoptSheetEntry() : null;
+    if (adopt) adopt.current = false;
+    const id = adopted ?? openSheetEntry();
+    entry.current = id;
+    let popped = false;
+    const onPop = () => {
+      if (window.history.state?.h1tSheet === id) return;
+      popped = true;
+      onCloseRef.current();
+    };
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      entry.current = null;
+      closeSheetEntry(id, href, popped);
+    };
+  }, [open, adopt]);
+  return entry;
+}
 
 export function Sheet({
   open,
@@ -97,25 +130,7 @@ export function Sheet({
     return () => clearTimeout(timer);
   }, [open, mounted]);
 
-  // Back (the phone's back gesture or button) closes the sheet instead of leaving the page. The entry copies the
-  // router's own state, so Next restores the same page. Closed another way, the entry is taken back, unless a
-  // navigation is pending, the route changed or another sheet sits above it (lib/sheet-history).
-  useEffect(() => {
-    if (!open || typeof window === "undefined") return;
-    const href = window.location.href;
-    const id = openSheetEntry();
-    let popped = false;
-    const onPop = () => {
-      if (window.history.state?.h1tSheet === id) return;
-      popped = true;
-      onCloseRef.current();
-    };
-    window.addEventListener("popstate", onPop);
-    return () => {
-      window.removeEventListener("popstate", onPop);
-      closeSheetEntry(id, href, popped);
-    };
-  }, [open]);
+  useSheetEntry(open, onClose);
 
   const setDragClosed = (closed: boolean) => {
     const dialog = dialogRef.current;

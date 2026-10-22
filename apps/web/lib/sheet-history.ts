@@ -48,6 +48,19 @@ export function openSheetEntry(): number {
 }
 
 /**
+ * A view drawn again on the entry it had: Back from a page it navigated to landed on that entry (the + sheet's portion
+ * view after So sánh). The entry on top is a sheet's that no open sheet holds: it is taken as this one's, nothing is
+ * pushed. Null when the entry on top is not such an entry.
+ */
+export function adoptSheetEntry(): number | null {
+  const id = entryOnTop();
+  if (id === undefined || openIds.includes(id)) return null;
+  lastId = Math.max(lastId, id);
+  openIds.push(id);
+  return id;
+}
+
+/**
  * A sheet closes or unmounts. `href` is the address it opened on, `popped` true when Back closed it. Its entry is
  * taken back only when nothing navigates and nothing sits above it.
  */
