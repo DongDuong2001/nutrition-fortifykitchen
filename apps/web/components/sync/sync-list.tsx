@@ -14,6 +14,7 @@ function labelOf(item: OutboxItem, name: string | null): string {
   if (item.kind === "profile") return "Hồ sơ";
   if (item.kind === "weight") return item.entity?.startsWith("training:") ? `Ngày tập ${day}` : `Cân nặng ${day}`;
   if (item.kind === "favourite") return "Món yêu thích";
+  if (item.kind === "template") return item.method === "DELETE" ? "Xóa ngày ăn mẫu" : "Ngày ăn mẫu";
   const what = item.method === "DELETE" ? "Xóa" : item.method === "PATCH" ? "Sửa" : item.method === "POST" && item.path?.endsWith("/restore") ? "Hoàn tác" : "Thêm";
   return `${what} ${name ?? item.label ?? "một món"}${day ? ` · ${day}` : ""}`;
 }

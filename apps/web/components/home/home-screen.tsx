@@ -31,6 +31,7 @@ import {
   type DayTemplateTag,
 } from "@/lib/day-templates";
 import { useDayTemplateRows, useTemplatePillHidden } from "@/hooks/use-day-templates";
+import { generateUuid } from "@/lib/uuid";
 import type { PickerOption } from "./template-picker-sheet";
 import { pastDayData, useDiary, useDiaryToast } from "@/lib/diary-store";
 import { formatDesktopDate } from "@/lib/format";
@@ -541,7 +542,8 @@ function HomeContent() {
 
   function saveDayAsTemplate(name: string, tag: DayTemplateTag) {
     const template = buildDayTemplate({
-      id: `dt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      // A uuid: the server stores the template under this id (PUT /day-templates/{id})
+      id: generateUuid(),
       name,
       tag,
       fallbackName: fallbackTemplateName(tag, viewIso),

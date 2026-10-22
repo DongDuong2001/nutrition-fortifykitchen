@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, pendingFavouriteOps, repointOutboxFood, resetWriteMemory, syncOfflineOutbox } from "../api-client";
+import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, pendingFavouriteOps, pendingTemplateOps, repointOutboxFood, resetWriteMemory, syncOfflineOutbox } from "../api-client";
 import { resetIdb } from "../idb";
 import { STALE_SENDING_MS, countItems, loadOutbox, putItem, readItems, resetOutboxState, scopeFor } from "../outbox";
 import { getSyncAlerts, resetSyncAlerts } from "../sync-state";
@@ -376,6 +376,50 @@ describe("S6: profile, weight and favourites go through the outbox, newest wins"
     const result = await apiClient.queueProfile(profile);
     expect(result.state).toBe("held");
     expect(readItems(scope)).toMatchObject([{ entity: "profile", held: { status: 400 } }]);
+  });
+
+  it("backend-sync: the target settings go only when given, all five with null for a cleared one", async () => {
+    const { bodies } = server({ "PUT /me/profile": [200, 200] });
+    await apiClient.queueProfile({ ...profile, displayName: "Lan" });
+    await apiClient.queueProfile(profile, { macroMode: "ratios", macroRatios: { proteinPct: 30, carbsPct: 40, fatPct: 30 }, macroFixed: undefined, customEnergyKcal: undefined, customTargets: undefined });
+    const [plain, withTargets] = bodies["PUT /me/profile"] as Record<string, unknown>[];
+    expect(Object.keys(plain)).not.toContain("macroMode");
+    expect(withTargets).toMatchObject({
+      sex: "male",
+      macroMode: "ratios",
+      macroRatios: { proteinPct: 30, carbsPct: 40, fatPct: 30 },
+      macroFixed: null,
+      customEnergyKcal: null,
+      customTargets: null,
+    });
+  });
+
+  it("backend-sync: a split waiting offline is carried into a later profile write (newest wins without losing it)", async () => {
+    server({ "PUT /me/profile": [503] });
+    await apiClient.queueProfile(profile, { macroMode: "keto", macroRatios: undefined, macroFixed: undefined, customEnergyKcal: 2000, customTargets: undefined });
+    await apiClient.queueProfile({ ...profile, displayName: "Tên mới" });
+    expect(readItems(scope).filter((i) => i.entity === "profile")).toHaveLength(1);
+    const { bodies } = server({ "PUT /me/profile": [200] });
+    await syncOfflineOutbox({ force: true });
+    expect(bodies["PUT /me/profile"]).toHaveLength(1);
+    expect(bodies["PUT /me/profile"][0]).toMatchObject({ display_name: "Tên mới", macroMode: "keto", customEnergyKcal: 2000, macroRatios: null });
+  });
+
+  it("backend-sync: Ngày ăn mẫu offline: PUT by id, a later delete replaces it, a non-uuid id is never sent", async () => {
+    const id = "aaaaaaaa-0000-4000-8000-0000000000aa";
+    const template = { id, name: "Ngày tập", tag: "tap" as const, meals: [{ slot: "breakfast" as const, items: [{ foodId: FOOD, servingLabel: "1 tô", grams: 500 }] }], createdAt: "2026-10-19T01:00:00.000Z" };
+    server({ [`PUT /day-templates/${id}`]: [503], [`DELETE /day-templates/${id}`]: [503] });
+    await apiClient.queueDayTemplate(template);
+    expect(pendingTemplateOps()).toEqual(new Map([[id, "put"]]));
+    expect(readItems(scope)).toMatchObject([{ kind: "template", entity: `template:${id}`, method: "PUT", payload: { name: "Ngày tập", tag: "tap", createdAt: template.createdAt } }]);
+    await apiClient.deleteDayTemplate(id);
+    expect(pendingTemplateOps()).toEqual(new Map([[id, "delete"]]));
+    await apiClient.queueDayTemplate({ ...template, id: "dt-1729-abcde" });
+    expect(readItems(scope)).toHaveLength(1);
+    const { calls } = server({ [`DELETE /day-templates/${id}`]: [200] });
+    await syncOfflineOutbox({ force: true });
+    expect(calls).toEqual([`DELETE /day-templates/${id}`]);
+    expect(pendingTemplateOps().size).toBe(0);
   });
 
   it("the sides survive a kill like diary writes do", async () => {

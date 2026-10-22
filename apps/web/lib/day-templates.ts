@@ -7,13 +7,15 @@ import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 import { savedMealEntries, savedMealSkipped, type SavedMealItem } from "./saved-meals";
 import { DAY_TEMPLATES_KEY, TEMPLATE_PILL_HIDDEN_KEY } from "./storage-keys";
+import { isUuid } from "./uuid";
 
 export { DAY_TEMPLATES_KEY, TEMPLATE_PILL_HIDDEN_KEY };
 
 /**
- * Ngày ăn mẫu (feat/ngay-mau): a whole day saved on this device and copied back into an empty day in one tap. Front end only, like
- * Bữa ăn đã lưu (lib/saved-meals) and the macro split: nothing here reaches the server, and a copy goes through the same
- * add path as Chép hôm qua (diary-store copyEntries). The foods and portions are the shape saved meals use.
+ * Ngày ăn mẫu (feat/ngay-mau): a whole day saved and copied back into an empty day in one tap. A copy goes through the same add
+ * path as Chép hôm qua (diary-store copyEntries). The foods and portions are the shape saved meals use. The list is kept on the
+ * device and follows the account through the API (/day-templates, migration 000016): the rules for that are at the end of this
+ * file (pure), the reads and writes in lib/day-template-store.
  */
 export type DayTemplateTag = "tap" | "nghi" | "khac";
 
@@ -270,4 +272,51 @@ export function isPillHidden(hidden: readonly string[], iso: string): boolean {
 export function hidePillFor(hidden: readonly string[], iso: string, todayIso: string): string[] {
   const oldest = shiftIsoDate(todayIso, -PILL_KEEP_DAYS);
   return [...new Set([...hidden, iso])].filter((d) => d >= oldest).sort();
+}
+
+// ---- following the account (the API's /day-templates) ----
+
+const sameTemplate = (a: DayTemplate, b: DayTemplate): boolean => JSON.stringify(a) === JSON.stringify(b);
+
+/** What a change of the list sends: each template that is new or changed (PUT), and the ids that are gone (DELETE). */
+export function templateWrites(prev: readonly DayTemplate[], next: readonly DayTemplate[]): { put: DayTemplate[]; remove: string[] } {
+  const before = new Map(prev.map((t) => [t.id, t]));
+  const after = new Set(next.map((t) => t.id));
+  return {
+    put: next.filter((t) => !before.has(t.id) || !sameTemplate(before.get(t.id)!, t)),
+    remove: prev.filter((t) => !after.has(t.id)).map((t) => t.id),
+  };
+}
+
+/** Ids the server can take: a template saved before they were uuids ("dt-…") gets a new one. The same list when none had to change. */
+export function withUuidIds(list: DayTemplate[], newId: () => string): DayTemplate[] {
+  return list.some((t) => !isUuid(t.id)) ? list.map((t) => (isUuid(t.id) ? t : { ...t, id: newId() })) : list;
+}
+
+// By time, not by text: the server may write the same moment with another offset or more digits
+const newestFirst = (a: DayTemplate, b: DayTemplate): number => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0);
+
+/**
+ * The server's list against this device's. The server's is the truth, except for a template with a write still waiting (`pending`:
+ * its save is kept, its delete wins). On the first sync of the device (`firstSync`), a template only the device has was made here
+ * before the list followed the account: it is kept and sent (`upload`). After that, one the server no longer has was deleted on
+ * another device and goes. Newest first.
+ */
+export function mergeDayTemplates(
+  server: readonly DayTemplate[],
+  local: readonly DayTemplate[],
+  pending: ReadonlyMap<string, "put" | "delete">,
+  firstSync: boolean
+): { list: DayTemplate[]; upload: DayTemplate[] } {
+  const localById = new Map(local.map((t) => [t.id, t]));
+  const onServer = new Set(server.map((t) => t.id));
+  const kept = server.flatMap((t) => {
+    const op = pending.get(t.id);
+    if (op === "delete") return [];
+    return [op === "put" ? (localById.get(t.id) ?? t) : t];
+  });
+  const onlyHere = local.filter((t) => !onServer.has(t.id) && pending.get(t.id) !== "delete");
+  const upload = firstSync ? onlyHere.filter((t) => !pending.has(t.id)) : [];
+  const stay = onlyHere.filter((t) => pending.has(t.id) || firstSync);
+  return { list: [...kept, ...stay].sort(newestFirst), upload };
 }
