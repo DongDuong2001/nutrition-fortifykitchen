@@ -11,8 +11,8 @@
  *   change as a 120 ms cross-fade (cc-62).
  * navKind is pure; the rest is a tiny store fed by popstate. Pages never import it (it would be copied into their
  * chunks): a screen that goes back in code lands on a parent path, the /add sheet that slid down by itself says
- * so on the page (data-sheet-route with data-state="closed"), and a header's back link that cannot go Back in the history
- * (the screen was opened from a link) marks <html data-nav-back> (fix/training-close-motion).
+ * so on the page (data-sheet-route with data-state="closed"), and a header's back link (a push to the parent) marks
+ * <html data-nav-back> (fix/training-close-motion).
  */
 import { NAV_TABS } from "./nav";
 
@@ -91,7 +91,7 @@ export function navKindFor(pathname: string): NavKind {
   if (current?.path === pathname) return current.kind;
   const from = current?.path ?? null;
   const popped = poppedTo === path(pathname);
-  // A screen's own back link that is not a history Back (components/ui/app-header) marks the page: the change is still a Back
+  // A screen's own back link (components/ui/app-header) marks the page: the change is a Back though it is a push
   const root = document.documentElement;
   const backLink = root.dataset.navBack === "1";
   delete root.dataset.navBack;

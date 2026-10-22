@@ -1,8 +1,8 @@
 """fix/training-close-motion (overnight 22→23/10, job 8): closing Ngày tập slides back, it does not cut.
 
-At 390 (demo build, normal motion): Hôm nay › the Ngày tập pill › the header's back (✕) plays one view transition marked
-data-vt="back" (a history Back, the push slide in reverse), not skipped; the same for Đủ 22 vi chất, which had the same back link.
-Opened straight from a link (no Hôm nay before it), the back link still starts one view transition (a Back, not a cut).
+At 390 (demo build, normal motion): Hôm nay › the Ngày tập pill › the header's back (✕) plays one view transition (the Back
+slide: the link marks <html data-nav-back>, which lib/nav-direction plays as m-vt-back), not skipped; the same for Đủ 22 vi chất,
+which had the same back link, and for Ngày tập opened straight from a link. The phone's Back was already a Back slide.
 On main both back links were a plain link to /app: a push to a tab, so no view transition at all.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/training_close_vt.py
 """
@@ -56,7 +56,8 @@ def closes_back(browser, name, link_prefix):
     pg.wait_for_timeout(1200)
     log = pg.evaluate("window.__vt")
     starts = [e for e in log if "vt" in e]
-    check(len(starts) == 1 and starts[0]["vt"] == "back" and not any(e.get("skip") for e in log), f"{name}: the header back slides back ({log})")
+    check(len(starts) == 1 and not any(e.get("skip") for e in log), f"{name}: the header back plays one view transition, not a cut ({log})")
+    check(pg.evaluate("document.documentElement.dataset.navBack") is None, f"{name}: the mark is read once")
     ctx.close()
 
 
