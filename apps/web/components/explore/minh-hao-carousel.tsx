@@ -8,14 +8,15 @@ import { SourceTag } from "@/components/foods/source-tag";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import type { FoodItem } from "@/lib/catalog";
 import { foodRowKcal } from "@/lib/food-meta";
+import { defaultServing } from "@/lib/portion";
 import { rowName } from "@/lib/food-rows";
 import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods } from "@/lib/fortify-kitchen";
 
 const SHOWN = 8;
 
-/** The card's second line: the food's first portion and its kcal ("1 phần lẻ (150 g sống) · 205 kcal"). */
+/** The card's second line: the food's default serving and its kcal ("1 phần lẻ (150 g sống) · 205 kcal"; grams for a food weighed in grams). */
 export const minhHaoMeta = (food: FoodItem): { meta: string; kcal?: string } => {
-  const portion = food.servings[0]?.label ?? "100 g";
+  const portion = defaultServing(food).label;
   const kcal = foodRowKcal(food);
   // The kcal is the bold link-coloured part (V3); a food without energy says so in plain text
   return kcal ? { meta: portion, kcal } : { meta: `${portion} · Chưa có kcal` };

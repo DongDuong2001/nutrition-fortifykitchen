@@ -2,6 +2,7 @@ import { formatAmount, formatNumber } from "./format";
 import { parseNumberInput } from "./parse-number";
 import type { FoodItem } from "./mock/foods";
 import { cookSwitchFor } from "./food-rows";
+import { isChanh } from "./catalog";
 import type { CookState, CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
@@ -640,6 +641,8 @@ export function isEggFood(food: ModeFood): boolean {
  */
 export function portionModeOf(food: ModeFood): "units" | "egg" | "grams" {
   if (hidesGrams(food) || food.category === "bo_sung" || food.category === "mon_viet" || food.category === "cua_toi" || food.source === "user") return "units";
+  // Chanh and chanh dây go by the quả (lib/catalog weighedFruit keeps it first), when the food has one
+  if (isChanh(food.nameVi) && (food.servings ?? []).some((s) => parseUnitServing(s.label)?.unit === "quả")) return "units";
   // A dish by the plate ("1 phần") and a can ("1 lon") keep their unit whatever their category says
   if ((food.servings ?? []).some((s) => ["lon", "phần"].includes(parseUnitServing(s.label)?.unit ?? ""))) return "units";
   return isEggFood(food) ? "egg" : "grams";
@@ -789,6 +792,18 @@ export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams:
  * The portion a food starts at when nothing was logged for it before: its first portion for a unit food, one medium
  * egg (or the first size), else its first gram portion or 100 g, weighed in the food's own state.
  */
+/**
+ * The serving a list shows a food by, and what its kcal there are for (Hao, overnight 22→23/10: grams everywhere). A food
+ * weighed in grams shows its gram (or ml) serving, else 100 g, whatever unit its data lists first ("1 củ", "1 bìa", "1 nắm");
+ * eggs, chanh and the foods logged by their unit (supplements, dishes, cans) show their first serving. A recent keeps the
+ * label it was logged with (lib/recent-foods).
+ */
+export function defaultServing(food: Pick<FoodItem, "nameVi" | "category" | "source" | "servings">): { label: string; grams: number } {
+  const first = food.servings[0] ?? { label: "100 g", grams: 100 };
+  if (portionModeOf(food) !== "grams" || GRAM_OR_VOLUME_LABEL.test(first.label.trim())) return first;
+  return food.servings.find((s) => GRAM_OR_VOLUME_LABEL.test(s.label.trim()) && s.grams > 0) ?? { label: /\bml\b/i.test(first.label) ? "100 ml" : "100 g", grams: 100 };
+}
+
 export function defaultPortionOf(food: FoodItem): { label: string; grams: number } {
   const mode = portionModeOf(food);
   if (mode === "units") return food.servings[0] ?? { label: "100 g", grams: 100 };
@@ -797,6 +812,6 @@ export function defaultPortionOf(food: FoodItem): { label: string; grams: number
     const size = (sizes.find((s) => s.size === "vừa") ?? sizes[0]).size;
     return resolvePortion(food, { kind: "egg", size, count: 1 }, null);
   }
-  const gram = food.servings.find((s) => /^\d+(?:[.,]\d+)?\s*g$/i.test(s.label.trim()) && s.grams > 0);
-  return resolvePortion(food, { kind: "grams", base: gram?.grams ?? 100, mult: 1, state: null }, cookSwitchFor(food, [], false));
+  // The grams the list shows the food by (defaultServing), so the row and the panel say the same
+  return resolvePortion(food, { kind: "grams", base: defaultServing(food).grams, mult: 1, state: null }, cookSwitchFor(food, [], false));
 }

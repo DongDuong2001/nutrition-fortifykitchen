@@ -20,7 +20,7 @@ export const YESTERDAY_ITEMS: MockHistoryItem[] = [
   { mealSlot: "lunch", foodId: "food-com-gao-lut", grams: 150, qty: "150 g" },
   { mealSlot: "lunch", foodId: "food-thit-bo-nac", grams: 150, qty: "150 g" },
   { mealSlot: "dinner", foodId: "food-ca-hoi", grams: 150, qty: "150 g" },
-  { mealSlot: "dinner", foodId: "food-khoai-lang", grams: 150, qty: "1 củ" },
-  { mealSlot: "dinner", foodId: "food-bong-cai-xanh", grams: 100, qty: "1 chén hấp" },
+  { mealSlot: "dinner", foodId: "food-khoai-lang", grams: 150, qty: "150 g" },
+  { mealSlot: "dinner", foodId: "food-bong-cai-xanh", grams: 100, qty: "100 g" },
   { mealSlot: "snack", foodId: "food-whey-protein", grams: 30, qty: "1 muỗng (30 g)" },
 ];

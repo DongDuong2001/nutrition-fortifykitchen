@@ -66,7 +66,8 @@ describe("foodMeta", () => {
       const unknown = { ...BASE_FOOD, nutrients: { carbs: 0, energy } as FoodItem["nutrients"] };
       expect(foodMeta(unknown)).toBe("Chưa có kcal / 30 g");
     }
-    expect(foodMeta({ ...BASE_FOOD, servings: [{ label: "1 chén", grams: 150 }], nutrients: { carbs: 0 } as FoodItem["nutrients"] })).toBe("Chưa có kcal / 1 chén");
+    // Grams everywhere (overnight 22→23/10): a food weighed in grams and listed by the chén reads per 100 g
+    expect(foodMeta({ ...BASE_FOOD, servings: [{ label: "1 chén", grams: 150 }], nutrients: { carbs: 0 } as FoodItem["nutrients"] })).toBe("Chưa có kcal / 100 g");
   });
 
   it("keeps a real 0 kcal as 0 kcal", () => {
