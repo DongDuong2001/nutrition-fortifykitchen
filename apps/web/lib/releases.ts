@@ -31,6 +31,19 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. One sheet in the + flow: the portion and So sánh are steps inside the
+  // + sheet. No tour and no tip: the step's ‹ is a labelled Back in plain sight, and it is not on Hôm nay.
+  {
+    id: "2026-10-22c",
+    date: "22/10",
+    items: [
+      {
+        icon: "meal",
+        title: "Khẩu phần mở ngay trong bảng",
+        body: "Chạm một món là khẩu phần trượt vào ngay trong bảng thêm món, không mở thêm bảng nào. Chạm ‹ để quay lại, ô tìm, chỗ đang xem và khay vẫn như cũ.",
+      },
+    ],
+  },
   // backend-sync-1022 (Hao 22/10): the macro split and Ngày ăn mẫu are stored with the account (migrations 000015/000016), on top of
   // 22a, which is live. One item, as the brief asks, and no tour or tip: no new control, the same screens now follow the account.
   {
