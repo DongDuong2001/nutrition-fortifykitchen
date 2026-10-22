@@ -49,7 +49,7 @@ def run(browser, width, text):
     tiles = rows.locator(TILE)
     check(tiles.count() >= min(rows.count(), 5), f"{tag}: each add-list row has a tile ({tiles.count()}/{rows.count()})")
     tb = tiles.first.bounding_box()
-    check(tb is not None and round(tb["width"]) == 44 and round(tb["height"]) == 44, f"{tag}: the tile is 44 px ({tb})")
+    check(tb is not None and round(tb["width"]) == round(44 * text / 100) and round(tb["height"]) == round(44 * text / 100), f"{tag}: the tile is 44 px, scaled with the text ({tb})")
     if text == 100:
         heights = pg.evaluate("() => [...document.querySelectorAll('[data-add-panel] button[data-food-row]')].filter((b) => b.offsetParent && !b.querySelector('[data-food-macro]')).slice(0, 6).map((b) => Math.round(b.getBoundingClientRect().height))")
         check(all(h <= 56 for h in heights), f"{tag}: rows without a macro line stay 56 px ({heights})")
@@ -67,7 +67,7 @@ def run(browser, width, text):
     pg.goto(BASE + "/foods/food-uc-ga", wait_until="networkidle")
     pg.wait_for_timeout(800)
     big = pg.locator(f"main {TILE}").first.bounding_box()
-    check(big is not None and round(big["width"]) == 112, f"{tag}: the food page has a 112 px tile ({big})")
+    check(big is not None and round(big["width"]) == round(112 * text / 100), f"{tag}: the food page has a 112 px tile, scaled with the text ({big})")
     check(pg.locator(f"main {TILE}").first.get_attribute("data-emoji") == "🍗", "Ức gà is 🍗")
     check("🍗" not in pg.locator("h1").first.inner_text(), "the emoji is not part of the page's text")
     pg.screenshot(path=str(SHOTS / f"food-emoji-food-{tag}.png"))
