@@ -106,6 +106,33 @@
   }
 }
 
+/* The size-adjusted Arial stand-ins shown until the self-hosted fonts (app/fonts/fonts.ts) arrive: Google's numbers,
+   as next/font/google wrote them before the fonts moved in. */
+@font-face {
+  font-family: "Manrope Fallback";
+  src: local("Arial");
+  ascent-override: 103.31%;
+  descent-override: 29.07%;
+  line-gap-override: 0%;
+  size-adjust: 103.19%;
+}
+@font-face {
+  font-family: "Saira Fallback";
+  src: local("Arial");
+  ascent-override: 109.52%;
+  descent-override: 42.36%;
+  line-gap-override: 0%;
+  size-adjust: 103.63%;
+}
+@font-face {
+  font-family: "Saira Condensed Fallback";
+  src: local("Arial");
+  ascent-override: 143.34%;
+  descent-override: 55.44%;
+  line-gap-override: 0%;
+  size-adjust: 79.18%;
+}
+
 /* static: lib/nutrient-colors and lib/food-group-colors name tokens in template strings (var(--color-deep-cyan),
    --color-tile-*), which Tailwind's scanner cannot see; without static v4 leaves those variables out of the CSS. */
 @theme static {
