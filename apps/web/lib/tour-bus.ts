@@ -97,12 +97,12 @@ export function setOverlayOpen(name: Overlay, open: boolean): void {
 
 /**
  * Things on screen that have a first-visit tip of their own: an open sheet (drag down to close), the unit stepper, and
- * cc-53b's portion controls (×N, Sống | Chín, the egg's Quả | Gam, a row of the tray). Counted, since two can be up at
- * once. Listeners are the tip-busy ones.
+ * cc-53b's portion controls (×N, Sống | Chín, the egg's Quả | Gam, a row of the tray), and Tự nhập's + Thêm vi chất khác.
+ * Counted, since two can be up at once. Listeners are the tip-busy ones.
  */
-export type Presence = "sheet" | "stepper" | "multiply" | "cook" | "egg" | "tray";
-/** The portion controls a tip can wait for (every Presence but the sheet). */
-export const PORTION_PRESENCES = ["stepper", "multiply", "cook", "egg", "tray"] as const;
+export type Presence = "sheet" | "stepper" | "multiply" | "cook" | "egg" | "tray" | "add-nutrient";
+/** The controls a tip can wait for (every Presence but the sheet). */
+export const PORTION_PRESENCES = ["stepper", "multiply", "cook", "egg", "tray", "add-nutrient"] as const;
 const present = new Map<Presence, number>();
 export const isPresent = (name: Presence): boolean => (present.get(name) ?? 0) > 0;
 export function setPresent(name: Presence, on: boolean): void {

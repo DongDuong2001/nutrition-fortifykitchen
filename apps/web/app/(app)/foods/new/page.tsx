@@ -8,36 +8,33 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { formatAmount } from "@/lib/format";
 import { parseNumberInput } from "@/lib/parse-number";
-import { nutrientName } from "@/lib/nutrients";
-import { Expand } from "@/components/ui/expand";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Segmented } from "@/components/ui/segmented";
 import { SectionTitle } from "@/components/ui/section-title";
+import { Expand } from "@/components/ui/expand";
 import { Field, UnitField, fieldClass, fieldErrorId } from "@/components/foods/food-field";
 import { nutrientDot } from "@/lib/nutrient-colors";
+import { MAIN_FIELDS, customFoodPayload, fieldForKey, type LabelField } from "@/lib/custom-food-fields";
+import { NutrientPickerSheet } from "@/components/foods/nutrient-picker-sheet";
+import { SHEET_EXIT_MS } from "@/components/ui/sheet";
 import { RecipeBuilder, useRecipeDraft } from "@/components/foods/recipe-builder";
 import { draftToRecipe, recipeDraftFromFood, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
 import { getRecipe, saveRecipe } from "@/lib/recipe-store";
 import { useBack } from "@/hooks/use-back";
 import { markUsed } from "@/lib/onboarding-store";
+import { setPresent } from "@/lib/tour-bus";
 import { HOME_ROUTE } from "@/lib/nav";
 import { AlertLine } from "@/components/ui/alert-line";
 
-/** The typed-in food: kcal and the three macros (dot = macro identity colour), then the optional micros (dot = nutrient colour). */
-const MACRO_FIELDS = [
-  { id: "cf-kcal", label: "Năng lượng", unit: "kcal", dot: "bg-macro-kcal", placeholder: "Ví dụ: 250" },
-  { id: "cf-pro", label: "Đạm", unit: "g", dot: "bg-macro-dam", placeholder: "Ví dụ: 12" },
-  { id: "cf-carbs", label: "Tinh bột", unit: "g", dot: "bg-macro-tinhbot", placeholder: "Ví dụ: 30" },
-  { id: "cf-fat", label: "Chất béo", unit: "g", dot: "bg-macro-beo", placeholder: "Ví dụ: 8" },
-] as const;
-const MICRO_FIELDS = [
-  { id: "cf-na", label: nutrientName("sodium"), unit: "mg", nutrient: "sodium", placeholder: "Ví dụ: 200" },
-  { id: "cf-k", label: nutrientName("potassium"), unit: "mg", nutrient: "potassium", placeholder: "Ví dụ: 300" },
-  { id: "cf-ca", label: nutrientName("calcium"), unit: "mg", nutrient: "calcium", placeholder: "Ví dụ: 120" },
-  { id: "cf-fe", label: nutrientName("iron"), unit: "mg", nutrient: "iron", placeholder: "Ví dụ: 2" },
-  { id: "cf-vitd", label: "Vitamin D", unit: "µg", nutrient: "vitamin_d", placeholder: "Ví dụ: 1" },
-] as const;
+/**
+ * Two columns, as long as a column holds its longest label ("Năng lượng *") on one line and a number beside its unit: below 18 rem
+ * of card (360 px with the phone's text at 125 % or more) the fields stack in one column instead of wrapping or cutting.
+ */
+const NUMBER_GRID = "grid grid-cols-1 gap-x-4 gap-y-3 @min-[18rem]:grid-cols-2";
+
+/** The macro rows keep their identity colour (dot); the other top-level rows take their nutrient colour, sub-rows a connector. */
+const MACRO_DOT: Record<string, string> = { energy: "bg-macro-kcal", protein: "bg-macro-dam", carbs: "bg-macro-tinhbot", fat: "bg-macro-beo" };
 
 function CreateFoodInner() {
   const router = useRouter();
@@ -103,18 +100,44 @@ function CreateFoodInner() {
   const [servingSize, setServingSize] = useState("100");
   const [servingUnit, setServingUnit] = useState<"g" | "ml" | "cái">("g");
 
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
+  // Every number field, by input id (lib/custom-food-fields): blank is no data, never 0
+  const [values, setValues] = useState<Record<string, string>>({});
+  const setValue = (id: string, value: string) => setValues((prev) => ({ ...prev, [id]: value }));
+  const calories = values["cf-kcal"] ?? "";
 
-  // Optional micros (sodium, potassium, calcium, iron, vitamin D)
-  const [showMicros, setShowMicros] = useState(false);
-  const [sodium, setSodium] = useState("");
-  const [calcium, setCalcium] = useState("");
-  const [iron, setIron] = useState("");
-  const [potassium, setPotassium] = useState("");
-  const [vitaminD, setVitaminD] = useState("");
+  // + Thêm vi chất khác: the keys added under the main block, in the order they were picked
+  const [added, setAdded] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // The button's tip (lib/tips food-new-nutrients) waits for the button, which only Tự nhập shows
+  const manual = mode === "nutrition";
+  useEffect(() => {
+    if (!manual) return;
+    setPresent("add-nutrient", true);
+    return () => setPresent("add-nutrient", false);
+  }, [manual]);
+  const focusAfterPick = useRef<number | null>(null);
+  useEffect(() => () => window.clearTimeout(focusAfterPick.current ?? undefined), []);
+  const pickNutrient = (key: string) => {
+    setAdded((prev) => (prev.includes(key) ? prev : [...prev, key]));
+    setPickerOpen(false);
+    // The sheet hands focus back to its opener as it closes; the new field takes it once the sheet is down
+    window.clearTimeout(focusAfterPick.current ?? undefined);
+    focusAfterPick.current = window.setTimeout(() => {
+      const el = document.getElementById(fieldForKey(key)!.id);
+      el?.focus({ preventScroll: true });
+      el?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, SHEET_EXIT_MS + 20);
+  };
+  const removeNutrient = (key: string) => {
+    const id = fieldForKey(key)!.id;
+    setAdded((prev) => prev.filter((k) => k !== key));
+    setValues((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    document.getElementById("cf-add-nutrient")?.focus();
+  };
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -155,14 +178,7 @@ function CreateFoodInner() {
     const errSize = validateField("servingSize", servingSize);
     const errCals = validateField("calories", calories);
 
-    setTouched({
-      nameVi: true,
-      servingSize: true,
-      calories: true,
-      protein: true,
-      carbs: true,
-      fat: true,
-    });
+    setTouched({ nameVi: true, servingSize: true, calories: true });
 
     if (errName || errSize || errCals) {
       return;
@@ -171,27 +187,15 @@ function CreateFoodInner() {
     setIsSubmitting(true);
     try {
       const parsedSize = parseNumberInput(servingSize) || 100;
-      const parsedCals = parseNumberInput(calories) ?? 0;
-      const parseMacro = (val: string): number | null => parseNumberInput(val);
-      const parsedPro = parseMacro(protein);
-      const parsedCarbs = parseMacro(carbs);
-      const parsedFat = parseMacro(fat);
+      // A field taken off with its × has dropped its value, so this is exactly what the form shows
+      const { calories: parsedCals, ...nutrition } = customFoodPayload(values);
 
       const createdFood = await apiClient.createFood({
         nameVi: nameVi.trim(),
         servingUnit,
         servingSize: parsedSize,
-        calories: parsedCals,
-        protein: parsedPro,
-        carbs: parsedCarbs,
-        fat: parsedFat,
-        micros: {
-          sodium: parseNumberInput(sodium) ?? undefined,
-          calcium: parseNumberInput(calcium) ?? undefined,
-          iron: parseNumberInput(iron) ?? undefined,
-          potassium: parseNumberInput(potassium) ?? undefined,
-          vitamin_d: parseNumberInput(vitaminD) ?? undefined,
-        },
+        calories: parsedCals ?? 0,
+        ...nutrition,
       });
 
       markUsed("create-food");
@@ -241,7 +245,7 @@ function CreateFoodInner() {
               <p className="m-0 text-cap leading-snug text-secondary">Kcal và 22 vi chất tự tính từ dữ liệu trong app</p>
             ) : (
               <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
-                Tự nhập chỉ có kcal và chất đa lượng. Vi chất để trống nếu bạn không nhập. Món sẽ có nhãn Tự nhập.
+                Vi chất để trống nếu bạn không nhập. Món sẽ có nhãn Tự nhập.
               </p>
             )}
           </div>
@@ -323,7 +327,7 @@ function CreateFoodInner() {
         </Field>
 
         {/* Nutrition Info Card */}
-        <section aria-labelledby="cf-nutrition" className="flex flex-col gap-3 rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
+        <section aria-labelledby="cf-nutrition" className="@container flex flex-col gap-3 rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
           <div>
             <SectionTitle id="cf-nutrition">Dinh dưỡng mỗi khẩu phần</SectionTitle>
             <p className="m-0 mt-1 text-cap leading-snug text-secondary">
@@ -331,90 +335,127 @@ function CreateFoodInner() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            {MACRO_FIELDS.map((f) => {
-              const error = f.id === "cf-kcal" && touched.calories ? errors.calories : undefined;
-              const value = { "cf-kcal": calories, "cf-pro": protein, "cf-carbs": carbs, "cf-fat": fat }[f.id] as string;
-              const set = { "cf-kcal": setCalories, "cf-pro": setProtein, "cf-carbs": setCarbs, "cf-fat": setFat }[f.id] as (v: string) => void;
+          <div className={NUMBER_GRID}>
+            {MAIN_FIELDS.map((f, i) => {
+              const kcal = f.id === "cf-kcal";
+              const error = kcal && touched.calories ? errors.calories : undefined;
+              // A sub-row starts a new grid row under its parent (Chất xơ under Tinh bột, Bão hòa under Chất béo)
+              const startsRow = f.indent && !MAIN_FIELDS[i - 1]?.indent;
               return (
-                <Field key={f.id} label={f.label} htmlFor={f.id} required={f.id === "cf-kcal"} dot={{ className: f.dot }} error={error} data-align-group="create-macro">
-                  <UnitField unit={f.unit}>
-                    <input
-                      id={f.id}
-                      type="text"
-                      inputMode="decimal"
-                      enterKeyHint={f.id === "cf-fat" ? "done" : "next"}
-                      value={value}
-                      onChange={(e) => {
-                        set(e.target.value);
-                        if (f.id === "cf-kcal" && touched.calories) validateField("calories", e.target.value);
-                      }}
-                      onBlur={f.id === "cf-kcal" ? () => handleBlur("calories", calories) : undefined}
-                      placeholder={f.placeholder}
-                      aria-invalid={error ? true : undefined}
-                      aria-describedby={error ? fieldErrorId(f.id) : undefined}
-                      className={`text-base ${fieldClass({ bad: !!error, inCard: true, number: true })}`}
-                    />
-                  </UnitField>
-                </Field>
+                <NumberField
+                  key={f.id}
+                  field={f}
+                  value={values[f.id] ?? ""}
+                  onChange={(v) => {
+                    setValue(f.id, v);
+                    if (kcal && touched.calories) validateField("calories", v);
+                  }}
+                  onBlur={kcal ? () => handleBlur("calories", calories) : undefined}
+                  error={error}
+                  className={startsRow ? "col-start-1" : ""}
+                />
               );
             })}
           </div>
         </section>
 
-        {/* Expandable Micros */}
+        {/* + Thêm vi chất khác: what else the label states, one field per pick */}
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            aria-expanded={showMicros}
-            onClick={() => setShowMicros(!showMicros)}
-            className="flex min-h-[52px] w-full cursor-pointer items-center justify-between gap-2 rounded-[14px] border border-transparent bg-card px-4 text-left text-callout font-semibold text-text shadow-ring m-tint transition-press"
-          >
-            <span>+ Thêm vi chất ({nutrientName("sodium")}, {nutrientName("calcium")}, {nutrientName("iron")}…)</span>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="m-chevron shrink-0 text-secondary"
-              aria-hidden="true"
-            >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-
-          <Expand open={showMicros} className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
-            {MICRO_FIELDS.map((f) => {
-              const value = { "cf-na": sodium, "cf-k": potassium, "cf-ca": calcium, "cf-fe": iron, "cf-vitd": vitaminD }[f.id] as string;
-              const set = { "cf-na": setSodium, "cf-k": setPotassium, "cf-ca": setCalcium, "cf-fe": setIron, "cf-vitd": setVitaminD }[f.id] as (v: string) => void;
-              return (
-                <Field key={f.id} label={f.label} htmlFor={f.id} dot={{ color: nutrientDot(f.nutrient) }} data-align-group="create-micro">
-                  <UnitField unit={f.unit}>
-                    <input
-                      id={f.id}
-                      type="text"
-                      inputMode="decimal"
-                      enterKeyHint={f.id === "cf-vitd" ? "done" : "next"}
-                      value={value}
-                      onChange={(e) => set(e.target.value)}
-                      placeholder={f.placeholder}
-                      className={`text-base ${fieldClass({ inCard: true, number: true })}`}
-                    />
-                  </UnitField>
-                </Field>
-              );
-            })}
+          <Expand open={added.length > 0} className="@container rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
+            <div className={NUMBER_GRID}>
+              {added.map((key) => {
+                const f = fieldForKey(key)!;
+                return <NumberField key={key} field={f} value={values[f.id] ?? ""} onChange={(v) => setValue(f.id, v)} onRemove={() => removeNutrient(key)} />;
+              })}
+            </div>
           </Expand>
+          <button
+            id="cf-add-nutrient"
+            type="button"
+            data-tour="add-nutrient"
+            aria-haspopup="dialog"
+            onClick={() => {
+              setPickerOpen(true);
+              markUsed("add-nutrient");
+            }}
+            className="flex min-h-[52px] w-full cursor-pointer items-center gap-2 rounded-[14px] border border-transparent bg-card px-4 text-left text-callout font-semibold text-cobalt shadow-ring m-tint transition-press"
+          >
+            + Thêm vi chất khác
+          </button>
         </div>
+        <NutrientPickerSheet open={pickerOpen} onClose={() => setPickerOpen(false)} added={added} onPick={pickNutrient} />
         </>
         )}
       </form>
       </main>
     </AppShell>
+  );
+}
+
+/** One number field of the label: its name and unit, "–" while blank (no data, never 0); an added one has a × that takes it off. */
+function NumberField({
+  field,
+  value,
+  onChange,
+  onBlur,
+  error,
+  onRemove,
+  className = "",
+}: {
+  field: LabelField;
+  value: string;
+  onChange: (value: string) => void;
+  onBlur?: () => void;
+  error?: string;
+  onRemove?: () => void;
+  className?: string;
+}) {
+  const dot = field.indent ? undefined : MACRO_DOT[field.key] ? { className: MACRO_DOT[field.key] } : { color: nutrientDot(field.key) };
+  return (
+    <Field
+      label={
+        <>
+          {field.indent && <span aria-hidden="true" className="mr-2 inline-block h-2 w-2 rounded-bl-[3px] border-b-2 border-l-2 border-divider align-[3px]" />}
+          {field.label}
+        </>
+      }
+      htmlFor={field.id}
+      required={field.required}
+      dot={dot}
+      error={error}
+      className={className}
+      action={
+        onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Bỏ ${field.label}`}
+            className="relative flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-secondary before:absolute before:-inset-2.5 before:content-[''] active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        )
+      }
+    >
+      <UnitField unit={field.unit}>
+        <input
+          id={field.id}
+          type="text"
+          inputMode="decimal"
+          enterKeyHint="next"
+          autoComplete="off"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          placeholder="–"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? fieldErrorId(field.id) : undefined}
+          className={`text-base ${fieldClass({ bad: !!error, inCard: true, number: true })}`}
+        />
+      </UnitField>
+    </Field>
   );
 }
 

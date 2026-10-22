@@ -1,7 +1,8 @@
 """v3 foods screens: Tạo món mới (Tự nhập), the food page and the comparison, at 390 and 1280.
 
-- Tạo món mới: every field has a visible label, a placeholder with an example, 16 px text and a 44 px+ hit area; the kcal
-  error shows beside its field; saving a typed food goes to Hôm nay
+- Tạo món mới: every field has a visible label, a placeholder (an example for the name and the portion, "–" for a number from the
+  label: blank is no data, custom-food-nutrients), 16 px text and a 44 px+ hit area; the kcal error shows beside its field; saving a
+  typed food goes to Hôm nay
 - Food page: the portion is one white card with a "Khẩu phần" heading; kcal and the macros take the macro identity colours
 - Compare: the Tính theo control is the V3 segmented control and switches basis
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/v3_foods.py
@@ -30,17 +31,17 @@ def create_food(browser, w):
     pg.wait_for_timeout(500)
     seg = pg.get_by_role("group", name="Cách tạo món")
     check(seg.count() == 1 and seg.get_by_role("button", name="Tự nhập").get_attribute("aria-pressed") == "true", f"{w}: Tự nhập is picked in the segmented control")
-    pg.get_by_role("button", name=" Thêm vi chất", exact=False).click()
-    pg.wait_for_timeout(400)
-    for fid in ["cf-name", "cf-size", "cf-kcal", "cf-pro", "cf-carbs", "cf-fat", "cf-na", "cf-k", "cf-ca", "cf-fe", "cf-vitd"]:
+    for fid in ["cf-name", "cf-size", "cf-kcal", "cf-pro", "cf-carbs", "cf-fiber", "cf-sugars", "cf-fat", "cf-satfat", "cf-trans", "cf-chol", "cf-na"]:
         f = pg.locator("#" + fid)
         label = pg.locator(f"label[for={fid}]")
         ph = f.get_attribute("placeholder") or ""
         size = float(f.evaluate("e => parseFloat(getComputedStyle(e).fontSize)"))
         box = f.bounding_box()
         check(label.count() == 1 and label.is_visible(), f"{w}: #{fid} has a visible label")
-        if fid != "cf-size" or True:
+        if fid in ("cf-name", "cf-size"):
             check("Ví dụ" in ph, f"{w}: #{fid} has an example placeholder ({ph!r})")
+        else:
+            check(ph == "–", f"{w}: #{fid} shows – while blank ({ph!r})")
         check(size >= 16, f"{w}: #{fid} text is {size:.0f} px")
         check(box and box["height"] >= 44, f"{w}: #{fid} is {box['height']:.0f} px high")
     # the error beside the field

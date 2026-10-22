@@ -12,7 +12,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -187,6 +187,11 @@ describe("pickTip", () => {
     expect(ids(ctx({ pathname: "/trends/micros" }))).toBe("trends-micros");
     expect(ids(ctx({ pathname: "/add" }))).toBe("add-tray");
     expect(ids(ctx({ pathname: "/foods/new" }))).toBe("food-new");
+    // + Thêm vi chất khác: only while Tự nhập shows the button, after the create tip, until a nutrient was added once
+    const created = flags({ used: ["create-food"] });
+    expect(ids(ctx({ pathname: "/foods/new" }), created)).toBe(null);
+    expect(ids(ctx({ pathname: "/foods/new", "add-nutrient": true }), created)).toBe("food-new-nutrients");
+    expect(ids(ctx({ pathname: "/foods/new", "add-nutrient": true }), flags({ used: ["create-food", "add-nutrient"] }))).toBe(null);
     expect(ids(ctx({ pathname: "/foods/food-cha-la" }))).toBe("food-detail");
     expect(ids(ctx({ pathname: "/foods/compare" }))).toBe("compare");
     expect(ids(ctx({ pathname: "/explore/leaderboard" }))).toBe("leaderboard");

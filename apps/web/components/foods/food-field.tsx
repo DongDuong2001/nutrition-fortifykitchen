@@ -25,6 +25,7 @@ export function Field({
   error,
   className = "",
   "data-align-group": alignGroup,
+  action,
   children,
 }: {
   label: React.ReactNode;
@@ -35,20 +36,32 @@ export function Field({
   error?: React.ReactNode;
   className?: string;
   "data-align-group"?: string;
+  /** A control at the end of the label row (the × of an added nutrient) */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const labelEl = (
+    <label htmlFor={htmlFor} className="text-cap font-semibold text-text">
+      {dot && <span aria-hidden="true" className={`mr-2 inline-block h-2 w-2 rounded-full align-[1px] ${dot.className ?? ""}`} style={dot.color ? { backgroundColor: dot.color } : undefined} />}
+      {label}
+      {required && (
+        <>
+          <span aria-hidden="true"> *</span>
+          <span className="sr-only"> (bắt buộc)</span>
+        </>
+      )}
+    </label>
+  );
   return (
     <div data-align-group={alignGroup} className={`flex min-w-0 flex-col gap-2 ${className}`}>
-      <label htmlFor={htmlFor} className="text-cap font-semibold text-text">
-        {dot && <span aria-hidden="true" className={`mr-2 inline-block h-2 w-2 rounded-full align-[1px] ${dot.className ?? ""}`} style={dot.color ? { backgroundColor: dot.color } : undefined} />}
-        {label}
-        {required && (
-          <>
-            <span aria-hidden="true"> *</span>
-            <span className="sr-only"> (bắt buộc)</span>
-          </>
-        )}
-      </label>
+      {action ? (
+        <div className="flex min-h-6 items-center justify-between gap-2">
+          {labelEl}
+          {action}
+        </div>
+      ) : (
+        labelEl
+      )}
       {children}
       <AlertLine show={!!error} gap={2} id={fieldErrorId(htmlFor)} className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
         {error}
