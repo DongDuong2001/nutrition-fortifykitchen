@@ -154,7 +154,8 @@ describe("microBoard over the Level's list (overnight 22→23/10: Tổng quan co
   it("the change, the lowest and the Thiếu count are the Level's too", () => {
     expect(board.change).toBe(reached(mine) - reached(prev.filter((r) => counted.includes(r.key))));
     for (const l of board.lowest) expect(counted).toContain(l.key);
-    expect(board.lacking).toBe(mine.filter((r) => r.percentage !== null && r.percentage < 50).length);
+    expect(board.levelCounts.thieu).toBe(mine.filter((r) => r.percentage !== null && r.percentage < 50).length);
+    expect(board.levelSquares.map((q) => q.key).sort()).toEqual([...counted].sort());
   });
   it("the squares and the counts per level stay all 22 (Đủ 22 vi chất)", () => {
     expect(board.squares).toHaveLength(22);

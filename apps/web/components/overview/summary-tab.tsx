@@ -30,9 +30,10 @@ export function SummaryTab() {
   // The count is over the Level's nutrients, as Hôm nay's "x/N đạt"; the card's grid keeps all 22
   const { level } = useCoaching();
   const board = useMemo(() => microBoard(micro, microPrevious, countedForLevel(level)), [micro, microPrevious, level]);
+  // Cần chú ý names the Level's nutrients, as the card above and Hôm nay
   const attention = useMemo(
-    () => attentionRows({ days: overview.days, proteinMin: targetMinFor("protein", targets), todayIso, micro, length }),
-    [overview.days, targets, todayIso, micro, length]
+    () => attentionRows({ days: overview.days, proteinMin: targetMinFor("protein", targets), todayIso, micro: micro.filter((r) => countedForLevel(level).includes(r.key)), length }),
+    [overview.days, targets, todayIso, micro, length, level]
   );
 
   const periodRow = <PeriodControl compact heading={periodHeading(period)} period={period} length={length} />;

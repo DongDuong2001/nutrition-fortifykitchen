@@ -43,13 +43,15 @@ These are foods whose default serving was a count, and they now read per 100 g (
 **Before:** for the same day, Tổng quan said "Vi chất đạt 8/22" and Hôm nay "5/8 đạt".
 
 **Change:** `microBoard` takes the Level's ids (`countedForLevel`, the list Hôm nay counts), so N is 8, 14, 18 or 22.
-- Over those ids: x/N, the bar, the change from the last period, the three lowest and "y đang thiếu".
-- "Đủ 22 vi chất" stays reachable:
-  - the card's grid still opens on all 22 squares, and ends with "Đủ 22 vi chất ›" (the Vi chất tab);
-  - on the Vi chất tab the four level lists of all 22 sit under the heading "Đủ 22 vi chất".
+- **Tóm tắt's Vi chất card:** x/N, the bar, the change from the last period, the three lowest, and the grid of squares with its counts. It ends with "Đủ 22 vi chất ›" (the Vi chất tab), as Hôm nay's column ends with the same link.
+- **The Vi chất tab's hero:** the same count, bar and note ("3 trên 8 vi chất đạt mục tiêu; 0 đang thiếu"), and the bars and their legend of those nutrients.
+  - The four level lists below hold all 22, under the heading "Đủ 22 vi chất".
+  - Before, the hero listed all 22 bars under its count, so "0 đang thiếu" would have sat above red bars of nutrients not counted.
+- **Cần chú ý** (both tabs) names the Level's nutrients, as Hôm nay's "Thiếu nhiều nhất" does. See open question 3.
 
 ## 3. TB/ngày
-Tổng quan's Kcal and Đạm big numbers are the period's average of a day. Every macro row of the scoreboard (Tóm tắt and Năng lượng) now says "TB/ngày" beside the number; the weight row does not.
+- Tổng quan's Kcal and Đạm big numbers are the period's average of a day. Every macro row of the scoreboard (Tóm tắt and Năng lượng) now says "TB/ngày" beside the number; the weight row does not.
+- **Fixed on the way:** at 360 px with 150 % text, the big number already ran under the day squares on main. The number and the squares now share one row that wraps, so the squares go under the number when there is no room. At 390 the row looks as before.
 
 ## 4. Hôm nay's footnote
 **Before:** "● Thiếu dữ liệu vi chất · chạm tên bữa để xem riêng bữa đó" under every day.
@@ -82,3 +84,4 @@ Tổng quan's Kcal and Đạm big numbers are the period's average of a day. Eve
 ## Open questions
 1. Should supplements (1 viên), Món Việt dishes (1 tô, 1 phần) and cans (1 lon) also go by grams? I kept their unit, as cc-53 decided ("Ghi theo lon, viên, phần"); say if "grams everywhere" includes them.
 2. So sánh's "Theo khẩu phần" and Giàu …'s "theo khẩu phần" still read the data's first serving (1 củ · 150 g). That is a comparison by the usual portion, so I left it; say if it should read 100 g too, which would make it the same as "Theo 100 g".
+3. Cần chú ý on Tổng quan now names only the Level's nutrients (at Level 1 it no longer says Vitamin B1). That matches Hôm nay, but a Level 1 account no longer sees the lowest of the other 14 there. They are one tap away in Đủ 22 vi chất. Say if Cần chú ý should keep all 22.

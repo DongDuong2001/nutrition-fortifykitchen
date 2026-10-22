@@ -2,8 +2,9 @@
 
 1  Grams everywhere except eggs and chanh: the + sheet's list says "/ 100 g" for Khoai lang (it said "/ 1 củ"), Trứng gà keeps
    "1 quả", Gần đây of Bữa tối shows Khoai lang by grams; no row of the list is shown by củ, bìa, nắm, dĩa or muỗng.
-2  Tổng quan counts the micros over the Level's list, as Hôm nay: the Vi chất card's "x/N" has Hôm nay's N; its grid still opens on
-   all 22, with "Đủ 22 vi chất ›" to the Vi chất tab, whose lists stay under the heading "Đủ 22 vi chất".
+2  Tổng quan counts the micros over the Level's list, as Hôm nay: the Vi chất card's "x/N" has Hôm nay's N and its grid the Level's
+   nutrients, with "Đủ 22 vi chất ›" to the Vi chất tab; there the hero is the Level's too, and all 22 are in the lists under the
+   heading "Đủ 22 vi chất".
 3  The Kcal and Đạm big numbers of Tổng quan say TB/ngày.
 4  Hôm nay's footnote: "● Thiếu dữ liệu vi chất" only while a grey dot is on screen, and no "chạm tên bữa" in it.
 5  Khám phá › Nhóm món lists no group with 0 foods.
@@ -85,7 +86,7 @@ with sync_playwright() as p:
     card.locator("button").first.click()
     pg.wait_for_timeout(600)
     squares = card.locator("#ov-micro-grid button, #ov-micro-grid [role=button]").count()
-    check(squares == 22, f"2: the card's grid still holds all 22 ({squares})")
+    check(squares == home_total, f"2: the card's grid holds the Level's nutrients, as Hôm nay's column ({squares})")
     link = card.get_by_role("link", name=re.compile("Đủ 22 vi chất"))
     check(link.count() == 1, "2: the card links to Đủ 22 vi chất")
     # ---- 3: TB/ngày ----

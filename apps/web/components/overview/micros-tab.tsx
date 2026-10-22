@@ -123,9 +123,10 @@ export function MicrosTab() {
   // The finished logged days the averages cover, and what was eaten on them
   const finished = useMemo(() => days.filter((d) => d.logged && d.date < todayIso), [days, todayIso]);
   const entries = useMemo(() => finished.flatMap((d) => dayEntries(d.date, todayIso)), [finished, todayIso]);
+  // The lowest of the Level's nutrients, as Hôm nay's "Thiếu nhiều nhất"
   const attention = useMemo(
-    () => nutrientAttention({ micro: rows, entries, loggedDays: finished.length }),
-    [rows, entries, finished.length]
+    () => nutrientAttention({ micro: rows.filter((r) => countedForLevel(level).includes(r.key)), entries, loggedDays: finished.length }),
+    [rows, entries, finished.length, level]
   );
 
   if (!overview.enough) return <NotEnoughData />;
@@ -173,9 +174,10 @@ export function MicrosTab() {
             <HeroBar pct={achievedPct} level scale={{ from: "0", to: `${board.total} vi chất` }} />
           </div>
           <HeroNote>
-            {board.achieved} trên {board.total} vi chất đạt mục tiêu; {board.lacking} đang thiếu.
+            {board.achieved} trên {board.total} vi chất đạt mục tiêu; {board.levelCounts.thieu} đang thiếu.
           </HeroNote>
-          <NutrientBars id="mi-grid" board={board} />
+          {/* The Level's nutrients, as the count above and Hôm nay's column; all 22 are in the lists of Đủ 22 vi chất */}
+          <NutrientBars id="mi-grid" squares={board.levelSquares} counts={board.levelCounts} />
         </HeroCard>
 
         <AttentionList items={items} title="Cần chú ý: thấp nhất kỳ này" />

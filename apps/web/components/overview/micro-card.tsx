@@ -28,7 +28,8 @@ function Chevron() {
 
 /**
  * The Vi chất card of Tóm tắt (dark): how many of the Level's nutrients reach their target (the count Hôm nay shows), one
- * continuous bar, and what is lowest. Tapping opens the NutrientGrid of all 22, lowest share first, and "Đủ 22 vi chất ›".
+ * continuous bar, and what is lowest. Tapping opens the NutrientGrid of those nutrients, lowest share first, and "Đủ 22 vi chất ›"
+ * (the Vi chất tab, which lists all 22).
  */
 export function MicroCard({ board, allHref }: { board: MicroBoard; allHref: string }) {
   const [open, setOpen] = useState(false);
@@ -76,12 +77,12 @@ export function MicroCard({ board, allHref }: { board: MicroBoard; allHref: stri
       </button>
 
       <Expand open={open} className="px-4 pb-4">
-          <NutrientGrid id="ov-micro-grid" squares={board.squares} selected={selected} onSelect={setSelected} />
+          <NutrientGrid id="ov-micro-grid" squares={board.levelSquares} selected={selected} onSelect={setSelected} />
           <p className="m-0 mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-muted-subtitle">
-            <span>Thiếu {board.counts.thieu}</span>
-            <span>Trung bình {board.counts.trungbinh}</span>
-            <span>Gần đủ {board.counts.ganDu}</span>
-            <span>Đạt {board.counts.dat}</span>
+            <span>Thiếu {board.levelCounts.thieu}</span>
+            <span>Trung bình {board.levelCounts.trungbinh}</span>
+            <span>Gần đủ {board.levelCounts.ganDu}</span>
+            <span>Đạt {board.levelCounts.dat}</span>
           </p>
           <Link href={allHref} className="mt-1 inline-flex min-h-11 items-center text-cap font-bold text-sky no-underline">
             Đủ 22 vi chất ›
