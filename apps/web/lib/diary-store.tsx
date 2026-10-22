@@ -137,7 +137,7 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved" | "left";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved" | "left" | "share";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
@@ -187,8 +187,8 @@ interface DiaryContextValue {
   dismissToast: () => void;
   /** After a toast's action: ends `shown` only if it is still the toast on screen (the action may have put a new one up, or none). */
   dismissToastAfterAction: (shown: ToastInfo) => void;
-  /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. */
-  notify: (message: string) => void;
+  /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. "share": with a Chia sẻ action (share-spotlight). */
+  notify: (message: string, kind?: "notice" | "share") => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
   pauseToast: () => void;
   resumeToast: () => void;
@@ -1263,8 +1263,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast((current) => toastAfterAction(current, shown));
   }, []);
 
-  const notify = useCallback((message: string) => {
-    setToast({ message, kind: "notice", mealSlot: null, durationMs: ADDED_TOAST_MS });
+  const notify = useCallback((message: string, kind: "notice" | "share" = "notice") => {
+    setToast({ message, kind, mealSlot: null, durationMs: ADDED_TOAST_MS });
   }, []);
 
   const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);

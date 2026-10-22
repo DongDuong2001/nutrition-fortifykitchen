@@ -36,7 +36,8 @@ export const RELEASES: readonly Release[] = [
   // So sánh in the portion panel, the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero when the day has no food yet) and the "Chép ngày ăn mẫu"
   // pill of an empty day (the meals' headers when the day already has food).
   // custom-food-nutrients (Hao 22/10): Tự nhập takes every nutrient on a label. The form is not on Hôm nay, so its step points at
-  // + Thêm vi chất khác where it is on screen and at the + of the bar on Hôm nay (fallback)
+  // + Thêm vi chất khác where it is on screen and at the + of the bar on Hôm nay (fallback).
+  // share-spotlight (Hao 22/10): Hôm nay's share button says Chia sẻ; its step points at it (always in Hôm nay's header)
   {
     id: "2026-10-22a",
     date: "22/10",
@@ -53,6 +54,11 @@ export const RELEASES: readonly Release[] = [
         title: "Nhập đủ vi chất trên nhãn",
         body: "Nhập đủ chất xơ, đường và mọi vi chất trên nhãn khi tự nhập món, theo đúng thứ tự trên nhãn. Chạm + Thêm vi chất khác để thêm vitamin và khoáng chất.",
       },
+      {
+        icon: "share",
+        title: "Chia sẻ ngày ăn bằng một chạm",
+        body: "Nút Chia sẻ ở đầu Hôm nay tạo ảnh tóm tắt ngày ăn, gửi ngay cho bạn bè hoặc HLV.",
+      },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
@@ -62,6 +68,7 @@ export const RELEASES: readonly Release[] = [
       { target: "day-menu", fallback: "home-hero", title: "Lưu cả ngày thành mẫu", body: "Mở nút ⋯ trên thẻ kcal rồi chọn Lưu ngày này thành mẫu. Cần ngày đã có món." },
       { target: "day-template-pill", fallback: "meal-pill", title: "Chép ngày ăn mẫu", body: "Ngày còn trống thì chạm Chép ngày ăn mẫu ở đầu thẻ bữa ăn, chọn một mẫu hoặc Hôm qua." },
       { target: "add-nutrient", fallback: "nav-add", title: "Nhập đủ vi chất", body: "Tạo món mới, chọn Tự nhập rồi chạm + Thêm vi chất khác để nhập mọi chất trên nhãn." },
+      { target: "home-share", title: "Chia sẻ ngày ăn", body: "Chạm Chia sẻ để tạo ảnh tóm tắt ngày ăn và gửi ngay." },
     ],
   },
   // swap-ingredients (Hao 21/10, in 21c because 21c is not live yet: no release 21d): in Thành phần a part with alternatives has "Đổi nguyên liệu"

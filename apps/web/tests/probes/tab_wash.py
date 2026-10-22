@@ -6,7 +6,8 @@ and the content paint over it. From 1024 px the wash is hidden. Cài đặt and 
 filled teal #007F96 with white text; the others are as they were.
 The chip rows' side fades are a mask on the row (ChipScroller), not an overlay: Khám phá's row at 390 px does not overflow, so it has no mask
 and the pixel at its right edge is the wash; at 360 px with 150 % text it overflows, so its right edge fades and, scrolled to the end, its
-left edge fades instead; the add sheet's filter row (the sheet variant) has no fades.
+left edge fades instead. The add sheet's filter row (the sheet variant) has the same fades: at 360 px it overflows, so its right edge fades
+(the left one once scrolled to the end); with the chips small enough to fit it has none.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tab_wash.py
 """
 # PROBE_COVERS: components/ui/tab-wash.tsx components/ui/app-header.tsx components/ui/segmented.tsx components/overview/overview-frame.tsx app/globals.css app/(app)/(tabs)/**
@@ -97,14 +98,24 @@ def main():
         big.wait_for_timeout(300)
         f = brow.evaluate(FADES)
         check(f["edges"] == "left" and "linear-gradient" in f["mask"], f"/explore at 360, 150 % text, scrolled to the end: fades on the left only ({f['edges']})")
-        # the add sheet's filter row sits in the sheet's header: no fades there
+        # the add sheet's filter row (the sheet variant) fades like the page's row: right while it overflows, left once scrolled, none when it fits
         sheet = browser.new_context(viewport={"width": 360, "height": 780}).new_page()
         sheet.goto(BASE + "/add", wait_until="networkidle")
         sheet.wait_for_timeout(700)
         srow = sheet.locator("[data-add-panel] [role=group][aria-label='Lọc món theo nhóm']").first
         f = srow.evaluate(FADES)
-        check(f["edges"] is None and f["mask"] == "none", f"the add sheet's filter row at 360 has no fades ({f['edges']}, {f['mask']})")
+        check(f["over"], f"the add sheet's filter row overflows at 360 ({f})")
+        check(f["edges"] == "right" and "linear-gradient" in f["mask"], f"the add sheet's filter row at 360 fades on the right only ({f['edges']}, {f['mask'][:40]})")
         sheet.screenshot(path=os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots", "v3-cleanup", "add-filter-row-360-after.png"), clip={"x": 0, "y": 0, "width": 360, "height": 260})
+        srow.evaluate("(e) => { e.scrollLeft = e.scrollWidth; }")
+        sheet.wait_for_timeout(300)
+        f = srow.evaluate(FADES)
+        check(f["edges"] == "left" and "linear-gradient" in f["mask"], f"the add sheet's filter row scrolled to the end fades on the left only ({f['edges']})")
+        # A row whose chips fit (all but two hidden): no fade
+        srow.evaluate("(e) => { e.scrollLeft = 0; [...e.children].slice(2).forEach((c) => { c.style.display = 'none'; }); }")
+        sheet.wait_for_timeout(400)
+        f = srow.evaluate(FADES)
+        check(not f["over"] and f["edges"] == "none" and f["mask"] == "none", f"the add sheet's filter row with the chips fitting has no fade ({f['edges']}, over={f['over']})")
         big.screenshot(path=os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots", "v3-cleanup", "explore-chip-row-360-text150-after.png"), clip={"x": 0, "y": 0, "width": 360, "height": 360})
 
         desk = browser.new_context(viewport={"width": 1440, "height": 900}).new_page()

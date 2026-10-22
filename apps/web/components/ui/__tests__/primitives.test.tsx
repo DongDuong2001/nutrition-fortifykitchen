@@ -94,6 +94,8 @@ describe("ChipGroup scroll with an icon (V3 filter chips)", () => {
     );
     expect(html.indexOf("data-testid=\"tile\"")).toBeLessThan(html.indexOf("Đạm"));
     expect(html).toContain("min-h-11");
-    expect(html).not.toContain("data-fade");
+    // The sheet variant fades like the page's (share-spotlight): before it is measured, nothing overflows, so no fade
+    expect(html).toContain('data-fade-edges="none"');
+    expect(html).toContain("--chip-mask:none");
   });
 });

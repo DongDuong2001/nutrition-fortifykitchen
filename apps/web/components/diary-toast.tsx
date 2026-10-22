@@ -7,11 +7,13 @@ import { useToastSwipe } from "@/components/ui/use-toast-swipe";
 import { useDiary, useDiaryToast, type ToastInfo } from "@/lib/diary-store";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 import { openSyncList } from "@/lib/sync-ui";
+import { emitSignal } from "@/lib/tour-bus";
 import { usePathname } from "next/navigation";
 
 /**
  * The app's one toast, from the diary store. Every "Đã thêm …" (a tray, a portion, a recent, a Bữa ăn đã lưu, Chỉ ghi kcal, a copy),
- * "Đã xóa …" and "Đã chuyển …" offers Hoàn tác, "Đã lưu …" offers Xem (Khám phá), "Chưa lưu được món" offers Thử lại. Every action
+ * "Đã xóa …" and "Đã chuyển …" offers Hoàn tác, "Đã lưu …" offers Xem (Khám phá), "Chưa lưu được món" offers Thử lại, "… chia sẻ nhé?"
+ * offers Chia sẻ (it opens Hôm nay's share sheet). Every action
  * ends its toast at once. The store ends it after its duration. cc-55: the countdown bar is
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
@@ -89,6 +91,8 @@ export function DiaryToast() {
                   ? "Thử lại"
                   : toast.kind === "left"
                     ? "Xem lý do"
+                    : toast.kind === "share"
+                    ? "Chia sẻ"
                     : toast.kind === "added" || toast.kind === "saved"
                     ? "Xem"
                     : "Hoàn tác"
@@ -105,7 +109,9 @@ export function DiaryToast() {
                       ? () => void retryUnsaved()
                       : toast.kind === "left"
                         ? openSyncList
-                        : showMeal
+                        : toast.kind === "share"
+                          ? () => emitSignal("open-share")
+                          : showMeal
             }
             countdown={{ totalMs: toast.durationMs, leftMs: toast.durationMs }}
           />

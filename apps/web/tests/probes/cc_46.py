@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-22a"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients (2026-10-22a)
+ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn", "Chia sẻ ngày ăn bằng một chạm"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients, share-spotlight (2026-10-22a)
 ITEMS_2110C = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add, polish, rich-tabs, minh-hao-tab, glide, swap-ingredients (2026-10-21c, live)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
@@ -129,7 +129,8 @@ def targets_ok(pg, selector, label):
 
 
 # cc-49/51 tips on Hôm nay (Chưa lưu, kéo xuống, chạm vi chất) are seen too, so the sheet is not waiting for a tip
-SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"]}
+# share-spotlight: the share tip may follow Có gì mới and shows again after it was seen, so these accounts have shared once (share_spotlight.py tests it)
+SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"], "used": ["share-day"]}
 
 
 def wrapped_titles(pg, titles):
@@ -207,7 +208,13 @@ def comes_before_tips(browser):
     check(card(pg).count() == 0, "no tip beside it")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(3000)
-    check(card(pg).count() == 0, "no tip after it in the same app open (one interruption per open)")
+    # share-spotlight (Hao 22/10): the share tip is the one tip that may follow Có gì mới in the same app open; no other tip does
+    texts = card(pg).all_inner_texts()
+    check(card(pg).count() == 0 or (len(texts) == 1 and "Chia sẻ ngày ăn của bạn" in texts[0]), f"after it in the same app open only the share tip may follow ({texts[:1]})")
+    if card(pg).count():
+        card(pg).get_by_role("button", name="Để sau").click()
+        pg.wait_for_timeout(2500)
+    check(card(pg).count() == 0, "and no tip after that (one interruption per open, plus the share tip)")
     ctx.close()
 
 
@@ -290,14 +297,14 @@ def tour(browser):
 
 def home_tour(browser):
     """cc-73b: Thử ngay runs the 21b tour on /app: two steps, the kcal target (the hero), then the vitamin column (the hero when it is missing).
-    An account that saw 21a gets 21b, 21c and 22a: the tour is 21c's two and 22a's six that are on Hôm nay (cut to 8: see lib/releases joinedTour)."""
+    An account that saw 21a gets 21b, 21c and 22a: the tour is 21c's first and 22a's seven that are on Hôm nay (cut to 8: see lib/releases joinedTour)."""
     ctx, pg = new_page(browser, onboarding={**SEEN_TIPS, "whatsNewSeen": "2026-10-21a"})
     go(pg, "/app", 1200)
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    # 21b's 2 + 21c's 2 + 22a's 6 on Hôm nay (So sánh món is in the portion panel; + Thêm vi chất khác is the + of the bar) = 10, cut to 8: 21b goes
-    steps = [("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]), ("Nhập đủ vi chất", ["add-nutrient", "nav-add"])]
+    # 21b's 2 + 21c's 2 + 22a's 7 on Hôm nay (So sánh món is in the portion panel; + Thêm vi chất khác is the + of the bar) = 11, cut to 8
+    steps = [("Đồ ăn của Minh Hào", ["nav-explore"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]), ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]), ("Chia sẻ ngày ăn", ["home-share"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()

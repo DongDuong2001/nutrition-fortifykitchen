@@ -9,11 +9,14 @@ import { useDiary } from "@/lib/diary-store";
 import { canVibrate } from "@/lib/haptics";
 import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
-import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
+import { finishTour, loadFlags, markShareLater, markShareTipDay, markTipSeen, markUsed, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
 import {
+  claimFollowWhatsNew,
   claimInterruption,
   interruptionBlockedByUi,
+  interruptionShown,
+  mayFollowWhatsNew,
   mayInterrupt,
   interruptionVersion,
   probeUi,
@@ -166,6 +169,25 @@ function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTou
 }
 
 function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => void; onTry: () => void; onTurnOff: () => void }) {
+  // share-spotlight: a tip that can be put off ("Để sau") is a short bubble, its two buttons only
+  if (tip.laterLabel) {
+    return (
+      <>
+        <h2 id="tip-title" className="m-0 text-lg font-bold leading-snug">
+          {tip.title}
+        </h2>
+        <p className="m-0 text-sm leading-relaxed text-secondary">{tip.body}</p>
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          <button type="button" onClick={onGotIt} className={quietButton}>
+            {tip.laterLabel}
+          </button>
+          <button type="button" onClick={onTry} className={primaryButton}>
+            {tip.tryLabel}
+          </button>
+        </div>
+      </>
+    );
+  }
   return (
     <>
       <p className="m-0 text-xs font-bold text-cobalt">Mẹo · lần đầu</p>
@@ -330,10 +352,10 @@ export function OnboardingLayer() {
     if (wn && !whatsNewSteps(wn)[wn.index]) writeWhatsNewTour(null);
   }, [wn]);
 
-  // The tip this screen would show now (null when none is due)
+  // The tip this screen would show now (null when none is due). After "Có gì mới" only the tip made to follow it (the share tip).
   const dueTip = useCallback((): Tip | null => {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
-    return pickTip({ ctx: tipContext(), flags, tourActive, now: Date.now() });
+    return pickTip({ ctx: tipContext(), flags, tourActive, now: Date.now(), afterWhatsNew: interruptionShown() === "whats-new" });
   }, [tourActive, wnActive, wnSheet, tipContext, flags]);
 
   // Opening a sheet, or a portion control turning up, is a new visit for its own tip (when that tip is still due)
@@ -377,12 +399,14 @@ export function OnboardingLayer() {
     const attempt = () => {
       // Asked first, and nothing polls while it is no: something else opened or is due, and this effect looks again when that changes
       // (the `interruptions` version) or on the next screen visit. The tip stays due; it is not dropped.
-      if (!mayInterrupt("tip")) return;
+      // share-spotlight: the tip that follows "Có gì mới" uses that allowance (lib/interruption followWhatsNew), not a new one
+      const follow = tip.afterWhatsNew === true && interruptionShown() === "whats-new";
+      if (!(follow ? mayFollowWhatsNew() : mayInterrupt("tip"))) return;
       if (interruptionBlockedByUi(probeUi())) {
         timer = setTimeout(attempt, TIP_RETRY_MS);
         return;
       }
-      if (!claimInterruption("tip")) return;
+      if (!(follow ? claimFollowWhatsNew() : claimInterruption("tip"))) return;
       visit.current.tipShown = true;
       setTipId(tip.id);
     };
@@ -481,6 +505,11 @@ export function OnboardingLayer() {
 
   const tip = tipId ? TIPS.find((t) => t.id === tipId) : null;
   if (!tip) return <Presence>{null}</Presence>;
+  // "Để sau" (and Esc) puts the share tip off: after two it stops (lib/tips again)
+  const close = () => {
+    if (tip.laterLabel) markShareLater();
+    setTipId(null);
+  };
   return (
     <Presence>
     <Spotlight
@@ -488,15 +517,20 @@ export function OnboardingLayer() {
       target={tip.target}
       round={tip.round}
       labelledBy="tip-title"
-      onShown={() => markTipSeen(tip.id)}
-      onEscape={() => setTipId(null)}
+      onShown={() => {
+        markTipSeen(tip.id);
+        // The "chia sẻ nhé?" toast never comes on the day the share tip showed (lib/share-nudge)
+        if (tip.id === "home-share") markShareTipDay(getTodayIsoVN());
+      }}
+      onEscape={close}
       onMissing={() => setTipId(null)}
     >
       <TipCard
         tip={tip}
-        onGotIt={() => setTipId(null)}
+        onGotIt={close}
         onTry={() => {
           setTipId(null);
+          markUsed("share-tip-try");
           emitSignal("open-share");
         }}
         onTurnOff={() => {

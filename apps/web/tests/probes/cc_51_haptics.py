@@ -27,7 +27,7 @@ TIPS = ["unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nut
         "add-shortlists", "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard"]
 TIPS_ON = (
     "try { localStorage.removeItem('h1t_onboarding_off'); if (localStorage.getItem('h1t_settings_v1_demo') === null) "
-    "localStorage.setItem('h1t_settings_v1_demo', %s); } catch (e) {}" % json.dumps(json.dumps({"onboarding": {"tourDone": True, "seen": TIPS}}))
+    "localStorage.setItem('h1t_settings_v1_demo', %s); } catch (e) {}" % json.dumps(json.dumps({"onboarding": {"tourDone": True, "seen": TIPS, "used": ["share-day"]}}))
 )
 problems = []
 
