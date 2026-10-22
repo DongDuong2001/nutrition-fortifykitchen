@@ -18,6 +18,7 @@ import { ageOf } from "./rda";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
 import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
 import { cleanDisplayName, validateDisplayName } from "./display-name";
+import { serverAcceptsTrainingMinutes } from "./training-limits";
 
 export { PROFILE_KEY, cleanDisplayName };
 
@@ -69,7 +70,8 @@ export function setupFieldsOf(profile: Profile): SetupProfile {
     weightKg: profile.weightKg,
     goal: profile.goal,
     periodMode: profile.periodMode,
-    trainingMinutesDefault: profile.trainingMinutesDefault,
+    // A Tùy chỉnh default the API does not take yet stays on this device (left out of PUT /me/profile, the server keeps its own)
+    trainingMinutesDefault: serverAcceptsTrainingMinutes(profile.trainingMinutesDefault) ? profile.trainingMinutesDefault : undefined,
     displayName: profile.displayName,
   };
 }
@@ -107,7 +109,8 @@ export const SAMPLE_PROFILE: Profile = {
 
 const SEXES: readonly string[] = ["male", "female"];
 const GOALS: readonly string[] = ["build", "maintain", "cut", "deep_cut"];
-const MAX_TRAINING_MINUTES = 240;
+// Tùy chỉnh goes up to 480 minutes (lib/training CUSTOM_MINUTES_MAX)
+const MAX_TRAINING_MINUTES = 480;
 
 export function normaliseProfile(profile: Profile): Profile {
   return { ...profile, periodMode: profile.sex === "female" && profile.periodMode };

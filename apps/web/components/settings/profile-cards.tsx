@@ -19,7 +19,8 @@ import { canVibrate, haptic, hapticsWanted } from "@/lib/haptics";
 import type { OnboardingFlags } from "@/lib/onboarding-flags";
 import { loadFlags, markUsed, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { startTour } from "@/lib/tour-bus";
-import { getTrainingDurations, TRAINING_SIZE_NAME, type TrainingSize } from "@/lib/training";
+import { CUSTOM_DURATION_ID, getTrainingDurations, isPresetMinutes, TRAINING_SIZE_NAME, type TrainingSize } from "@/lib/training";
+import { TrainingMinutesPicker } from "@/components/training/minutes-picker";
 import { readPrefs, writePrefs } from "@/lib/training-prefs";
 import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -268,6 +269,8 @@ export function BodyCard({ alignGroup }: { alignGroup?: string }) {
 
 export function GoalCard() {
   const { profile, updateProfile } = useDiary();
+  const [minutesOpen, setMinutesOpen] = useState(false);
+  const customDefault = !isPresetMinutes(profile.trainingMinutesDefault);
   const options = goalOptions(profile.weightKg);
   return (
     <Card as="section" aria-label="Mục tiêu" padding={false} className="flex flex-col px-4 pt-4">
@@ -285,16 +288,35 @@ export function GoalCard() {
       </ChoiceGroup>
       <ChoiceGroup labelId="profile-training-label" label="Ngày tập mặc định" unit="phút" reason="Dùng để tính lượng muối khi tập.">
         <ChoiceGrid
-          columns={5}
-          items={TRAINING_OPTIONS.map((option) => ({
-            id: option.id,
-            label: option.minutes === 0 ? "Nghỉ" : String(option.minutes),
-            ariaLabel: option.minutes === 0 ? "Nghỉ" : `${option.minutes} phút`,
-            active: profile.trainingMinutesDefault === option.minutes,
-            onClick: () => updateProfile({ trainingMinutesDefault: option.minutes }),
-          }))}
+          columns={6}
+          items={[
+            ...TRAINING_OPTIONS.map((option) => ({
+              id: option.id,
+              label: option.minutes === 0 ? "Nghỉ" : String(option.minutes),
+              ariaLabel: option.minutes === 0 ? "Nghỉ" : `${option.minutes} phút`,
+              active: profile.trainingMinutesDefault === option.minutes,
+              onClick: () => updateProfile({ trainingMinutesDefault: option.minutes }),
+            })),
+            // feat/training-custom-minutes: the same picker as Ngày tập; a custom default shows its minutes on the chip
+            {
+              id: CUSTOM_DURATION_ID,
+              label: customDefault ? String(profile.trainingMinutesDefault) : "Tùy chỉnh",
+              ariaLabel: customDefault ? `Tùy chỉnh, ${profile.trainingMinutesDefault} phút` : "Tùy chỉnh thời gian tập",
+              active: customDefault,
+              onClick: () => setMinutesOpen(true),
+            },
+          ]}
         />
       </ChoiceGroup>
+      <TrainingMinutesPicker
+        open={minutesOpen}
+        initial={customDefault ? profile.trainingMinutesDefault : 150}
+        onClose={() => setMinutesOpen(false)}
+        onPick={(minutes) => {
+          setMinutesOpen(false);
+          updateProfile({ trainingMinutesDefault: minutes });
+        }}
+      />
       <TrainingSizeRow />
     </Card>
   );
