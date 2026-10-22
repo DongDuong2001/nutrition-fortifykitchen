@@ -9,6 +9,8 @@ import { TouchActive } from "@/components/touch-active";
 import { KeyboardGuard } from "@/components/keyboard-guard";
 import { Vitals } from "@/components/vitals";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
+import { THEME_SCRIPT } from "@/lib/theme";
+import { ThemeSync } from "@/components/theme-sync";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://h1tmicro.vn"),
@@ -40,10 +42,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={FONT_VARIABLES}>
+    <html lang="vi" suppressHydrationWarning className={FONT_VARIABLES}>
       <head>
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />
+        {/* Dark mode (behind its flag, lib/theme.ts): data-theme before the first paint, so a dark choice never flashes light */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="bg-page text-text antialiased min-h-dvh flex flex-col font-sans">
         <NavHistoryTracker />
@@ -52,6 +56,7 @@ export default function RootLayout({
         <TouchActive />
         <KeyboardGuard />
         <Vitals />
+        <ThemeSync />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
