@@ -8,7 +8,7 @@ From the Chrome audit of main f13f64c, demo build.
 **Change** (`defaultServing`, lib/portion):
 - A food weighed in grams is now listed by its gram (or ml) serving, else 100 g, whatever unit its data lists first.
 - The list meta, the group macro line ("26,6 g tinh bột"), a recent's fallback and the Minh Hào cards read it.
-- The portion panel opens on the same grams, so the row and the panel agree.
+- The portion panel opens on the same grams, so the row and the panel agree. The one food this moves is a food weighed in grams whose data lists an ml serving first: Yogurt kefir (200 ml) opened at 100 and now opens at 200, the amount its row shows.
 
 **Kept**
 - Eggs keep the quả (egg sizes, as before).
@@ -85,3 +85,5 @@ These are foods whose default serving was a count, and they now read per 100 g (
 1. Should supplements (1 viên), Món Việt dishes (1 tô, 1 phần) and cans (1 lon) also go by grams? I kept their unit, as cc-53 decided ("Ghi theo lon, viên, phần"); say if "grams everywhere" includes them.
 2. So sánh's "Theo khẩu phần" and Giàu …'s "theo khẩu phần" still read the data's first serving (1 củ · 150 g). That is a comparison by the usual portion, so I left it; say if it should read 100 g too, which would make it the same as "Theo 100 g".
 3. Cần chú ý on Tổng quan now names only the Level's nutrients (at Level 1 it no longer says Vitamin B1). That matches Hôm nay, but a Level 1 account no longer sees the lowest of the other 14 there. They are one tap away in Đủ 22 vi chất. Say if Cần chú ý should keep all 22.
+
+Self-review (ponytail-review): every caller of `defaultServing`, `defaultPortionOf`, `microBoard`, `NutrientBars` and `weighedFruit` checked; nothing to fix.
