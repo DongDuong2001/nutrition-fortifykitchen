@@ -63,7 +63,7 @@ def explore(browser, size_name, size):
     check(all(i >= 0 for i in order) and order == sorted(order),
           f"{w}: Món giàu vi chất, Gần đây, Của bạn, leaderboard, coaches in that order ({order})")
     tiles = rich.locator("ul[role='list'] > li a")
-    check(tiles.count() == 8, f"{w}: eight tiles ({tiles.count()})")
+    check(tiles.count() == 17, f"{w}: seventeen tiles: 7 minerals, 8 vitamins, đạm and chất xơ ({tiles.count()})")
     hrefs = [tiles.nth(i).get_attribute("href") for i in range(tiles.count())]
     check(all(h and h.startswith("/explore/rich/") for h in hrefs), f"{w}: tiles open /explore/rich/[chất]")
     colours = {tiles.nth(i).evaluate("e => getComputedStyle(e).backgroundColor") for i in range(tiles.count())}

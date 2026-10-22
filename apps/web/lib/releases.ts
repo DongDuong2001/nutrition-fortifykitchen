@@ -51,6 +51,7 @@ export const RELEASES: readonly Release[] = [
       },
       { icon: "bars", title: "Kcal từ đạm, tinh bột, béo", body: "Chạm Tinh bột, Đạm hoặc Chất béo ở thẻ đen để xem số kcal từ nó và phần của nó trong tổng kcal. Chạm lần nữa để quay lại." },
       { icon: "select", title: "Món ăn có biểu tượng cho dễ tìm", body: "Mỗi món trong danh sách thêm món, ở Khám phá và trang món có biểu tượng, nhìn là nhận ra ngay." },
+      { icon: "bars", title: "Thêm danh sách Giàu …", body: "Khám phá có thêm Giàu Zinc, Selenium, Phosphorus, Vitamin A, B6, B12, Folate, E và K, xếp theo lượng trong 100 g hoặc mỗi khẩu phần." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item

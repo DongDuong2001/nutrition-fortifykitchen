@@ -1,16 +1,30 @@
 import type { FoodItem } from "./catalog";
 import { getNutrientDefinition, type NutrientDefinition } from "./nutrients";
 
-/** The nutrients with a "Giàu …" list in Khám phá, in display order. Ids are catalog ids. */
+/**
+ * The nutrients with a "Giàu …" list in Khám phá, in display order: minerals, then vitamins, then đạm and chất xơ. Ids are catalog
+ * ids. A nutrient is here only when the catalogue backs it (feat/rich-more-nutrients, 23/10: at least 10 foods with a value, and
+ * a list that ranks sensibly per 100 g and per portion; the 21/10 catalogue has 200 or more foods for each). Sodium is left out:
+ * "giàu natri" is not a goal.
+ */
 export const RICH_NUTRIENT_IDS = [
   "calcium",
   "iron",
   "potassium",
   "magnesium",
-  "protein",
-  "fiber",
+  "zinc",
+  "selenium",
+  "phosphorus",
   "vitamin_d",
   "vitamin_c",
+  "vitamin_a",
+  "b12",
+  "folate",
+  "vitamin_e",
+  "vitamin_k",
+  "b6",
+  "protein",
+  "fiber",
 ] as const;
 
 export type RichNutrientId = (typeof RICH_NUTRIENT_IDS)[number];

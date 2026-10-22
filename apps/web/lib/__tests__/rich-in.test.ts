@@ -54,8 +54,36 @@ describe("richInFoods", () => {
     });
   });
 
-  it("lists the eight nutrients of the brief", () => {
-    expect(RICH_NUTRIENT_IDS).toEqual(["calcium", "iron", "potassium", "magnesium", "protein", "fiber", "vitamin_d", "vitamin_c"]);
+  it("lists minerals, then vitamins, then đạm and chất xơ (feat/rich-more-nutrients); never sodium", () => {
+    expect(RICH_NUTRIENT_IDS).toEqual([
+      "calcium", "iron", "potassium", "magnesium", "zinc", "selenium", "phosphorus",
+      "vitamin_d", "vitamin_c", "vitamin_a", "b12", "folate", "vitamin_e", "vitamin_k", "b6",
+      "protein", "fiber",
+    ]);
+    expect(RICH_NUTRIENT_IDS).not.toContain("sodium");
+    const groups = RICH_NUTRIENT_IDS.map((id) => getNutrientDefinition(id)?.group);
+    const firstVitamin = groups.indexOf("vitamins");
+    expect(groups.slice(0, firstVitamin).every((g) => g === "minerals")).toBe(true);
+    expect(groups.slice(firstVitamin, firstVitamin + 8).every((g) => g === "vitamins")).toBe(true);
+  });
+
+  it("every nutrient has a catalogue definition, a unit, a colour and a name for its title", async () => {
+    const { NUTRIENT_COLORS } = await import("../nutrient-colors");
+    for (const id of RICH_NUTRIENT_IDS) {
+      const def = getNutrientDefinition(id);
+      expect(def, id).toBeDefined();
+      expect(def!.unit.length, id).toBeGreaterThan(0);
+      expect(richName(def!).length, id).toBeGreaterThan(0);
+      if (def!.group === "minerals" || def!.group === "vitamins") expect(NUTRIENT_COLORS[id], id).toBeDefined();
+    }
+  });
+
+  it("a new nutrient ranks per 100 g and per portion like the others (zinc: oysters per 100 g, a big serving per portion)", () => {
+    const zinc = (id: string, per100: number, grams: number): FoodItem => ({ ...food(id, null, grams), nutrients: { zinc: per100 } });
+    const list = [zinc("hau", 16.6, 50), zinc("bo", 10.5, 200), zinc("hat", 9.9, 10)];
+    expect(richInFoods(list, "zinc", "per100", 11, "food").map((r) => r.food.id)).toEqual(["hau", "bo", "hat"]);
+    expect(richInFoods(list, "zinc", "portion", 11, "food").map((r) => r.food.id)).toEqual(["bo", "hau", "hat"]);
+    expect(richInFoods(list, "zinc", "per100", 11, "food")[0]).toMatchObject({ unit: "mg", pct: 151 });
   });
 });
 
