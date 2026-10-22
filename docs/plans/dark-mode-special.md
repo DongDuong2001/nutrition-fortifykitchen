@@ -87,7 +87,7 @@ Heaviest users: `shadow-ring` 47 uses in 35 files, `shadow-card` 29 in 27 files,
 
 ## 10. Other things to check
 
-- `components/landing/*` (landing page, `kiln-wordmark-footer.tsx` props default to `var(--color-cobalt/ink/kiln-paper)`; `stacking-audiences.tsx:159` has the only `dark:` class, `dark:text-sky`, today dead). Landing is not in the V3 screens; decide whether it follows dark. `--color-kiln-paper`, `--color-doodle*` (link page background doodles, `components/link-page/*`), `--color-gold` and `--color-hover` have no V3 dark source.
+- `components/landing/*` (landing page, `kiln-wordmark-footer.tsx` props default to `var(--color-cobalt/ink/kiln-paper)`; `stacking-audiences.tsx:159` has the only `dark:` class, `dark:text-sky`; Tailwind v4's default `dark:` is `prefers-color-scheme`, so it is live today on a dark phone, see the plan). Landing is not in the V3 screens; decide whether it follows dark. `--color-kiln-paper`, `--color-doodle*` (link page background doodles, `components/link-page/*`), `--color-gold` and `--color-hover` have no V3 dark source.
 - `app/dev/ui/page.tsx:38` (`border-white/10`) is dev-only.
 - Tailwind's default palette is still in the build (`--color-*` not reset), but no source file uses `bg-sky-500`-style classes (0 hits), so nothing falls through the dark map.
 - `lg:` (desktop) layouts have no V3 dark artboard (all dark screens are 390 px); desktop dark is the same tokens with no design reference.

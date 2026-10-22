@@ -52,7 +52,8 @@ The foundation's block already uses these values.
    - Option A, recommended: pin the picture to light. Wrap the off-screen ShareDay in `data-theme="light"`, so every recipient gets the same picture. About 1 h.
    - Option B: let it follow the app, using V3ShareB's dark palette. About 4 h.
 7. **Structure, not colour.** In the V3 dark artboards the add sheet, the edit sheet and the food page's portion card drop the white inset card and become flat rows. That is a component change, so it needs Hao's confirmation that the dark artboards mean it.
-8. **Food emoji tiles** (job 3, if merged). The emoji sits on a `surface` tile, which becomes #3A3A3C in dark. Fine as it is; check contrast on the 112 px food-page tile.
+8. **The `dark:` variant.** Tailwind v4's default `dark:` follows `prefers-color-scheme`, not Sáng/Tối. There is one use today, `dark:text-sky` on the landing page, and it is already live on dark phones. When the flag ships, add `@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));` so `dark:` follows the setting. Adding it now would change the landing page for live users, so it waits.
+9. **Food emoji tiles** (job 3, if merged). The emoji sits on a `surface` tile, which becomes #3A3A3C in dark. Fine as it is; check contrast on the 112 px food-page tile.
 
 ## PWA and browser chrome
 

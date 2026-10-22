@@ -1435,7 +1435,8 @@ button.m-drag-lift[data-touch-drag="dragging"] {
 /* Dark mode, the hidden foundation (job 14, docs/plans/dark-mode.md). Only under data-theme="dark", which lib/theme.ts
    sets before the first paint and only while its flag is on, so light mode has no new rule at all. Values: the V3
    dark map (design/v3/V3-SPEC.md: page, card, raised, divider, text, secondary, field, segment track, the Apple dark
-   system colours, status text, glass rgba(28,28,30,.70)); the ones V3 does not give are marked "proposed". */
+   system colours, status text, glass rgba(28,28,30,.70)); the ones V3 does not give are marked "proposed".
+   docs/plans/dark-mode-tokens.md lists every token with its source. */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --color-page: #000000;
@@ -1443,12 +1444,13 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   --color-raised: #2C2C2E;
   --color-surface: #3A3A3C;
   --color-seg-track: #3A3A3C;
-  --color-paper-dark: #3A3A3C;
+  --color-paper-dark: #48484A; /* proposed */
   --color-card-border: #38383A;
   --color-divider: #38383A;
   --color-text: #FFFFFF;
   --color-secondary: #AEAEB2;
   --color-secondary-strong: #D1D1D6; /* proposed */
+  --color-destructive: #FF4245;
   --color-destructive-text: #FF4245;
   --color-success: #30D158;
   --color-amber: #FFD600;
@@ -1479,21 +1481,21 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   --color-deep-brown: #B78A66;
   --color-level-empty: #38383A;
   --color-track: #38383A;
-  --color-cobalt-tint: rgba(36, 87, 245, 0.24); /* proposed */
+  --color-cobalt-tint: #16224A;
   --color-hover: #2C2C2E; /* proposed */
   --color-grabber: #48484A; /* proposed */
   --color-scrim: rgba(0, 0, 0, 0.6); /* proposed */
-  --color-scrim-2: rgba(0, 0, 0, 0.4); /* proposed */
-  --color-press: rgba(255, 255, 255, 0.08); /* proposed */
-  --color-press-hold: rgba(255, 255, 255, 0.16); /* proposed */
-  --color-warning-bg: rgba(255, 214, 0, 0.16); /* proposed */
+  --color-scrim-2: rgba(0, 0, 0, 0.33); /* proposed */
+  --color-press: rgba(255, 255, 255, 0.1);
+  --color-press-hold: rgba(255, 255, 255, 0.2); /* proposed */
+  --color-warning-bg: #3A2E14;
   --color-warning-text: #FFD600;
-  --color-fill: rgba(120, 120, 128, 0.36); /* Apple dark systemFill */
+  --color-fill: rgba(120, 120, 128, 0.16); /* V3 keeps it in dark */
   --color-glass: rgba(28, 28, 30, 0.7);
   --color-glass-text: #FFFFFF;
-  --color-glass-sheet: rgba(28, 28, 30, 0.8);
+  --color-glass-sheet: rgba(28, 28, 30, 0.86);
   --color-glass-tab: var(--color-glass-tab-dark);
-  --color-glass-tab-off: #AEAEB2; /* proposed */
+  --color-glass-tab-off: #C9CDD6;
   --color-tab-teal: var(--color-tab-teal-dark);
   --color-tab-orange: var(--color-tab-orange-dark);
 }
