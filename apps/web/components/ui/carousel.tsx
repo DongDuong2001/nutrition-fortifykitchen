@@ -10,7 +10,7 @@ import { IconButton } from "@/components/ui/icon-button";
  * `action` is a link at the right of the title ("Xem tất cả").
  * Desktop parity (23/10): a mouse wheel scrolls the page, not the row, and the scrollbar is hidden, so from 1024 px two 44 px
  * buttons beside the title page the row (the click for the phone's swipe). They show only when the row overflows, and each is
- * off at its end. Phones keep the swipe alone (the buttons are lg-only).
+ * off at its end (aria-disabled, so a focused button keeps focus there). Phones keep the swipe alone (the buttons are lg-only).
  */
 export function Carousel({ title, children, id, action }: { title: string; children: React.ReactNode; id?: string; action?: React.ReactNode }) {
   const listRef = useRef<HTMLUListElement>(null);
@@ -19,8 +19,12 @@ export function Carousel({ title, children, id, action }: { title: string; child
     const el = listRef.current;
     if (!el) return;
     const max = el.scrollWidth - el.clientWidth;
-    setEnds({ start: el.scrollLeft <= 1, end: el.scrollLeft >= max - 1, overflow: max > 1 });
+    const next = { start: el.scrollLeft <= 1, end: el.scrollLeft >= max - 1, overflow: max > 1 };
+    // Same ends, same object: a scroll in the middle of the row does not re-render it
+    setEnds((prev) => (prev.start === next.start && prev.end === next.end && prev.overflow === next.overflow ? prev : next));
   }, []);
+  // Cards can arrive after mount (the diary or the catalogue syncing) without the list resizing: measure after every render
+  useEffect(measure);
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
@@ -35,7 +39,7 @@ export function Carousel({ title, children, id, action }: { title: string; child
   }, [measure]);
   const page = (dir: 1 | -1) => {
     const el = listRef.current;
-    if (!el) return;
+    if (!el || (dir === -1 ? ends.start : ends.end)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: reduce ? "auto" : "smooth" });
   };
@@ -47,12 +51,12 @@ export function Carousel({ title, children, id, action }: { title: string; child
   );
   const arrows = ends.overflow ? (
     <div className="hidden items-center gap-1 lg:flex">
-      <IconButton label={`${title}: xem trước`} tone="card" disabled={ends.start} onClick={() => page(-1)} className="disabled:cursor-default disabled:opacity-40">
+      <IconButton label={`${title}: xem trước`} tone="card" aria-disabled={ends.start} onClick={() => page(-1)} className="aria-disabled:cursor-default aria-disabled:opacity-40">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="m15 6-6 6 6 6" />
         </svg>
       </IconButton>
-      <IconButton label={`${title}: xem tiếp`} tone="card" disabled={ends.end} onClick={() => page(1)} className="disabled:cursor-default disabled:opacity-40">
+      <IconButton label={`${title}: xem tiếp`} tone="card" aria-disabled={ends.end} onClick={() => page(1)} className="aria-disabled:cursor-default aria-disabled:opacity-40">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="m9 6 6 6-6 6" />
         </svg>

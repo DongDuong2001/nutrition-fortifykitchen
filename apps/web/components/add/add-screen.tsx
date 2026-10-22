@@ -925,7 +925,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                     scrolls (at 1280×800 it sat 56 px below the fold); the phone's bar is already fixed under its list */}
                 {tray.length > 0 && (
                   <TrayBar
-                    className="sticky bottom-0 z-10"
+                    className="sticky bottom-0 z-sticky"
                     totals={trayTotalsNow}
                     mealName={mealNameVi}
                     canAdd={trayAddable}

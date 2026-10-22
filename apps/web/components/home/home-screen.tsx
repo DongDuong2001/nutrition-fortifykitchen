@@ -494,7 +494,8 @@ function HomeContent() {
   useEffect(() => {
     if (wasSelecting.current && !selecting && window.matchMedia("(min-width: 1024px)").matches) {
       const active = document.activeElement;
-      if (!active || active === document.body) document.getElementById("home-day-menu")?.focus();
+      // The copy and move sheets close inert, so the button that closed them still holds focus there
+      if (!active || active === document.body || active.closest("[inert]")) document.getElementById("home-day-menu")?.focus();
     }
     wasSelecting.current = selecting;
     if (!selecting || targetSheet !== null) return;

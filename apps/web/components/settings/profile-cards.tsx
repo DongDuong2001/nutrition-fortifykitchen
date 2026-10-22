@@ -104,6 +104,10 @@ function ChoiceGroup({
 // It saves on blur or Enter, so typing "2" on the way to "2003" does not show an error.
 // The row shows the year; tapping it turns into the field. Desktop parity (23/10): the field opens with the year selected (typing
 // replaces it), Esc puts the year back and closes it, and closing returns the focus to the row.
+/** Desktop parity (23/10): the keyboard extras of the year field (select on focus, focus back to the row) are for a mouse and
+    keyboard from 1024 px; a phone keeps its own caret and Go key */
+const finePointerDesktop = () => window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+
 function BirthYearField() {
   const { profile, updateProfile } = useDiary();
   const [editing, setEditing] = useState(false);
@@ -140,7 +144,10 @@ function BirthYearField() {
     const message = birthYearError(shown);
     setError(message);
     const birthYear = parseBirthYear(shown);
-    if (message || birthYear === null) return;
+    if (message || birthYear === null) {
+      refocus.current = false;
+      return;
+    }
     if (birthYear !== profile.birthYear) updateProfile({ birthYear });
     setTyped(null);
     setEditing(false);
@@ -148,7 +155,7 @@ function BirthYearField() {
 
   function cancel() {
     cancelled.current = true;
-    refocus.current = true;
+    refocus.current = finePointerDesktop();
     setTyped(null);
     setError(undefined);
     setEditing(false);
@@ -185,11 +192,13 @@ function BirthYearField() {
           autoFocus
           value={shown}
           onChange={(e) => change(e.target.value)}
-          onFocus={(e) => e.currentTarget.select()}
+          onFocus={(e) => {
+            if (finePointerDesktop()) e.currentTarget.select();
+          }}
           onBlur={save}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              refocus.current = true;
+              refocus.current = finePointerDesktop();
               e.currentTarget.blur();
             } else if (e.key === "Escape") {
               e.preventDefault();

@@ -639,7 +639,7 @@
      what can be clicked says so before the click. .m-hover gives the same to a card that presses by scaling (no ::after of
      its own). Phones and touch never match: no change there. */
   @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
-    .m-tint:hover::after,
+    .m-tint:hover:not(:disabled, [aria-disabled="true"])::after,
     .m-hover:hover::after {
       opacity: 0.5;
       transition-duration: var(--m-tint-in);
