@@ -47,10 +47,10 @@ const TIP_DELAY_MS = 500;
 const TIP_RETRY_MS = 400;
 
 const LEVELS = [
-  { name: "Thiếu", range: "dưới 50%", bar: "bg-level-red" },
-  { name: "Trung bình", range: "50–79%", bar: "bg-level-yellow" },
-  { name: "Gần đủ", range: "80–99%", bar: "bg-level-green" },
-  { name: "Đạt", range: "từ 100% trở lên", bar: "bg-level-blue" },
+  { name: "Thiếu", range: "dưới 50%", bar: "bg-level-thieu" },
+  { name: "Trung bình", range: "50–79%", bar: "bg-level-trungbinh" },
+  { name: "Gần đủ", range: "80–99%", bar: "bg-level-gandu" },
+  { name: "Đạt", range: "từ 100% trở lên", bar: "bg-level-dat" },
 ] as const;
 
 const TOUR_COPY: Record<string, { title: string; body: string; hint?: string }> = {
@@ -152,11 +152,10 @@ function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTou
           ))}
         </span>
         <div className="flex items-center gap-1">
-          {!last && (
-            <button type="button" onClick={onSkip} className={quietButton}>
-              Bỏ qua
-            </button>
-          )}
+          {/* design-floor: Bỏ qua on every step, the last one included (D-ONB-01) */}
+          <button type="button" onClick={onSkip} className={quietButton}>
+            Bỏ qua
+          </button>
           <button type="button" onClick={onNext} className={primaryButton}>
             {last ? "Xong" : "Tiếp"}
           </button>
@@ -334,7 +333,7 @@ export function OnboardingLayer() {
   // The tip this screen would show now (null when none is due)
   const dueTip = useCallback((): Tip | null => {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
-    return pickTip({ ctx: tipContext(), flags, tourActive });
+    return pickTip({ ctx: tipContext(), flags, tourActive, now: Date.now() });
   }, [tourActive, wnActive, wnSheet, tipContext, flags]);
 
   // Opening a sheet, or a portion control turning up, is a new visit for its own tip (when that tip is still due)

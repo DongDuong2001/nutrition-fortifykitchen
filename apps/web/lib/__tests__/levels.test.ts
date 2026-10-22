@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, it, expect } from "vitest";
+import { contrast, token } from "./css-tokens";
 import {
   calculateSegments,
   getLevel,
@@ -67,15 +66,15 @@ describe("lib/levels", () => {
   // Colours are the @theme tokens in app/globals.css (no raw hex here), so light and dark follow the theme
   describe("getLevelColor", () => {
     it("returns light mode token variables", () => {
-      expect(getLevelColor("thieu", "light")).toBe("var(--color-level-red)");
-      expect(getLevelColor("trungbinh", "light")).toBe("var(--color-level-yellow)");
-      expect(getLevelColor("ganDu", "light")).toBe("var(--color-level-green)");
-      expect(getLevelColor("dat", "light")).toBe("var(--color-level-blue)");
+      expect(getLevelColor("thieu", "light")).toBe("var(--color-level-thieu)");
+      expect(getLevelColor("trungbinh", "light")).toBe("var(--color-level-trungbinh)");
+      expect(getLevelColor("ganDu", "light")).toBe("var(--color-level-gandu)");
+      expect(getLevelColor("dat", "light")).toBe("var(--color-level-dat)");
     });
 
     it("uses the same four level tokens inside ink cards (one palette since 17/10; cc-66 dropped the -dark copies)", () => {
       for (const lvl of ["thieu", "trungbinh", "ganDu", "dat"] as const) expect(getLevelColor(lvl, "dark")).toBe(getLevelColor(lvl, "light"));
-      expect(getLevelColor("thieu", "dark")).toBe("var(--color-level-red)");
+      expect(getLevelColor("thieu", "dark")).toBe("var(--color-level-thieu)");
     });
   });
 
@@ -100,7 +99,7 @@ describe("lib/levels", () => {
   });
 
   describe("homeBarTone", () => {
-    it("uses the four levels on every day, today included (Hao, 16/10): red under 50, yellow 50 to 79, green 80 to 99, blue from 100", () => {
+    it("uses the four levels on every day, today included (Hao, 16/10): red under 50, yellow 50 to 79, mint 80 to 99, green from 100 (V3)", () => {
       expect(homeBarTone(0)).toBe("thieu");
       expect(homeBarTone(49)).toBe("thieu");
       expect(homeBarTone(50)).toBe("trungbinh");
@@ -113,7 +112,7 @@ describe("lib/levels", () => {
     it("has no grey tone: every tone maps to a level colour on both surfaces", () => {
       for (const pct of [0, 30, 60, 90, 120]) {
         for (const surface of ["light", "dark"] as const) {
-          expect(homeBarColor(homeBarTone(pct), surface)).toMatch(/^var\(--color-level-(red|yellow|green|blue)/);
+          expect(homeBarColor(homeBarTone(pct), surface)).toMatch(/^var\(--color-level-(thieu|trungbinh|gandu|dat)\)$/);
         }
       }
     });
@@ -121,21 +120,11 @@ describe("lib/levels", () => {
 
   describe("bars on the ink hero card", () => {
     // Non-text contrast (WCAG 1.4.11): a lit segment must stand out from an empty one by at least 3:1
-    const css = readFileSync(join(__dirname, "../../app/globals.css"), "utf8");
-    const token = (name: string) => css.match(new RegExp(`--color-${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1] ?? "";
-    const luminance = (hex: string) => {
-      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-    const ratio = (a: string, b: string) => {
-      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-      return (hi + 0.05) / (lo + 0.05);
-    };
-    it.each(["red", "yellow", "green", "blue"])("%s is at least 3:1 against the empty segment and the card", (name) => {
+    it.each(["thieu", "trungbinh", "gandu", "dat"])("%s is at least 3:1 against the empty segment and the card", (name) => {
       const lit = token(`level-${name}`);
       expect(lit).not.toBe("");
-      expect(ratio(lit, token("level-empty-dark"))).toBeGreaterThanOrEqual(3);
-      expect(ratio(lit, token("surface-dark"))).toBeGreaterThanOrEqual(3);
+      expect(contrast(lit, token("level-empty-dark"))).toBeGreaterThanOrEqual(3);
+      expect(contrast(lit, token("ink"))).toBeGreaterThanOrEqual(3);
     });
   });
 });

@@ -21,69 +21,162 @@
 /* cc-66 (S16): see-through surfaces become solid when the system asks for less transparency */
 @custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
 
-@theme {
+/* V3-SPEC §4 Liquid Glass, for the navigation layer only (tab bar, sheet header, toast, Back and trailing circles), never
+   content. Solid card colour under reduced transparency; solid with the card-border edge under more contrast. Never
+   animate backdrop-filter (D-MAT-05). */
+@utility glass {
+  background-color: var(--color-glass);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-contrast: more) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 0 0 1px var(--color-card-border), 0 8px 24px rgb(0 0 0 / 0.12);
+  }
+}
+/* A glass bar inside a surface (the sheet's header): the blur and the fill, no lift */
+@utility glass-bar {
+  background-color: var(--color-glass-sheet);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* The + button: cobalt tinted glass with its glow */
+@utility glass-cobalt {
+  background-color: var(--color-glass-cobalt);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-glass-cobalt);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-cobalt);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* static: lib/nutrient-colors and lib/food-group-colors name tokens in template strings (var(--color-deep-cyan),
+   --color-tile-*), which Tailwind's scanner cannot see; without static v4 leaves those variables out of the CSS. */
+@theme static {
   --font-sans: var(--font-manrope-face), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-saira-condensed-face), sans-serif;
-  --font-saira: var(--font-saira-condensed-face), sans-serif;
+  /* V3-SPEC §2: Saira italic 800 for headers and key numbers (only the italic face is loaded, so display text is italic) */
+  --font-display: var(--font-saira-face), sans-serif;
+  --font-saira: var(--font-saira-face), sans-serif;
+  /* V3 keeps Saira Condensed for tight numbers (the hero's macro grams and %, the meal kcal) */
+  --font-condensed: var(--font-saira-condensed-face), var(--font-saira-face), sans-serif;
 
-  /* Cobalt Sign core tokens */
-  /* The app background is white (Hao, 17/10). */
-  --color-page: #FFFFFF;
-  /* Second surface on white: chips, search fields, segmented tabs, inputs and small tiles. */
-  --color-surface: #F6F5F2;
+  /* V3 palette (design/v3/V3-SPEC.md §1, Hao 22/10). Light only in this run; every value is a token so the dark map
+     (V3-SPEC's dark column) is one :root block later. The page is Apple's systemGroupedBackground and the cards are white. */
+  --color-page: #F2F2F7;
+  /* Fields, chips and small tiles inside a white card (V3 "field / chip"). On the grey page they are white with --shadow-field. */
+  --color-surface: #EEEEF3;
   --color-card: #FFFFFF;
+  --color-raised: #FFFFFF;
   /* Hover of chips on the surface token: one step darker. */
-  --color-paper-dark: #EAE6DE;
-  --color-card-border: #E8E5DE;
+  --color-paper-dark: #E3E3E8;
+  --color-card-border: #E5E5EA;
   --color-ink: #111317;
-  /* cc-66 (D1): text is ink */
   --color-text: var(--color-ink);
-  --color-secondary: #6B6A66;
-  --color-cobalt: #1238D6;
-  --color-sky: #9EC3FF;
-  /* Light cobalt wash: the phone you are on in the install sheet, and its info box. */
-  --color-cobalt-tint: #F2F5FF;
-  --color-destructive: #D93F44;
-  /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.9:1 on --color-surface) */
-  --color-destructive-text: #C4373C;
+  /* 5,4:1 on the page, 6,0:1 on a card */
+  --color-secondary: #636366;
+  /* Accent, links and the primary button (white text 5,6:1). Replaces #1238D6. */
+  --color-cobalt: #2457F5;
+  /* Links and the selected tab on ink */
+  --color-sky: #5CB8FF;
+  --color-cobalt-tint: #EAF0FF;
+  /* Destructive text and fills (V3 red deep) */
+  --color-destructive: #E9152D;
+  --color-destructive-text: #E9152D;
+  /* The segmented control's track on the page; the selected segment is white */
+  --color-seg-track: #E3E3E8;
 
-  /* 4 level fill colours (Hao, 17/10): Thiếu, Trung bình, Gần đủ, Đạt. Fills only, never text. The names are kept
-     from the first palette, so "blue" is the Đạt fill (green now). */
-  --color-level-red: #F2453D;
-  --color-level-yellow: #FFB020;
-  --color-level-green: #80D8A0;
-  --color-level-blue: #2FC46B;
-  --color-level-empty: #E6E1D7;
-  /* Track of the continuous level bar on light surfaces (inside ink cards it is --color-level-empty-dark). */
-  --color-track: #ECEAE6;
+  /* Apple system colours (V3-SPEC §1): base for fills, dots and tiles; deep for text and white-on-colour. Base yellow,
+     mint, cyan, green and orange are never text on white. */
+  --color-sys-red: #FF383C;
+  --color-sys-orange: #FF8D28;
+  --color-sys-yellow: #FFCC00;
+  --color-sys-green: #34C759;
+  --color-sys-mint: #00C8B3;
+  --color-sys-teal: #00C3D0;
+  --color-sys-cyan: #00C0E8;
+  --color-sys-blue: #0088FF;
+  --color-sys-indigo: #6155F5;
+  --color-sys-purple: #CB30E0;
+  --color-sys-pink: #FF2D55;
+  --color-sys-brown: #AC7F5E;
+  --color-sys-grey: #8E8E93;
+  --color-deep-red: #E9152D;
+  --color-deep-orange: #C55300;
+  --color-deep-yellow: #A16A00;
+  --color-deep-green: #008932;
+  --color-deep-mint: #008575;
+  --color-deep-teal: #008198;
+  --color-deep-cyan: #007EAE;
+  --color-deep-blue: #1E6EF4;
+  --color-deep-indigo: #564ADE;
+  --color-deep-purple: #B02FC2;
+  --color-deep-pink: #E7124D;
+  --color-deep-brown: #956D51;
+  /* Settings row tiles: privacy, delete and sign-out (V3-SPEC §3.4) */
+  --color-deep-grey: #8E8E93;
 
+  /* The 4 levels, named by meaning (V3-SPEC §1; lib/levels.ts thresholds unchanged): thiếu under 50, trung bình 50–79,
+     gần đủ 80–99 (mint, was green), đạt 100 and up (green, was blue). Fills only, never text, never a gradient. */
+  --color-level-thieu: var(--color-sys-red);
+  --color-level-trungbinh: var(--color-sys-yellow);
+  --color-level-gandu: var(--color-sys-mint);
+  --color-level-dat: var(--color-sys-green);
+  --color-level-empty: #E5E5EA;
+  /* Track of a bar on a white card (inside ink it is --color-level-empty-dark). */
+  --color-track: #E5E5EA;
 
-  /* The first palette's values, kept for what is not a level fill: the landing's green ticks and amber chip border,
-     the medal, the expired-link icon and title on ink, and "MICRO" in the share image footer. */
-  --color-success: #17945F;
-  --color-amber: #B07800;
-  --color-amber-on-dark: #E8A400;
-  --color-cobalt-on-dark: #5C86F2;
-  --color-level-empty-dark: #2A2C31;
+  /* Macro identity (V3-SPEC §1): the dot before a macro's name and the colour of its value text */
+  --color-macro-kcal: var(--color-cobalt);
+  --color-macro-kcal-text: var(--color-cobalt);
+  --color-macro-dam: var(--color-sys-pink);
+  --color-macro-dam-text: var(--color-deep-pink);
+  --color-macro-tinhbot: var(--color-sys-yellow);
+  --color-macro-tinhbot-text: var(--color-deep-yellow);
+  --color-macro-beo: var(--color-sys-green);
+  --color-macro-beo-text: var(--color-deep-green);
+  --color-macro-xo: var(--color-sys-teal);
+  --color-macro-xo-text: var(--color-deep-teal);
+  --color-macro-muoi: var(--color-sys-blue);
+  --color-macro-muoi-text: var(--color-deep-blue);
 
-  --color-divider: #E6E2DA;
-  /* Text a step darker than --color-secondary: the coach tagline on the link page. */
-  --color-secondary-strong: #4A4945;
+  /* What is not a level: the landing's ticks, success text, amber text and its warm box */
+  --color-success: #008932;
+  --color-amber: #A16A00;
+  --color-amber-on-dark: #FFD600;
+  --color-cobalt-on-dark: #5CB8FF;
+  --color-level-empty-dark: #2E3139;
+
+  --color-divider: #E5E5EA;
+  /* Text a step darker than --color-secondary: the coach tagline on the link page, and secondary under more contrast. */
+  --color-secondary-strong: #48484A;
   /* The link page's background doodles (LinkKhanh.dc.html): objects, barbell and floor line, wind dust. */
   --color-doodle: #D9D5CD;
   --color-doodle-line: #D6D2CA;
   --color-doodle-dust: #D2CEC5;
-  --color-hover: #FAF9F6;
+  --color-hover: #F7F7FA;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
-  /* Small secondary text on ink that is lighter than --color-muted-on-dark: the share image footer's tagline. */
-  --color-secondary-light: #A9A8A3;
-  /* Text on ink and surface-dark: headers, sidebar, toasts, dark cards, dial number. Same value as --color-card. */
+  /* Text on ink: the hero, the toast, the share footer */
   --color-on-dark: #FFFFFF;
-  /* Text on accent fills: cobalt/blue and destructive buttons, badges and selected chips. */
+  /* Text on accent fills: cobalt and destructive buttons, badges and selected chips. */
   --color-on-accent: #FFFFFF;
-  /* Calorie dial background ring. 3.44:1 on ink #111317 and 3.15:1 on the surface-dark inset panel #1A1C22 (WCAG 1.4.11 needs 3:1). */
-  --color-track-on-dark: #666A75;
+  /* The kcal track on the ink hero (V3 heroTrack) */
+  --color-track-on-dark: #2E3139;
   --color-grabber: #D5D8DF;
   --color-scrim: rgba(17, 19, 23, 0.4);
   /* cc-62 (S14): a sheet opened over another sheet dims less, the first scrim is already there */
@@ -92,15 +185,71 @@
   --color-press: rgba(17, 19, 23, 0.06);
   /* The hold on a food row (touch drag): the tint deepens over the 500 ms before the row lifts */
   --color-press-hold: rgba(17, 19, 23, 0.14);
-  /* The press wash on ink (the Hôm nay pills, the bottom nav): a dark tint does not read there */
+  /* The press wash on ink (the hero, the toast) */
   --color-press-on-dark: rgba(255, 255, 255, 0.16);
-  --color-surface-dark: #1A1C22;
+  --color-surface-dark: #1C1C1E;
   --color-warning-bg: #FFF4E0;
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
   /* The landing footer's warm paper (kiln wordmark footer) */
   --color-kiln-paper: #F3F1EC;
+  /* A grey fill with no glass behind it: the sheet's Close circle (V3-SPEC §4, no glass on glass) */
+  --color-fill: rgba(120, 120, 128, 0.16);
+
+  /* Food-group icon tiles (design/v3/icons/IconTile.dc.html, Hao 22/10): highlight, the app colour, a touch deeper */
+  --color-tile-yellow-hi: #FFE14D;
+  --color-tile-yellow-base: #FFCC00;
+  --color-tile-yellow-lo: #F5A800;
+  --color-tile-indigo-hi: #8C84FF;
+  --color-tile-indigo-base: #6155F5;
+  --color-tile-indigo-lo: #4E42E0;
+  --color-tile-green-hi: #5EDB7E;
+  --color-tile-green-base: #34C759;
+  --color-tile-green-lo: #1FAE45;
+  --color-tile-blue-hi: #4DA8FF;
+  --color-tile-blue-base: #0088FF;
+  --color-tile-blue-lo: #0070E0;
+  --color-tile-cyan-hi: #4DD9F5;
+  --color-tile-cyan-base: #00C0E8;
+  --color-tile-cyan-lo: #00A3D1;
+  --color-tile-orange-hi: #FFAA5A;
+  --color-tile-orange-base: #FF8D28;
+  --color-tile-orange-lo: #F2700A;
+  --color-tile-red-hi: #FF6E70;
+  --color-tile-red-base: #FF383C;
+  --color-tile-red-lo: #E5202B;
+  --color-tile-teal-hi: #33D6E0;
+  --color-tile-teal-base: #00C3D0;
+  --color-tile-teal-lo: #00A8B8;
+  --color-tile-purple-hi: #E06BEF;
+  --color-tile-purple-base: #CB30E0;
+  --color-tile-purple-lo: #B01FCB;
+  --color-tile-mint-hi: #3DDCCB;
+  --color-tile-mint-base: #00C8B3;
+  --color-tile-mint-lo: #00AE9B;
+  --color-tile-brown-hi: #C9A385;
+  --color-tile-brown-base: #AC7F5E;
+  --color-tile-brown-lo: #946A4B;
+  --color-tile-pink-hi: #FF6683;
+  --color-tile-pink-base: #FF2D55;
+  --color-tile-pink-lo: #E8173F;
+  --color-tile-cobalt-hi: #5B86FF;
+  --color-tile-cobalt-base: #2457F5;
+  --color-tile-cobalt-lo: #1A47E0;
+  --color-tile-ink-hi: #4A4A4D;
+  --color-tile-ink-base: #2A2B2E;
+  --color-tile-ink-lo: #111317;
+
+  /* Liquid Glass (V3-SPEC §4): the navigation layer only (tab bar, sheet header, toast, Back and trailing circles).
+     The .glass utility below applies it; prefers-reduced-transparency makes it the solid card colour. */
+  --color-glass: rgba(255, 255, 255, 0.72);
+  --color-glass-text: #111317;
+  /* The sheet header's glass (V3 sheetGlass) */
+  --color-glass-sheet: rgba(255, 255, 255, 0.8);
+  --color-glass-tab-off: #3C3C43;
+  /* The + button's tinted glass and its glow */
+  --color-glass-cobalt: rgba(36, 87, 245, 0.88);
 
   /* Motion curves (cc-55). They replace Tailwind's ease-out / ease-in-out and feed every transition-* utility; the
      durations live with the motion classes at the end of this file. */
@@ -118,6 +267,15 @@
   --shadow-chip: inset 0 0 0 1px rgb(17 19 23 / 0.1);
   --shadow-card: 0 0 0 1px rgb(17 19 23 / 0.08), 0 1px 2px rgb(17 19 23 / 0.04), 0 4px 12px rgb(17 19 23 / 0.04);
   --shadow-sheet: 0 -6px 24px rgb(17 19 23 / 0.12);
+  /* V3: a field or chip on the grey page is white with a 0.5 px ring */
+  --shadow-field: inset 0 0 0 0.5px rgb(17 19 23 / 0.1);
+  /* V3-SPEC §4 glass edge: a top highlight, a hairline and a soft lift */
+  --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12);
+  /* The food-group icon tile (IconTile.dc.html): a top highlight and a soft shadow; Tất cả (ink) adds a faint ring */
+  --shadow-tile: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
+  --shadow-tile-ink: inset 0 0 0 1px rgb(255 255 255 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
+  --drop-shadow-tile-glyph: 0 0.5px 0.5px rgb(0 0 0 / 0.2);
+  --shadow-glass-cobalt: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 6px 16px rgb(36 87 245 / 0.45);
   /* Tailwind's scale, same geometry, ink instead of black */
   --shadow-2xs: 0 1px rgb(17 19 23 / 0.05);
   --shadow-xs: 0 1px 2px 0 rgb(17 19 23 / 0.05);
@@ -129,7 +287,10 @@
 
   /* cc-66 (D3): two radii for every surface */
   --radius-card: 18px;
-  --radius-sheet: 20px;
+  /* V3-SPEC §4: sheets float inset 8 px with 28 px corners all round */
+  --radius-sheet: 28px;
+  /* V3-SPEC §3.4: the 30 px settings tile */
+  --radius-tile: 8px;
 
   /* cc-66 (S13): the type scale in rem, the same px at a 16 px root, so text follows the browser and phone text size.
      Font size only: the line height stays what the element inherits or sets with leading-*. Tailwind's own xs–5xl
@@ -154,6 +315,8 @@
 
 /* cc-66 (D9): one stacking scale. Sticky headers and meal pills, the nav, sheets and dialogs, toasts, the tour. */
 :root {
+  /* The Minh Hào tile (IconTile.dc.html): a shade over the rainbow */
+  --gradient-tile-rainbow: linear-gradient(180deg, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0.12) 100%), linear-gradient(135deg, #FF383C, #FF8D28, #FFCC00, #34C759, #0088FF, #CB30E0);
   --z-sticky: 10;
   --z-nav: 40;
   --z-sheet: 50;

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { Suspense, createContext, startTransition, useContext, useEffect, useMemo, useOptimistic } from "react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
+import { Segmented } from "@/components/ui/segmented";
 import { EnterGlide } from "@/components/ui/enter-glide";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
@@ -85,32 +85,21 @@ export function PeriodControl({
     </button>
   );
   const lengthGroup = (
-    <div role="group" aria-label="Độ dài kỳ" data-tour="trends-range" className="inline-flex shrink-0 rounded-full border border-card-border bg-card p-0.5">
-      {([7, 30] as const).map((n) => {
-        const isActive = n === length;
-        return (
-          <Link
-            key={n}
-            href={`${pathname}${periodQuery(n, 0)}`}
-            replace
-            scroll={false}
-            onClick={() => markUsed("range-toggle")}
-            aria-current={isActive ? "true" : "false"}
-            className={`inline-flex min-h-11 items-center justify-center rounded-full text-sm font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
-              compact ? "min-w-11 px-2" : "px-4"
-            } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
-          >
-            {compact ? (
-              <>
-                {n}
-                <span className="sr-only"> ngày</span>
-              </>
-            ) : (
-              `${n} ngày`
-            )}
-          </Link>
-        );
-      })}
+    <div data-tour="trends-range" className="shrink-0">
+      <Segmented<"7" | "30">
+        label="Độ dài kỳ"
+        fill={false}
+        items={([7, 30] as const).map((n) => ({
+          key: String(n) as "7" | "30",
+          label: compact ? String(n) : `${n} ngày`,
+          srSuffix: compact ? " ngày" : undefined,
+        }))}
+        value={String(length) as "7" | "30"}
+        onChange={(key) => {
+          markUsed("range-toggle");
+          go(Number(key) as PeriodLength, 0);
+        }}
+      />
     </div>
   );
 
@@ -159,9 +148,8 @@ function ContentSkeleton() {
 }
 
 /**
- * The frame of the four Tổng quan sub-tabs (app/(app)/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the phone's ink band with the wordmark (the h1 "Tổng quan" is
- * sr-only there), the sub-tab bar (a tablist of links; on desktop it sits in the title row), and the period
- * control shared by all four. The period is in the URL (?p=7|30 and ?o=offset), so the sub-tab links carry it.
+ * The frame of the four Tổng quan sub-tabs (app/(app)/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the 34 px large title "Tổng quan" on the page (V3, no ink band), the sub-tab Segmented
+ * (a nav of links) under it, and the period control shared by all four. The period is in the URL (?p=7|30 and ?o=offset), so the sub-tab links carry it.
  */
 export function OverviewFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -214,36 +202,22 @@ function FrameInner({ children }: { children: React.ReactNode }) {
       <AppHeader
         variant="tab"
         layout="wide"
-        wordmark
         title="Tổng quan"
         alignGroup="overview-header"
         tabs={
-          <nav
-            aria-label="Tổng quan"
-            className="flex w-full overflow-x-auto border-b border-surface-dark [scrollbar-width:none] lg:w-auto lg:self-start lg:border-divider"
-          >
-            {TABS.map((tab) => {
-              const isActive = tab.id === active;
-              return (
-                <Link
-                  key={tab.id}
-                  href={`${tab.href}${query}`}
-                  onNavigate={() => startTransition(() => setActive(tab.id))}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`relative inline-flex min-h-11 flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-callout font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-cobalt ${
-                    isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"
-                  }`}
-                >
-                  {tab.label}
-                  {isActive && <span aria-hidden="true" className="absolute inset-x-2 bottom-[-1px] h-[3px] rounded-full bg-sky lg:bg-cobalt" />}
-                </Link>
-              );
-            })}
-          </nav>
+          <Segmented<OverviewTab>
+            as="nav"
+            label="Tổng quan"
+            alignGroup="overview-tabs"
+            className="lg:max-w-[480px]"
+            items={TABS.map((tab) => ({ key: tab.id, label: tab.label, href: `${tab.href}${query}` }))}
+            value={active}
+            onChange={(id) => startTransition(() => setActive(id))}
+          />
         }
       />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-0 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
         {/* The period control; Tóm tắt draws it itself, between the hero and the scoreboard */}
         {active !== "summary" && (
           <PeriodControl compact heading={period ? periodHeading(period) : ""} period={period} length={length} />

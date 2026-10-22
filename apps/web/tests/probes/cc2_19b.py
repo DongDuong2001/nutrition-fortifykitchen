@@ -79,7 +79,7 @@ def run(browser, size_name, size):
     pg.get_by_role("button", name="Lưu", exact=True).click()
     pg.wait_for_timeout(400)
 
-    go("/explore")
+    go("/explore/meals")  # V3: Khám phá has the Bữa ăn của tôi row; the saved meals are listed on the pushed screen
     w = f"{size_name} Bữa ăn của tôi"
     check("Sáng nhanh" in text(pg), f"{w}: saved meal listed by name")
     check(pg.locator("button[aria-label^='Thêm Sáng nhanh']").count() == 1, f"{w}: one tap add button present")

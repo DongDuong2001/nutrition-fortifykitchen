@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
+import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
 import { calculateSaltTarget, getTrainingPhases, type TrainingCheckItem, type TrainingPhase, type TrainingSize } from "@/lib/training";
 import {
@@ -260,105 +259,85 @@ function TrainingContent() {
     : "Ngày này chưa lưu thời lượng tập · Chỉ xem";
 
   return (
-    <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col">
+    <AppShell>
+      {/* One header for both widths (one h1). A phone has the duration and the salt card under it; from 1024 px they sit in the header and the cards row. */}
+      <AppHeader
+        variant="sub"
+        title="Ngày tập"
+        subtitle={headerSubtitle}
+        backHref={diaryHref}
+        layout="wide"
+        alignGroup="training-header"
+        actions={
+          <div className="hidden items-center gap-3 lg:flex">
+            {!isPast && prefs && <TrainingSizeChip size={size} onClick={openSizeFromChip} className="shrink-0" />}
+            <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
+          </div>
+        }
+      />
+
       {/* ============================================================== */}
-      {/* MOBILE LAYOUT (<1024px) — Matches Training.dc.html & TrainingRest.dc.html */}
+      {/* MOBILE LAYOUT (<1024px): V3Training.dc.html */}
       {/* ============================================================== */}
-      <div
+      <main
         data-align-container="training-mobile"
-        className="w-full min-h-dvh bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden"
+        className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 lg:hidden"
       >
-        <AppHeader
-          variant="sub"
-          title="Ngày tập"
-          subtitle={headerSubtitle}
-          backHref={diaryHref}
-          alignGroup="training-header"
-          summary={
-            <div className="flex flex-col gap-3 w-full">
-              <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="mobile" disabled={isPast} />
-              {isPast ? (
-                <p className="m-0 pt-1 text-cap leading-snug text-muted-on-dark">
-                  Muối: —<br />
-                  {pastNote}
-                </p>
-              ) : (
-                <SaltSummaryCard
-                  saltTarget={saltTarget}
-                  isRestDay={isRestDay}
-                  trainingMinutes={trainingMinutes}
-                  variant="mobile-banner"
-                />
-              )}
-            </div>
-          }
-        />
-
-        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-3">
-          {!isPast && prefs && (
-            <div className="flex items-center gap-2">
-              <TrainingSizeChip size={size} onClick={openSizeFromChip} />
-            </div>
-          )}
-
-          {isRestDay && !isPast && <RestDayCard targets={restTargets} />}
-
-          {showChecklist && (
-            <PhaseChecklist
-              phases={phases}
-              ticked={ticked}
-              onToggle={handleToggle}
-              onAddItem={openOwn}
-              onRemoveItem={removeOwn}
-              busyId={waitingId}
-              readOnly={isPast}
-              variant="mobile"
+        <div className="flex flex-col gap-4 pb-1">
+          <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="mobile" disabled={isPast} />
+          {isPast ? (
+            <p className="m-0 rounded-card bg-ink p-4 text-cap leading-snug text-muted-on-dark">
+              Muối: —<br />
+              {pastNote}
+            </p>
+          ) : (
+            <SaltSummaryCard
+              saltTarget={saltTarget}
+              isRestDay={isRestDay}
+              trainingMinutes={trainingMinutes}
+              variant="mobile-banner"
             />
           )}
-
-          {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
-        </main>
-
-        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink">
-          <BottomNav />
         </div>
-      </div>
 
-      {/* ============================================================== */}
-      {/* DESKTOP LAYOUT (≥1024px) — Matches DesktopTraining.dc.html */}
-      {/* ============================================================== */}
-      <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
-        {/* Left Sidebar */}
-        <DesktopSidebar />
+        {!isPast && prefs && (
+          <div className="flex items-center gap-2">
+            <TrainingSizeChip size={size} onClick={openSizeFromChip} />
+          </div>
+        )}
 
-        {/* Main Content Area */}
-        <main
-          data-align-container="training-desktop"
-          className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border"
-        >
-          {/* Header */}
-          <AppHeader
-            variant="tab"
-            title="Ngày tập"
-            flush
-            subtitle={desktopSubtitle}
-            backHref={diaryHref}
-            alignGroup="training-header"
-            actions={
-              <div className="flex items-center gap-3">
-                {!isPast && prefs && <TrainingSizeChip size={size} onClick={openSizeFromChip} className="shrink-0" />}
-                <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
-              </div>
-            }
+        {isRestDay && !isPast && <RestDayCard targets={restTargets} />}
+
+        {showChecklist && (
+          <PhaseChecklist
+            phases={phases}
+            ticked={ticked}
+            onToggle={handleToggle}
+            onAddItem={openOwn}
+            onRemoveItem={removeOwn}
+            busyId={waitingId}
+            readOnly={isPast}
+            variant="mobile"
           />
+        )}
 
-          {isPast ? (
-            <section aria-labelledby="past-training" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-5 flex flex-col gap-2">
-              <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
-              <p className="m-0 font-display italic font-extrabold text-[2.5rem] leading-none text-text tracking-display">—</p>
-              <p className="m-0 text-sm text-secondary">{pastNote}</p>
-            </section>
-          ) : (
+        {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
+      </main>
+
+      {/* ============================================================== */}
+      {/* DESKTOP LAYOUT (>=1024px): DesktopTraining.dc.html */}
+      {/* ============================================================== */}
+      <main
+        data-align-container="training-desktop"
+        className="hidden w-full max-w-[1240px] flex-col gap-5 px-8 pt-5 pb-12 box-border lg:flex"
+      >
+        {isPast ? (
+          <section aria-labelledby="past-training" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-5 flex flex-col gap-2">
+            <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
+            <p className="m-0 font-display italic font-extrabold text-[2.5rem] leading-none text-text tracking-display">—</p>
+            <p className="m-0 text-sm text-secondary">{pastNote}</p>
+          </section>
+        ) : (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SaltSummaryCard
               saltTarget={saltTarget}
@@ -371,10 +350,10 @@ function TrainingContent() {
               currentSodiumMg={sodiumMg}
             />
           </section>
-          )}
+        )}
 
-          {/* Section 2: Phase Checklist / Rest Tips + Tip Banner */}
-          {(!isPast || showChecklist) && (
+        {/* Section 2: Phase Checklist / Rest Tips + Tip Banner */}
+        {(!isPast || showChecklist) && (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {isRestDay ? (
               <RestDayCard targets={restTargets} />
@@ -392,13 +371,12 @@ function TrainingContent() {
             )}
             {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
           </section>
-          )}
-        </main>
-      </div>
+        )}
+      </main>
 
       <TrainingSizeSheet open={sizeOpen} value={size} onChoose={chooseSize} onClose={() => setSizeOpen(false)} />
       <TrainingLogSheet item={logItem} foods={foods} onClose={() => setLogItem(null)} onLogged={handleLogged} />
       <OwnItemSheet target={ownTarget} onClose={() => setOwnTarget(null)} onAdd={addOwn} />
-    </div>
+    </AppShell>
   );
 }

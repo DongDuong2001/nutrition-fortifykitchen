@@ -16,10 +16,10 @@ export interface NutrientHistoryProps {
 }
 
 const FILL: Record<NutrientLevel, string> = {
-  thieu: "bg-level-red",
-  trungbinh: "bg-level-yellow",
-  ganDu: "bg-level-green",
-  dat: "bg-level-blue",
+  thieu: "bg-level-thieu",
+  trungbinh: "bg-level-trungbinh",
+  ganDu: "bg-level-gandu",
+  dat: "bg-level-dat",
 };
 
 /**
@@ -43,16 +43,19 @@ export function NutrientHistory({ points, unit, todayIso }: NutrientHistoryProps
             aria-current={point.iso === todayIso ? "date" : undefined}
             className="flex flex-col items-center gap-1 min-w-0"
           >
-            <span className="text-micro font-semibold tabular-nums leading-none text-text">{value}</span>
+            <span className="text-xs font-semibold tabular-nums leading-none text-text">{value}</span>
             {level ? (
-              <span aria-hidden="true" className="flex h-16 w-6 flex-col justify-end overflow-hidden rounded-sm bg-level-empty">
+              <span
+                role="img"
+                aria-label={`${weekdayShortVi(point.iso)} ${point.iso.slice(8)}/${point.iso.slice(5, 7)}: ${value}${point.percentage !== null ? " mục tiêu" : ""}`}
+                className="flex h-16 w-6 flex-col justify-end overflow-hidden rounded-sm bg-level-empty">
                 <span className={`block w-full ${FILL[level]}`} style={{ height: `${Math.min(point.percentage ?? 0, 100)}%` }} />
               </span>
             ) : (
               <span aria-hidden="true" className="h-16 w-6" />
             )}
-            <span className="text-micro leading-none text-secondary">{weekdayShortVi(point.iso)}</span>
-            <span className="text-micro leading-none tabular-nums text-secondary">{point.iso.slice(8)}</span>
+            <span className={`text-xs leading-none ${point.iso === todayIso ? "font-bold text-text" : "text-secondary"}`}>{weekdayShortVi(point.iso)}</span>
+            <span className="text-xs leading-none tabular-nums text-secondary">{point.iso.slice(8)}</span>
           </li>
         );
       })}

@@ -2,10 +2,10 @@
 
 Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, sizes 390x844 and 1440x900.
 - Hero: sentence case label ("Cả ngày · 7 món"); every text 11 px or more; the kcal percent sits right after the
-  target on the same line (the kcal number's 32 px, 10 px gap, cc-44); each macro reads amount then percent with an 8 px gap; on a
+  target on the same line (the kcal number's 34 px, 10 px gap; V3 22/10); each macro reads amount then percent with an 8 px gap; on a
   past day the level word follows the kcal percent.
-- Nutrient column: no caption; "Khoáng chất" and "Vitamin" are the meal headers' ink pills (24 px phone, cc-44), and the
-  first pill sits one verdict header (cc-61) below the first meal pill; food rows and nutrient rows share the name size.
+- Nutrient column: no caption; "Khoáng chất" and "Vitamin" are Saira 17 px section headers under an inset hairline (V3 22/10,
+  no ink band), the meal header is a 44 px row; food rows and nutrient rows share the name size.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27f.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/page.tsx
@@ -76,7 +76,7 @@ def run(browser, size, tag):
         gap = pct["r"]["left"] - target["r"]["right"]
         check(abs(pct["r"]["top"] + pct["r"]["height"] - (target["r"]["top"] + target["r"]["height"])) < 10, f"{t}: kcal percent on the target's line")
         check(abs(gap - 10) <= 1, f"{t}: 10 px between target and percent ({gap:.1f} px)")
-        check(pct["fs"] == 32 and pct["st"] == "italic", f"{t}: percent 32 px Saira italic ({pct['fs']} {pct['st']})")
+        check(pct["fs"] == 34 and pct["st"] == "italic", f"{t}: percent 34 px Saira italic ({pct['fs']} {pct['st']})")
         if past:
             word = [s for s in geo if s["t"] in ("Thiếu", "Trung bình", "Gần đủ", "Đạt")]
             check(len(word) == 1 and word[0]["r"]["left"] >= pct["r"]["right"] - 1, f"{t}: the level word follows the percent ({[s['t'] for s in geo]})")
@@ -95,28 +95,22 @@ def run(browser, size, tag):
         )
         check(len(macro) == 4 and all(m["order"] and abs(m["gap"] - 8) <= 1.5 for m in macro), f"{t}: macro amount then percent, 8 px gap {[(m['amount'], m['pct'], round(m['gap'], 1)) for m in macro]}")
 
-        # nutrient column: no caption, ink pills like the meal headers (cc-44)
+        # nutrient column: no caption, V3 section headers (Saira 17 px, no ink band) and a 44 px meal header row
         aside = pg.locator("aside[aria-label='Vi chất'] >> visible=true").first
         check(aside.locator("> p:not([data-level-summary])").count() == 0, f"{t}: no caption over the nutrient column")
-        titles = aside.locator("h3").all_text_contents()  # the pill draws them uppercase (cc-44)
-        check(titles == ["Khoáng chất", "Vitamin"], f"{t}: group bands in normal case {titles}")
+        titles = aside.locator("h3").all_text_contents()  # drawn uppercase by CSS
+        check(titles == ["Khoáng chất", "Vitamin"], f"{t}: group headers in normal case {titles}")
         band = pg.evaluate(
             """() => {
-              const h3 = document.querySelector("aside[aria-label='Vi chất'] h3 > span");
-              const meal = document.querySelector("section[aria-label='Bữa sáng'] > div > div");
-              const a = h3.getBoundingClientRect(), b = meal.getBoundingClientRect();
-              const head = document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]").getBoundingClientRect().height;
-              const cs = getComputedStyle(h3.querySelector('span')), ms = getComputedStyle(meal.querySelector('button span'));
-              const hs = getComputedStyle(h3), mp = getComputedStyle(meal);
-              return { head, aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [hs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [hs.paddingLeft, mp.paddingLeft] };
+              const h3 = document.querySelector("aside[aria-label='Vi chất'] h3");
+              const meal = document.querySelector("section[aria-label='Bữa sáng'] > div");
+              const hs = getComputedStyle(h3);
+              return { mealH: meal.getBoundingClientRect().height, fs: hs.fontSize, tt: hs.textTransform, bg: hs.backgroundColor, ink: !!document.querySelector('[data-ink-pill]') };
             }"""
         )
-        # cc-61: the x/N đạt header sits above the first band, so the pill is one header height below the first meal pill
-        check(abs(band["aTop"] - band["bTop"] - band["head"]) <= 1, f"{t}: first nutrient pill one verdict header ({band['head']:.0f} px) below the first meal pill ({band['aTop']:.1f} vs {band['bTop']:.1f})")
-        check(band["bg"][0] == band["bg"][1], f"{t}: same pill background {band['bg']}")
-        check(band["fw"][0] == band["fw"][1] and band["fs"][0] == band["fs"][1] and band["pl"][0] == band["pl"][1], f"{t}: same weight, size and padding {band['fw']} {band['fs']} {band['pl']}")
-        if phone:
-            check(abs(band["aH"] - 24) <= 0.5 and abs(band["bH"] - 24) <= 0.5, f"{t}: pills are 24 px ({band['aH']}, {band['bH']})")
+        check(band["fs"] == "17px" and band["tt"] == "uppercase", f"{t}: section header Saira 17 px uppercase ({band['fs']}, {band['tt']})")
+        check(band["bg"] == "rgba(0, 0, 0, 0)" and not band["ink"], f"{t}: no ink band ({band['bg']}, ink pills {band['ink']})")
+        check(abs(band["mealH"] - 44) <= 0.5 or (not phone and band["mealH"] >= 44), f"{t}: meal header row is 44 px ({band['mealH']})")
 
         # food rows and nutrient rows use the same name size
         sizes = pg.evaluate(
@@ -128,8 +122,12 @@ def run(browser, size, tag):
         )
         check(sizes[0] == sizes[1] and sizes[2] == sizes[3], f"{t}: food and nutrient rows share the text size {sizes}")
         if phone:
-            sc = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
-            check(sc <= 0, f"{t}: no page scroll ({sc})")
+            # V3-SPEC §3.1: the meals card is flexible, the vi chất card 180 px, 8 px apart, 12 px page margins
+            g = pg.evaluate(
+                """() => { const a = document.querySelector("aside[aria-label='Vi chất']").getBoundingClientRect(); const m = document.querySelector('[data-food-scroll]').getBoundingClientRect();
+                  return { aw: a.width, gap: a.left - m.right, left: m.left, right: innerWidth - a.right }; }"""
+            )
+            check(abs(g["aw"] - 180) <= 0.5 and abs(g["gap"] - 8) <= 0.5 and abs(g["left"] - 12) <= 0.5 and abs(g["right"] - 12) <= 0.5, f"{t}: two cards 12 / flexible / 8 / 180 / 12 ({g})")
         os.makedirs(SHOTS, exist_ok=True)
         pg.screenshot(path=os.path.join(SHOTS, f"cc-27f-home-{w}-{'past' if past else 'today'}.png"))
         ctx.close()

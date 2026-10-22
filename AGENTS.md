@@ -1,6 +1,6 @@
 # Agent rules: H1T MICRO
 
-Read these before any task: `HANDOFF.md`, `design/SPEC.md`, `docs/`, then `tasks/00_task_runner_rules.md`.
+Read these before any task: `HANDOFF.md`, `design/SPEC.md`, `DESIGN.md` (the design floor), `docs/`, then `tasks/00_task_runner_rules.md`.
 Antigravity: also follow .agent/rules/antigravity.md.
 
 ## Scope (who does what)
@@ -21,6 +21,7 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - UI copy is Vietnamese. Number format: 1.041 and 2,1.
 - **The design wins over the scaffold.** Where `tasks/` or existing code conflicts with `design/`, follow `design/` and the "Design overrides the scaffold" section of `HANDOFF.md`.
 - No "Coach" tags or chips in the UI.
+- `design/` decides the look; DESIGN.md is the floor every screen must meet. When they conflict, follow DESIGN.md and add a line to OPEN_QUESTIONS.
 - Fortify Kitchen menu sync is kept for later. Do not build it.
 - Out of scope: Redis, Asynq, Meilisearch and gamification.
 
@@ -71,6 +72,7 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - [ ] `npx tsc --noEmit`, `npm run build` and the unit tests pass.
 - [ ] `PROGRESS.md` is updated.
 - [ ] Tutorials ship with the feature (see **Tutorials** below).
+- [ ] Meets DESIGN.md: no `auto` rule fails, and the `review` rules the change touches were checked (cite their IDs in the PR).
 
 ## Tutorials (every agent, Antigravity included)
 Every feature task that users can see ships its own teaching in the same branch:

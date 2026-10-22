@@ -55,11 +55,13 @@ def explore(browser, size_name, size):
     w = f"{size_name} Khám phá"
     rich = pg.locator("section#explore-rich")
     check(rich.count() == 1, f"{w}: Món giàu vi chất section")
-    # Order under the chips (Hao 15/10, keeps Dong's order): leaderboard banner, coaches, Món giàu vi chất, Gần đây
+    # V3 order (design/v3 V3KhamPhaB): Món giàu vi chất, Nhóm món, Gần đây, Của bạn; the demo-only leaderboard banner and
+    # coaches are not in the design and sit below them
     body = pg.inner_text("body")
-    order = [body.find(t) for t in ("Bảng xếp hạng kỷ luật", "Huấn luyện viên tiêu biểu", "Món giàu vi chất", "Gần đây")]
+    # (the Saira section headers are uppercase on screen, so compare lower-cased)
+    order = [body.lower().find(t.lower()) for t in ("Món giàu vi chất", "Gần đây", "Của bạn", "Bảng xếp hạng kỷ luật", "Huấn luyện viên tiêu biểu")]
     check(all(i >= 0 for i in order) and order == sorted(order),
-          f"{w}: leaderboard, coaches, Món giàu vi chất, Gần đây in that order ({order})")
+          f"{w}: Món giàu vi chất, Gần đây, Của bạn, leaderboard, coaches in that order ({order})")
     tiles = rich.locator("ul[role='list'] > li a")
     check(tiles.count() == 8, f"{w}: eight tiles ({tiles.count()})")
     hrefs = [tiles.nth(i).get_attribute("href") for i in range(tiles.count())]
@@ -79,7 +81,8 @@ def explore(browser, size_name, size):
         ul.evaluate("e => { e.scrollLeft = 0; }")
     body = squash(pg.inner_text("body"))
     for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới"]:
-        check(label in body, f"{w}: shows {label}")
+        # Section headers are drawn in capitals (V3): compare without case
+        check(label.lower() in body.lower(), f"{w}: shows {label}")
     cb = pg.locator("a", has_text="Tạo món mới").first.bounding_box()
     check(cb["height"] >= 48, f"{w}: Tạo món mới is a 48 px button")
     no_h_scroll(pg, w)
@@ -97,7 +100,7 @@ def settings(browser, size_name, size):
     hero = pg.locator("main a[href='/settings/profile']").first
     check(hero.count() == 1, f"{w}: the profile card links to Hồ sơ")
     bg = hero.evaluate("e => getComputedStyle(e).backgroundColor")
-    check(bg == "rgb(26, 28, 34)", f"{w}: the profile card is the dark surface ({bg})")
+    check(bg == "rgb(17, 19, 23)", f"{w}: the profile card is the ink surface ({bg})")
     t = squash(hero.inner_text())
     check(re.search(r"\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
     big = hero.locator("span", has_text=re.compile(r"kcal$")).last
@@ -105,18 +108,19 @@ def settings(browser, size_name, size):
     dark = pg.evaluate(
         """() => [...document.querySelectorAll('main *')].filter(e => {
             const r = e.getBoundingClientRect();
-            return getComputedStyle(e).backgroundColor === 'rgb(26, 28, 34)' && r.width > 250 && r.height > 60;
+            return getComputedStyle(e).backgroundColor === 'rgb(17, 19, 23)' && r.width > 250 && r.height > 60;
         }).length"""
     )
     check(dark == 1, f"{w}: one dark accent card ({dark})")
     body = squash(pg.inner_text("body"))
     for label in ["Mục tiêu mỗi ngày", "Tài khoản", "Ngôn ngữ", "Nhắc nhở", "Nguồn dữ liệu", "Thêm vào màn hình chính", "Vùng nguy hiểm", "Xóa tài khoản", "H1T MICRO Pro"]:
-        check(label in body, f"{w}: shows {label}")
+        # Section headers are drawn in capitals (V3): compare without case
+        check(label.lower() in body.lower(), f"{w}: shows {label}")
     icons = pg.locator("main a svg[aria-hidden='true']").count()
     check(icons >= 6, f"{w}: rows carry icons ({icons})")
     danger = pg.locator("section[aria-labelledby='settings-danger-title']")
     dc = danger.locator("h2").evaluate("e => getComputedStyle(e).color")
-    check(dc != "rgb(20, 21, 25)", f"{w}: the danger title is not body text colour ({dc})")
+    check(dc != "rgb(17, 19, 23)", f"{w}: the danger title is not body text colour ({dc})")
     if size_name == "390":
         db = danger.bounding_box()
         last_bottom = pg.evaluate("() => Math.max(...[...document.querySelectorAll('main section, main a')].map(e => e.getBoundingClientRect().bottom))")

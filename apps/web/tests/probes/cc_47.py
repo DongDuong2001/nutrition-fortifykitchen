@@ -115,7 +115,7 @@ def main():
                 check(any("saira" in f.lower() for f in families), f"{engine}: Saira Condensed is embedded")
                 (SHOTS / f"cc-47-{engine}.svg").write_text(text)
                 # The same SVG with its fonts removed: what a phone draws when the fonts are not in the picture
-                bare = re.sub(r"Manrope|Saira Condensed", "No Such Face", re.sub(r"@font-face\s*{[^}]*}", "", text))
+                bare = re.sub(r"Manrope|Saira", "No Such Face", re.sub(r"@font-face\s*{[^}]*}", "", text))
                 png = pg.evaluate(DRAW, "data:image/svg+xml;charset=utf-8," + urllib.parse.quote(bare))
                 (SHOTS / f"cc-47-nofonts-{engine}.png").write_bytes(base64.b64decode(png.split(",", 1)[1]))
             ctx.close()

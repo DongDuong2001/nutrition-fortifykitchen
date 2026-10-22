@@ -1,7 +1,7 @@
 """cc-22: Hôm nay at "/" (coach layout; /app since cc-45).
 
 Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, sizes 390x844 and 1280x800.
-- No page scroll at 390; the header is 52 px; the nutrient column and the hero are on the same screen.
+- V3 (22/10): at 390 the page scrolls (header, hero and the two cards flow); the header is two 44 px rows; from 1024 the cards keep their own scroll.
 - Tap a food: hero label and caption change, Sửa shows; tap again: back. Tap a meal header: meal mode and ⋯.
 - A food with a missing micronutrient has the grey dot; an empty slot reads "Chưa ăn · Thêm" and links to /add.
 - 20+ foods: only the list scrolls, meal headers stick.
@@ -85,10 +85,9 @@ def run(browser, size, tag):
     check(pg.url == BASE + "/app", f"{tag} /app stays at /app")
     check(hero_label(pg).startswith("Cả ngày · "), f"{tag} day mode label: {hero_label(pg)}")
     if phone:
-        scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
-        check(scroll <= 0, f"{tag} no page scroll ({scroll})")
+        # V3-SPEC §3.1: row 1 the wordmark and the share button, row 2 the date stepper and "Ngày tập"; 4 px above, 4 px below
         h = pg.evaluate("document.querySelector('header').getBoundingClientRect().height")
-        check(abs(h - 52) <= 1, f"{tag} header is 52 px ({h})")
+        check(abs(h - 96) <= 1, f"{tag} header is two 44 px rows ({h})")
     foods = pg.locator("button[aria-pressed][aria-label*=', ']")
     n = foods.count()
     check(n >= 7, f"{tag} foods listed: {n}")
@@ -103,7 +102,7 @@ def run(browser, size, tag):
     check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa")).count() == 0, f"{tag} no Sửa or meal ⋯ in day mode (cc-27a: the day has its own ⋯)")
     # today: the four level colours (one palette on ink and light since cc-44: red, amber, light green, green)
     kcal = fills(pg, "Kcal so với mục tiêu ngày")
-    level_dark = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"}
+    level_dark = {"rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)"}
     empty_dark = "rgb(42, 44, 49)"
     lit = [c for c in kcal if c != empty_dark]
     check(len(lit) > 0 and len(set(lit)) == 1 and set(lit) <= level_dark, f"{tag} today kcal bar is lit in one level colour ({set(lit)})")
@@ -187,7 +186,7 @@ def run(browser, size, tag):
     allfills = set()
     for label in ["Kcal so với mục tiêu ngày", "Đạm so với mục tiêu ngày", "Chất béo so với mục tiêu ngày", "Sodium so với mục tiêu ngày", "Calcium so với mục tiêu ngày", "Vitamin C so với mục tiêu ngày"]:
         allfills |= set(fills(pg, label))
-    coloured = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"} & allfills
+    coloured = {"rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)"} & allfills
     check(len(coloured) >= 1, f"{tag} past day bars use level colours {sorted(coloured)}")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-22-past-{w}.png"))
     ctx.close()
@@ -197,13 +196,17 @@ def run(browser, size, tag):
     go(pg, "/app")
     check(pg.locator("button[aria-pressed][aria-label*=', ']").count() >= 29, f"{tag} 22 seeded foods plus the sample day")
     if phone:
+        # V3: the page scrolls and the cards do not; a long day makes the page longer
         scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
-        check(scroll <= 0, f"{tag} 30+ foods: still no page scroll ({scroll})")
-    pg.evaluate(LIST + ".scrollTop = " + LIST + ".querySelector('section').offsetHeight / 2")
-    pg.wait_for_timeout(200)
-    sticky = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling; const hs = [...l.querySelectorAll('button[aria-pressed]:not([aria-label*=\", \"])')]; return hs.map(h => Math.round(h.getBoundingClientRect().top - l.getBoundingClientRect().top)); })()")
-    inset = 4 if phone else 7  # cc-44: the ink pill sits 4 px in (6 px plus the card's 1 px border from lg)
-    check(any(abs(v - inset) <= 1 for v in sticky), f"{tag} a meal header sticks to the top of the list, {inset} px in ({sticky}, scrollTop {pg.evaluate(LIST + '.scrollTop')})")
+        check(scroll > 0, f"{tag} 30+ foods: the page scrolls ({scroll})")
+        box = pg.evaluate("(() => { const l = " + LIST + "; return [l.scrollHeight, l.clientHeight]; })()")
+        check(box[0] <= box[1] + 1, f"{tag} 30+ foods: the meals card does not scroll itself ({box})")
+    else:
+        pg.evaluate(LIST + ".scrollTop = " + LIST + ".querySelector('section').offsetHeight / 2")
+        pg.wait_for_timeout(200)
+        sticky = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling; const hs = [...l.querySelectorAll('button[aria-pressed]:not([aria-label*=\", \"])')]; return hs.map(h => Math.round(h.getBoundingClientRect().top - l.getBoundingClientRect().top)); })()")
+        # V3: the 44 px meal header row sticks flush to the top of the list (the card's 1 px border above it)
+        check(any(abs(v - 1) <= 1 for v in sticky), f"{tag} a meal header sticks to the top of the list ({sticky}, scrollTop {pg.evaluate(LIST + '.scrollTop')})")
     # empty day: the slot rows
     ctx.close()
 

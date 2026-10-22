@@ -45,7 +45,7 @@ def body(pg):
 
 
 def is_404(pg):
-    return "KHÔNG TÌM THẤY TRANG" in body(pg)
+    return "KHÔNG CÓ TRANG" in body(pg)
 
 
 def run(browser, size, tag):
@@ -75,7 +75,7 @@ def run(browser, size, tag):
     # no flash: the gate shows nothing, then the page, never the 404, while the role is being read
     ctx = browser.new_context(viewport=size)
     ctx.add_init_script(
-        """window.__seen404 = false; setInterval(() => { if (document.body && document.body.innerText.toUpperCase().includes('KHÔNG TÌM THẤY TRANG')) window.__seen404 = true; }, 2);"""
+        """window.__seen404 = false; setInterval(() => { if (document.body && document.body.innerText.toUpperCase().includes('KHÔNG CÓ TRANG')) window.__seen404 = true; }, 2);"""
     )
     pg = ctx.new_page()
     pg.goto(BASE + COACH + "?as=coach", wait_until="networkidle")

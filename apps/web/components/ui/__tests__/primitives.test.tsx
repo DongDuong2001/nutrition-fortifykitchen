@@ -65,9 +65,10 @@ describe("Notice, EmptyState, SectionTitle, ChipGroup scroll, Card padding (cc-6
     expect(cls(renderToStaticMarkup(<EmptyState gap={3} title="x" />))).toContain("gap-3");
   });
 
-  it("SectionTitle sizes: md 16 px (default), lg 17 px, sm 13 px", () => {
-    expect(cls(renderToStaticMarkup(<SectionTitle>a</SectionTitle>))).toContain("text-base");
-    expect(cls(renderToStaticMarkup(<SectionTitle size="lg">a</SectionTitle>))).toContain("text-body-lg");
+  it("SectionTitle sizes: md and lg the V3 section header (Saira italic 17 px uppercase), sm 13 px", () => {
+    for (const html of [renderToStaticMarkup(<SectionTitle>a</SectionTitle>), renderToStaticMarkup(<SectionTitle size="lg">a</SectionTitle>)]) {
+      expect(cls(html)).toEqual(expect.arrayContaining(["font-display", "italic", "text-body-lg", "uppercase"]));
+    }
     expect(cls(renderToStaticMarkup(<SectionTitle size="sm">a</SectionTitle>))).toContain("text-cap");
   });
 
@@ -83,5 +84,16 @@ describe("Notice, EmptyState, SectionTitle, ChipGroup scroll, Card padding (cc-6
     expect(cls(renderToStaticMarkup(<Card>a</Card>))).toContain("p-4");
     expect(cls(renderToStaticMarkup(<Card as="li" padding={false}>a</Card>))).not.toContain("p-4");
     expect(renderToStaticMarkup(<Card as="li">a</Card>)).toMatch(/^<li /);
+  });
+});
+
+describe("ChipGroup scroll with an icon (V3 filter chips)", () => {
+  it("draws the icon before the label and keeps the 44 px chip", () => {
+    const html = renderToStaticMarkup(
+      <ChipGroup scroll sheet ariaLabel="Lọc món" items={[{ id: "dam", label: "Đạm", icon: <i data-testid="tile" />, onClick: () => {} }]} />
+    );
+    expect(html.indexOf("data-testid=\"tile\"")).toBeLessThan(html.indexOf("Đạm"));
+    expect(html).toContain("min-h-11");
+    expect(html).not.toContain("data-fade");
   });
 });

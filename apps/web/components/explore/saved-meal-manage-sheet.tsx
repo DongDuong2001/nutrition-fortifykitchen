@@ -30,14 +30,16 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
   return (
     <Sheet open={open} onClose={onClose} title={confirming ? `Xóa ${name}?` : name} titleId="saved-meal-title" desktopDialog>
       {confirming ? (
-        <>
+        <div className="flex flex-col gap-3">
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
             Bữa ăn của tôi này ({itemCount} món) sẽ bị xóa. Các món đã ghi trong Nhật ký không đổi.
           </p>
+          <PillButton type="button" variant="tertiary" onClick={() => setConfirming(false)}>
+            Hủy
+          </PillButton>
           <PillButton
             type="button"
-            variant="secondary"
-            className="mt-2 border-destructive text-destructive-text"
+            variant="destructive"
             onClick={() => {
               onDelete();
               onClose();
@@ -45,10 +47,7 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
           >
             Xóa Bữa ăn của tôi
           </PillButton>
-          <PillButton type="button" variant="secondary" onClick={() => setConfirming(false)}>
-            Hủy
-          </PillButton>
-        </>
+        </div>
       ) : (
         <form
           noValidate
@@ -66,17 +65,15 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               autoComplete="off"
-              className="h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt"
+              className="h-12 w-full rounded-xl border-2 border-transparent bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt"
             />
           </FormRow>
           <PillButton type="submit" variant="primary" disabled={!draft.trim()}>
             Lưu tên
           </PillButton>
-          <PillButton type="button" variant="secondary" className="border-destructive text-destructive-text" onClick={() => setConfirming(true)}>
+          {/* Xóa is always the last item, in destructive red; the sheet's own Close is the leading circle in its header */}
+          <PillButton type="button" variant="danger" onClick={() => setConfirming(true)}>
             Xóa
-          </PillButton>
-          <PillButton type="button" variant="secondary" onClick={onClose}>
-            Đóng
           </PillButton>
         </form>
       )}

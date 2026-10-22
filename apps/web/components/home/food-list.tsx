@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { rememberAddOpener } from "@/components/ui/add-opener";
-import { kcalLabel } from "@/lib/kcal";
+import { kcalLabel, kcalValue } from "@/lib/kcal";
 import { missingMicros, portionDetailOf, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
@@ -18,6 +18,15 @@ import { Expand } from "@/components/ui/expand";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
+
+// V3-SPEC §3.7: the meal dot, in the deep shade of the meal's colour (Sáng orange, Trưa yellow, Trước tập pink, Tối indigo, Bữa phụ mint)
+const MEAL_DOT: Record<HomeMeal["slot"], string> = {
+  breakfast: "bg-deep-orange",
+  lunch: "bg-deep-yellow",
+  pre_workout: "bg-deep-pink",
+  dinner: "bg-deep-indigo",
+  snack: "bg-deep-mint",
+};
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
@@ -152,7 +161,8 @@ function FoodRow({
       onPointerLeave={cancel}
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
-      className={`${motionClass} ${touchDrag?.enabled ? "m-drag-lift" : ""} flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
+      data-align-group="home-meals"
+      className={`${motionClass} ${touchDrag?.enabled ? "m-drag-lift" : ""} relative flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 py-1 text-left after:pointer-events-none after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-divider after:content-[''] lg:min-h-12 ${
         isDragging ? "opacity-40" : ""
       } ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
@@ -160,7 +170,7 @@ function FoodRow({
     >
       {/* The name, its markers and, on a line of its own, how it was weighed (cc-53b) */}
       <span className={`flex min-w-0 flex-wrap items-center gap-x-1.5 ${detail ? "py-0.5" : ""}`}>
-        <span className="min-w-0 break-words text-cap font-semibold leading-tight line-clamp-2 lg:text-callout" title={entry.name}>
+        <span className="min-w-0 break-words text-callout font-semibold leading-tight line-clamp-2" title={entry.name}>
           {entry.name}
         </span>
         {missing && (
@@ -191,7 +201,7 @@ function FoodRow({
         {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
         {detail && <span className={`basis-full text-micro leading-tight lg:text-cap ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
-      <span className={`${AMOUNT_GUARD} font-display text-callout font-extrabold tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
+      <span className={`${AMOUNT_GUARD} font-condensed text-callout font-extrabold tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -199,8 +209,9 @@ function FoodRow({
 }
 
 /**
- * The left column of the home body: four meals, each an ink pill header (tap = that meal alone) and its foods
- * as 32 px rows (48 px from lg) (tap = that food alone, long press = edit, today only). Only this list scrolls; headers stick.
+ * The meals card of the home body (V3): each meal a 44 px header row (tap the name = that meal alone, the cobalt + adds to it)
+ * and its foods as 44 px rows (48 px from lg) (tap = that food alone, long press = edit, today only). The page scrolls on a
+ * phone; from lg this card scrolls and its headers stick.
  */
 export interface SelectProps {
   ids: ReadonlySet<string>;
@@ -347,10 +358,10 @@ export function FoodList({
       </div>
     );
   }
-  const pill = inkPill();
   if (isEmpty) hadCopy.current = canCopyYesterday;
   return (
-    <div ref={listRef} data-food-scroll className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
+    // V3: a white card (178 px at 390) beside the vi chất card. The page scrolls on a phone; from lg the card keeps its own scroll.
+    <div ref={listRef} data-food-scroll className="min-w-0 flex-1 overflow-hidden rounded-card bg-card lg:min-h-0 lg:overflow-y-auto lg:overscroll-y-contain lg:border lg:border-card-border lg:shadow-card">
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {/* cc-64 (A8): the first food of the day closes this line (150 ms) while the food's row rises in, so the list does
           not jump up 44 px; Như hôm qua stays in it while it closes */}
@@ -410,8 +421,13 @@ export function FoodList({
               isDropTarget ? "bg-cobalt/10 ring-2 ring-cobalt/60 rounded-xl" : ""
             }`}
           >
-            <div className={`sticky top-0 z-sticky ${pill.wrap}`}>
-            <div data-ink-pill data-tour="meal-pill" className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark ${isDropTarget ? "ring-2 ring-sky" : ""}`}>
+            {/* V3-SPEC §3.7: a 44 px row, the meal dot, the name, the kcal number (no unit) and a 44 px cobalt + */}
+            <div
+              data-tour="meal-pill"
+              data-meal-header=""
+              data-align-group="home-meals"
+              className={`flex min-h-11 items-center pl-3 lg:sticky lg:top-0 lg:z-sticky ${mealSelected ? "bg-cobalt-tint" : "bg-card"} ${isDropTarget ? "ring-2 ring-inset ring-cobalt" : ""}`}
+            >
               <button
                 type="button"
                 aria-pressed={mealSelected}
@@ -419,11 +435,12 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="relative flex min-w-0 flex-1 cursor-pointer flex-wrap items-center self-stretch justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit before:absolute before:inset-x-0 before:-top-1 before:bottom-0 before:content-[''] lg:before:-top-1.5"
+                className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
               >
-                <span className={pill.label}>{meal.label}</span>
-                <span className={`${pill.kcal} ${isDropTarget ? "shrink whitespace-normal text-right" : ""}`}>
-                  {isDropTarget ? "Thả vào đây để chuyển" : meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
+                <span aria-hidden="true" className={`h-2 w-2 flex-none rounded-full ${MEAL_DOT[meal.slot]}`} />
+                <span className="whitespace-nowrap font-display text-callout font-extrabold uppercase leading-[1.1] tracking-[0.01em]">{meal.label}</span>
+                <span className={`ml-0.5 font-condensed text-cap font-extrabold leading-none tabular-nums text-secondary ${isDropTarget ? "whitespace-normal" : "whitespace-nowrap"}`}>
+                  {isDropTarget ? "Thả vào đây để chuyển" : meal.entries.length > 0 ? kcalValue(meal.kcal) : ""}
                 </span>
               </button>
               {!readOnly && (
@@ -438,15 +455,15 @@ export function FoodList({
                   data-export="hide"
                   data-tour="meal-add"
                   data-testid="meal-add"
-                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-cap lg:before:-inset-y-1 ${
-                    mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
-                  }`}
+                  className="inline-flex h-11 w-11 flex-none items-center justify-center text-cobalt no-underline transition-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt active:scale-[0.97] motion-reduce:active:scale-100"
                 >
-                  + Thêm
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
                 </Link>
               )}
             </div>
-            </div>
+            <div aria-hidden="true" className="mx-3 h-px bg-divider" />
             {rowsOf(meal).map(({ entry, state }) =>
               state === "exit" ? (
                 <div key={entry.id} data-exiting className="m-row-exit" aria-hidden="true" inert>
@@ -473,14 +490,14 @@ export function FoodList({
               )
             )}
             {rowsOf(meal).length === 0 && (
-              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-cap font-normal text-secondary lg:h-12 lg:text-callout">
+              <p className="m-0 mx-3 flex min-h-11 items-center border-b border-b-divider text-cap font-normal text-secondary lg:min-h-12 lg:text-callout">
                 {readOnly ? "Không có món" : "Chưa ăn"}
               </p>
             )}
           </section>
         );
       })}
-      <p className="m-0 px-3 pt-3 text-micro leading-snug text-secondary lg:text-cap">
+      <p className="m-0 p-3 text-xs leading-snug text-secondary lg:text-cap">
         <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất · chạm tên bữa để xem riêng bữa đó
       </p>
     </div>

@@ -65,6 +65,9 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
+/** V3-SPEC §3.1: the share button is a 44 px glass circle with a cobalt glyph */
+const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt");
+
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
 // that suspends the first time it renders is shown only 300 ms after its fallback (React throttles a reveal), so the first open of
@@ -143,26 +146,17 @@ function useOnceOpen(open: boolean, ready = false): boolean {
 }
 const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
 
-/** The picture of Hôm nay while the diary is read (and the Suspense fallback): the ink band and the two column shapes. */
+/** The picture of Hôm nay while the diary is read (and the Suspense fallback): the header rows, the ink card and the two white cards. */
 function HomeLoading() {
   return (
     <>
         <h1 className="sr-only">Hôm nay</h1>
-        <div className="h-[52px] rounded-b-sheet bg-ink lg:hidden" />
-        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
+        <div className="h-[96px] lg:hidden" />
+        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-2 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
           <span className="sr-only">Đang tải…</span>
-          <div className="h-[152px] rounded-2xl bg-surface-dark motion-safe:animate-pulse" />
-          <div className="flex gap-0 motion-safe:animate-pulse">
-            <div className="flex flex-1 flex-col gap-2 p-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-5 rounded bg-level-empty" />
-              ))}
-            </div>
-            <div className="flex w-[198px] flex-col gap-2 bg-card p-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-5 rounded bg-level-empty" />
-              ))}
-            </div>
+          <div className="h-[152px] rounded-2xl bg-ink motion-safe:animate-pulse" />
+          <div className="flex items-start gap-2 motion-safe:animate-pulse">
+            <HomeBodySkeleton />
           </div>
         </main>
       </>
@@ -172,16 +166,16 @@ function HomeLoading() {
 /** True once Hôm nay has been on screen in this page session: only the very first draw is split in two. */
 let homeDrawn = false;
 
-/** The food list and the nutrient column as shapes, for the one frame (the app's first load) before they are drawn. */
+/** The meals card and the vi chất card as shapes, for the one frame (the app's first load) before they are drawn. */
 function HomeBodySkeleton() {
   return (
     <>
-      <div aria-hidden="true" className="flex flex-1 flex-col gap-2 p-3">
+      <div aria-hidden="true" className="flex min-h-[320px] flex-1 flex-col gap-2 rounded-card bg-card p-3">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="h-5 rounded bg-level-empty" />
         ))}
       </div>
-      <div aria-hidden="true" className="flex w-[198px] flex-col gap-2 bg-card p-3">
+      <div aria-hidden="true" className="flex min-h-[320px] w-[180px] flex-none flex-col gap-2 rounded-card bg-card p-3">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="h-5 rounded bg-level-empty" />
         ))}
@@ -489,7 +483,6 @@ function HomeContent() {
 
   const pills: HeroPill[] = [];
   if (mode.kind === "day") {
-    pills.push({ key: "training", label: `Ngày tập ${trainingValue} ›`, href: `/training?date=${viewIso}`, tour: "training-pill" });
     if (!nothingLogged) {
       pills.push({ key: "day-menu", label: "⋯", id: "home-day-menu", ariaLabel: "Tùy chọn ngày", onClick: () => setDayMenuOpen(true) });
     }
@@ -507,6 +500,20 @@ function HomeContent() {
     }
     pills.push({ key: "clear", label: "Xem cả ngày ×", onClick: () => setMode(DAY_MODE) });
   }
+
+  // V3-SPEC §3.1: "Ngày tập 60′ ›" is a white pill with cobalt text at the right end of the date row (it left the hero)
+  const trainingPill =
+    mode.kind === "day" ? (
+      <Link
+        href={`/training?date=${viewIso}`}
+        data-tour="training-pill"
+        className="inline-flex min-h-11 flex-none items-center no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt"
+      >
+        <span className="inline-flex h-8 items-center whitespace-nowrap rounded-full border border-card-border bg-card px-3 text-cap font-bold text-cobalt">
+          Ngày tập {trainingValue} ›
+        </span>
+      </Link>
+    ) : null;
 
   const desktopSubtitle = clientNow ? (
     <>
@@ -584,7 +591,7 @@ function HomeContent() {
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
-            : "h-[calc(100dvh-88px-var(--update-bar-h,0px)-env(safe-area-inset-bottom))] lg:h-dvh"
+            : "lg:h-dvh"
         }`}
       >
         {selecting ? (
@@ -601,6 +608,7 @@ function HomeContent() {
           title="Hôm nay"
           wordmark
           compact
+          dateRow={<>{trainingPill}</>}
           date={day.date}
           onPrev={() => goToDay(shiftIsoDate(viewIso, -1))}
           onNext={isPast ? () => goToDay(shiftIsoDate(viewIso, 1)) : undefined}
@@ -621,7 +629,7 @@ function HomeContent() {
               data-tour="home-share"
               aria-haspopup="dialog"
               aria-describedby={nothingLogged ? "share-reason" : undefined}
-              className={`${HEADER_ICON_BUTTON} disabled:cursor-default disabled:opacity-50`}
+              className={`${SHARE_BUTTON} disabled:cursor-default disabled:opacity-50`}
             >
               <IconShare />
             </button>
@@ -679,7 +687,7 @@ function HomeContent() {
             countKey={`${viewIso} ${JSON.stringify(mode)}`}
           />
           {coach && !selecting && (
-            <div className="mt-2 flex min-h-11 flex-none items-center justify-end border-t border-t-card-border px-3 lg:px-0">
+            <div className="mt-2 flex min-h-11 flex-none items-center justify-end px-3 lg:px-0">
               <button
                 type="button"
                 onClick={() => setExplainerOpen(true)}
@@ -691,7 +699,9 @@ function HomeContent() {
               </button>
             </div>
           )}
-          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 ${
+              selecting ? "mt-2" : "mx-3 mt-2 items-start gap-2 pb-4"
+            } lg:mx-0 lg:items-stretch lg:gap-4 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "lg:mt-4"}`}>
             {!heavyReady && <HomeBodySkeleton />}
             {heavyReady && (
               <FoodList

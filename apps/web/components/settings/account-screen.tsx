@@ -10,7 +10,8 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { FormRow } from "@/components/ui/form-row";
-import { Row } from "@/components/ui/row";
+import { SettingsRow } from "@/components/settings/settings-row";
+import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { useDiary } from "@/lib/diary-store";
 import { currentAccountId, signOut } from "@/lib/auth-actions";
 import { isLiveMode } from "@/lib/api-mode";
@@ -48,7 +49,7 @@ function DisplayNameRow() {
       hint="Hiện trên ảnh chia sẻ"
       error={error}
       data-align-group="account-row"
-      className="py-3"
+      className="py-4"
     >
       <input
         id="account-display-name"
@@ -65,8 +66,8 @@ function DisplayNameRow() {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
         aria-invalid={error ? true : undefined}
-        className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none focus:border-cobalt ${
-          error ? "border-destructive" : "border-grabber"
+        className={`h-12 w-full rounded-xl border-0 bg-surface px-3 text-base text-text outline-none focus:shadow-[inset_0_0_0_2px_var(--color-cobalt)] ${
+          error ? "shadow-[inset_0_0_0_2px_var(--color-destructive)]" : ""
         }`}
       />
     </FormRow>
@@ -156,17 +157,34 @@ export function AccountScreen() {
         {!ready ? (
           <div aria-busy="true" aria-live="polite" className="h-[240px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
         ) : account ? (
-          <Card as="section" aria-label="Thông tin tài khoản" className="flex flex-col gap-1">
+          <Card as="section" aria-label="Thông tin tài khoản" padding={false} className="flex flex-col px-4">
             <DisplayNameRow />
-            <div data-align-group="account-row">
-              <Row label="Email" hint={account.email} showChevron={false} />
-            </div>
-            <div data-align-group="account-row">
-              <Row label={account.hasPassword ? "Đổi mật khẩu" : "Đặt mật khẩu"} href="/settings/account/password" />
-            </div>
-            <div data-align-group="account-row">
-              <Row label={<span className="text-destructive-text">Đăng xuất</span>} onClick={handleSignOut} showChevron={false} />
-            </div>
+            <SettingsRow
+              tone="profile"
+              glyph={SETTINGS_ICONS.mail}
+              label="Email"
+              hint={<span className="select-text">{account.email}</span>}
+              chevron={false}
+              minHeight="14"
+              data-align-group="account-row"
+            />
+            <SettingsRow
+              tone="privacy"
+              glyph={SETTINGS_ICONS.lock}
+              label={account.hasPassword ? "Đổi mật khẩu" : "Đặt mật khẩu"}
+              href="/settings/account/password"
+              minHeight="14"
+              data-align-group="account-row"
+            />
+            <SettingsRow
+              tone="privacy"
+              glyph={SETTINGS_ICONS.signOut}
+              label={<span className="text-destructive-text">Đăng xuất</span>}
+              onClick={handleSignOut}
+              chevron={false}
+              minHeight="14"
+              data-align-group="account-row"
+            />
           </Card>
         ) : (
           <SignedOutCard />

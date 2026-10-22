@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Manrope, Saira_Condensed } from "next/font/google";
+import { Manrope, Saira, Saira_Condensed } from "next/font/google";
 // The root layout is gone when this renders, so it brings the tokens (colours, press feedback) and fonts itself.
 import "./globals.css";
 import { HOME_ROUTE } from "@/lib/home-route";
@@ -10,6 +10,14 @@ const manrope = Manrope({
   subsets: ["vietnamese", "latin"],
   weight: ["400", "600", "700"],
   variable: "--font-manrope-face",
+  display: "swap",
+});
+
+const saira = Saira({
+  subsets: ["vietnamese", "latin"],
+  weight: ["800", "900"],
+  style: ["italic"],
+  variable: "--font-saira-face",
   display: "swap",
 });
 
@@ -35,7 +43,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
+    <html lang="vi" className={`${manrope.variable} ${saira.variable} ${sairaCondensed.variable}`}>
       <body className="flex min-h-dvh items-center justify-center bg-page p-4 font-sans text-text antialiased">
         <main
           role="alert"

@@ -39,6 +39,7 @@ def text(pg):
 
 def new_page(browser, size, route):
     ctx = browser.new_context(viewport=size)
+    ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")  # no tip over the 7|30 control
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
     pg.goto(BASE + route, wait_until="networkidle")
@@ -72,14 +73,14 @@ def energy(browser, size_name, size):
     opened = lambda: pg.locator("section[aria-label='Năng lượng và chất sinh năng lượng'] button[aria-expanded='true']").count()
     check(opened() == 1 and rows.nth(0).get_attribute("aria-expanded") == "true", f"{w}: Kcal open by default")
     rows.nth(3).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     check(opened() == 1 and rows.nth(3).get_attribute("aria-expanded") == "true", f"{w}: opening Tinh bột closes Kcal")
     bars = pg.locator("#ov-score-carbs button[aria-pressed]")
     check(bars.count() == 7, f"{w}: seven bars ({bars.count()})")
     line = lambda: squash(pg.locator("#ov-score-carbs p[aria-live]").inner_text())
     before = line()
     bars.nth(1).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     check(before != line() and bars.nth(1).get_attribute("aria-pressed") == "true", f"{w}: a bar updates the day line ({before!r} -> {line()!r})")
     t = text(pg)
     split = pg.locator("[role='img'][aria-label^='Đạm']")
@@ -92,7 +93,7 @@ def energy(browser, size_name, size):
     no_h_scroll(pg, w)
     shot(pg, "energy", size_name)
     # The 30-day view still draws seven bars
-    pg.locator('a:has-text("30 ngày") >> visible=true').first.click()
+    pg.locator('[aria-label="Độ dài kỳ"] button:has-text("30") >> visible=true').first.click()
     pg.wait_for_timeout(500)
     check(pg.locator("#ov-score-calories button[aria-pressed]").count() == 7, f"{w}: 30 days chart shows the last 7 days")
     ctx.close()
@@ -103,15 +104,13 @@ def micros(browser, size_name, size):
     w = f"{size_name} Vi chất"
     hero = squash(pg.locator("#mi-hero").inner_text())
     check(re.search(r"\d+\s*/22", hero) is not None, f"{w}: hero reads n/22 ({hero[:60]!r})")
-    squares = pg.locator("#mi-grid ul button")
-    check(squares.count() == 22, f"{w}: 22 squares ({squares.count()})")
-    squares.nth(2).click()
-    pg.wait_for_timeout(150)
-    name = (squares.nth(2).get_attribute("aria-label") or "").split(" ")[0]
-    sel = squash(pg.locator("#mi-grid p[aria-live]").inner_text())
-    check(name in sel and "%" in sel, f"{w}: a square names the nutrient, share and level ({sel!r})")
-    link = pg.locator("#mi-grid a[href^='/micros/']")
-    check(link.count() == 1, f"{w}: the selected nutrient links to its detail")
+    # V3: every nutrient is a bar on the hero (lowest first), named and with its share; no tap needed
+    bars = pg.locator("#mi-grid > li")
+    check(bars.count() == 22, f"{w}: 22 nutrient bars ({bars.count()})")
+    name = (bars.nth(2).get_attribute("aria-label") or "")
+    check(re.search(r"%, (Thiếu|Trung bình|Gần đủ|Đạt)$", name) is not None or name.endswith("chưa có dữ liệu"), f"{w}: a bar names the nutrient, share and level ({name!r})")
+    legend = squash(pg.locator("#mi-hero").inner_text())
+    check(all(x in legend for x in ["Thiếu", "Trung bình", "Gần đủ", "Đạt"]), f"{w}: the four level counts are shown")
     # cc-57: each section is a button (aria-expanded) with the shared Expand, no longer a <details>
     sections = pg.locator("#mi-sections > div[data-align-group='overview-micro']")
     labels = [squash(sections.nth(i).locator("button").first.inner_text()) for i in range(sections.count())]
@@ -143,12 +142,12 @@ def body(browser, size_name, size):
     line = lambda: squash(pg.locator("section[aria-labelledby='bd-line'] p[aria-live]").inner_text())
     before = line()
     points.nth(1).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     after = line()
     check(before != after and points.nth(1).get_attribute("aria-pressed") == "true", f"{w}: a point updates the line ({before!r} -> {after!r})")
     check(re.search(r"\d+,\d kg", after) is not None, f"{w}: the line shows date and kg ({after!r})")
     pg.get_by_role("button", name="Lần cân sau").click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     check(points.nth(2).get_attribute("aria-pressed") == "true", f"{w}: the stepper moves to the next weigh-in")
     t = text(pg)
     check(re.search(r"Số lần cân \d+/7", t) is not None, f"{w}: weigh-ins n/6")

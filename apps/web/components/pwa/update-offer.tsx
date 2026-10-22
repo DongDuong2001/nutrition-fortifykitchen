@@ -53,7 +53,7 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-sheet px-3 pb-2 lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[400px] lg:pb-0">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-sheet px-3 pb-2 lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[400px] lg:pb-0">
       <Presence>
         {visible && (
           <div className="pointer-events-auto">

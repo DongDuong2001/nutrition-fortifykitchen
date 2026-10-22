@@ -16,15 +16,15 @@ import { NAV_TABS } from "@/lib/nav";
 function GateSkeleton() {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row">
-      <div aria-hidden="true" className="hidden w-60 shrink-0 bg-ink p-6 text-on-dark lg:block">
+      <div aria-hidden="true" className="hidden w-60 shrink-0 border-r border-card-border bg-card p-6 text-text lg:block">
         <div className="px-2 font-display text-2xl font-black italic tracking-display">
-          H1T <span className="text-sky">MICRO</span>
+          H1T <span className="text-cobalt">MICRO</span>
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0">
-        {/* The header's shape: the ink band on a phone, the title row's placeholder from 1024 px */}
-        <header aria-hidden="true" className="h-[92px] rounded-b-sheet bg-ink lg:h-auto lg:rounded-none lg:bg-transparent lg:px-8 lg:pt-8">
-          <span className="hidden h-8 w-48 rounded bg-surface-dark motion-safe:animate-pulse lg:block" />
+      <div className="flex min-w-0 flex-1 flex-col pb-[calc(104px+env(safe-area-inset-bottom))] lg:pb-0">
+        {/* The header's shape: the large title's placeholder on the page (V3: no ink band) */}
+        <header aria-hidden="true" className="px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2 lg:px-8 lg:pt-8">
+          <span className="block h-9 w-48 rounded bg-level-empty motion-safe:animate-pulse" />
         </header>
         <main
           role="status"
@@ -41,9 +41,9 @@ function GateSkeleton() {
           ))}
         </main>
       </div>
-      {/* The nav band with its four names as text: the first thing painted on a cold start (FCP) */}
-      <div aria-hidden="true" className="fixed bottom-0 left-0 right-0 z-nav h-[calc(72px+env(safe-area-inset-bottom))] bg-ink lg:hidden">
-        <div className="mx-auto grid h-[72px] w-full max-w-[560px] grid-cols-4 items-center px-4 text-center text-micro font-semibold text-muted-on-dark">
+      {/* The tab bar's capsule with its four names as text: the first thing painted on a cold start (FCP) */}
+      <div aria-hidden="true" className="fixed inset-x-4 bottom-[calc(24px+env(safe-area-inset-bottom))] z-nav lg:hidden">
+        <div className="glass mx-auto grid h-16 w-full max-w-[528px] grid-cols-4 items-center rounded-full px-4 text-center text-micro font-semibold text-glass-tab-off">
           {NAV_TABS.map((t) => (
             <span key={t.tab}>{t.label}</span>
           ))}

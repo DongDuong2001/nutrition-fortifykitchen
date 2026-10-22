@@ -53,7 +53,7 @@ export function DiaryToast() {
     <div
       role="status"
       data-lift={onAdd ? "" : undefined}
-      className="m-toast-host pointer-events-none fixed inset-x-0 bottom-[calc(72px+var(--update-bar-h,0px)+env(safe-area-inset-bottom)+12px)] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]"
+      className="m-toast-host pointer-events-none fixed inset-x-0 bottom-[calc(88px+var(--update-bar-h,0px)+env(safe-area-inset-bottom)+12px)] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]"
     >
       <Presence>
         {parkedDelete && (

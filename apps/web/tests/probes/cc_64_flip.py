@@ -39,7 +39,7 @@ def move(browser, reduced):
     t.ensure_food(pg)
     entry_id = t.row(pg).get_attribute("data-entry-id")
     pg.evaluate(SAMPLE, entry_id)
-    t.row(pg).drag_to(t.section(pg, "snack").locator("[data-ink-pill]"))
+    t.row(pg).drag_to(t.section(pg, "snack").locator("[data-meal-header]"))
     pg.wait_for_timeout(1200)
     frames = pg.evaluate("window.__flip")
     ctx.close()

@@ -3,6 +3,14 @@
 import React from "react";
 import { type TrainingCheckItem, type TrainingPhase } from "@/lib/training";
 import { IconButton } from "@/components/ui/icon-button";
+import { SectionHeader } from "@/components/ui/section-title";
+
+// V3 Training: the salt rows and the fast-carb row carry their macro's colour (a dot before the name, the dose in text colour)
+function macroTone(id: string): { dot: string; text: string } | null {
+  if (id.startsWith("intra-salt")) return { dot: "bg-macro-muoi-text", text: "text-macro-muoi-text" };
+  if (id === "intra-carb") return { dot: "bg-macro-tinhbot-text", text: "text-macro-tinhbot-text" };
+  return null;
+}
 
 export interface PhaseChecklistProps {
   phases: TrainingPhase[];
@@ -40,6 +48,7 @@ export function PhaseChecklist({
     const isChecked = ticked.includes(it.id);
     const removable = it.own && !readOnly && onRemoveItem;
     const busy = busyId === it.id;
+    const tone = macroTone(it.id);
     return (
       <div key={it.id} className={rowClass} aria-busy={busy || undefined}>
         <label
@@ -58,7 +67,8 @@ export function PhaseChecklist({
             />
           </span>
           <span className="flex-1 flex flex-col py-1 min-w-0">
-            <span title={it.own ? it.label : undefined} className={`${isDesktop ? "text-callout" : "text-sm"} font-semibold text-text leading-snug line-clamp-2 break-words`}>
+            <span title={it.own ? it.label : undefined} className="text-callout font-semibold text-text leading-snug line-clamp-2 break-words">
+              {tone && <span aria-hidden="true" className={`mr-2 inline-block h-2 w-2 rounded-full align-[1px] ${tone.dot}`} />}
               {it.label}
             </span>
             {busy ? (
@@ -72,7 +82,7 @@ export function PhaseChecklist({
               <path d="M12 3a9 9 0 1 0 9 9" />
             </svg>
           )}
-          <span className="font-bold text-callout tabular-nums text-text shrink-0">{it.dose}</span>
+          <span className={`font-bold text-callout tabular-nums shrink-0 ${tone ? tone.text : "text-text"}`}>{it.dose}</span>
         </label>
         {removable && (
           <IconButton
@@ -112,7 +122,7 @@ export function PhaseChecklist({
         return (
           <div key={ph.id} data-align-group={isDesktop ? undefined : "training-content"} className={sectionClass}>
             <div className="flex justify-between items-baseline pb-1">
-              <h2 className={`m-0 font-bold text-text ${isDesktop ? "text-lg" : "text-base"}`}>{ph.name}</h2>
+              <SectionHeader>{ph.name}</SectionHeader>
               <span className={`font-semibold text-secondary tabular-nums ${isDesktop ? "text-sm" : "text-cap"}`}>
                 {completedCount} / {totalCount}
               </span>

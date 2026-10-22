@@ -3,6 +3,7 @@
 import React from "react";
 import { DayBars } from "@/components/overview/parts/day-bars";
 import { Expand } from "@/components/ui/expand";
+import { dayFill } from "@/components/overview/parts/day-fill";
 import type { ScoreRowData } from "@/lib/overview-detail";
 
 function Chevron() {
@@ -37,6 +38,7 @@ export function ScoreRow({
   onToggle,
   onSelect,
   alignGroup,
+  levels = false,
 }: {
   row: ScoreRowData;
   first: boolean;
@@ -45,6 +47,8 @@ export function ScoreRow({
   onToggle: () => void;
   onSelect: (i: number) => void;
   alignGroup?: string;
+  /** Day squares and bars in the four level colours (Năng lượng) instead of met / not met (Tóm tắt) */
+  levels?: boolean;
 }) {
   const panelId = `ov-score-${row.key}`;
   return (
@@ -59,16 +63,16 @@ export function ScoreRow({
         <span className="text-callout font-bold">{row.title}</span>
         <span className="text-right text-cap font-semibold text-secondary">{row.change}</span>
         <span className="min-w-0">
-          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums tracking-display">{row.value}</span>
+          <span className={`font-display font-extrabold leading-none tabular-nums tracking-display ${levels ? "text-[2.5rem]" : "text-[2.75rem]"}`}>{row.value}</span>
           <span className="block text-cap text-secondary">{row.sub}</span>
         </span>
-        <span className="flex flex-col items-end justify-center gap-1">
+        <span className={`flex flex-col items-end justify-center ${levels ? "gap-2" : "gap-1"}`}>
           {row.target && (
             <span aria-hidden="true" className="flex gap-1">
               {row.days.map((d) => (
                 <span
                   key={d.iso}
-                  className={`h-3 w-3 rounded-[3px] ${d.met ? "bg-cobalt" : d.inProgress ? "border border-card-border" : "bg-card-border"}`}
+                  className={`box-border h-3 w-3 rounded-[3px] ${d.inProgress ? "border border-secondary" : dayFill(d, row, levels)}`}
                 />
               ))}
             </span>
@@ -80,7 +84,7 @@ export function ScoreRow({
         </span>
       </button>
       <Expand open={open} id={panelId}>
-        <DayBars row={row} selected={selected} onSelect={onSelect} />
+        <DayBars row={row} selected={selected} onSelect={onSelect} levels={levels} />
       </Expand>
     </li>
   );

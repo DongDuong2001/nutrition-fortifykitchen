@@ -3,7 +3,7 @@
  * "back" goes when there is no in-app history, and the in-app history stack. Pure functions, no React.
  * Hôm nay is HOME_ROUTE (/app; "/" is the coach link page), Tổng quan is /trends, Nhật ký is no longer a tab (it lives under Hôm nay).
  */
-import { HOME_ROUTE } from "./home-route";
+import { HOME_ROUTE, OVERVIEW_ROUTE } from "./home-route";
 
 /** Hôm nay. Every link, redirect and route check that means Hôm nay uses this (it lives in ./home-route). */
 export { HOME_ROUTE };
@@ -12,7 +12,7 @@ export type NavTab = "today" | "overview" | "explore" | "settings";
 
 export const NAV_TABS: { tab: NavTab; href: string; label: string }[] = [
   { tab: "today", href: HOME_ROUTE, label: "Hôm nay" },
-  { tab: "overview", href: "/trends", label: "Tổng quan" },
+  { tab: "overview", href: OVERVIEW_ROUTE, label: "Tổng quan" },
   { tab: "explore", href: "/explore", label: "Khám phá" },
   { tab: "settings", href: "/settings", label: "Cài đặt" },
 ];

@@ -8,8 +8,8 @@ import { getLevelColor } from "./levels";
 import type { MockDayData } from "./mock/sample-day";
 
 /**
- * The share image is the Hôm nay screen itself, drawn at 390 px wide and rasterised at 1080/390 (components/home/
- * share-day.tsx). The model here is what that picture needs, as plain values; the size rules are pure.
+ * The share image (V3ShareB: header, hero, meals card beside the vi chất card, footer) is drawn at 390 px wide and
+ * rasterised at 1080/390 (components/home/share-day.tsx). The model here is what that picture needs, as plain values; the size rules are pure.
  */
 export const SHARE_CSS_WIDTH = 390;
 export const SHARE_WIDTH = 1080;
@@ -61,6 +61,19 @@ export function shareKey(): ShareKeyItem[] {
     { label: "Gần đủ", color: getLevelColor("ganDu") },
     { label: "Đạt ≥100%", color: getLevelColor("dat") },
   ];
+}
+
+/** The meal dot of the image, in the deep shade of the meal's colour (as Hôm nay): a colour token as `var(--color-x)`. */
+const MEAL_DOT: Record<HomeMeal["slot"], string> = {
+  breakfast: "var(--color-deep-orange)",
+  lunch: "var(--color-deep-yellow)",
+  pre_workout: "var(--color-deep-pink)",
+  dinner: "var(--color-deep-indigo)",
+  snack: "var(--color-deep-mint)",
+};
+
+export function shareMealDot(slot: HomeMeal["slot"]): string {
+  return MEAL_DOT[slot];
 }
 
 /** Meals with no food are not drawn on the image. */
@@ -173,7 +186,7 @@ export function buildShareModel({
 }
 
 /** The two families the share image is drawn in (app/layout.tsx). */
-export const SHARE_FONTS = ["manrope", "saira condensed"];
+export const SHARE_FONTS = ["manrope", "saira"];
 
 /**
  * Whether html-to-image's font CSS can draw the picture in its own fonts: both families have a face, and every face's

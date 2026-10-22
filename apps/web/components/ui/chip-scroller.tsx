@@ -8,6 +8,8 @@ export interface ChipScrollerItem {
   active?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  /** A 20 px IconTile before the label (V3 filter chips): the chip gets 12 px before it, 8 between. */
+  icon?: React.ReactNode;
 }
 
 export interface ChipScrollerProps {
@@ -15,6 +17,8 @@ export interface ChipScrollerProps {
   ariaLabel: string;
   "data-align-group"?: string;
   "data-align-edge"?: string;
+  /** The row sits in a sheet's glass header: it runs from edge to edge of the sheet (16 px padding, scrolls under the gutters) and has no fades. */
+  sheet?: boolean;
 }
 
 /**
@@ -23,7 +27,7 @@ export interface ChipScrollerProps {
  * From 1024 px it wraps onto more lines, with no scrolling and no fades.
  * The active chip is brought into view.
  */
-export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge }: ChipScrollerProps) {
+export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge, sheet = false }: ChipScrollerProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const activeId = items.find((it) => it.active)?.id;
@@ -35,6 +39,9 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
       (el): el is HTMLElement => el instanceof HTMLElement && el.dataset.chipId === activeId,
     );
     if (!chip) return;
+    // Only a chip that is cut off or out of view is brought in: one that is fully on screen stays where it is (the row never shifts under a tap)
+    const left = chip.offsetLeft - scroller.scrollLeft;
+    if (left >= 0 && left + chip.offsetWidth <= scroller.clientWidth) return;
     scroller.scrollTo({ left: chip.offsetLeft - (scroller.clientWidth - chip.offsetWidth) / 2 });
   }, [activeId]);
 
@@ -45,7 +52,9 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
         role="group"
         aria-label={ariaLabel}
         onScroll={(e) => setScrolled(e.currentTarget.scrollLeft > 0)}
-        className="relative flex flex-nowrap gap-2 overflow-x-auto pr-8 scrollbar-none lg:flex-wrap lg:overflow-visible lg:pr-0"
+        className={`relative flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible ${
+          sheet ? "-mx-4 scroll-px-4 px-4 lg:mx-0 lg:px-0" : "pr-8 lg:pr-0"
+        }`}
       >
         {items.map((it) => (
           <button
@@ -56,14 +65,19 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
             aria-current={!it.onClick && it.active ? "true" : undefined}
             aria-label={it.ariaLabel}
             onClick={it.onClick}
-            className={`min-h-11 shrink-0 whitespace-nowrap rounded-full px-4 text-xs font-semibold cursor-pointer border-0 transition-press active:scale-[0.97] ${
+            className={`min-h-11 shrink-0 whitespace-nowrap rounded-full text-xs font-semibold cursor-pointer border-0 transition-press active:scale-[0.97] ${
+              it.icon ? "flex items-center gap-2 pl-3 pr-4 text-cap" : "px-4"
+            } ${
               it.active ? "bg-ink text-on-dark font-bold shadow-xs" : "bg-surface text-text font-normal hover:bg-divider"
             }`}
           >
-            {it.label}
+            {it.icon}
+            {it.icon ? <span>{it.label}</span> : it.label}
           </button>
         ))}
       </div>
+      {!sheet && (
+      <>
       <div
         aria-hidden="true"
         data-fade="left"
@@ -78,6 +92,8 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
         className="pointer-events-none absolute inset-y-0 right-0 w-10 lg:hidden"
         style={{ background: "linear-gradient(to left, var(--color-card), transparent)" }}
       />
+      </>
+      )}
     </div>
   );
 }

@@ -39,10 +39,16 @@ export const RELEASES: readonly Release[] = [
   // for all of them. No tip, on purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác,
   // Thực phẩm / Thực phẩm bổ sung, Đồ ăn của Minh Hào). feat/glide adds "Chuyển nhóm, chuyển tab mượt hơn" (no control to learn, so no tour step). The first tour step is the Khám phá carousel, which is not on Hôm nay: it points at
   // the Khám phá tab there (fallback) and at the carousel itself wherever it is on screen
+  // feat/v3-redesign (Hao 22/10, V3 "vibrant + glass"): extends 21c, which is not live yet (no deploy since 20/10). The tour points at
+  // Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab.
   {
     id: "2026-10-21c",
     date: "21/10",
     items: [
+      { icon: "home", title: "Giao diện mới: sáng hơn, nhiều màu hơn", body: "Nền xám nhạt với thẻ trắng, chữ to rõ hơn. Mỗi vi chất và mỗi nhóm món có màu riêng, thanh dưới nổi lên và trong mờ." },
+      { icon: "meal", title: "Nút + ở từng bữa", body: "Mỗi bữa ở Hôm nay có nút + màu xanh ngay dòng tên bữa, chạm là thêm món vào đúng bữa đó." },
+      { icon: "bars", title: "Nhóm món có biểu tượng màu", body: "Khám phá có lưới Nhóm món với biểu tượng màu. Khi thêm món, mỗi chip nhóm cũng có biểu tượng, món Tinh bột, Đạm, Chất béo hiện luôn lượng của nhóm đó." },
+      { icon: "home", title: "Mẹo không làm phiền", body: "Mỗi ngày hiện nhiều nhất một mẹo, và bước hướng dẫn nào cũng có nút Bỏ qua." },
       { icon: "meal", title: "Thêm món mượt hơn", body: "Bấm dấu + thì bảng thêm món trượt lên ngay trên màn hình bạn đang xem. Thêm xong, bảng trượt xuống và món mới hiện ở Hôm nay." },
       { icon: "meal", title: "Thêm nhầm thì Hoàn tác", body: "Thêm xong bấm Hoàn tác trong vài giây là bỏ đúng những món vừa thêm, dù là một món hay cả khay." },
       { icon: "home", title: "Danh sách món gọn hơn", body: "Mỗi nhóm hiện vài món đầu, bấm Xem thêm để xem tiếp. Bảng chọn khẩu phần có nút ✕ để đóng." },
@@ -53,6 +59,9 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Đổi nguyên liệu trong món", body: "Món có Thành phần cho đổi nguyên liệu, như sữa chua thường hay Hy Lạp, hạnh nhân hay hạt bí. Chọn ở dòng Đổi nguyên liệu, số gam giữ nguyên, và món ghi lại đúng theo bạn chọn." },
     ],
     tour: [
+      { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
+      { target: "training-pill", fallback: "day-date", title: "Ngày tập", body: "Nút Ngày tập nằm cạnh ngày, bên phải. Chạm để đổi số phút tập hôm nay." },
+      { target: "nav-explore", title: "Nhóm món có màu", body: "Ở Khám phá, mỗi nhóm món có biểu tượng màu riêng. Chạm một nhóm để xem các món trong nhóm." },
       { target: "explore-minh-hao", fallback: "nav-explore", title: "Đồ ăn của Minh Hào", body: "Ở Khám phá có hàng thẻ Đồ ăn của Minh Hào. Khi thêm món, chạm chip cùng tên để chọn nhanh." },
       { target: "dish-parts", fallback: "meal-add", title: "Đổi nguyên liệu", body: "Mở Thành phần của món. Nguyên liệu nào đổi được thì có dòng Đổi nguyên liệu, chọn loại bạn dùng." },
     ],

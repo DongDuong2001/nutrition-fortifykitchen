@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { AuthNotice } from "@/components/auth/auth-notice";
 import { SessionRedirect } from "@/components/auth/session-redirect";
-import { AuthShell } from "@/components/onboarding/auth-shell";
-import { BrandMark } from "@/components/onboarding/brand-mark";
+import { AuthShell, LegalLine } from "@/components/onboarding/auth-shell";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
 import { EmailPasswordForm } from "@/components/onboarding/email-password-form";
 
@@ -17,42 +16,35 @@ export default function SignInPage() {
   return (
     <AuthShell
       split
-      hero={
+      title="Chào mừng trở lại."
+      lead="Đăng nhập để xem tiếp nhật ký và theo dõi 22 vi chất của bạn."
+      aside={
         <>
-          <BrandMark className="self-center" />
-          <div className="flex flex-col gap-2">
-            <h1 className="m-0 font-display text-title font-black italic uppercase leading-tight lg:text-display">
-              CHÀO MỪNG TRỞ LẠI.
-            </h1>
-            <p className="m-0 text-balance text-callout leading-normal text-muted-subtitle">
-              Đăng nhập để xem tiếp nhật ký và theo dõi 22 vi chất của bạn.
-            </p>
-            <ul className="m-0 hidden list-none flex-col gap-4 p-0 lg:flex pt-2">
-              {DESKTOP_SIGNIN_POINTS.map((point) => (
-                <li key={point} className="flex items-center gap-3 text-sm leading-normal text-muted-subtitle">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="flex-none text-sky"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12l5 5 9-10" />
-                  </svg>
-                  {point}
-                </li>
-              ))}
-            </ul>
-            <div className="hidden lg:block pt-3">
-              <Link href="/landing" className="text-xs font-semibold text-sky hover:underline no-underline">
-                Tìm hiểu thêm về H1T MICRO →
-              </Link>
-            </div>
+          <ul className="m-0 hidden list-none flex-col gap-4 p-0 pt-2 lg:flex">
+            {DESKTOP_SIGNIN_POINTS.map((point) => (
+              <li key={point} className="flex items-center gap-3 text-sm leading-normal text-muted-subtitle">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="flex-none text-sky"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12l5 5 9-10" />
+                </svg>
+                {point}
+              </li>
+            ))}
+          </ul>
+          <div className="hidden pt-3 lg:block">
+            <Link href="/landing" className="text-xs font-semibold text-sky no-underline hover:underline">
+              Tìm hiểu thêm về H1T MICRO →
+            </Link>
           </div>
         </>
       }
@@ -65,19 +57,13 @@ export default function SignInPage() {
         <span className="h-px flex-1 bg-divider" />
       </div>
       <EmailPasswordForm variant="signin" />
-      <p className="m-0 text-center text-callout text-secondary">
-        Chưa có tài khoản?{" "}
+      <p className="m-0 flex min-h-11 flex-wrap items-center justify-center text-center text-callout text-secondary">
+        Chưa có tài khoản?
         <Link href="/signup" className="inline-flex min-h-11 items-center px-2 font-semibold text-cobalt">
           Đăng ký
         </Link>
       </p>
-      <p className="m-0 text-center text-[0.75rem] leading-relaxed text-secondary">
-        Bằng việc tiếp tục, bạn đồng ý với{" "}
-        <Link href="/terms" className="underline hover:text-text">Điều khoản dịch vụ</Link>
-        {" "}và{" "}
-        <Link href="/privacy" className="underline hover:text-text">Chính sách bảo mật</Link>
-        {" "}của H1T MICRO.
-      </p>
+      <LegalLine lead="Bằng việc tiếp tục" />
       <AuthNotice />
     </AuthShell>
   );

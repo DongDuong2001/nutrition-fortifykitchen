@@ -34,6 +34,13 @@ def squash(text):
     return re.sub(r"\s+", " ", text)
 
 
+def meal_kcal(pg, meal):
+    """V3: the meal header shows the kcal number without the word ("TRƯA 488")."""
+    head = squash(pg.locator(f"section[aria-label='{meal}'] [data-meal-header] >> visible=true").first.inner_text()).strip()
+    m = re.search(r"(\d[\d.]*)$", head)
+    return int(m.group(1).replace(".", "")) if m else 0
+
+
 def kcal_of(text):
     m = re.search(r"([\d.]+)\s*kcal", text)
     return int(m.group(1).replace(".", "")) if m else None
@@ -146,7 +153,7 @@ def main():
         pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(800)
         text_before = squash(pg.locator(f"section[aria-label='{meal}'] >> visible=true").first.inner_text())
-        kcal_before = kcal_of(text_before) or 0
+        kcal_before = meal_kcal(pg, meal)
         panel, section = open_dish(pg)
         for _ in range(5):
             section.get_by_role("button", name="Giảm 10 g Bánh phở (tươi)").tap()
@@ -161,7 +168,8 @@ def main():
         check(text.count("Phở bò") == 1 and "Phở bò · đã chỉnh" in text, f"{meal}: one row, Phở bò · đã chỉnh ({text[:200]!r})")
         # The demo day's own rows are in the meal too (at lunchtime it holds "Thịt bò nạc"): only rows that were not there before count
         check("Bánh phở" not in text and text.count("Thịt bò") == text_before.count("Thịt bò"), "no separate Bánh phở or Thịt bò row")
-        check((kcal_of(text) or 0) - kcal_before == kcal_card, f"the meal gained the card's {kcal_card} kcal ({kcal_before} → {kcal_of(text)})")
+        kcal_after = meal_kcal(pg, meal)
+        check(kcal_after - kcal_before == kcal_card, f"the meal gained the card's {kcal_card} kcal ({kcal_before} → {kcal_after})")
         pg.screenshot(path=str(SHOTS / "phobo-edited-row.png"))
         # The edited dish is in no list
         pg.goto(BASE + "/add", wait_until="networkidle")

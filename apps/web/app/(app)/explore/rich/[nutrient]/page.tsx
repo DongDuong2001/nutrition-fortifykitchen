@@ -5,18 +5,24 @@ import { notFound, useParams, usePathname, useRouter, useSearchParams } from "ne
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
-import { ChipGroup } from "@/components/ui/chip-group";
+import { Segmented } from "@/components/ui/segmented";
 import { SwitchGlide } from "@/components/ui/switch-glide";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { useDiary } from "@/lib/diary-store";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
+import { nutrientDot, nutrientFill } from "@/lib/nutrient-colors";
 import { formatAmount } from "@/lib/format";
 import { isRichNutrientId, richInFoods, richName, type RichBasis, type RichKind } from "@/lib/rich-in";
 import { defaultPortionOf } from "@/lib/portion";
 import { useBack } from "@/hooks/use-back";
 import { dedupeTwins, rowName } from "@/lib/food-rows";
+
+/** The 4 × 28 px accent bar before a title. */
+function AccentBar({ color }: { color: string }) {
+  return <span aria-hidden="true" className="h-7 w-1 shrink-0 rounded-sm" style={{ background: color }} />;
+}
 
 /**
  * Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. Two tabs: Thực phẩm
@@ -53,29 +59,33 @@ export default function RichInPage() {
     <AppShell>
       <AppHeader
         variant="sub"
+        layout="wide"
         title={`Giàu ${name}`}
         subtitle={`${definition.unit} ${supplement ? "mỗi lần dùng" : basis === "per100" ? "mỗi 100 g" : "mỗi khẩu phần"}`}
         onBack={goBack}
-        layout="wide"
+        lead={<AccentBar color={nutrientFill(id)} />}
       />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
-        <ChipGroup
-          columns={2}
-          tone="light"
-          tabs
-          ariaLabel="Loại"
+        <Segmented
+          as="tabs"
+          label="Loại"
+          alignGroup="rich-controls"
+          value={kind}
+          onChange={setKind}
           items={[
-            { id: "food", label: "Thực phẩm", active: !supplement, onClick: () => setKind("food") },
-            { id: "supplement", label: "Thực phẩm bổ sung", active: supplement, onClick: () => setKind("supplement") },
+            { key: "food", label: "Thực phẩm" },
+            { key: "supplement", label: "Thực phẩm bổ sung" },
           ]}
         />
         {!supplement && (
-          <ChipGroup
-            columns={2}
-            tone="light"
+          <Segmented
+            label="Tính theo"
+            alignGroup="rich-controls"
+            value={basis}
+            onChange={setBasis}
             items={[
-              { id: "per100", label: "Mỗi 100 g", active: basis === "per100", onClick: () => setBasis("per100") },
-              { id: "portion", label: "Mỗi khẩu phần", active: basis === "portion", onClick: () => setBasis("portion") },
+              { key: "per100", label: "Mỗi 100 g" },
+              { key: "portion", label: "Mỗi khẩu phần" },
             ]}
           />
         )}
@@ -105,6 +115,7 @@ export default function RichInPage() {
                     meta={row.pct === null ? per : `${row.pct}% mục tiêu ngày · ${per}`}
                     value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
                     withBorderTop={i > 0}
+                    valueColor={nutrientDot(id)}
                     category={row.food.category}
                   />
                 );

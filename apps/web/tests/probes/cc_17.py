@@ -57,7 +57,7 @@ def chip_report(pg):
     return pg.evaluate(
         """() => Array.from(document.querySelectorAll('[role=group][aria-label="Thời gian tập"] button')).map((b) => {
             const range = document.createRange();
-            range.selectNodeContents(b);
+            range.selectNodeContents(b.querySelector('span') || b);
             const lines = new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top))).size;
             const r = b.getBoundingClientRect();
             return {
@@ -132,17 +132,12 @@ def check_training(browser, size_name, size):
     check(carb.is_checked(), f"{label}: the tick survives a reload")
     check(not carb.is_disabled(), f"{label}: today's tick stays editable after reload")
 
-    # Chips: one row of five equal columns, no wrapped label, every target 44 px
+    # Chips (V3 segmented control): one row of five equal columns on the phone and on desktop, no wrapped label, every target 44 px
     chips = [c for c in chip_report(pg) if c["visible"]]
     check(len(chips) == 5, f"{label}: five duration chips ({len(chips)})")
     if chips:
-        # Phone: 3 equal columns, so rows of 3 and 2 with the sixth cell empty. Desktop: one row of 5.
         tops = [c["top"] for c in chips]
-        if size_name == "390":
-            check(len(set(tops[:3])) == 1 and len(set(tops[3:])) == 1 and tops[0] != tops[3],
-                  f"{label}: chips sit in a 3 + 2 grid of equal columns (tops {tops})")
-        else:
-            check(len(set(tops)) == 1, f"{label}: the five chips share one row (tops {tops})")
+        check(len(set(tops)) == 1, f"{label}: the five chips share one row (tops {tops})")
         widths = [c["width"] for c in chips]
         check(max(widths) - min(widths) <= 1.0, f"{label}: the five chips are equal width ({widths})")
         check(all(c["lines"] == 1 for c in chips), f"{label}: no chip label wraps ({[c['label'] + ':' + str(c['lines']) for c in chips]})")
@@ -195,12 +190,8 @@ def header_box(pg):
     return pg.evaluate(
         """() => {
             const header = document.querySelector('[data-align-container="micros-page"] header');
-            const list = document.querySelector('[data-align-container="micros-page"] .overflow-y-auto');
             const r = header.getBoundingClientRect();
-            return {
-                height: r.height, text: header.innerText,
-                listTop: list ? list.offsetTop : null, listScroll: list ? list.scrollTop : null,
-            };
+            return { height: r.height, text: header.innerText };
         }"""
     )
 
@@ -208,7 +199,7 @@ def header_box(pg):
 def check_micros_phone(browser):
     label = "micros 390"
     context, pg, errors = open_page(browser, PHONE, "/micros")
-    pg.wait_for_selector("text=Thiếu nhiều nhất")
+    pg.wait_for_selector("text=Thiếu nhiều nhất >> visible=true")
     pg.wait_for_timeout(300)
 
     rest = header_box(pg)
@@ -216,20 +207,15 @@ def check_micros_phone(browser):
     check("Thiếu nhiều nhất" in rest["text"], f"{label}: header at rest shows the summary")
     check("Xu hướng 7 và 30 ngày" in rest["text"], f"{label}: header at rest shows the trends link")
 
-    # cc-27c: the header no longer folds in place; a compact 60 px bar takes over once the summary has scrolled
-    # away (full coverage in cc_27c.py). Here: it appears with the count and the title, and goes at the top.
-    sel = '[data-align-container="micros-page"] .overflow-y-auto'
-    pg.evaluate("(sel) => { document.querySelector(sel).scrollTop = 700; }", sel)
+    # V3Micros: no compact bar and no inner scroller; the header scrolls away with the page (one h1)
+    pg.evaluate("() => window.scrollTo(0, 700)")
     pg.wait_for_timeout(400)
-    bar = pg.evaluate("() => { const b = document.querySelector('[data-micros-compact=shown]'); return b ? { h: b.getBoundingClientRect().height, text: b.innerText } : null; }")
-    check(bar is not None and bar["h"] <= 64, f"{label}: a compact bar shows once the list scrolls past the header ({bar})")
-    check(bar is not None and "đã đạt" in bar["text"] and "/22" in bar["text"], f"{label}: compact bar keeps the 8/22 count")
-    check(bar is not None and "VI CHẤT" in bar["text"].upper(), f"{label}: compact bar keeps the title")
-    pg.screenshot(path=os.path.join(SHOTS, "cc-17-micros-scrolled-390.png"), animations="disabled")
-    pg.evaluate("(sel) => { document.querySelector(sel).scrollTop = 0; }", sel)
+    check(pg.locator("[data-micros-compact]").count() == 0, f"{label}: no compact bar")
+    check(pg.locator("h1").count() == 1, f"{label}: one h1 ({pg.locator('h1').count()})")
+    pg.evaluate("() => window.scrollTo(0, 0)")
     pg.wait_for_timeout(400)
     back = header_box(pg)
-    check(abs(back["height"] - rest["height"]) <= 2, f"{label}: the full header is back at the top of the list ({back['height']:.0f} px)")
+    check(abs(back["height"] - rest["height"]) <= 2, f"{label}: the full header is back at the top ({back['height']:.0f} px)")
 
     pg.screenshot(path=os.path.join(SHOTS, "cc-17-micros-top-390.png"), animations="disabled")
     no_horizontal_scroll(pg, label)
@@ -240,7 +226,7 @@ def check_micros_phone(browser):
 def check_micros_desktop(browser):
     label = "micros 1280"
     context, pg, errors = open_page(browser, DESKTOP, "/micros")
-    pg.wait_for_selector("[data-align-container='micros-desktop']")
+    pg.wait_for_selector("#desktop-group-vitamins")
     pg.wait_for_timeout(300)
     pg.screenshot(path=os.path.join(SHOTS, "cc-17-micros-top-1280.png"), animations="disabled")
     pg.evaluate("() => window.scrollTo(0, 400)")

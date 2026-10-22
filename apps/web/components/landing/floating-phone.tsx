@@ -37,7 +37,8 @@ export function FloatingPhone() {
         aria-hidden="true"
       />
 
-      <div className="floating-phone-wrap relative rounded-[40px] bg-gradient-to-tr from-cobalt via-sky/60 to-card p-1 shadow-2xl">
+      {/* A picture of the app, not the app (D-TYPE-01's exception): hidden from screen readers and out of the tab order */}
+      <div aria-hidden="true" inert className="floating-phone-wrap relative rounded-[40px] bg-gradient-to-tr from-cobalt via-sky/60 to-card p-1 shadow-2xl">
         {/* Outer Phone Hardware Chassis */}
         <div className="relative w-[280px] sm:w-[310px] h-[590px] rounded-[38px] border-4 border-ink/80 bg-ink p-2.5 shadow-2xl flex flex-col overflow-hidden">
           {/* Dynamic Island / Speaker Notch */}

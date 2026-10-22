@@ -1,5 +1,8 @@
 import type { FoodNutrientValue, TargetSource } from "../nutrients";
-import type { GoalType, SexType } from "../targets";
+import { calculateTargets, type GoalType, type SexType } from "../targets";
+import { applyProfileTargets, type DayUser } from "../day-targets";
+import { ageOf } from "../rda";
+import { microsSummaryFor } from "../lacking";
 
 export interface MockFoodItem {
   id: string;
@@ -85,8 +88,12 @@ export interface MockDayData {
   nutrients?: Record<string, number | null>;
 }
 
-/** The sample day always has a kcal total (number), unlike a live day whose entries may all lack kcal. */
-export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
+/**
+ * The foods and amounts of the sample day (design/SPEC.md). Its targets and percentages below are placeholders: the
+ * exported SAMPLE_DAY recomputes them from lib/targets.ts and lib/rda.ts for the sample user (V3-SPEC §6), so every
+ * screen shows the same numbers. Never edit a food value here to make a number fit.
+ */
+const SAMPLE_DAY_FOODS: MockDayData & { calories: { consumed: number } } = {
   date: "2026-10-10",
   dateLabel: "Hôm nay 10/10",
   desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg",
@@ -511,4 +518,28 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     vitaminsTotal: 12,
     mostLacking: ["Vitamin D", "Calcium"],
   },
+};
+
+// The sample user (lib/profile SAMPLE_PROFILE): male, born 2003, 65 kg, Giữ cân, 60 minutes of training
+const SAMPLE_USER: DayUser = { sex: "male", birthYear: 2003, weightKg: 65, goal: "maintain", trainingMinutesDefault: 60 };
+
+const RETARGETED = applyProfileTargets(
+  SAMPLE_DAY_FOODS,
+  SAMPLE_USER,
+  calculateTargets({
+    sex: SAMPLE_USER.sex,
+    weightKg: SAMPLE_USER.weightKg,
+    goal: SAMPLE_USER.goal,
+    trainingMinutes: SAMPLE_USER.trainingMinutesDefault,
+    isPeriod: false,
+    age: ageOf(SAMPLE_USER.birthYear),
+  }),
+);
+
+/** The sample day always has a kcal total (number), unlike a live day whose entries may all lack kcal. */
+export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
+  ...RETARGETED,
+  calories: { ...RETARGETED.calories, consumed: SAMPLE_DAY_FOODS.calories.consumed },
+  // "Thiếu nhiều nhất" and the counts follow the recomputed percentages too
+  microsSummary: microsSummaryFor(RETARGETED),
 };

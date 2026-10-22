@@ -172,7 +172,8 @@ def compare_page(browser, size, size_name):
     check(order[:5] == ["Năng lượng", "Đạm", "Chất béo", "Tinh bột", "Chất xơ"], f"{w}: macro rows in order {order[:5]}")
     check(order[5] == "Vitamin B1" and order[7] == "Calcium", f"{w}: Vitamin before Khoáng chất ({order[5]}, {order[7]})")
     titles = pg.locator('[role="rowgroup"] h3').all_inner_texts()
-    check(titles == ["Năng lượng và đa lượng", "Vitamin", "Khoáng chất"], f"{w}: section titles {titles}")
+    # V3: the section headers are Saira uppercase (inner_text shows the capitals)
+    check([t.lower() for t in titles] == ["năng lượng và đa lượng", "vitamin", "khoáng chất"], f"{w}: section titles {titles}")
 
     # values on the 100 g basis
     check(cell_text(pg, "Năng lượng", 0).startswith("280 kcal"), f"{w}: Chà là 280 kcal per 100 g ({cell_text(pg, 'Năng lượng', 0)})")

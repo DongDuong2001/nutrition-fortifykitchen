@@ -83,7 +83,7 @@ The root must start with exactly:
 ## Sample data (keep everything consistent)
 
 - **User and targets:**
-  - Male, born 2003, 65 kg, goal Giữ cân (1.950–2.275 kcal), training 60 phút today.
+  - Male, born 2003, 65 kg, goal Giữ cân (2.275 kcal: 35 kcal/kg, the upper end since cc-73b), training 60 phút today.
   - Today is Thứ Bảy 10/10/2026.
   - Email ban@email.com.
 - **Meals today:**
@@ -92,8 +92,11 @@ The root must start with exactly:
   - Trước tập 94 kcal: Chà là 30 g 84, Bột củ dền 3 g 10.
   - Bữa tối and Bữa phụ are empty.
   - Total 1.041 kcal, còn 909.
-- **Macros:** Đạm 62/104 g, Tinh bột 133/254 g, Béo 21/33–65 g, Chất xơ 14/30 g.
-- **Micros:** 8/21 đạt (Khoáng chất 5/9, Vitamin 3/12). Most lacking: Vitamin D 2,1/15 µg and Canxi 331/1.200 mg.
+- **Targets come from the code (V3-SPEC §6, 22/10):** every target and percentage of the sample day is computed by lib/targets.ts and lib/rda.ts for this user (lib/mock/sample-day.ts builds SAMPLE_DAY with them; lib/__tests__/sample-day-targets.test.ts holds every screen to them). The food amounts below are unchanged.
+- **Macros:** Đạm 62/143 g (43%), Tinh bột 133/280 g (48%), Chất béo 21/65 g (32%), Chất xơ 14/32 g (44%). Kcal 1.041 / 2.275 (46%), còn 1.234.
+- **Micros:** 9/22 đạt (Khoáng chất 6/10, Vitamin 3/12). Most lacking: Vitamin D 2,1/15 µg (14%) and Vitamin E 3,2/15 mg (21%).
+  - Minerals: Sodium 2.900 / 2.750–4.130 mg 105%, Iron 11/8 mg 138%, Zinc 12,4/11 mg 113%, Phosphorus 1.050/700 mg 150%, Selenium 52/55 µg 95%, Copper 0,8/0,9 mg 89%, Potassium 3.900/3.400 mg 115%, Magnesium 410/400 mg 102%, Calcium 331/1.000 mg 33%, Manganese 1,8/2,3 mg 78%.
+  - Vitamins: B12 3,1/2,4 µg 129%, B2 1,4/1,3 mg 108%, B3 18/16 mg 113%, B6 1,1/1,3 mg 85%, B5 4,1/5 mg 82%, A 520/900 µg 58%, B1 0,9/1,2 mg 75%, Folate 290/400 µg 73%, K 85/120 µg 71%, E 3,2/15 mg 21%, C 48/90 mg 53%, D 2,1/15 µg 14%.
 - **Coach rules:**
   - kcal/kg by goal, the upper end of the coach's range (cc-73b, 20/10; the sample day below is from before): Tăng cơ 40, Giữ cân 35, Giảm mỡ 30, Giảm mỡ nhanh 25.
   - Protein 2,2 g/kg; fat 1 g/kg.

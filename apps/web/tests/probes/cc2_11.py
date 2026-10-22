@@ -88,14 +88,24 @@ def check_explore(browser, size_name, size):
     go(pg, "/explore")
     body = text(pg)
     check(pg.locator("h1:visible").count() == 1, f"{size_name} explore: one visible h1")
-    for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới", "Món giàu vi chất"]:
-        check(label in body, f"{size_name} explore: shows {label}")
-    mine = pg.locator("section[aria-labelledby=explore-mine]").inner_text()
-    check("Bột củ dền" in mine or "Chưa có món nào. Tạo món mới" in mine, f"{size_name} explore: Món của tôi lists own foods or shows its empty state")
-    chip_names = [t.strip() for t in pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true").all_inner_texts()]
-    # Huấn luyện viên and Bảng xếp hạng are Dong's chips (task-04); the food categories are the rest
-    category_chips = [t for t in chip_names if t not in ("Huấn luyện viên", "Bảng xếp hạng")]
-    check(len(category_chips) == 13, f"{size_name} explore: Tất cả + 12 category chips, Đồ uống included ({len(category_chips)})")
+    for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới", "Món giàu vi chất", "Nhóm món", "Của bạn"]:
+        if label == "Nhóm món" and size_name != "390":
+            continue  # V3: from 1024 px the category chips take the place of the Nhóm món section
+        # V3: section headings are Saira uppercase on screen, so compare case-insensitively
+        check(label.lower() in body.lower(), f"{size_name} explore: shows {label}")
+    # V3: Của bạn is three rows (Yêu thích, Bữa ăn của tôi, Món của tôi) with their counts, then Tạo món mới
+    yours = re.sub(r"\s+", " ", pg.locator("section[aria-labelledby=explore-yours]").inner_text())
+    check(re.search(r"Món của tôi · \d+ món", yours) is not None, f"{size_name} explore: Của bạn counts Món của tôi ({yours[:120]!r})")
+    check(pg.locator("section[aria-labelledby=explore-yours] a[href='/explore/cua_toi']").count() == 1, f"{size_name} explore: the Món của tôi row opens its list")
+    if size_name == "390":
+        # a phone shows the 11 groups as Nhóm món (Món của tôi is a row of Của bạn); the chips are desktop-only
+        groups = [t.split("\n")[0].strip() for t in pg.locator("nav[aria-label='Nhóm món'] a >> visible=true").all_inner_texts()]
+        check(len(groups) == 11 and "Đồ uống" in groups, f"{size_name} explore: 11 groups in Nhóm món, Đồ uống included ({len(groups)})")
+    else:
+        chip_names = [t.strip() for t in pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true").all_inner_texts()]
+        # Huấn luyện viên and Bảng xếp hạng are Dong's chips (task-04); the food categories are the rest
+        category_chips = [t for t in chip_names if t not in ("Huấn luyện viên", "Bảng xếp hạng")]
+        check(len(category_chips) == 13, f"{size_name} explore: Tất cả + 12 category chips, Đồ uống included ({len(category_chips)})")
     shot(pg, "explore", size_name)
     no_h_scroll(pg, f"{size_name} explore")
 
@@ -109,7 +119,10 @@ def check_explore(browser, size_name, size):
     pg.fill("input[type=search] >> visible=true", "")
 
     # category chip opens the pushed screen
-    pg.locator("[aria-label='Lọc món theo nhóm'] button:has-text('Trái cây') >> visible=true").first.click()
+    if size_name == "390":
+        pg.locator("nav[aria-label='Nhóm món'] a:has-text('Trái cây') >> visible=true").first.click()
+    else:
+        pg.locator("[aria-label='Lọc món theo nhóm'] button:has-text('Trái cây') >> visible=true").first.click()
     pg.wait_for_url("**/explore/trai_cay")
     check("Chuối" in text(pg), f"{size_name} category: Trái cây lists Chuối")
     shot(pg, "category", size_name)
@@ -154,9 +167,9 @@ def check_food(browser, size_name, size):
     pg.wait_for_url("**/foods/**")
     body = text(pg)
     check(path_of(pg) == "/foods/food-yen-mach", f"{size_name} food: opens /foods/food-yen-mach ({path_of(pg)})")
-    check("Nguồn tốt của" in body, f"{size_name} food: Nguồn tốt của")
+    check("nguồn tốt của" in body.lower(), f"{size_name} food: Nguồn tốt của")
     check(re.search(r"Chưa có dữ liệu cho \d+ trong 22 vi chất", body) is not None, f"{size_name} food: unknown count line")
-    check("Khoáng chất" in body and "Vitamin" in body, f"{size_name} food: mineral and vitamin groups")
+    check("khoáng chất" in body.lower() and "vitamin" in body.lower(), f"{size_name} food: mineral and vitamin groups")
     check(pg.locator("section[aria-labelledby=food-micros] li").count() == 22, f"{size_name} food: 22 nutrient rows")
     check(re.search(r"Thêm vào (Bữa|Trước|Sau|Tối|Sáng|Trưa|Ăn)", body) is not None or "Thêm vào" in body, f"{size_name} food: Thêm vào <bữa>")
     # good-source threshold: every chip is >= 20 %

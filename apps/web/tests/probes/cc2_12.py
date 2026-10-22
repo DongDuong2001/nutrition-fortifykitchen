@@ -85,7 +85,8 @@ def dinner_items(pg):
 def meal_kcal(pg, meal_name):
     """The kcal total in a meal's header on Hôm nay (None when the meal has no food)."""
     txt = pg.locator(f"section[aria-label='{meal_name}'] button[aria-label^='Xem riêng']").first.inner_text()
-    m = re.search(r"([\d.]+)\s*kcal", txt)
+    # V3 meal header: the dot, the meal name and the kcal number (no unit): "TỐI 420"
+    m = re.search(r"([\d.]+)\s*$", txt.strip())
     return int(m.group(1).replace(".", "")) if m else None
 
 
@@ -132,7 +133,7 @@ def check_recents(browser, size_name, size):
     pg.wait_for_timeout(300)
     rows = pg.locator("section[aria-label='Gần đây'] li:visible")
     check(rows.count() >= 1 and pg.locator("[data-quick-row]:visible").count() >= 1, f"{size_name} add: Gần đây cards are listed ({rows.count()})")
-    check("Gần đây" in text(pg), f"{size_name} add: Gần đây section")
+    check("gần đây" in text(pg).lower(), f"{size_name} add: Gần đây section")  # V3 titles are uppercase on screen
     shot(pg, "add", size_name)
     no_h_scroll(pg, f"{size_name} add")
     tap_targets_ok(pg, "[data-quick-row] button", f"{size_name} add: recent row controls")
@@ -246,8 +247,11 @@ def check_saved_meals(browser, size_name, size):
     check(save_btn.is_disabled(), f"{size_name} save: an empty meal's item is disabled")
     pg.keyboard.press("Escape")
 
-    # listed in Khám phá
+    # Khám phá counts it in Của bạn, /explore/meals lists it
     go(pg, "/explore")
+    yours = re.sub(r"\s+", " ", pg.locator("section[aria-labelledby=explore-yours]").inner_text())
+    check("Bữa ăn của tôi · 1 bữa" in yours, f"{size_name} explore: Của bạn counts the saved meal ({yours[:100]!r})")
+    go(pg, "/explore/meals")
     section = pg.locator("section[aria-labelledby=explore-saved-meals]")
     body = re.sub(r"\s+", " ", section.inner_text())
     check("Sáng của tôi" in body, f"{size_name} explore: Bữa ăn của tôi lists the saved meal")
@@ -268,7 +272,8 @@ def check_saved_meals(browser, size_name, size):
     check("Sáng của tôi · 3 món vào Bữa tối" in msg, f"{size_name} saved meal tap: one toast for all foods ({msg!r})")
     # Client navigation to Hôm nay keeps the in-memory toast. The three foods must be on Hôm nay before the undo,
     # so this fails if the add never happened (cc2-32: Nhật ký is folded into Hôm nay).
-    pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/app']").first.click()
+    # dispatch_event: the Next dev badge (dev server only) sits over the first nav item at 390 and swallows a pointer click
+    pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/app']").first.dispatch_event("click")
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(400)
     check(home_dinner_items(pg) == 3, f"{size_name} saved meal tap: three foods in Bữa tối on Hôm nay ({home_dinner_items(pg)})")
@@ -278,7 +283,7 @@ def check_saved_meals(browser, size_name, size):
 
     # in the add sheet, with the chosen meal
     go(pg, "/add?meal=lunch")
-    check("Bữa ăn của tôi" in text(pg) and "Sáng của tôi" in text(pg), f"{size_name} add: Bữa ăn của tôi section lists it")
+    check("bữa ăn của tôi" in text(pg).lower() and "Sáng của tôi" in text(pg), f"{size_name} add: Bữa ăn của tôi section lists it")
     pg.locator("button[aria-label^='Thêm Sáng của tôi']:visible").first.click()
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
@@ -289,7 +294,7 @@ def check_saved_meals(browser, size_name, size):
     check(meal_food_count(pg, "Bữa trưa") == 2, f"{size_name} add sheet: one undo removes them")
 
     # rename, then delete with a confirm step
-    go(pg, "/explore")
+    go(pg, "/explore/meals")
     pg.locator("button[aria-label='Tùy chọn Sáng của tôi']:visible").first.click()
     pg.wait_for_timeout(300)
     pg.locator("#saved-meal-name").fill("Sáng nhanh")

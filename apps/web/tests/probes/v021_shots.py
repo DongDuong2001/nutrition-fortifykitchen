@@ -38,7 +38,7 @@ def main():
         pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
         pg.wait_for_timeout(600)
         extras = pg.evaluate("[...document.querySelectorAll('[data-extra]')].map(e => e.innerText.replace(/\\s+/g, ' ').trim())")
-        check(len(extras) == 6 and all(t.endswith("—") for t in extras), f"Level 3: every extra is — when an entry lacks it ({extras})")
+        check(len(extras) == 6 and all(t.endswith("chưa có dữ liệu") for t in extras), f"Level 3: every extra says chưa có dữ liệu when an entry lacks it (— only on the share image) ({extras})")
         pg.screenshot(path=os.path.join(SHOTS, "v021-home-L3-390.png"))
         scroller = pg.locator("aside[aria-label='Vi chất'] > div").first
         scroller.evaluate("el => { el.scrollTop = el.scrollHeight; }")

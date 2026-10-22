@@ -37,7 +37,10 @@ ROUTES = [
     ("/trends/body", "Tổng quan", "tab"),
     ("/foods/new", "Tạo món mới", "pushed"),
 ]
-INK_BAND_PHONE = {"/app", "/trends", "/trends/micros", "/trends/body"}
+INK_BAND_PHONE = {"/app"}
+# V3: Tổng quan has no ink band and no wordmark: a 34 px page title, the sub-tab Segmented and white / ink data cards
+V3_PAGE_TITLE = {"/app", "/explore", "/training", "/foods/new", "/trends", "/trends/micros", "/trends/body", "/settings", "/settings/account", "/settings/profile", "/settings/profile/weight",
+                 "/settings/targets", "/settings/targets/macros", "/settings/language", "/settings/notifications", "/settings/data-sources", "/settings/whats-new", "/settings/delete-account"}
 SHOT_NAMES = {"/app": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
 sys.stdout.reconfigure(encoding="utf-8")
@@ -61,6 +64,8 @@ INK_TOP = """
     let fixed = false;
     for (let p = el; p; p = p.parentElement) if (getComputedStyle(p).position === 'fixed' || p.tagName === 'ASIDE') { fixed = true; break; }
     if (fixed) continue;
+    // V3-SPEC 3.3: an ink DATA CARD (all four corners rounded, e.g. the Hôm nay hero) is not a header band
+    if (parseFloat(cs.borderTopLeftRadius) >= 12 && parseFloat(cs.borderBottomLeftRadius) >= 12) continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0 || r.top > 200 || r.top + window.scrollY > 200) continue;
     out.push([el.tagName, Math.round(r.left), Math.round(r.top), Math.round(r.width)]);
@@ -105,7 +110,7 @@ def main():
 
                 wm = pg.evaluate(WORDMARK)
                 if label == "390":
-                    check(wm == (1 if route in ("/app", "/trends", "/trends/micros", "/trends/body") else 0), f"{where}: wordmark in {wm} header(s) (only on Tổng quan)")
+                    check(wm == (1 if route == "/app" else 0), f"{where}: wordmark in {wm} header(s) (only on Hôm nay)")
                 else:
                     check(wm == 0, f"{where}: no wordmark in a header on desktop ({wm})")
 
@@ -113,7 +118,11 @@ def main():
                 if label == "390":
                     band = [e for e in ink if e[3] >= 380]
                     # IA v2 "Headers and UI unity" (12/10 23:15): the ink header is on every screen at 390
-                    check(len(band) >= 1, f"{where}: ink header present")
+                    if route in V3_PAGE_TITLE or route.startswith("/micros"):
+                        # V3 (v3-micros): Vi chất and its detail have the grey page, the glass Back and an ink data card (358 px), no band
+                        check(not band, f"{where}: V3 header, no ink header band ({band})")
+                    else:
+                        check(len(band) >= 1, f"{where}: ink header present")
                 else:
                     content_w = vp["width"] - 240
                     band = [e for e in ink if e[3] >= content_w * 0.9]

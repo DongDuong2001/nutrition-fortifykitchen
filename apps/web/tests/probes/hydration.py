@@ -64,7 +64,8 @@ def main():
 
             # cc-07: tapping each Micros group chip scrolls only the list, never the header or page
             if path == "/micros" and vp["width"] == 390:
-                chips = page.locator('[data-align-container="micros-page"] button[aria-pressed]')
+                # V3: the group switch is the Khoáng chất | Vitamin segmented control; the sticky chip bar is hidden until the hero has scrolled away
+                chips = page.locator('[data-align-container="micros-page"] button[aria-pressed]:visible')
                 for i in range(chips.count()):
                     chips.nth(i).click()
                     page.wait_for_timeout(400)

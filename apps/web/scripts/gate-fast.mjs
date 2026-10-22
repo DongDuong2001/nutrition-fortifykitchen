@@ -12,6 +12,8 @@ console.log(`gate:fast: ${changed.length} file(s) changed vs origin/main`);
 
 const results = [];
 results.push(await run("typecheck", "npx", ["tsc", "--noEmit"]));
+// DESIGN.md "Enforcement": the design lint (D-TYPE-06, D-COL-07, D-WRT-04, D-A11Y-02)
+results.push(await run("lint:design", "node", ["scripts/lint-design.mjs"]));
 
 const testable = changed.filter((f) => /\.(ts|tsx|js|mjs|jsx|css|json)$/.test(f) && !f.startsWith("tests/"));
 const wholeSuite = changed.some((f) => /^(vitest\.config\.ts|lib\/__tests__\/setup-demo\.ts|package(-lock)?\.json|tsconfig\.json)$/.test(f));

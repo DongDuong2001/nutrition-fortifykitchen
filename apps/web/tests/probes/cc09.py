@@ -16,7 +16,7 @@ SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 BIRTH_ERROR = "Nhập năm sinh từ 1920 đến 2015"  # Dong (main): the range is 1920 to 2015
-NOT_FOUND = "KHÔNG TÌM THẤY TRANG"
+NOT_FOUND = "KHÔNG CÓ TRANG"  # V3 (V3NotFound): the 404 says "Không có trang" (uppercase on screen)
 MENU_HREFS = [
     "/settings/language",
     "/settings/notifications",

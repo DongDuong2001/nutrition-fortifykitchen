@@ -29,16 +29,16 @@ export function getLevelLabel(lvl: NutrientLevel): string {
 
 // The colours are the level tokens in app/globals.css (@theme), so no hex lives here
 export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): string {
-  // One palette on light and on ink (17/10); `tone` still picks the empty track below
+  // One palette on light and on ink (17/10), named by meaning (V3 22/10: gần đủ mint, đạt green); `tone` still picks the empty track below
   switch (lvl) {
     case "thieu":
-      return "var(--color-level-red)";
+      return "var(--color-level-thieu)";
     case "trungbinh":
-      return "var(--color-level-yellow)";
+      return "var(--color-level-trungbinh)";
     case "ganDu":
-      return "var(--color-level-green)";
+      return "var(--color-level-gandu)";
     case "dat":
-      return "var(--color-level-blue)";
+      return "var(--color-level-dat)";
   }
 }
 
@@ -53,8 +53,8 @@ export function homeSegments(pct: number): number {
 }
 
 /**
- * The home bars use the four levels everywhere, today included (Hao, 16/10): red under 50%, yellow 50 to 79%, green
- * 80 to 99%, blue from 100%. An unknown value is an empty bar and never gets a colour (HomeBar).
+ * The home bars use the four levels everywhere, today included (Hao, 16/10): red under 50%, yellow 50 to 79%, mint
+ * 80 to 99%, green from 100% (V3, 22/10). An unknown value is an empty bar and never gets a colour (HomeBar).
  */
 export function homeBarTone(pct: number): NutrientLevel {
   return getLevel(pct);

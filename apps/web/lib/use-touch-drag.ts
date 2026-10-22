@@ -16,6 +16,8 @@ export const TOUCH_MOVE_PX = 8;
 /** The finger this close to the top or bottom edge of the list scrolls it. */
 export const AUTOSCROLL_EDGE_PX = 48;
 const AUTOSCROLL_MAX_PX = 12;
+/** On a phone the floating tab bar (64 px, 24 px up) covers the bottom of the screen: the bottom scroll band sits above it. */
+const PAGE_BOTTOM_RESERVE_PX = 88;
 /** The copy eases back to the row in this long when it is let go off target. */
 const SPRING_BACK_MS = 200;
 
@@ -246,10 +248,13 @@ export function useTouchDrag(props: TouchDragProps) {
     const scrollLoop = () => {
       frame = requestAnimationFrame(scrollLoop);
       if (!scroller) return;
+      // From lg the list card scrolls itself; on a phone (V3) the page does, and the glass tab bar covers the bottom of the screen
+      const inner = getComputedStyle(scroller).overflowY === "auto";
       const box = scroller.getBoundingClientRect();
-      const step = autoScrollDelta(lastY, box.top, box.bottom);
+      const step = inner ? autoScrollDelta(lastY, box.top, box.bottom) : autoScrollDelta(lastY, 0, window.innerHeight - PAGE_BOTTOM_RESERVE_PX);
       if (step === 0) return;
-      scroller.scrollTop += step;
+      if (inner) scroller.scrollTop += step;
+      else window.scrollBy(0, step);
       ctrl.retarget(lastX, lastY);
     };
 

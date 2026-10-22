@@ -163,9 +163,8 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "group": "mineral",
       "consumed": null,
       "targetMin": 8,
-      "targetMax": 10,
       "unit": "mg",
-      "displayValue": "— / 8–10 mg",
+      "displayValue": "— / 8 mg",
       "percentage": null,
       "isCoachRule": true
     },
@@ -174,9 +173,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Zinc",
       "group": "mineral",
       "consumed": null,
-      "targetMin": 12,
+      "targetMin": 11,
       "unit": "mg",
-      "displayValue": "— / 12 mg",
+      "displayValue": "— / 11 mg",
       "percentage": null,
       "isCoachRule": true
     },
@@ -196,9 +195,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Selenium",
       "group": "mineral",
       "consumed": null,
-      "targetMin": 34,
+      "targetMin": 55,
       "unit": "µg",
-      "displayValue": "— / 34 µg",
+      "displayValue": "— / 55 µg",
       "percentage": null,
       "isCoachRule": false
     },
@@ -218,10 +217,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Potassium",
       "group": "mineral",
       "consumed": null,
-      "targetMin": 5200,
-      "targetMax": 6500,
+      "targetMin": 3400,
       "unit": "mg",
-      "displayValue": "— / 5.200–6.500 mg",
+      "displayValue": "— / 3.400 mg",
       "percentage": null,
       "isCoachRule": true
     },
@@ -230,10 +228,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Magnesium",
       "group": "mineral",
       "consumed": null,
-      "targetMin": 600,
-      "targetMax": 750,
+      "targetMin": 400,
       "unit": "mg",
-      "displayValue": "— / 600–750 mg",
+      "displayValue": "— / 400 mg",
       "percentage": null,
       "isCoachRule": true
     },
@@ -242,10 +239,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Calcium",
       "group": "mineral",
       "consumed": null,
-      "targetMin": 1200,
-      "targetMax": 1500,
+      "targetMin": 1000,
       "unit": "mg",
-      "displayValue": "— / 1.200–1.500 mg",
+      "displayValue": "— / 1.000 mg",
       "percentage": null,
       "isCoachRule": true,
       "targetSource": "coach"
@@ -329,9 +325,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Vitamin A",
       "group": "vitamin",
       "consumed": null,
-      "targetMin": 650,
+      "targetMin": 900,
       "unit": "µg",
-      "displayValue": "— / 650 µg",
+      "displayValue": "— / 900 µg",
       "percentage": null,
       "isCoachRule": false,
       "targetSource": "dri"
@@ -365,9 +361,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Vitamin K",
       "group": "vitamin",
       "consumed": null,
-      "targetMin": 150,
+      "targetMin": 120,
       "unit": "µg",
-      "displayValue": "— / 150 µg",
+      "displayValue": "— / 120 µg",
       "percentage": null,
       "isCoachRule": false,
       "targetSource": "dri"
@@ -377,9 +373,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Vitamin E",
       "group": "vitamin",
       "consumed": null,
-      "targetMin": 6.5,
+      "targetMin": 15,
       "unit": "mg",
-      "displayValue": "— / 6,5 mg",
+      "displayValue": "— / 15 mg",
       "percentage": null,
       "isCoachRule": false,
       "targetSource": "dri"
@@ -389,9 +385,9 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       "name": "Vitamin C",
       "group": "vitamin",
       "consumed": null,
-      "targetMin": 100,
+      "targetMin": 90,
       "unit": "mg",
-      "displayValue": "— / 100 mg",
+      "displayValue": "— / 90 mg",
       "percentage": null,
       "isCoachRule": false,
       "targetSource": "dri"
@@ -418,7 +414,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     "vitaminsTotal": 12,
     "mostLacking": [
       "Vitamin D",
-      "Calcium"
+      "Vitamin E"
     ]
   }
 };

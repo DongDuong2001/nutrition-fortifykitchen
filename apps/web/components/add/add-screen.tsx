@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, useCallback, useDeferredValue, useSyncExternalStore, Suspense } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, useDeferredValue, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDiary } from "@/lib/diary-store";
 import { canLog } from "@/lib/diary-edits";
@@ -23,9 +23,11 @@ import { ADD_LIST_LIMITS, FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { FoodSearchField } from "@/components/foods/food-search-field";
-import { foodMeta } from "@/lib/food-meta";
+import { foodServingMeta } from "@/lib/food-meta";
+import { groupMacroLine } from "@/lib/food-group-macro";
+import { IconTile } from "@/components/ui/icon-tile";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
-import { isCategoryFilter } from "@/lib/food-categories";
+import { isCategoryFilter, type FoodFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
 import { dedupeTwins, twinIdsOf } from "@/lib/food-rows";
 import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
@@ -132,6 +134,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
   const phoneSearchInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   // cc-55: /add is a sheet over the tab it was opened from (the real screen, still mounted: an intercepting route). The panel (a
   // dialog on a desktop) slides up from @starting-style, and ✕, the scrim, a drag down or an add slide it away before the route goes.
   const panelRef = useRef<HTMLDivElement>(null);
@@ -159,6 +162,20 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   useEffect(() => {
     if (isDesktop) return;
     return lockBodyScroll();
+  }, [isDesktop]);
+
+  // Phone: the glass header floats over the list (the list scrolls under it), so the list starts below the header's own height
+  // (--add-header-h on the panel: the title's subtitle wraps to a second line on a narrow phone)
+  useLayoutEffect(() => {
+    if (isDesktop) return;
+    const panel = panelRef.current;
+    const header = headerRef.current;
+    if (!panel || !header) return;
+    const measure = () => panel.style.setProperty("--add-header-h", `${header.offsetHeight}px`);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    return () => observer.disconnect();
   }, [isDesktop]);
 
   // Phone: the panel's bottom edge rides above the on-screen keyboard (--add-keyboard, read by `bottom` of the panel) and its top stays at
@@ -661,8 +678,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
-  // Meta line for a food row in the list
-  const getFoodMeta = foodMeta;
+  // Meta line for a food row in the list (V3: kcal / serving; the group's macro is the row's third line)
+  const getFoodMeta = foodServingMeta;
+  // The filter chips with their 20 px food-group tile (the chip ids are the tile keys)
+  const chipItems = useMemo(() => filterItems.map((item) => ({ ...item, icon: <IconTile k={item.id as FoodFilter} size={20} /> })), [filterItems]);
 
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
@@ -704,6 +723,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       onOpenRecent={(r) => pickFood(r.food, { label: r.label, grams: r.grams })}
       onAddSavedMeal={addSavedMealToMeal}
       onQuickKcal={() => setQuickOpen(true)}
+      showCarousels={ready && showShortcuts}
+      showQuick={ready && filter === "all"}
     />
   );
 
@@ -745,6 +766,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       <>
         <div
           ref={desktopWrapRef}
+          data-backdrop
           onClick={() => handleClose()}
           className="fixed inset-0 z-sheet flex items-center justify-center p-4"
         >
@@ -761,8 +783,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
             {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
             <h1 className="sr-only">Thêm món</h1>
             {/* Dialog Header */}
-            <header className="flex items-start justify-between gap-4">
-              <div className="flex flex-col items-start">
+            <header className="flex items-start gap-3">
+              {/* Close on the leading side (DESIGN.md: the same place on every sheet) */}
+              <IconButton onClick={() => handleClose()} label="Đóng" tone="surface" className="shrink-0 text-text hover:bg-divider">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </IconButton>
+              <div className="flex min-w-0 flex-col items-start">
                 <button
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
@@ -780,30 +808,18 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   Tự chọn theo giờ trong ngày · bấm để đổi bữa
                 </div>
               </div>
-
-              <div className="flex shrink-0 items-center gap-2">
-                <IconButton
-                  onClick={() => handleClose()}
-                  label="Đóng"
-                  tone="surface" className="text-text hover:bg-divider"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </IconButton>
-              </div>
             </header>
 
             {/* Two Pane Layout */}
             <div className="flex gap-6 items-start">
               {/* Left Pane: Search & Results */}
               <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
-                <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} />
+                <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} tone="sheet" />
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-                <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
+                <ChipGroup scroll items={chipItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
-                <Expand open={ready && showShortcuts}>{shortcuts}</Expand>
+                {shortcuts}
 
                 {/* Results: grouped or flat */}
                 {catalogPending && list.foods.length > 0 && <CatalogNote />}
@@ -812,6 +828,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
                   <FoodList
                     dataTour="add-results"
+                    variant="add"
+                    getMacro={groupMacroLine}
                     limits={ADD_LIST_LIMITS}
                     scrollRef={desktopListRef}
                     list={list}
@@ -890,96 +908,102 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          className="m-sheet m-quick m-vt-sheet fixed inset-x-0 bottom-[var(--add-keyboard,0px)] top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
+          className="m-sheet m-quick m-vt-sheet fixed inset-x-2 bottom-[var(--add-keyboard,max(8px,env(safe-area-inset-bottom)))] top-[8dvh] z-nav flex flex-col overflow-hidden rounded-sheet bg-page shadow-sheet"
         >
-          {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
-          <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
-            {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
+          <div className="relative min-h-0 flex-1">
+            {/* One scroll region: carousels, the food list and the create button (the last item stays reachable). It runs under the
+                glass header, so it starts below the header's own height. */}
             <div
-              aria-hidden="true"
-              data-sheet-handle
-              data-sheet-drag
-              {...panelDrag.handlers}
-              style={{ touchAction: "none" }}
-              className="-mx-4 -mt-3 -mb-2 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch"
+              ref={phoneScrollRef}
+              data-add-scroll
+              className="absolute inset-0 flex flex-col gap-4 overflow-y-auto overscroll-contain px-4 pt-[calc(var(--add-header-h,12rem)+1rem)] pb-8"
             >
-              <div className="h-1 w-10 rounded-full bg-grabber" />
-            </div>
-            {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
-            <h1 className="sr-only">Thêm món</h1>
+              {shortcuts}
 
-            <div data-sheet-drag {...panelDrag.handlers} style={{ touchAction: "none" }} className="flex items-start justify-between gap-2">
-              <div className="flex flex-col items-start">
+              {catalogPending && list.foods.length > 0 && <CatalogNote />}
+              {ready && (
+              <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
+                <FoodList
+                  dataTour="add-results"
+                  variant="add"
+                  getMacro={groupMacroLine}
+                  limits={ADD_LIST_LIMITS}
+                  list={list}
+                  {...listPick}
+                  getMeta={getFoodMeta}
+                  categoryName={categoryName}
+                  showCategory={!isCategoryFilter(listFilter)}
+                  isFavourite={isFavouriteFood}
+                  showSourceTag={query.trim() !== ""}
+                  empty={emptyState}
+                  footer={createFoodLink}
+                />
+              </SwitchGlide>
+              )}
+            </div>
+
+            {/* Pinned glass header (V3-SPEC §4): grabber, Close (44 px circle, plain fill, leading) with the meal switcher centred,
+                the search field, the filter chips. Navigation layer only: the list scrolls under it. */}
+            <div ref={headerRef} className="glass-bar absolute inset-x-0 top-0 z-sticky flex flex-col shadow-glass">
+              {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
+              <div
+                aria-hidden="true"
+                data-sheet-handle
+                data-sheet-drag
+                {...panelDrag.handlers}
+                style={{ touchAction: "none" }}
+                className="flex h-5 shrink-0 cursor-grab items-center justify-center"
+              >
+                <div className="h-[5px] w-9 rounded-full bg-grabber" />
+              </div>
+              {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
+              <h1 className="sr-only">Thêm món</h1>
+
+              <div data-sheet-drag {...panelDrag.handlers} style={{ touchAction: "none" }} className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-3 px-4">
+                <button
+                  type="button"
+                  onClick={() => handleClose()}
+                  aria-label="Đóng"
+                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-fill p-0 text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
                 <button
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
                   aria-label="Đổi bữa"
-                  className="-ml-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
+                  className="flex min-h-11 cursor-pointer flex-col items-center justify-center gap-0.5 border-0 bg-transparent p-0 text-center text-text active:scale-[0.98] transition-press"
                 >
-                  <span>
-                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
+                  <span className="text-body-lg font-normal">
+                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText} <span aria-hidden="true">⌄</span>
                   </span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+                  <span className="text-xs font-normal text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</span>
                 </button>
-                <div className="text-xs font-normal text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
+                <span aria-hidden="true" />
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
-                <IconButton
-                  onClick={() => handleClose()}
-                  label="Đóng"
-                  tone="surface" className="text-text"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </IconButton>
+              <div className="px-4 pt-2">
+                <FoodSearchField value={query} onChange={setQuery} inputRef={phoneSearchInputRef} className="shrink-0" tone="sheet" />
+              </div>
+
+              {/* Filter row: Tất cả, then Đồ ăn của Minh Hào when there is one, Yêu thích, then the categories with foods */}
+              <div className="px-4 py-3">
+                <ChipGroup scroll sheet items={chipItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
               </div>
             </div>
-
-            <FoodSearchField value={query} onChange={setQuery} inputRef={phoneSearchInputRef} className="shrink-0" />
-
-            {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-            <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
-          </div>
-
-          {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}
-          <div ref={phoneScrollRef} data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
-            <Expand open={ready && showShortcuts} wrapClassName="flex-none">
-              {shortcuts}
-            </Expand>
-
-            {catalogPending && list.foods.length > 0 && <CatalogNote />}
-            {ready && (
-            <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
-              <FoodList
-                dataTour="add-results"
-                limits={ADD_LIST_LIMITS}
-                list={list}
-                {...listPick}
-                getMeta={getFoodMeta}
-                categoryName={categoryName}
-                showCategory={!isCategoryFilter(listFilter)}
-                isFavourite={isFavouriteFood}
-                showSourceTag={query.trim() !== ""}
-                empty={emptyState}
-                footer={createFoodLink}
-              />
-            </SwitchGlide>
-            )}
           </div>
 
           {/* The tray bar, under the list while the tray holds a food. cc-64 (A1): it opens and closes with Expand, so the
               list above eases instead of jumping */}
           <div
             className={`relative shrink-0 ${
-              tray.length > 0 ? "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-card before:to-transparent" : ""
+              tray.length > 0 ? "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-page before:to-transparent" : ""
             }`}
           >
-            <Expand open={tray.length > 0} className="px-4 pb-2">
+            <Expand open={tray.length > 0} className="px-4 pb-4">
               <TrayBar
                 totals={trayTotalsNow}
                 mealName={mealNameVi}
@@ -994,13 +1018,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       </>
       )}
 
-      {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
+      {/* The portion sheet (phone): V3, the page grey behind the panel's white cards (V3Portion) */}
       <Sheet
         open={selectedFood !== null && !isDesktop}
         onClose={closePortionSheet}
         labelledBy="portion-sheet-title"
         stacked
         quick
+        className="bg-page!"
       >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">

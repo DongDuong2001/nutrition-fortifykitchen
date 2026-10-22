@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-21c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
+ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
 ITEMS_2010B = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
@@ -295,7 +295,8 @@ def home_tour(browser):
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    steps = [("Một con số", ["home-hero"]), ("Vi chất theo DRI", ["nutrient-column", "home-hero"]), ("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"])]
+    # feat/v3-redesign extends 21c with three steps first (a meal's +, the Ngày tập pill, the Khám phá tab): 2 + 5 = 7 steps
+    steps = [("Một con số", ["home-hero"]), ("Vi chất theo DRI", ["nutrient-column", "home-hero"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
@@ -317,7 +318,8 @@ def history(browser):
     row.click()
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
-    text = pg.locator("main").inner_text()
+    # V3: the release headings are Saira section headers, uppercase on screen
+    text = re.sub(r"CẬP NHẬT (\d\d/\d\d)", r"Cập nhật \1", pg.locator("main").inner_text())
     check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS_1810F + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
     check(text.count("Cập nhật 19/10") == 2 and all(t in text for t in ITEMS_1910B + ITEMS_1910A), "…and the two 19/10 releases (19b and 19a)")
     check(text.count("Cập nhật 20/10") == 2 and all(t in text for t in ITEMS_2010B + ITEMS_2010A), "…and the two 20/10 releases (20b and 20a)")

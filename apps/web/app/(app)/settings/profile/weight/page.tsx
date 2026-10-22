@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { AppShell } from "@/components/ui/app-shell";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
+import { SectionHeader } from "@/components/ui/section-title";
+import { nutrientDot } from "@/lib/nutrient-colors";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
 import { nutrientName } from "@/lib/nutrients";
@@ -58,14 +60,15 @@ export default function WeightPage() {
 
   const form = (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-      <Card className="flex flex-col items-center gap-3">
-        <FormRow label="Cân nặng hôm nay" htmlFor="weight-input" error={error} className="items-center">
-          <div className="flex items-center gap-3">
+      <Card as="section" aria-label="Cân nặng hôm nay" className="flex flex-col items-center gap-3">
+        <FormRow label="Cân nặng hôm nay" htmlFor="weight-input" error={error} className="items-center gap-3">
+          {/* Wraps at large text sizes (D-LAY-04) instead of pushing the page sideways */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               aria-label="Giảm 0,1 kg"
               onClick={() => step(-STEP_KG)}
-              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97] transition-press"
+              className="h-14 w-14 shrink-0 cursor-pointer rounded-full border-0 bg-surface text-callout font-bold tabular-nums text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
             >
               −0,1
             </button>
@@ -78,8 +81,8 @@ export default function WeightPage() {
                 disabled={!hydrated}
                 onChange={(e) => change(e.target.value)}
                 aria-invalid={error ? true : undefined}
-                className={`h-16 w-[140px] rounded-xl border-2 bg-surface text-center font-display text-[2.75rem] font-black italic tabular-nums text-text outline-none focus:border-cobalt focus:ring-2 focus:ring-cobalt focus:ring-offset-2 ${
-                  error ? "border-destructive" : "border-cobalt"
+                className={`h-16 w-32 rounded-[14px] border-0 bg-surface text-center font-display text-[2.75rem] font-black italic tabular-nums text-text outline-none focus:ring-2 focus:ring-cobalt focus:ring-offset-2 ${
+                  error ? "shadow-[inset_0_0_0_2px_var(--color-destructive)]" : "shadow-[inset_0_0_0_2px_var(--color-cobalt)]"
                 }`}
               />
               <span className="text-base font-semibold text-secondary">kg</span>
@@ -88,29 +91,35 @@ export default function WeightPage() {
               type="button"
               aria-label="Tăng 0,1 kg"
               onClick={() => step(STEP_KG)}
-              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97] transition-press"
+              className="h-14 w-14 shrink-0 cursor-pointer rounded-full border-0 bg-surface text-callout font-bold tabular-nums text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
             >
               +0,1
             </button>
           </div>
+          <p className="m-0 text-center text-xs text-secondary">Dùng để tính kcal, đạm và chất béo mỗi ngày.</p>
         </FormRow>
       </Card>
 
-      <Card className="flex flex-col gap-2">
-        <h2 className="m-0 text-callout font-bold">Mục tiêu sẽ cập nhật</h2>
+      <Card as="section" aria-label="Mục tiêu sẽ cập nhật" className="flex flex-col gap-2">
+        <SectionHeader>Mục tiêu sẽ cập nhật</SectionHeader>
         {preview ? (
           <>
-            <TargetLine label="Năng lượng" value={targetRangeText(preview.calories, "kcal")} />
-            <TargetLine label="Đạm" value={targetRangeText(preview.protein, "g")} />
-            <TargetLine label={nutrientName("potassium")} value={targetRangeText(preview.potassium, "mg")} />
+            <TargetLine label="Năng lượng" value={targetRangeText(preview.calories, "kcal")} dot="var(--color-macro-kcal)" color="var(--color-macro-kcal-text)" />
+            <TargetLine label="Đạm" value={targetRangeText(preview.protein, "g")} dot="var(--color-macro-dam)" color="var(--color-macro-dam-text)" />
+            <TargetLine
+              label={nutrientName("potassium")}
+              value={targetRangeText(preview.potassium, "mg")}
+              dot={nutrientDot("potassium")}
+              color={nutrientDot("potassium")}
+            />
           </>
         ) : (
-          <p className="m-0 text-sm text-secondary">Nhập cân nặng để xem mục tiêu</p>
+          <p className="m-0 text-callout text-secondary">Nhập cân nặng để xem mục tiêu</p>
         )}
         <p className="m-0 text-cap text-secondary">Tính lại theo cân nặng mới.</p>
       </Card>
 
-      <PillButton type="submit" disabled={!hydrated}>
+      <PillButton type="submit" disabled={!hydrated} className="text-body-lg!">
         Lưu
       </PillButton>
     </form>
@@ -127,11 +136,16 @@ export default function WeightPage() {
   );
 }
 
-function TargetLine({ label, value }: { label: string; value: string }) {
+function TargetLine({ label, value, dot, color }: { label: string; value: string; dot: string; color: string }) {
   return (
-    <div data-align-group="weight-row" className="flex items-baseline justify-between gap-3 text-sm">
-      <span className="text-secondary">{label}</span>
-      <span className="text-right font-semibold tabular-nums">{value}</span>
+    <div data-align-group="weight-row" className="flex min-h-7 items-baseline justify-between gap-3 text-callout">
+      <span className="text-secondary">
+        <span aria-hidden="true" className="mr-2 inline-block h-2 w-2 rounded-full align-[1px]" style={{ background: dot }} />
+        {label}
+      </span>
+      <span className="text-right font-semibold tabular-nums" style={{ color }}>
+        {value}
+      </span>
     </div>
   );
 }

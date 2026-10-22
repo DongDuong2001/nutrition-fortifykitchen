@@ -51,7 +51,7 @@ SIZES_JS = """() => {
 }"""
 
 
-# Line boxes of the smallest element whose text starts with each label (the wordmark; the meal pill with its kcal)
+# Line boxes of the smallest element whose text starts with each label (the wordmark; the meal header with its kcal number)
 LINES_JS = """() => {
   const lines = (el) => {
     const r = document.createRange();
@@ -59,7 +59,7 @@ LINES_JS = """() => {
     return new Set([...r.getClientRects()].filter(b => b.width > 0).map(b => Math.round(b.top + b.height / 2))).size;
   };
   const out = {};
-  for (const [label, needs] of [['H1T MICRO', ''], ['TRƯỚC TẬP', 'KCAL']]) {
+  for (const [label, needs] of [['H1T MICRO', ''], ['TRƯỚC TẬP', '']]) {
     const hits = [...document.querySelectorAll('body *')].filter(e => {
       const t = e.textContent.replace(/\\s+/g, ' ').trim().toUpperCase();
       return e.getBoundingClientRect().width > 0 && t.startsWith(label) && t.includes(needs) && t.length < 40;
@@ -99,7 +99,7 @@ def link_page(browser):
         check(s["avatar"] == e["avatar"], f"@{w}: avatar {s['avatar']}")
         check(s["h1"] == e["h1"], f"@{w}: name {s['h1']} px")
         check(s["tagline"] == e["tagline"], f"@{w}: tagline {s['tagline']} px")
-        check(s["taglineColor"] == "rgb(74, 73, 69)", f"@{w}: tagline colour {s['taglineColor']}")
+        check(s["taglineColor"] == "rgb(72, 72, 74)", f"@{w}: tagline colour {s['taglineColor']}")
         check(s["rows"] == [e["row"], e["row"]] if w == 1440 else len(s["rows"]) == 2 and all(h >= e["row"] for h in s["rows"]), f"@{w}: two rows of {e['row']} px, divider included ({s['rows']})")
         check(all(sw >= 44 and sh >= 44 for _, sw, sh in s["socials"]) and [n for n, _, _ in s["socials"]] == ["Facebook", "YouTube", "TikTok"], f"@{w}: social links 44 px ({s['socials']})")
         check(s["svg"] == 1, f"@{w}: one background drawing shown ({s['svg']})")
@@ -168,7 +168,7 @@ def chooser(browser):
     pg.evaluate("document.fonts.ready")
     lines = pg.evaluate(LINES_JS)
     check(lines.get("H1T MICRO") == 1, f"Hôm nay 390: the H1T MICRO wordmark on one line ({lines})")
-    check(lines.get("TRƯỚC TẬP") == 1, f"Hôm nay 390: the Trước tập pill (name and kcal) on one line ({lines})")
+    check(lines.get("TRƯỚC TẬP") == 1, f"Hôm nay 390: the Trước tập header (name and kcal number) on one line ({lines})")
     loaded = pg.evaluate("[...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family))]")
     check(any("Manrope" in f for f in loaded) and any("Saira" in f for f in loaded), f"Hôm nay 390: Manrope and Saira Condensed loaded ({loaded})")
     pg.screenshot(path=str(SHOTS / "cc-45-app-390.png"))

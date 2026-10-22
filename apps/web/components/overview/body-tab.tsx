@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from "react";
 import { useOverview } from "@/components/overview/overview-frame";
 import { HeroCard, HeroNumber } from "@/components/overview/parts/hero-card";
-import { SectionTitle } from "@/components/ui/section-title";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber, formatRange, formatSigned } from "@/lib/format";
 import { weekdayShort, weightDayNote } from "@/lib/overview-board";
@@ -16,6 +15,23 @@ const CHART_HEIGHT = "h-[176px]";
 const PAD = 6; // percent of the chart width kept free at both ends
 const dm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 const kg = (v: number) => formatNumber(v, { decimals: 1 });
+
+/** The 16 px bold heading of a white card on the trends screens (V3 design files). */
+function CardTitle({ id, className = "", children }: { id: string; className?: string; children: React.ReactNode }) {
+  return (
+    <h2 id={id} className={`m-0 text-base font-bold leading-snug ${className}`}>
+      {children}
+    </h2>
+  );
+}
+
+function StepGlyph({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={dir === "left" ? "m15 5-7 7 7 7" : "m9 6 6 6-6 6"} />
+    </svg>
+  );
+}
 
 /**
  * The weight line of the period: one dot per weigh-in placed by date, joined by a line. Each dot is a button
@@ -49,6 +65,12 @@ function WeightLine({
             <polyline points={line} fill="none" className="stroke-cobalt" strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
           )}
         </svg>
+        <span aria-hidden="true" className="absolute left-0 top-0 text-xs tabular-nums text-secondary">
+          {kg(high)}
+        </span>
+        <span aria-hidden="true" className="absolute bottom-1 left-0 text-xs tabular-nums text-secondary">
+          {kg(low)}
+        </span>
         {points.map((p, i) => {
           const isSel = i === selected;
           return (
@@ -64,7 +86,7 @@ function WeightLine({
               <span
                 aria-hidden="true"
                 className={`absolute left-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                  isSel ? "h-4 w-4 bg-cobalt ring-4 ring-sky/50" : "h-2 w-2 bg-cobalt"
+                  isSel ? "h-4 w-4 bg-cobalt ring-4 ring-cobalt/25" : "h-2 w-2 bg-cobalt"
                 }`}
                 style={{ top: `${y(p.kg)}%` }}
               />
@@ -142,8 +164,15 @@ export function BodyTab() {
         </HeroCard>
 
         <Card as="section" aria-labelledby="bd-line" className="flex flex-col gap-3">
-          <div className="flex min-h-11 items-center justify-between gap-3">
-            <SectionTitle id="bd-line">Cân nặng {period.length} ngày</SectionTitle>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-1">
+              <CardTitle id="bd-line">Cân nặng {period.length} ngày</CardTitle>
+              {hasPoints && (
+                <p className="m-0 text-cap leading-snug text-secondary">
+                  Thấp nhất {kg(Math.min(...weight.points.map((p) => p.kg)))} kg, cao nhất {kg(Math.max(...weight.points.map((p) => p.kg)))} kg.
+                </p>
+              )}
+            </div>
             {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-surface px-3 text-cap font-bold">Dữ liệu mẫu</span>}
           </div>
           {hasPoints && point ? (
@@ -161,15 +190,15 @@ export function BodyTab() {
                   onClick={() => setPickedDate(weight.points[selected - 1].date)}
                   tone="card" className="text-text disabled:cursor-default disabled:opacity-45"
                 >
-                  <span aria-hidden="true">‹</span>
+                  <StepGlyph dir="left" />
                 </IconButton>
-                <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
+                <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl bg-surface p-3">
                   <span className="whitespace-nowrap text-cap font-semibold text-secondary">
                     {weekdayShort(point.date)} {dm(point.date)}
                   </span>
-                  <span className="text-right">
-                    <span className="font-display text-2xl font-extrabold tabular-nums tracking-display">{kg(point.kg)} kg</span>
-                    {pointNote && <span className="ml-2 text-xs font-bold text-secondary">{pointNote}</span>}
+                  <span className="flex flex-col gap-1 text-right">
+                    <span className="font-display text-2xl font-extrabold leading-none tabular-nums tracking-display">{kg(point.kg)} kg</span>
+                    {pointNote && <span className="text-xs font-bold text-secondary">{pointNote}</span>}
                   </span>
                 </p>
                 <IconButton
@@ -178,7 +207,7 @@ export function BodyTab() {
                   onClick={() => setPickedDate(weight.points[selected + 1].date)}
                   tone="card" className="text-text disabled:cursor-default disabled:opacity-45"
                 >
-                  <span aria-hidden="true">›</span>
+                  <StepGlyph dir="right" />
                 </IconButton>
               </div>
             </>
@@ -190,7 +219,7 @@ export function BodyTab() {
 
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
         <section aria-labelledby="bd-facts" className="flex flex-col rounded-card border border-transparent shadow-ring lg:shadow-card bg-card px-4 text-text">
-          <SectionTitle id="bd-facts" className="py-3">Trong kỳ này</SectionTitle>
+          <CardTitle id="bd-facts" className="py-3">Trong kỳ này</CardTitle>
           <dl className="m-0 flex flex-col">
             <div data-align-group="overview-stats" className="flex min-h-14 items-center justify-between gap-3 border-t border-divider">
               <dt className="text-callout">Số lần cân</dt>
@@ -214,7 +243,7 @@ export function BodyTab() {
         </section>
 
         <Card as="section" aria-labelledby="bd-shift" className="flex flex-col gap-3">
-          <SectionTitle id="bd-shift">Mục tiêu theo cân nặng</SectionTitle>
+          <CardTitle id="bd-shift">Mục tiêu theo cân nặng</CardTitle>
           {shift === null ? (
             <p className="m-0 text-cap leading-snug text-secondary">Cần ít nhất hai lần cân trong kỳ để so sánh mục tiêu.</p>
           ) : (

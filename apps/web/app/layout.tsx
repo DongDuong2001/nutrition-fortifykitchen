@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Saira_Condensed } from "next/font/google";
+import { Manrope, Saira, Saira_Condensed } from "next/font/google";
 import "./globals.css";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { UnsavedWorkWatch } from "@/components/unsaved-work-watch";
 import { RouteTransition } from "@/components/route-transition";
 import { TouchActive } from "@/components/touch-active";
+import { KeyboardGuard } from "@/components/keyboard-guard";
 import { Vitals } from "@/components/vitals";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
@@ -16,6 +17,17 @@ const manrope = Manrope({
   display: "swap",
 });
 
+// V3-SPEC §2: Saira italic 800/900 for headers and key numbers. Only the italic face is loaded, so every font-display
+// text is italic without a class on each element.
+const saira = Saira({
+  subsets: ["vietnamese", "latin"],
+  weight: ["800", "900"],
+  style: ["italic"],
+  variable: "--font-saira-face",
+  display: "swap",
+});
+
+// V3 keeps Saira Condensed for the tight numbers: the hero's macro grams and %, the meal kcal (font-condensed)
 const sairaCondensed = Saira_Condensed({
   subsets: ["vietnamese", "latin"],
   weight: ["800", "900"],
@@ -53,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
+    <html lang="vi" className={`${manrope.variable} ${saira.variable} ${sairaCondensed.variable}`}>
       <head>
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />
@@ -63,6 +75,7 @@ export default function RootLayout({
         <PwaRegister />
         <UnsavedWorkWatch />
         <TouchActive />
+        <KeyboardGuard />
         <Vitals />
         <RouteTransition>{children}</RouteTransition>
       </body>

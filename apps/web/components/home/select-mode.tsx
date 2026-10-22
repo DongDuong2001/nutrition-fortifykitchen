@@ -6,7 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { TARGET_MEALS, actionBarLabel, selectTitle, type CopyTarget } from "@/lib/multi-select";
 
 const HEAD_BUTTON =
-  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-callout font-bold text-on-dark hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:text-cobalt lg:hover:text-cobalt";
+  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-callout font-bold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
 
 /** The header of select mode: Hủy · "Đã chọn N" with the date · Chọn hết. It takes the place of the day header. */
 export function SelectHeader({
@@ -23,7 +23,7 @@ export function SelectHeader({
   onToggleAll: () => void;
 }) {
   return (
-    <header className="w-full flex-none select-none rounded-b-sheet bg-ink text-on-dark lg:rounded-none lg:bg-page lg:text-text">
+    <header className="w-full flex-none select-none bg-page text-text">
       <div className="mx-auto flex min-h-[52px] w-full max-w-[560px] items-center gap-2 px-3 pt-[max(4px,env(safe-area-inset-top))] pb-1 lg:max-w-[1100px] lg:px-8 lg:pt-8">
         <button type="button" onClick={onCancel} className={`${HEAD_BUTTON} -ml-2`}>
           Hủy
@@ -32,7 +32,7 @@ export function SelectHeader({
           <h1 aria-live="polite" className="m-0 text-callout font-bold leading-tight">
             {selectTitle(count)}
           </h1>
-          <p className="m-0 text-xs leading-snug text-muted-subtitle lg:text-secondary">{dateLabel}</p>
+          <p className="m-0 text-xs leading-snug text-secondary">{dateLabel}</p>
         </div>
         <button type="button" onClick={onToggleAll} className={`${HEAD_BUTTON} -mr-2`}>
           {allSelected ? "Bỏ chọn hết" : "Chọn hết"}

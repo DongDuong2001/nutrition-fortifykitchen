@@ -1,7 +1,7 @@
 """cc2-unify: one header and one UI system on every route, at 390 and 1280.
 
-Phone: every route's header has the same background (ink), bottom radius (20), title font (Saira) and size (24),
-side padding (16) and title row height; one h1; back chevron is at least 44 px where there is one.
+Phone (V3): a header on the grey page (no ink slab) with the Saira title (34 px on a tab root and on Thiết lập xong, 28 px on
+a pushed screen); one h1; the back chevron is at least 44 px where there is one.
 Desktop: no full-width ink element at the top of the window, h1 is 32 px, the header starts at the same top offset.
 Everywhere: no all-caps text outside the h1, Saira display text and Hôm nay's ink pills (cc-44); no horizontal scroll.
 Screenshots: .screenshots/cc2-unify-{overview,diary,explore,settings,micros,food}-{390,1280}.png
@@ -24,6 +24,13 @@ ROUTES = [
     "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account",
     "/paywall", "/install", "/setup/profile", "/setup/goal", "/setup/done", "/this-page-does-not-exist",
 ]
+# V3 (Cài đặt group): no ink slab; the screens ported so far
+V3_SETTINGS = {"/settings", "/settings/profile", "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account"}
+# V3 push screens and status screens (Thêm món ăn detail, Tạo món mới, Sửa món, Gói, Cài đặt app, Thiết lập): the grey page, no ink slab
+V3_PUSH = {"/micros", "/micros/calcium", "/training", "/foods/food-cha-la", "/foods/new", "/entry/item-1", "/paywall", "/install"}
+V3_SETUP = {"/setup/profile", "/setup/goal", "/setup/done"}
+# V3 status screen (§3.6): the 404 has a centred title, no header bar
+STATUS_NO_HEADER = {"/this-page-does-not-exist"}
 # Setup keeps its own desktop card layout (no header at desktop), see IA-v2 Decided 12/10
 NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal", "/setup/done"}
 SHOT_NAMES = {"/app": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}
@@ -94,21 +101,47 @@ def main():
                 desktop = size["width"] >= 1024
                 if desktop and route in NO_HEADER_DESKTOP:
                     pass
+                elif route in STATUS_NO_HEADER:
+                    check(h is None and d["h1Count"] == 1, f"{where}: V3 status screen, one h1 and no header bar")
                 else:
                     check(h is not None, f"{where}: has a header")
                 if h:
                     check(d["h1Count"] == 1, f"{where}: exactly one visible h1 (got {d['h1Count']})")
                     check("saira" in (h["font"] or "").lower(), f"{where}: title font is Saira ({h['font']})")
                     if desktop:
-                        check(h["size"] == "32px" or not h["h1Visible"], f"{where}: desktop title 32px (got {h['size']})")
+                        # V3: Gọn 32 px; the Thiết lập done screen's title is the 34 px large title
+                        check(h["size"] == ("34px" if route == "/setup/done" else "32px") or not h["h1Visible"], f"{where}: desktop title size (got {h['size']})")
                         check(h["bg"] != "rgb(17, 19, 23)" or h["width"] < 1000, f"{where}: no full-width ink header on desktop")
+                    elif route in ("/app", "/explore"):
+                        # V3 tab roots on the grey page: Hôm nay a 24 px title beside the wordmark, Khám phá the 34 px large title; 16 px sides
+                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["size"] == ("24px" if route == "/app" else "34px"), f"{where}: V3 title size ({h['size']})")
+                        check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
+                        check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
+                    elif route in V3_PUSH or route in V3_SETUP:
+                        # V3: the grey page (setup: the page shows through), the glass Back and a 28 px title; Thiết lập xong a 34 px large title
+                        check(h["bg"] in ("rgb(242, 242, 247)", "rgba(0, 0, 0, 0)"), f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["radius"] == "0px", f"{where}: no rounded ink slab ({h['radius']})")
+                        check(h["size"] == ("34px" if route == "/setup/done" else "28px"), f"{where}: V3 title size ({h['size']})")
+                        check(h["top"] == (16 if route == "/setup/done" else 0), f"{where}: header at the top ({h['top']})")
+                    elif route in V3_SETTINGS:
+                        # V3 Cài đặt: the tab root has a 34 px page title, its push screens the glass Back and a 28 px title, all on the grey page
+                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["size"] == ("34px" if route == "/settings" else "28px"), f"{where}: V3 title size ({h['size']})")
+                        check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
+                    elif route.startswith("/trends"):
+                        # V3: Tổng quan is a 34 px page title on the grey page (no ink slab)
+                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["size"] == "34px", f"{where}: V3 large title 34px ({h['size']})")
+                        check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
+                        check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
                     else:
                         check(h["bg"] == "rgb(17, 19, 23)", f"{where}: phone header is ink ({h['bg']})")
                         check(h["radius"] == "20px", f"{where}: bottom radius 20 ({h['radius']})")
                         check(h["size"] == "24px", f"{where}: phone title 24px ({h['size']})")
                         check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
                         check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
-                    if h["backW"] is not None:
+                    if h["backW"] is not None and not (desktop and route in NO_HEADER_DESKTOP):
                         check(h["backW"] >= 44 and h["backH"] >= 44, f"{where}: back is 44 px ({h['backW']}x{h['backH']})")
                 if desktop:
                     check(not d["inkBands"], f"{where}: no ink band at the top ({d['inkBands']})")

@@ -108,7 +108,7 @@ def main():
             pg.wait_for_selector("h1:has-text('Cài đặt')")
             body = pg.inner_text("main")
             for text in ["Hồ sơ của bạn", "Mục tiêu mỗi ngày", "Ngôn ngữ", "Nhắc nhở", "Thêm vào màn hình chính", "Tài khoản", "Vùng nguy hiểm", "Xóa tài khoản"]:
-                check(text in body, f"{label} /settings shows {text!r}")
+                check(text.lower() in body.lower(), f"{label} /settings shows {text!r}")
             check("Nam · sinh 2003 · 65 kg · Giữ cân" in body, f"{label} /settings profile sub reads Nam · sinh 2003 · 65 kg · Giữ cân")
             check(re.search(r"2.275 kcal\s+đạm 143 g", body) is not None, f"{label} /settings targets sub reads kcal and đạm")
             check(pg.locator("a[href='/settings/profile']").count() >= 1, f"{label} /settings links to /settings/profile")

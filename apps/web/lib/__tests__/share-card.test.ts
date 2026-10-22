@@ -11,6 +11,7 @@ import {
   shareImageSize,
   SHARE_MAX_HEIGHT,
   shareKey,
+  shareMealDot,
   shareMeals,
   shareName,
   shareFontsEmbedded,
@@ -138,6 +139,16 @@ describe("share model", () => {
   });
 });
 
+describe("share meal dots", () => {
+  it("are the deep shade of the meal's colour, one token per slot", () => {
+    expect(shareMealDot("breakfast")).toBe("var(--color-deep-orange)");
+    expect(shareMealDot("lunch")).toBe("var(--color-deep-yellow)");
+    expect(shareMealDot("pre_workout")).toBe("var(--color-deep-pink)");
+    expect(shareMealDot("dinner")).toBe("var(--color-deep-indigo)");
+    expect(shareMealDot("snack")).toBe("var(--color-deep-mint)");
+  });
+});
+
 describe("share colour key", () => {
   it("is the four levels with their thresholds, today and past days alike", () => {
     const key = shareKey();
@@ -198,7 +209,7 @@ describe("keepInShareImage", () => {
 describe("shareFontsEmbedded", () => {
   const face = (family: string, src: string) => `@font-face { font-family: ${family}; font-weight: 400; src: url(${src}) format("woff2"); }`;
   const manrope = face("Manrope", '"data:font/woff2;base64,d09GMgABAAAA"');
-  const saira = face("'Saira Condensed'", "data:application/font-woff;base64,d09GMgABAAAA");
+  const saira = face("'Saira'", "data:application/font-woff;base64,d09GMgABAAAA");
 
   it("is true when both families are there and every face is inlined", () => {
     expect(shareFontsEmbedded(manrope + saira)).toBe(true);

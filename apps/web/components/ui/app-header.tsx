@@ -12,7 +12,7 @@ export type AppHeaderVariant = "daily" | "sub" | "tab";
 export interface AppHeaderProps {
   /** "daily" screens move between days (date nav); "sub" and "tab" differ only in the default width. */
   variant?: AppHeaderVariant;
-  /** The screen's name (Saira Condensed). One h1 per page. */
+  /** The screen's name (Saira italic). One h1 per page. */
   title?: string;
   /** cc-55b: "p" when the screen is only a picture behind another one (Hôm nay behind /add): one h1 per page. */
   titleAs?: "h1" | "p";
@@ -54,8 +54,12 @@ export interface AppHeaderProps {
   layout?: "narrow" | "wide";
   /** Desktop: the page's main already has 32 px padding, so the header adds none. */
   flush?: boolean;
-  /** Phone: a 52 px band (4 px above and below the 44 px row) and a 21 px wordmark. The home screen. */
+  /** Phone: a 52 px band (4 px above and below the 44 px row) and a 20 px wordmark. The home screen. */
   compact?: boolean;
+  /** Phone: the date stepper moves to a second row and this sits at its right end (Hôm nay's "Ngày tập 60′ ›"). From 1024 px it sits before the stepper in the one row. */
+  dateRow?: React.ReactNode;
+  /** Push screens: drawn between Back and the title (V3-SPEC §3.2: a group's accent bar and 36 px tile, a nutrient's accent bar). */
+  lead?: React.ReactNode;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
   /** "page": the row shares both edges with the page body, checked from 1024 px (data-align-from="lg"); default: left edge only. */
@@ -63,10 +67,11 @@ export interface AppHeaderProps {
   className?: string;
 }
 
+/** V3-SPEC §4: Back and trailing actions are 44 px Liquid Glass circles on a phone; plain icon buttons from 1024 px. */
 export const HEADER_ICON_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-text max-lg:glass no-underline cursor-pointer hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
 const DATE_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-text cursor-pointer hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-cobalt";
 
 /**
  * cc-72: the calendar beside the date (the icon set's Calendar path, drawn here like the chevrons: the header is on every
@@ -89,11 +94,13 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 }
 
 /**
- * The one header of H1T MICRO (design/UI-RULES.md, IA v2 "Headers and UI unity").
- * Phone: `bg-ink`, bottom corners 20 px, safe-area top, 16 px sides, one 44 px title row (back, Saira 24 title,
- * up to two icon actions), plus an optional second row INSIDE the same header (tabs, date summary, search).
- * Desktop (>= 1024 px): no ink band; the same row sits on paper (Saira 32), ink only in the summary card.
- * It is one DOM for both, so there is exactly one h1.
+ * The one header of H1T MICRO (V3-SPEC §3.1–3.3; the brief's ScreenHeader). No ink slab: it sits on the grey page.
+ * - Tab roots (variant "tab"): a 34 px Saira italic large title, controls under it (search, sub-tabs, period).
+ * - Push screens ("sub"): one row with the 44 px glass Back circle, the 28 px title 12 px after it (24 px when it is
+ *   long, two lines at most), then the trailing actions; the subtitle sits under the title, aligned to it. A 24 px
+ *   fade from the page colour sits at the top, under the floating circles.
+ * - Hôm nay ("daily"): the wordmark, the date stepper and the actions.
+ * Desktop (>= 1024 px): the same row on the page (Saira 32), ink only in the summary card. One DOM, one h1.
  */
 export function AppHeader({
   variant = "daily",
@@ -121,6 +128,8 @@ export function AppHeader({
   layout,
   flush = false,
   compact = false,
+  dateRow,
+  lead,
   alignGroup,
   alignMode = "left",
   className = "",
@@ -145,11 +154,11 @@ export function AppHeader({
   const nextDisabled = !onNext || canGoNext === false || (canGoNext === undefined && dateLabel.startsWith("Hôm nay"));
 
   const back = backHref ? (
-    <Link href={backHref} aria-label={backLabel} className={`${HEADER_ICON_BUTTON} -ml-2`}>
+    <Link href={backHref} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </Link>
   ) : onBack ? (
-    <button type="button" onClick={onBack} aria-label={backLabel} className={`${HEADER_ICON_BUTTON} -ml-2`}>
+    <button type="button" onClick={onBack} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </button>
   ) : null;
@@ -162,12 +171,18 @@ export function AppHeader({
       ? "max-w-[560px] mx-auto px-4 lg:max-w-[1240px] lg:mx-0 lg:px-8 lg:pt-8"
       : "max-w-[560px] mx-auto px-4 lg:pt-8";
   const deskPad = "lg:pb-0";
-  const phonePad = compact ? "pt-[max(4px,env(safe-area-inset-top))] pb-1" : "pt-[max(12px,env(safe-area-inset-top))] pb-4";
+  // V3 push screens: 8 px above the Back row and nothing under the header (the page's own 16 px follows), as on the boards
+  const phonePad = compact
+    ? "pt-[max(4px,env(safe-area-inset-top))] pb-1"
+    : back
+      ? "pt-[max(8px,env(safe-area-inset-top))] pb-0"
+      : "pt-[max(12px,env(safe-area-inset-top))] pb-4";
 
   return (
     <header
-      className={`w-full flex-none select-none bg-ink text-on-dark rounded-b-sheet lg:rounded-none lg:bg-page lg:text-text ${className}`}
+      className={`w-full flex-none select-none bg-page text-text ${className}`}
     >
+      {back && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-sticky h-6 bg-linear-to-b from-page to-transparent lg:hidden" />}
       <div
         className={`flex w-full flex-col gap-3 ${phonePad} box-border ${column} ${deskPad}`}
       >
@@ -175,14 +190,15 @@ export function AppHeader({
           data-align-group={alignGroup}
           data-align-edge={alignMode === "left" ? "left" : undefined}
           data-align-from={alignMode === "page" ? "lg" : undefined}
-          className="group/hdr flex min-h-11 items-center gap-2"
+          className={`group/hdr flex min-h-11 gap-3 ${back ? "items-start" : "items-center"} ${dateRow ? "max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:gap-x-2 max-lg:gap-y-0" : ""}`}
         >
           {back}
+          {lead && <div className="flex min-h-11 shrink-0 items-center gap-3">{lead}</div>}
           {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
               has something to say (Chưa lưu, Ngoại tuyến) the row has no room for both on a phone: the logo steps aside, so the status
               never lands on the day arrows (hotfix 20/10). The page title (sr-only on a phone) is not hidden with them: it stays in the
               accessibility tree, so the page keeps its h1 */}
-          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
+          <div className={`min-w-0 flex-1 ${dateRow ? "max-lg:col-start-1 max-lg:row-start-1" : ""} ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
@@ -193,10 +209,10 @@ export function AppHeader({
                     href={HOME_ROUTE}
                     aria-label="H1T MICRO, về Hôm nay"
                     data-tour="home-logo"
-                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-on-dark no-underline ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:hidden`}
+                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-text no-underline ${compact ? "text-[20px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden`}
                   >
                     <span aria-hidden="true">
-                      H1T <span className="text-sky">MICRO</span>
+                      H1T <span className="text-cobalt">MICRO</span>
                     </span>
                   </Link>
                 )}
@@ -208,14 +224,21 @@ export function AppHeader({
               </>
             ) : (
               title && (
-                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display line-clamp-2">
-                  {title}
-                </Title>
+                <div className={back ? "flex min-h-11 items-center" : undefined}>
+                  <Title
+                    title={typeof title === "string" ? title : undefined}
+                    className={`m-0 break-words font-display italic font-extrabold leading-tight uppercase tracking-display line-clamp-2 lg:text-display-sm ${
+                      back ? (typeof title === "string" && title.length > 18 ? "text-2xl" : "text-headline") : variant === "tab" ? "text-display" : "text-2xl"
+                    }`}
+                  >
+                    {title}
+                  </Title>
+                </div>
               )
             )}
             {subtitle && (
               <div
-                className={`m-0 mt-0.5 text-cap leading-snug text-muted-subtitle lg:text-sm lg:text-secondary ${
+                className={`m-0 mt-0.5 text-callout leading-snug text-secondary lg:text-sm ${
                   variant === "daily" ? "hidden lg:block" : ""
                 }`}
               >
@@ -226,8 +249,10 @@ export function AppHeader({
 
           {desktopStat ? <div className="hidden lg:flex">{desktopStat}</div> : null}
 
+          {dateRow && <div className="flex min-w-0 items-center max-lg:col-start-2 max-lg:row-start-2 max-lg:justify-self-end lg:shrink-0">{dateRow}</div>}
+
           {hasDateNav && (
-            <div className="flex min-w-0 items-center lg:shrink-0 lg:gap-1.5">
+            <div className={`flex min-w-0 items-center lg:shrink-0 lg:gap-1.5 ${dateRow ? "max-lg:col-start-1 max-lg:row-start-2 max-lg:-ml-3" : ""}`}>
               <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" data-testid="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
@@ -239,7 +264,7 @@ export function AppHeader({
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-body-lg font-semibold leading-tight tracking-tight text-text cursor-pointer hover:text-cobalt focus-visible:outline-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel ? (
                     // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
@@ -268,19 +293,19 @@ export function AppHeader({
 
           {/* cc-68 (S13): the one sync status sits in the header of every tab (not a sub-screen, not the picture behind /add) */}
           {actions || showSync ? (
-            <div className="flex shrink-0 items-center gap-2">
+            <div className={`flex shrink-0 items-center gap-2 ${dateRow ? "max-lg:col-start-2 max-lg:row-start-1 max-lg:justify-self-end" : ""}`}>
               {showSync && <SyncStatus />}
               {actions}
             </div>
           ) : null}
         </div>
 
-        {progress && <StepBars current={progress.current} total={progress.total} tone="dark" />}
+        {progress && <StepBars current={progress.current} total={progress.total} tone="light" />}
         {tabs}
         {search}
         {summary && (
           <div
-            className={`w-full rounded-card bg-surface-dark p-4 text-on-dark lg:bg-ink ${summaryPhoneOnly ? "lg:hidden" : ""}`}
+            className={`w-full rounded-card bg-ink p-4 text-on-dark ${summaryPhoneOnly ? "lg:hidden" : ""}`}
           >
             {summary}
           </div>

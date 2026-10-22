@@ -8,11 +8,13 @@ import {
   type SexType,
   type TargetRange,
 } from "./targets";
-import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
+import { DRAFT_KEY, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
+import { applyProfileTargets } from "./day-targets";
+
+export { applyProfileTargets };
 import { formatAmount } from "./format";
 import { applyCustomTargets, CUSTOM_TARGETS_ENABLED, parseCustomTargets, type CustomTargets } from "./custom-targets";
 import { ageOf } from "./rda";
-import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
 import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
 import { cleanDisplayName, validateDisplayName } from "./display-name";
@@ -191,69 +193,3 @@ export function targetRangeText(range: TargetRange, unit: string): string {
   return range.max === range.min ? `${min} ${unit}` : `${min}–${formatAmount(range.max, unit)} ${unit}`;
 }
 
-/** Same stat with a new target. The display text and percentage follow the diary's own formulas. */
-function retarget<S extends MockMacroStat | MockMicroStat>(stat: S, range: TargetRange): S {
-  const { consumed, unit } = stat;
-  const targetMax = range.max === range.min ? undefined : range.max;
-  const target =
-    targetMax === undefined
-      ? formatAmount(range.min, unit)
-      : `${formatAmount(range.min, unit)}–${formatAmount(targetMax, unit)}`;
-  return {
-    ...stat,
-    targetMin: range.min,
-    targetMax,
-    percentage: consumed === null ? null : range.min > 0 ? Math.round((consumed / range.min) * 100) : 0,
-    displayValue: consumed === null ? stat.displayValue : `${formatAmount(consumed, unit)} / ${target} ${unit}`,
-  };
-}
-
-/**
- * The day with its targets, user and achieved counts set from the profile. Pure: the day it is
- * given is not changed. Stats the profile does not set keep the values the day has.
- */
-export function applyProfileTargets(
-  day: MockDayData,
-  profile: Profile,
-  targets: CompleteTargets,
-  trainingMinutes = profile.trainingMinutesDefault
-): MockDayData {
-  const retargetAll = <S extends MockMacroStat | MockMicroStat>(stats: S[]): S[] =>
-    stats.map((stat) => {
-      const range = targets[stat.key];
-      return range ? retarget(stat, range) : stat;
-    });
-
-  const macros = retargetAll(day.macros);
-  const minerals = retargetAll(day.minerals);
-  const vitamins = retargetAll(day.vitamins);
-  const kcal = targets.calories;
-  const consumed = day.calories.consumed ?? 0;
-  const achieved = (stats: MockMicroStat[]) => stats.filter((s) => (s.percentage ?? 0) >= 100).length;
-  const vitaminsAchieved = achieved(vitamins);
-  const mineralsAchieved = achieved(minerals);
-
-  return {
-    ...day,
-    user: {
-      ...day.user,
-      sex: profile.sex,
-      birthYear: profile.birthYear,
-      weightKg: profile.weightKg,
-      goal: profile.goal,
-      goalLabel: goalName(profile.goal),
-      trainingMinutes,
-    },
-    calories: {
-      ...day.calories,
-      targetMin: kcal.min,
-      targetMax: kcal.max,
-      remaining: Math.max(0, kcal.min - consumed),
-      percentage: Math.round((consumed / kcal.min) * 100),
-    },
-    macros,
-    minerals,
-    vitamins,
-    microsSummary: { ...day.microsSummary, achieved: vitaminsAchieved + mineralsAchieved, vitaminsAchieved, mineralsAchieved },
-  };
-}

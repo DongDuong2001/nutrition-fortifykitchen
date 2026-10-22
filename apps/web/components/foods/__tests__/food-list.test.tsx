@@ -58,3 +58,40 @@ describe("the add list's limits", () => {
     expect((after.match(/<[a-z]/g) ?? []).length).toBeLessThan(550);
   });
 });
+
+// V3-SPEC §3.8: the + sheet's rows have three lines; the category label sits on the page above its white card
+describe("the add variant (V3 rows)", () => {
+  const poultry = MOCK_FOODS.find((f) => f.id === "food-uc-ga")!;
+  const fruit = MOCK_FOODS.find((f) => f.category === "trai_cay")!;
+  const list: FoodListData = { grouped: true, foods: [poultry, fruit], groups: [{ key: "dam", label: "Đạm", foods: [poultry] }, { key: "trai_cay", label: "Trái cây", foods: [fruit] }] };
+  const draw = () =>
+    renderToString(
+      <FoodList
+        list={list}
+        variant="add"
+        getMacro={(f) => (f.id === poultry.id ? "31 g đạm" : null)}
+        onPick={() => {}}
+        getMeta={() => "165 kcal / 100 g"}
+        categoryName={() => "Đạm"}
+        empty={<p>trống</p>}
+      />
+    );
+
+  it("a row with a macro has the bold third line, a row without has none", () => {
+    const html = draw();
+    expect((html.match(/data-food-macro/g) ?? []).length).toBe(1);
+    expect(html).toContain("31 g đạm");
+  });
+
+  it("the category label is a heading above the card, not a sticky bar inside it", () => {
+    const html = draw();
+    expect(html).toContain("<h2");
+    expect(html).toMatch(/<h2[^>]*>Đạm/);
+    expect(html).not.toContain("sticky");
+  });
+
+  it("the default variant draws no third line", () => {
+    const html = renderToString(<FoodList list={list} getMacro={() => "31 g đạm"} onPick={() => {}} getMeta={() => "m"} categoryName={() => "n"} empty={<p>trống</p>} />);
+    expect(html).not.toContain("data-food-macro");
+  });
+});

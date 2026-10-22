@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Sheet } from "@/components/ui/sheet";
-import { Chip } from "@/components/ui/chip";
 import { getTrainingPhases, TRAINING_SIZE_NAME, type TrainingSize } from "@/lib/training";
 
 // cc-52: the two choices, each with the doses it pre-fills (from the coach's ranges, lib/training)
@@ -60,18 +59,18 @@ export function TrainingSizeSheet({
   );
 }
 
-/** The small "Bé · đổi" chip on Ngày tập: opens the sheet. Before a choice: "Chọn Bự / Bé". */
+/** The "Bé · đổi" chip on Ngày tập: opens the sheet. Before a choice: "Chọn Bự / Bé". White with a hairline ring on the grey page. */
 export function TrainingSizeChip({ size, onClick, className = "" }: { size: TrainingSize | null; onClick: () => void; className?: string }) {
   return (
-    <Chip
+    <button
+      type="button"
       onClick={onClick}
-      aria-pressed={undefined}
       aria-haspopup="dialog"
       aria-label={size ? `Nhóm ${TRAINING_SIZE_NAME[size]}. Đổi nhóm` : "Chọn nhóm Bự hoặc Bé"}
       data-tour="training-size"
-      className={className}
+      className={`inline-flex h-11 min-h-11 cursor-pointer select-none items-center justify-center rounded-full border-0 bg-card px-4 text-sm font-semibold text-text shadow-field transition-press active:scale-[0.97] motion-reduce:active:scale-100 ${className}`}
     >
       {size ? `${TRAINING_SIZE_NAME[size]} · đổi` : "Chọn Bự / Bé"}
-    </Chip>
+    </button>
   );
 }

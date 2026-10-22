@@ -255,6 +255,31 @@ def check_sheet_landmarks(browser, width, height):
     return reasons
 
 
+def check_not_found_link(browser):
+    """The 404's Về Tổng quan link has the bottom nav's Tổng quan href and opens a screen whose h1 is Tổng quan."""
+    reasons = []
+    ctx = browser.new_context(viewport={"width": 390, "height": 844})
+    pg = ctx.new_page()
+    try:
+        pg.goto(BASE + NOT_FOUND_ROUTE, wait_until="networkidle")
+        link = pg.get_by_role("link", name="Về Tổng quan")
+        href = link.get_attribute("href") if link.count() == 1 else None
+        if href is None:
+            reasons.append("no Về Tổng quan link")
+        else:
+            pg.goto(BASE + "/app", wait_until="networkidle")
+            tab = pg.locator("nav[aria-label='Điều hướng chính'] a", has_text="Tổng quan").first.get_attribute("href")
+            if href != tab:
+                reasons.append(f"href {href} is not the nav's Tổng quan {tab}")
+            response = pg.goto(BASE + href, wait_until="networkidle")
+            h1 = pg.locator("h1").first.inner_text() if pg.locator("h1").count() else ""
+            if not response or response.status != 200 or "tổng quan" not in h1.lower():
+                reasons.append(f"{href} answered {response.status if response else None} with h1 {h1!r}")
+    finally:
+        ctx.close()
+    return reasons
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     routes = []
@@ -277,6 +302,14 @@ def main():
                 else:
                     passed += 1
                     print(f"PASS {label}")
+        # review-0210: the 404's "Về Tổng quan" leads to the real Tổng quan screen (the bottom nav's tab), not Hôm nay
+        reasons = check_not_found_link(browser)
+        if reasons:
+            failed += 1
+            print("FAIL [404] Về Tổng quan: " + " | ".join(reasons))
+        else:
+            passed += 1
+            print("PASS [404] Về Tổng quan leads to Tổng quan")
         for width, height in WIDTHS:
             reasons = check_sheet_landmarks(browser, width, height)
             label = f"[sheet over Hôm nay] /add @{width}x{height}"

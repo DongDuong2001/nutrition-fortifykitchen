@@ -218,8 +218,13 @@ def probe_explore(pg, name):
     h1 = pg.locator("h1 >> visible=true")
     check(h1.count() == 1 and "KHÁM PHÁ" in h1.first.inner_text().upper(), f"{name}: /explore shows the Khám phá heading")
     check(pg.locator('input[type="search"] >> visible=true').count() == 1, f"{name}: /explore has the food search")
+    # V3: a phone shows the Nhóm món grid, from 1024 px the category chips take its place
     chips = pg.locator('[aria-label="Lọc món theo nhóm"] button >> visible=true').count()
-    check(chips >= 3, f"{name}: /explore shows the category chips ({chips})")
+    groups = pg.locator('nav[aria-label="Nhóm món"] a >> visible=true').count()
+    if name == "390":
+        check(groups >= 11, f"{name}: /explore shows the Nhóm món groups ({groups})")
+    else:
+        check(chips >= 3, f"{name}: /explore shows the category chips ({chips})")
     pg.locator('input[type="search"] >> visible=true').fill("trứng")
     pg.wait_for_timeout(300)
     rows = pg.locator("[data-food-row] >> visible=true")

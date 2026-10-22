@@ -55,6 +55,8 @@ export function SummaryTab() {
     line: row.line,
     number: row.number,
     gap: row.gap,
+    dotKey: row.kind === "nutrient" ? row.key : undefined,
+    percentage: row.kind === "nutrient" ? (micro.find((r) => r.key === row.key)?.percentage ?? null) : null,
   }));
 
   return (
@@ -65,7 +67,7 @@ export function SummaryTab() {
       </div>
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
         <MicroCard key={`${length}-${period.offset}`} board={board} />
-        <AttentionList items={items} />
+        <AttentionList items={items} large />
       </div>
     </div>
   );

@@ -6,8 +6,10 @@ import { MOCK_FOODS } from "../mock/foods";
 import { SAMPLE_DAY, type MockMicroStat } from "../mock/sample-day";
 
 describe("Thiếu nhiều nhất follows the day's food", () => {
-  it("the sample day lacks Vitamin D and Calcium most", () => {
-    expect(microsSummaryFor(SAMPLE_DAY).mostLacking).toEqual(["Vitamin D", "Calcium"]);
+  // V3-SPEC §6: the sample day's targets come from lib/targets and lib/rda (US DRI): Vitamin E 3,2 / 15 mg (21 %) now
+  // lacks more than Calcium 331 / 1.000 mg (33 %). The V3 design shows "Vitamin D, Calcium" from its older targets.
+  it("the sample day lacks Vitamin D and Vitamin E most", () => {
+    expect(microsSummaryFor(SAMPLE_DAY).mostLacking).toEqual(["Vitamin D", "Vitamin E"]);
   });
 
   it("drops Calcium from the list once a calcium-rich food is logged today", () => {

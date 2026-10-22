@@ -60,7 +60,7 @@ window.__shareSnaps = [];
       badge: badge ? badge.getAttribute('data-level-badge') : null,
       badgeText: badge ? badge.innerText.replace(/\\s+/g, ' ').trim() : null,
       top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
-      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
+      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('h1, h2') || h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const m = (e) => { const q = e.getBoundingClientRect(); return (q.top + q.bottom) / 2; };
         return { name: p0.innerText.trim(), nameMid: m(p0.parentElement), badgeMid: b ? m(b) : null }; })(),
       groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.textContent.trim()),
@@ -138,9 +138,9 @@ def level_run(browser, size, tag, level):
         check(len(col["extras"]) == 6, f"{tag} L{level}: six extras")
         check(all(e["bars"] == 0 and not e["pct"] for e in col["extras"]), f"{tag} L{level}: extras are amounts only {col['extras'][:2]}")
         check(any(e["text"].endswith("—") for e in col["extras"]) or any(re.search(r"\d", e["text"]) for e in col["extras"]), f"{tag} L{level}: extras show an amount or a dash")
-        # the extras band is the first band, one x/N đạt header (cc-61) below the first meal band
-        top = pg.evaluate("""() => { const h = [...document.querySelectorAll("aside[aria-label='Vi chất'] h3")].find(x => x.getBoundingClientRect().width > 0); const m = document.querySelector("section[aria-label='Bữa sáng'] > button, section[aria-label='Bữa sáng'] > div"); return [h.getBoundingClientRect().top, m.getBoundingClientRect().top, document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]").getBoundingClientRect().height]; }""")
-        check(abs(top[0] - top[1] - top[2]) <= 1, f"{tag} L{level}: first band one verdict header below the first meal band ({top})")
+        # V3 22/10: the extras header is the first section header, under the x/N đạt header (no ink band any more)
+        top = pg.evaluate("""() => { const h = [...document.querySelectorAll("aside[aria-label='Vi chất'] h3")].find(x => x.getBoundingClientRect().width > 0); const s = document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]"); return [h.getBoundingClientRect().top, s.getBoundingClientRect().bottom]; }""")
+        check(top[0] >= top[1] - 1, f"{tag} L{level}: the first section header sits under the x/N đạt header ({top})")
     bars = pg.evaluate("[...document.querySelectorAll(\"aside[aria-label='Vi chất'] [role=progressbar]\")].filter(b => b.getBoundingClientRect().width > 0).length")
     check(bars == TOTAL[level], f"{tag} L{level}: one bar per counted nutrient ({bars})")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28b-home-L{level}-{w}.png"))
@@ -149,7 +149,8 @@ def level_run(browser, size, tag, level):
         pg.goto(BASE + "/micros", wait_until="networkidle")
         pg.wait_for_timeout(500)
         body = squash(pg.inner_text("body"))
-        check("Vitamin (12)" in body and "Khoáng chất (10)" in body, f"{tag} L{level}: /micros lists all 12 vitamins and 10 minerals")
+        # V3Micros: the segmented pair (phone) and the chips (desktop) carry the counts, x of the 12 vitamins and the 10 minerals
+        check(re.search(r"Vitamin · \d+/12", body) is not None and re.search(r"Khoáng chất · \d+/10", body) is not None, f"{tag} L{level}: /micros lists all 12 vitamins and 10 minerals")
     ctx.close()
 
 

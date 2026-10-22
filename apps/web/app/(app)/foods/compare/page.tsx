@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
-import { ChipGroup } from "@/components/ui/chip-group";
+import { Segmented } from "@/components/ui/segmented";
 import { PillButton } from "@/components/ui/pill-button";
-import { SectionTitle } from "@/components/ui/section-title";
 import { ComparePicker } from "@/components/foods/compare-picker";
 import { CompareTable } from "@/components/foods/compare-table";
 import { useBack } from "@/hooks/use-back";
@@ -74,13 +73,19 @@ function CompareInner() {
         {compare ? (
           <>
             <div className="flex flex-col gap-2">
-              <span className="text-cap font-semibold text-secondary">Tính theo</span>
-              <ChipGroup
-                columns={2}
-                tone="light"
+              <span aria-hidden="true" className="text-cap font-semibold text-secondary">Tính theo</span>
+              <Segmented
+                label="Tính theo"
+                alignGroup="compare-basis"
+                className="lg:max-w-xs"
+                value={basis}
+                onChange={(next) => {
+                  markUsed("compare-basis");
+                  setBasis(next);
+                }}
                 items={[
-                  { id: "per100", label: "100 g", active: basis === "per100", onClick: () => { markUsed("compare-basis"); setBasis("per100"); } },
-                  { id: "serving", label: "Khẩu phần", active: basis === "serving", onClick: () => { markUsed("compare-basis"); setBasis("serving"); } },
+                  { key: "per100", label: "100 g" },
+                  { key: "serving", label: "Khẩu phần" },
                 ]}
               />
             </div>
@@ -100,7 +105,9 @@ function CompareInner() {
           </>
         ) : (
           <Card as="section" aria-labelledby="compare-empty" className="flex flex-col items-center gap-3 py-8 text-center">
-            <SectionTitle id="compare-empty">Chưa đủ món để so sánh</SectionTitle>
+            <h2 id="compare-empty" className="m-0 text-callout font-semibold text-text">
+              Chưa đủ món để so sánh
+            </h2>
             <p className="m-0 max-w-[320px] text-sm leading-snug text-secondary">
               {foods.length === 1
                 ? `Đã chọn ${foods[0].nameVi}. Thêm ít nhất 1 món nữa, tối đa ${MAX_COMPARE_FOODS} món.`

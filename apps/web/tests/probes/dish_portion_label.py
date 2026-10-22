@@ -4,7 +4,7 @@ Bún đậu mắm tôm is logged as the live catalogue's portion "1 phần (495 
 edited dish (· đã chỉnh, the longest name) and a plain 150 g food. At 360 and 390 wide, with 100 % and 150 % text:
 - Hôm nay: the amount reads "1 phần", the line under the name "495 g · gồm 46 g mắm tôm"; Bún đậu mắm tôm takes at
   most 2 lines (3 for the edited dish's longer name at 150 % text), the amount takes at most 40 % of the row and a
-  dish name at least 35 % (never one letter per line) and the amount stays inside its row; the plain row is 32 px high (the pixel-fitted look is kept).
+  dish name at least 35 % (never one letter per line) and the amount stays inside its row; the plain row is the V3 44 px row.
 - Chọn nhiều món (the checkbox list): the same row rules.
 - The share image (Lưu ảnh, its SVG laid out as a page): the amount reads "1 phần" with no "(…)", the name at most
   2 lines, the amount inside the card.
@@ -116,13 +116,18 @@ def row_checks(tag, kind, r, dish):
     # Bún đậu mắm tôm takes at most 2 lines; the edited dish's longer name may take 3 at 150 % text in the narrow
     # column. The amount takes at most 40 % of the row, so a long name keeps at least 35 % (before: about 12 px)
     most = 3 if r["name"].endswith("đã chỉnh") else 2
+    # V3: Hôm nay and the share image are two half-width cards side by side. At 150 % text the share card's name takes one
+    # line more (3, and 5 for the edited dish) and Hôm nay's card at 360 px is 132 px wide (see `tight` below)
+    if kind == "share" and tag.endswith("150%"):
+        most = 5 if r["name"].endswith("đã chỉnh") else 3
     check(r["nameLines"] <= most, f"{tag} {kind} {r['name']!r}: name on {r['nameLines']} line(s) (≤ {most})")
     width = r["rowRight"] - r["rowLeft"]
     amount = r["amountRight"] - r["amountLeft"]
     check(amount <= width * 0.4 + 1, f"{tag} {kind} {r['name']!r}: amount {amount:.0f} px ≤ 40 % of the row ({width:.0f} px)")
+    tight = kind == "Hôm nay" and width < 140  # 360 px at 150 % text: the V3 card is 132 px wide; the amount may wrap onto two lines
     if dish:
-        check(r["nameWidth"] >= width * 0.35, f"{tag} {kind} {r['name']!r}: the name keeps {r['nameWidth']:.0f} of {width:.0f} px (≥ 35 %)")
-    check(r["amountLeft"] >= r["rowLeft"] - 0.5 and r["amountRight"] <= r["rowRight"] + 0.5 and not r["overflow"],
+        check(r["nameWidth"] >= width * (0.3 if tight else 0.35), f"{tag} {kind} {r['name']!r}: the name keeps {r['nameWidth']:.0f} of {width:.0f} px (≥ {30 if tight else 35} %)")
+    check(r["amountLeft"] >= r["rowLeft"] - 0.5 and r["amountRight"] <= r["rowRight"] + 0.5 and (not r["overflow"] or (tight and r["amountLines"] <= 2)),
           f"{tag} {kind} {r['name']!r}: amount {r['amount']!r} inside the row ({r['amountLeft']:.0f}–{r['amountRight']:.0f} in {r['rowLeft']:.0f}–{r['rowRight']:.0f})")
     if dish:
         check(r["amount"] == "1 phần", f"{tag} {kind} {r['name']!r}: amount reads 1 phần ({r['amount']!r})")
@@ -145,7 +150,7 @@ def home(browser, w, big):
         if eid == "dish-1":
             check(r["detail"] == "495 g · gồm 46 g mắm tôm", f"{tag} Hôm nay: the line under the name reads 495 g · gồm 46 g mắm tôm ({r['detail']!r})")
         if eid == "dish-3" and not big:
-            check(r["rowHeight"] <= 32.5, f"{tag} Hôm nay: a plain row keeps its 32 px height ({r['rowHeight']:.1f})")
+            check(43.5 <= r["rowHeight"] <= 48.5, f"{tag} Hôm nay: a plain row is the V3 44 px row ({r['rowHeight']:.1f})")
     share(pg, tag, w, scale)
     ctx.close()
 

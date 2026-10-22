@@ -7,10 +7,10 @@ import { formatNumber } from "@/lib/format";
 import type { MicroSquare } from "@/lib/overview-board";
 
 const SQUARE_BG: Record<NutrientLevel, string> = {
-  thieu: "bg-level-red",
-  trungbinh: "bg-level-yellow",
-  ganDu: "bg-level-green",
-  dat: "bg-level-blue",
+  thieu: "bg-level-thieu",
+  trungbinh: "bg-level-trungbinh",
+  ganDu: "bg-level-gandu",
+  dat: "bg-level-dat",
 };
 
 /**

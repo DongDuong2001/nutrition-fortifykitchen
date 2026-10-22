@@ -263,7 +263,7 @@ with sync_playwright() as p:
         close_tips(pg)
         # The catalogue is on the device now; the network goes away
         api.offline = True
-        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.locator('a[data-tour="meal-add"]:visible').first.click()
         pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
         pick_food(pg, "Khoai lang luộc", "^Thêm vào Bữa")
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
@@ -352,7 +352,7 @@ with sync_playwright() as p:
         ctx, pg, st = device(browser, api)
         open_day(pg)
         api.offline = True
-        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.locator('a[data-tour="meal-add"]:visible').first.click()
         pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
         pick_food(pg, "Khoai lang luộc", "^Thêm vào Bữa")
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
@@ -396,7 +396,7 @@ with sync_playwright() as p:
         api.unauthorized = True
         for food in ("Bắp luộc", "Bún tươi"):
             close_tips(pg)
-            pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+            pg.locator('a[data-tour="meal-add"]:visible').first.click()
             pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
             pick_food(pg, food, "^Thêm vào Bữa")
             pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
@@ -453,7 +453,7 @@ with sync_playwright() as p:
         ctx, pg, st = signed_in_device(browser, api)
         open_day(pg)
         api.offline = True
-        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.locator('a[data-tour="meal-add"]:visible').first.click()
         pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
         pick_food(pg, "Gạo lứt nấu", "^Thêm vào Bữa")
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
@@ -495,7 +495,7 @@ with sync_playwright() as p:
         ctx, pg, st = signed_in_device(browser, api)
         open_day(pg)
         api.offline = True
-        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.locator('a[data-tour="meal-add"]:visible').first.click()
         pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
         pick_food(pg, "Bún tươi", "^Thêm vào Bữa")
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
@@ -518,7 +518,7 @@ with sync_playwright() as p:
         api = FakeApi()
         ctx, pg, st = signed_in_device(browser, api)
         open_day(pg)
-        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.locator('a[data-tour="meal-add"]:visible').first.click()
         pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
         pick_food(pg, "Bắp luộc", "^Thêm vào Bữa")
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)

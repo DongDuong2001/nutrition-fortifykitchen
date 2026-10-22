@@ -17,9 +17,11 @@ export interface OnboardingFlags {
   tourStartedIso: string | null;
   /** The newest release (lib/releases id) whose "Có gì mới" sheet this account has seen (cc-46) */
   whatsNewSeen: string | null;
+  /** When the last tip was shown (epoch ms): at most one tip in 24 h (design-floor, V3 22/10) */
+  tipShownAt?: number | null;
 }
 
-export const DEFAULT_FLAGS: OnboardingFlags = { tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null };
+export const DEFAULT_FLAGS: OnboardingFlags = { tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null, tipShownAt: null };
 
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 
@@ -35,12 +37,15 @@ export function parseFlags(raw: unknown): OnboardingFlags {
     replayOpened: v.replayOpened === true,
     tourStartedIso: typeof v.tourStartedIso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.tourStartedIso) ? v.tourStartedIso : null,
     whatsNewSeen: typeof v.whatsNewSeen === "string" ? v.whatsNewSeen : null,
+    tipShownAt: typeof v.tipShownAt === "number" && Number.isFinite(v.tipShownAt) ? v.tipShownAt : null,
   };
 }
 
 const withId = (list: string[], id: string) => (list.includes(id) ? list : [...list, id]);
 
 export const markSeenIn = (flags: OnboardingFlags, id: string): OnboardingFlags => ({ ...flags, seen: withId(flags.seen, id) });
+/** A tip was shown now: seen, and the time that starts the 24 h until the next tip. */
+export const markTipShownIn = (flags: OnboardingFlags, id: string, nowMs: number): OnboardingFlags => ({ ...markSeenIn(flags, id), tipShownAt: nowMs });
 export const markUsedIn = (flags: OnboardingFlags, event: string): OnboardingFlags => ({ ...flags, used: withId(flags.used, event) });
 
 /** Turning tips back on starts them over (every tip can show once more); what was used stays used. */

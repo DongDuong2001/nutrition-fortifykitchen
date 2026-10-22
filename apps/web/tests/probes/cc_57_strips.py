@@ -72,6 +72,8 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         ctx = browser.new_context(**PHONE)
+        # next dev draws its issue badge over the nav (a prod build has none); keep it out of the touches
+        ctx.add_init_script("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = 'nextjs-portal { display: none !important; }'; document.head.appendChild(s); });")
         pg = ctx.new_page()
         open_today(pg)
         cdp = ctx.new_cdp_session(pg)
@@ -117,7 +119,8 @@ def main():
         pg.wait_for_url("**/explore")
         pg.wait_for_timeout(900)
         r = Rec(pg, "03-press-chip")
-        chip = pg.locator('[aria-label="Lọc món theo nhóm"] button:visible').nth(1)
+        # V3: Khám phá has no chip row on a phone; a Món giàu vi chất tile is the pressable that scales
+        chip = pg.locator('#explore-rich a:visible').nth(1)
         box = chip.bounding_box()
         pg.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         pg.mouse.down()
@@ -184,7 +187,9 @@ def main():
         )
         r.snap("before grab", 1)
         # A real touch (CDP), aimed at where the grabber is right now: the sheet keeps sliding while this script works
-        hx, hy = pg.evaluate("() => { const r = document.querySelector('[data-sheet-handle]').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }")
+        # V3: the 20 px grabber is easy to miss while the sheet moves, and the title is the meal switcher (a button, which takes its own touches);
+        # the empty column to the right of the title is a drag area of the title row (44 px tall), so aim there
+        hx, hy = pg.evaluate("() => { const r = document.querySelector('[data-add-panel] [data-sheet-drag]:not([data-sheet-handle])').getBoundingClientRect(); return [r.right - 16 - 22, r.y + r.height / 2]; }")
         cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": hx, "y": hy}]})
         pg.wait_for_timeout(300)
         held_y = pg.evaluate("() => new DOMMatrix(getComputedStyle(document.querySelector('[data-add-panel]')).transform).m42")
