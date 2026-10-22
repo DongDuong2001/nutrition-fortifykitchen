@@ -20,6 +20,7 @@ import (
 	"nutrition-api/internal/coaching"
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/csrf"
+	"nutrition-api/internal/daytemplates"
 	"nutrition-api/internal/diary"
 	"nutrition-api/internal/library"
 	"nutrition-api/internal/logger"
@@ -128,6 +129,8 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	trendsRepo := trends.NewRepository(pool)
 	trendsService := trends.NewService(trendsRepo)
 	trendsHandler := trends.NewHandler(trendsService)
+
+	dayTemplatesHandler := daytemplates.NewHandler(daytemplates.NewService(daytemplates.NewRepository(pool)))
 
 	coachingRepo := coaching.NewRepository(pool)
 	coachingService := coaching.NewService(coachingRepo)
@@ -277,6 +280,13 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			// Trends route (Phase 5)
 			r.Get("/trends", trendsHandler.GetTrends)
 
+			// Ngày ăn mẫu (migration 000016)
+			r.Route("/day-templates", func(r chi.Router) {
+				r.Get("/", dayTemplatesHandler.List)
+				r.Put("/{id}", dayTemplatesHandler.Put)
+				r.Delete("/{id}", dayTemplatesHandler.Delete)
+			})
+
 			// Coaching routes (Level 4 application & status)
 			r.Route("/coaches", func(r chi.Router) {
 				r.Post("/apply", coachingHandler.Apply)
@@ -310,4 +320,3 @@ func MaxBodySize(limitBytes int64) func(http.Handler) http.Handler {
 		})
 	}
 }
-
