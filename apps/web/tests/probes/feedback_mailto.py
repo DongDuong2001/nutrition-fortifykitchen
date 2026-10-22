@@ -53,7 +53,7 @@ def subject(pg):
 
 def cut(pg, scope):
     return pg.evaluate(
-        """(sel) => [...document.querySelectorAll(sel + ' *')].filter((e) => e.children.length === 0 && e.textContent.trim() && (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1) && getComputedStyle(e).overflow !== 'visible').map((e) => e.textContent.trim().slice(0, 30))""",
+        """(sel) => [...document.querySelectorAll(sel + ' *')].filter((e) => e.children.length === 0 && e.textContent.trim() && e.clientWidth > 1 && (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1) && getComputedStyle(e).overflow !== 'visible').map((e) => e.textContent.trim().slice(0, 30))""",
         scope,
     )
 
