@@ -11,7 +11,8 @@ import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
  * "Giàu <nutrient>" in Saira and opens /explore/rich/[nutrient].
  * V3-SPEC §1: the tile is the nutrient's colour (lib/nutrient-colors). White text needs 4,5:1, which the base system
  * colours (yellow, orange, cyan, green) do not give, so the tile takes the deep shade (`nutrientDot`, as the design file
- * does). A long name (Magnesium, Potassium) steps down from 26 to 22 px so it stays on one line in the 152 px tile; Đạm and Chất xơ have no colour and stay ink.
+ * does). A long name (Magnesium, Potassium) steps down from 26 to 22 px, a longer one (Vitamin B12, Phosphorus) to 20 px, so it stays
+ * on one line in the 152 px tile and no tile grows the row; Đạm and Chất xơ have no colour and stay ink.
  */
 export function RichCarousel() {
   return (
@@ -28,7 +29,7 @@ export function RichCarousel() {
               style={coloured ? { background: nutrientDot(id) } : undefined}
               className={`m-hover flex h-full min-h-[112px] flex-col justify-between gap-3 rounded-card p-4 text-on-accent no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${coloured ? "" : "bg-ink"}`}
             >
-              <span className={`font-display font-black italic leading-none tracking-[-0.01em] ${name.length > 8 ? "text-title-sm" : "text-title"}`}>Giàu {name}</span>
+              <span className={`font-display font-black italic leading-none tracking-[-0.01em] ${name.length > 10 ? "text-xl" : name.length > 8 ? "text-title-sm" : "text-title"}`}>Giàu {name}</span>
               <span className="text-cap font-semibold">Xem món</span>
             </Link>
           </li>
