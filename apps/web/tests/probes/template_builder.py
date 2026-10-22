@@ -110,6 +110,9 @@ def run(browser):
     field = pg.locator("[role=dialog] input[inputmode=decimal]:visible, [role=dialog] input[type=number]:visible").first
     if field.count():
         field.fill("300")
+    else:
+        # An egg (the first "gà" result) has a size and a count, no grams field: a bigger size is a new portion
+        pg.locator("[role=dialog]:visible").last.get_by_role("button", name=re.compile(r"^Lớn")).first.click()
     pg.get_by_role("button", name="Lưu khẩu phần").click()
     pg.wait_for_timeout(600)
     total_after = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
