@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { InstallRow } from "@/components/pwa/install-row";
 import { Card } from "@/components/ui/card";
@@ -102,10 +102,20 @@ function ChoiceGroup({
 
 // Same rule as setup: a year from 1900 to this year. An invalid year keeps its error on screen.
 // It saves on blur or Enter, so typing "2" on the way to "2003" does not show an error.
-// The row shows the year; tapping it turns into the field.
+// The row shows the year; tapping it turns into the field. Desktop parity (23/10): the field opens with the year selected (typing
+// replaces it), Esc puts the year back and closes it, and closing returns the focus to the row.
 function BirthYearField() {
   const { profile, updateProfile } = useDiary();
   const [editing, setEditing] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const refocus = useRef(false);
+  const cancelled = useRef(false);
+  useEffect(() => {
+    if (!editing && refocus.current) {
+      refocus.current = false;
+      rowRef.current?.querySelector<HTMLElement>("button")?.focus();
+    }
+  }, [editing]);
   const [typed, setTyped] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
   const shown = typed ?? String(profile.birthYear);
@@ -122,6 +132,11 @@ function BirthYearField() {
   }
 
   function save() {
+    // The field unmounting after Esc blurs it: that blur must not save what Esc dropped
+    if (cancelled.current) {
+      cancelled.current = false;
+      return;
+    }
     const message = birthYearError(shown);
     setError(message);
     const birthYear = parseBirthYear(shown);
@@ -131,18 +146,31 @@ function BirthYearField() {
     setEditing(false);
   }
 
+  function cancel() {
+    cancelled.current = true;
+    refocus.current = true;
+    setTyped(null);
+    setError(undefined);
+    setEditing(false);
+  }
+
   if (!editing) {
     return (
+      <div ref={rowRef}>
       <SettingsRow
         tone="profile"
         glyph={SETTINGS_ICONS.calendar}
         label="Năm sinh"
         hint="Dùng để chọn mức khuyến nghị theo tuổi."
         value={String(profile.birthYear)}
-        onClick={() => setEditing(true)}
+        onClick={() => {
+          cancelled.current = false;
+          setEditing(true);
+        }}
         minHeight="16"
         data-align-group="profile-row"
       />
+      </div>
     );
   }
 
@@ -157,9 +185,16 @@ function BirthYearField() {
           autoFocus
           value={shown}
           onChange={(e) => change(e.target.value)}
+          onFocus={(e) => e.currentTarget.select()}
           onBlur={save}
           onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Enter") {
+              refocus.current = true;
+              e.currentTarget.blur();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancel();
+            }
           }}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "profile-birth-year-error" : undefined}
