@@ -294,9 +294,9 @@
   --color-glass-tab-dark: rgba(28, 28, 30, 0.82);
   /* Tab colours (Hao 22/10, boards AccTongQuan and AccKhamPha): the active bottom-nav tab and Tổng quan's active sub-tab. Hôm nay and
      Cài đặt stay cobalt. The -dark values wait for the dark column (V3-SPEC), like the other -dark tokens. */
-  --color-tab-teal: #008198;
+  --color-tab-teal: #007F96;
   --color-tab-teal-dark: #00D2E0;
-  --color-tab-orange: #C55300;
+  --color-tab-orange: #C45200;
   --color-tab-orange-dark: #FF9230;
   /* The colour wash at the top of a tab root (boards TintHomNay, AccTongQuan, AccKhamPha): its colour and its peak alpha per tab */
   --color-wash-home: var(--color-cobalt);

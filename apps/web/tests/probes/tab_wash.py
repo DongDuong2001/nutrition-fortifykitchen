@@ -3,7 +3,7 @@
 On a phone, Hôm nay, Tổng quan and Khám phá draw one TabWash: aria-hidden, pointer-events none, absolute, 240 px tall, its gradient the
 tab's colour at A, 0.4 A at 55 % and none at 100 % (Hôm nay cobalt 0.16, Tổng quan teal 0.18, Khám phá orange 0.28); the header
 and the content paint over it. From 1024 px the wash is hidden. Cài đặt and the pushed screens have none. Tổng quan's active chip is
-filled teal #008198 with white text; the others are as they were.
+filled teal #007F96 with white text; the others are as they were.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tab_wash.py
 """
 # PROBE_COVERS: components/ui/tab-wash.tsx components/ui/app-header.tsx components/ui/segmented.tsx components/overview/overview-frame.tsx app/globals.css app/(app)/(tabs)/**
@@ -66,7 +66,7 @@ def main():
             check(phone.locator("[data-tab-wash]").count() == 0, f"{route}: no wash")
         phone.goto(BASE + "/trends", wait_until="networkidle")
         chips = phone.evaluate("() => [...document.querySelectorAll('nav[aria-label=\"Tổng quan\"] a')].map((a) => { const s = a.querySelector('span'); const c = getComputedStyle(s); return [s.textContent.trim(), c.backgroundColor, c.color, a.getAttribute('aria-current')]; })")
-        check(chips[0][1] == "rgb(0, 129, 152)" and chips[0][2] == "rgb(255, 255, 255)" and chips[0][3] == "page", f"the active chip is teal with white text ({chips[0]})")
+        check(chips[0][1] == "rgb(0, 127, 150)" and chips[0][2] == "rgb(255, 255, 255)" and chips[0][3] == "page", f"the active chip is teal with white text ({chips[0]})")
         check(all(c[1] == "rgba(0, 0, 0, 0)" and c[2] == "rgb(99, 99, 102)" for c in chips[1:]), f"the others are unchanged ({chips[1:]})")
         desk = browser.new_context(viewport={"width": 1440, "height": 900}).new_page()
         for route, *_ in WASHED:

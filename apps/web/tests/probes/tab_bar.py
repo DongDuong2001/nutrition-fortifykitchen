@@ -1,7 +1,7 @@
 """The phone tab bar: its fill, its blur and its shadow, and (v3-cleanup item 9b) the colour of the active tab.
 
 Item 7: the glass is 0.86 white (rgba(255, 255, 255, 0.86)), keeps its 24 px blur, and its shadow reaches 10 px down and 28 px out at 0.16.
-Item 9b: Hôm nay and Cài đặt are cobalt, Tổng quan teal #008198 and Khám phá orange #C55300 when active, the label and the icon alike.
+Item 9b: Hôm nay and Cài đặt are cobalt, Tổng quan teal #007F96 and Khám phá orange #C45200 when active, the label and the icon alike.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tab_bar.py
 """
 # PROBE_COVERS: components/ui/bottom-nav.tsx components/ui/nav-icons.tsx app/globals.css app/(app)/(tabs)/**
@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 problems = []
-TABS = [("/app", "Hôm nay", "rgb(36, 87, 245)"), ("/trends", "Tổng quan", "rgb(0, 129, 152)"), ("/explore", "Khám phá", "rgb(197, 83, 0)"), ("/settings", "Cài đặt", "rgb(36, 87, 245)")]
+TABS = [("/app", "Hôm nay", "rgb(36, 87, 245)"), ("/trends", "Tổng quan", "rgb(0, 127, 150)"), ("/explore", "Khám phá", "rgb(196, 82, 0)"), ("/settings", "Cài đặt", "rgb(36, 87, 245)")]
 
 
 def check(cond, msg):

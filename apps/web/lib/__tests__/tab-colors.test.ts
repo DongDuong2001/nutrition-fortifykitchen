@@ -26,9 +26,9 @@ describe("the active tab's label on the tab bar", () => {
   for (const name of ["cobalt", "tab-teal", "tab-orange"]) {
     for (const [what, surface] of BEHIND) {
       const ratio = contrast(token(name), over(surface));
-      // Reported in the PR. Held: over a white card. Over the grey page the brief's #008198 and #C55300 are 4.497 and 4.480, a hair
-      // under 4.5 (#007F96 and #C45200 would reach it); over the ink hero card and black every tab colour, cobalt too, is 3.3 to 4.2
-      const held = what === "a white card";
+      // Reported in the PR. Held where the bar sits nearly always: over the grey page and over a white card. Over the ink hero card and
+      // black every tab colour, cobalt too, is 3.3 to 4.2 (the blur and saturation of the backdrop are not modelled)
+      const held = what === "the grey page" || what === "a white card";
       (held ? it : it.skip)(`${name} over ${what}: ${ratio.toFixed(2)}:1`, () => {
         expect(ratio).toBeGreaterThanOrEqual(4.5);
       });
