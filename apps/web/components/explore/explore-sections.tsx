@@ -34,7 +34,7 @@ const GROUPS = FOOD_CATEGORIES.filter((c) => c.key !== "cua_toi");
 
 /**
  * Nhóm món (V3): one white card, a 2-column grid of the food groups (icon tile, name, "<n> món"), the way the category
- * chips were on a phone. An odd last group spans both columns. From 1024 px the chips above the sections do this job.
+ * chips were on a phone. Only the groups that have foods; an odd last group spans both columns. From 1024 px the chips above the sections do this job.
  */
 function GroupGrid() {
   const { foods, pending } = useCatalogFoods();
@@ -44,14 +44,16 @@ function GroupGrid() {
     [foods]
   );
   const waiting = foods.length === 0 && pending;
+  // A group with no food is left out (overnight 22→23/10: "Đồ uống · 0 món" on the demo); while the catalogue loads, every group waits
+  const shown = waiting ? GROUPS : GROUPS.filter((g) => counts[g.key] > 0);
   return (
     <section aria-labelledby="explore-groups" className="flex flex-col gap-1 lg:hidden">
       <SectionTitle id="explore-groups" className="flex min-h-11 items-center">
         Nhóm món
       </SectionTitle>
       <nav aria-label="Nhóm món" className="grid grid-cols-2 overflow-hidden rounded-card border border-transparent bg-card shadow-ring">
-        {GROUPS.map((g, i) => {
-          const spans = i === GROUPS.length - 1 && i % 2 === 0;
+        {shown.map((g, i) => {
+          const spans = i === shown.length - 1 && i % 2 === 0;
           return (
             <Link
               key={g.key}
