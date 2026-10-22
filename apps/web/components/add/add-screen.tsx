@@ -45,6 +45,8 @@ import {
   MEAL_SLOTS,
 } from "@/lib/meal-slot";
 import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
+import { addToDraft, draftFor } from "@/lib/template-draft";
+import type { DayTemplateItem } from "@/lib/day-templates";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { Expand } from "@/components/ui/expand";
@@ -109,15 +111,46 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso, hydrated } = useDiary();
+  const diary = useDiary();
+  const { data, recentFoods, savedMeals, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso, hydrated, notify } = diary;
+  // feat/template-builder: /add?mau=<id> adds to a meal of the Ngày ăn mẫu being edited (lib/template-draft), never to the diary.
+  // Every add path goes through these three, so the portion's Thêm, the Khay, a one-tap recent and a Bữa ăn đã lưu all land in
+  // the draft; Chỉ ghi kcal is not offered (a template holds foods).
+  const mauParam = searchParams.get("mau");
+  const [templateTarget] = useState(() => (mauParam ? draftFor(mauParam) : null));
+  const toDraft = (slot: MealSlot, items: DayTemplateItem[]): boolean => {
+    if (!templateTarget || !addToDraft(templateTarget.id, slot, items)) return false;
+    notify(`Đã thêm ${items.length} món vào ${templateTarget.name} · ${getMealSlotNameVi(slot)}`);
+    return true;
+  };
+  const addFoodEntry: typeof diary.addFoodEntry = templateTarget
+    ? async (food, grams, slot, label) => toDraft(slot, [{ foodId: food.id, servingLabel: label?.trim() || gramsServingLabel(grams), grams }])
+    : diary.addFoodEntry;
+  const addFoodEntries: typeof diary.addFoodEntries = templateTarget
+    ? (items, slot) => toDraft(slot, items.map((t) => ({ foodId: t.food.id, servingLabel: t.label.trim() || gramsServingLabel(t.grams), grams: t.grams })))
+    : diary.addFoodEntries;
+  const addSavedMeal: typeof diary.addSavedMeal = templateTarget ? (meal, slot) => void toDraft(slot, meal.items) : diary.addSavedMeal;
+  // A reload (or a link) lost the draft: never fall back to the diary for foods meant for a template; say so and go back
+  const lostTemplate = mauParam !== null && templateTarget === null;
+  useEffect(() => {
+    if (!lostTemplate) return;
+    notify("Ngày ăn mẫu chưa lưu đã đóng. Mở lại để thêm món.");
+    goBack();
+  }, [lostTemplate, notify, goBack]);
   // cc-68: /add?date=YYYY-MM-DD adds to yesterday (the gate below sends a day that cannot be edited back to Hôm nay)
   // (the + of the nav opens /add?date= itself when Hôm nay shows yesterday: components/ui/add-opener; dayBehind is the fallback)
   const [dayBehind] = useState(() => homeDay());
   const dateParam = searchParams.get("date") ?? dayBehind;
   const addDay = hydrated && todayIso ? viewedIsoDate(dateParam, todayIso) : todayIso;
   const addToDay = addDay && addDay !== todayIso ? addDay : undefined;
-  const homeHref = addToDay ? `${HOME_ROUTE}?date=${addToDay}` : HOME_ROUTE;
-  const dayText = addToDay ? ` · ${formatDayLabel(addToDay, new Date(`${todayIso}T12:00:00+07:00`)).toLocaleLowerCase("vi-VN")}` : "";
+  // Template mode goes back to the editor (null: Back), never on to Hôm nay
+  const homeHref = templateTarget ? null : addToDay ? `${HOME_ROUTE}?date=${addToDay}` : HOME_ROUTE;
+  const dayText = templateTarget
+    ? ` · ${templateTarget.name}`
+    : addToDay
+      ? ` · ${formatDayLabel(addToDay, new Date(`${todayIso}T12:00:00+07:00`)).toLocaleLowerCase("vi-VN")}`
+      : "";
+  const slotHint = templateTarget ? "Vào ngày ăn mẫu, không ghi vào nhật ký" : null;
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -798,7 +831,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       onAddSavedMeal={addSavedMealToMeal}
       onQuickKcal={() => setQuickOpen(true)}
       showCarousels={ready && showShortcuts}
-      showQuick={ready && filter === "all"}
+      showQuick={ready && filter === "all" && !templateTarget}
     />
   );
 
@@ -881,7 +914,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   </svg>
                 </button>
                 <div className="text-xs text-secondary mt-0.5">
-                  Tự chọn theo giờ trong ngày · bấm để đổi bữa
+                  {slotHint ?? "Tự chọn theo giờ trong ngày · bấm để đổi bữa"}
                 </div>
               </div>
             </header>
@@ -1062,7 +1095,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   <span className="text-body-lg font-normal">
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText} <span aria-hidden="true">⌄</span>
                   </span>
-                  <span className="text-xs font-normal text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</span>
+                  <span className="text-xs font-normal text-secondary">{slotHint ?? "Tự chọn theo giờ trong ngày · chạm để đổi"}</span>
                 </button>
                 <span aria-hidden="true" />
               </div>

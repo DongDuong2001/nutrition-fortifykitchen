@@ -179,6 +179,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-23a");
     expect(r?.date).toBe("23/10");
+    expect(r?.items.map((i) => i.title)).toContain("Tự tạo ngày ăn mẫu");
     expect(r?.items.map((i) => i.title)).toContain("Dễ dùng hơn trên máy tính");
     expect(r?.items.map((i) => i.title)).toContain("Hôm nay dễ đọc hơn");
     expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
