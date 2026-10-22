@@ -34,7 +34,9 @@ export const RELEASES: readonly Release[] = [
   // feat/v3-redesign + feat/compare-in-add + feat/ngay-mau + feat/rename-labels (Hao 22/10): one entry for the stack, on top of 21c, which is live. The
   // tour points at Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab,
   // So sánh in the portion panel, the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero when the day has no food yet) and the "Chép ngày ăn mẫu"
-  // pill of an empty day (the meals' headers when the day already has food)
+  // pill of an empty day (the meals' headers when the day already has food).
+  // custom-food-nutrients (Hao 22/10): Tự nhập takes every nutrient on a label. The form is not on Hôm nay, so its step points at
+  // + Thêm vi chất khác where it is on screen and at the + of the bar on Hôm nay (fallback)
   {
     id: "2026-10-22a",
     date: "22/10",
@@ -46,6 +48,11 @@ export const RELEASES: readonly Release[] = [
       { icon: "bars", title: "So sánh món ngay khi đang thêm", body: "Chọn một món để thêm, chạm So sánh ngay dưới số kcal rồi chọn thêm món để xem cạnh nhau." },
       { icon: "meal", title: "Ngày ăn mẫu", body: "Lưu cả ngày thành mẫu ở nút ⋯ của Hôm nay. Ngày còn trống thì chạm Chép ngày ăn mẫu để chép lại bằng một chạm, Hoàn tác được." },
       { icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." },
+      {
+        icon: "meal",
+        title: "Nhập đủ chất xơ, đường và mọi vi chất trên nhãn",
+        body: "Tự nhập món giờ có chất xơ, đường, chất béo bão hòa, trans, cholesterol và sodium theo thứ tự trên nhãn. Chạm + Thêm vi chất khác để nhập thêm vitamin và khoáng chất.",
+      },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
@@ -54,6 +61,7 @@ export const RELEASES: readonly Release[] = [
       { target: "portion-compare", fallback: "portion-detail", title: "So sánh món", body: "Đang chọn khẩu phần, chạm So sánh để đặt món này cạnh món khác." },
       { target: "day-menu", fallback: "home-hero", title: "Lưu cả ngày thành mẫu", body: "Mở nút ⋯ trên thẻ kcal rồi chọn Lưu ngày này thành mẫu. Cần ngày đã có món." },
       { target: "day-template-pill", fallback: "meal-pill", title: "Chép ngày ăn mẫu", body: "Ngày còn trống thì chạm Chép ngày ăn mẫu ở đầu thẻ bữa ăn, chọn một mẫu hoặc Hôm qua." },
+      { target: "add-nutrient", fallback: "nav-add", title: "Nhập đủ vi chất", body: "Tạo món mới, chọn Tự nhập rồi chạm + Thêm vi chất khác để nhập mọi chất trên nhãn." },
     ],
   },
   // swap-ingredients (Hao 21/10, in 21c because 21c is not live yet: no release 21d): in Thành phần a part with alternatives has "Đổi nguyên liệu"

@@ -8,10 +8,13 @@ export interface FoodSearchFieldProps {
   className?: string;
   /** "sheet": the + sheet's V3 field (no border, a 2 px cobalt ring while focused, a filled-circle clear button). Default: the Khám phá field. */
   tone?: "default" | "sheet";
+  /** What the field searches (its accessible name) and its placeholder: foods by default. */
+  label?: string;
+  placeholder?: string;
 }
 
 /** The "Tìm món" search field shared by the add sheet and Khám phá. */
-export function FoodSearchField({ value, onChange, inputRef, className = "", tone = "default" }: FoodSearchFieldProps) {
+export function FoodSearchField({ value, onChange, inputRef, className = "", tone = "default", label = "Tìm món", placeholder = "Tìm món: cơm, trứng, chà là…" }: FoodSearchFieldProps) {
   const sheet = tone === "sheet";
   return (
     <label
@@ -28,7 +31,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "", ton
         <circle cx="11" cy="11" r="7" />
         <path d="M20 20l-3.5-3.5" />
       </svg>
-      <span className="sr-only">Tìm món</span>
+      <span className="sr-only">{label}</span>
       <input
         ref={inputRef}
         type="search"
@@ -37,11 +40,11 @@ export function FoodSearchField({ value, onChange, inputRef, className = "", ton
         autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
-        aria-label="Tìm món"
+        aria-label={label}
         data-testid="food-search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Tìm món: cơm, trứng, chà là…"
+        placeholder={placeholder}
         className="min-w-0 flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-11 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
       />
       {value && (

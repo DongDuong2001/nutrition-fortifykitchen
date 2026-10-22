@@ -49,7 +49,7 @@ export interface TipContext extends PortionControls {
  * Portion controls on screen (lib/tour-bus Presence): the unit stepper (supplements, món Việt, cans), and cc-53b's ×N
  * row, Sống | Chín switch, egg Quả | Gam and the tray's rows.
  */
-export type PortionControls = Partial<Record<"stepper" | "multiply" | "cook" | "egg" | "tray", boolean>>;
+export type PortionControls = Partial<Record<"stepper" | "multiply" | "cook" | "egg" | "tray" | "add-nutrient", boolean>>;
 
 /** The share tip waits until today holds this many foods. */
 export const SHARE_TIP_MIN_FOODS = 3;
@@ -245,6 +245,15 @@ export const TIPS: readonly Tip[] = [
     note: "Danh sách nguyên liệu của món chỉ có trên máy này.",
     used: ["create-food"],
     when: (c) => c.pathname === "/foods/new",
+  },
+  // custom-food-nutrients: + Thêm vi chất khác is on Tự nhập only, so the tip waits for the button (lib/tour-bus presence)
+  {
+    id: "food-new-nutrients",
+    target: "add-nutrient",
+    title: "Nhập đủ vi chất trên nhãn",
+    body: "Nhãn có thêm Vitamin C, Magnesium hay chất khác? Chạm + Thêm vi chất khác, chọn chất rồi nhập số. Ô để trống là chưa có dữ liệu.",
+    used: ["add-nutrient"],
+    when: (c) => c.pathname === "/foods/new" && c["add-nutrient"] === true,
   },
   {
     id: "training",
