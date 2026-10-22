@@ -309,6 +309,8 @@ export function FoodList({
 }) {
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
   const { listRef, rowsOf } = useRowMotion(meals, dayKey);
+  // The grey dot's legend shows only when a grey dot is on screen (overnight 22→23/10); "chạm tên bữa" is the meal-focus tip
+  const anyMissing = meals.some((m) => m.entries.some((e) => missingMicros(e)));
   const pull = usePullRefresh(listRef, onPullRefresh, !select && !readOnly);
   // The pill keeps its place while the empty row closes (the first food of the day)
   const lastPill = useRef<NonNullable<typeof templatePill> | null>(null);
@@ -386,8 +388,12 @@ export function FoodList({
                 type="button"
                 aria-pressed={mealSelected}
                 aria-label={`Xem riêng ${meal.fullName.toLocaleLowerCase("vi-VN")}`}
-                onClick={() => onMeal(meal.slot)}
+                onClick={() => {
+                  markUsed("meal-focus");
+                  onMeal(meal.slot);
+                }}
                 data-testid="meal-header"
+                data-tour="meal-name"
                 style={noSelect}
                 className="hit-44 relative flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
               >
@@ -451,9 +457,11 @@ export function FoodList({
           </section>
         );
       })}
-      <p className="m-0 p-3 text-xs leading-snug text-secondary lg:text-cap">
-        <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất · chạm tên bữa để xem riêng bữa đó
-      </p>
+      {anyMissing && (
+        <p data-missing-legend className="m-0 p-3 text-xs leading-snug text-secondary lg:text-cap">
+          <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất
+        </p>
+      )}
     </div>
   );
 }

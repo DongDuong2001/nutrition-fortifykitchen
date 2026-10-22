@@ -330,6 +330,15 @@ export const TIPS: readonly Tip[] = [
     used: ["leaderboard-optin"],
     when: (c) => c.pathname === "/explore/leaderboard",
   },
+  // Overnight 22→23/10: this was the second half of Hôm nay's footnote ("· chạm tên bữa để xem riêng bữa đó"), now a tip of its own
+  {
+    id: "meal-focus",
+    target: "meal-name",
+    title: "Xem riêng một bữa",
+    body: "Chạm tên bữa để xem riêng bữa đó. Chạm lần nữa để xem cả ngày.",
+    used: ["meal-focus"],
+    when: today,
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */
