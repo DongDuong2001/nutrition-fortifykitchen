@@ -3,7 +3,7 @@
 Phone (V3): a header on the grey page (no ink slab) with the Saira title (34 px on a tab root and on Thiết lập xong, 28 px on
 a pushed screen); one h1; the back chevron is at least 44 px where there is one.
 Desktop: no full-width ink element at the top of the window, h1 is 32 px, the header starts at the same top offset.
-Everywhere: no all-caps text outside the h1, Saira display text and Hôm nay's ink pills (cc-44); no horizontal scroll.
+Everywhere: no all-caps text outside the h1, Saira display text; no horizontal scroll.
 Screenshots: .screenshots/cc2-unify-{overview,diary,explore,settings,micros,food}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_unify.py
 """
@@ -70,8 +70,6 @@ HEADER_JS = """() => {
     if (!Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) continue;
     if (!vis(el)) continue;
     if (cs.fontFamily.toLowerCase().includes('saira')) continue;
-    // cc-44: Hôm nay's ink pills (meal and group headers) are uppercase by design
-    if (el.closest('[data-ink-pill]')) continue;
     caps.push((el.textContent || '').trim().slice(0, 30));
   }
   out.caps = caps;
