@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDiary } from "@/lib/diary-store";
 import { canLog } from "@/lib/diary-edits";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
-import { previousInAppPath, useBack } from "@/hooks/use-back";
+import { lastInAppPath, previousInAppPath, useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { lastPortionOf, resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
@@ -53,6 +53,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet, takeBackSheetEntries } from "@/lib/sheet-history";
 import { compareHref } from "@/lib/food-compare";
+import { catalogFoodById } from "@/lib/catalog";
 import { ComparePicker } from "@/components/foods/compare-picker";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
@@ -74,6 +75,32 @@ function subscribeDesktop(onChange: () => void) {
   return () => mq.removeEventListener("change", onChange);
 }
 const desktopNow = () => window.matchMedia(DESKTOP_QUERY).matches;
+
+// fix/compare-back: So sánh from a food's portion sheet goes to the comparison page (it replaces the picker's history entry), and
+// Back lands on the + sheet's own entry, a new AddScreen. A one-shot note (sessionStorage, read once by the next + sheet that came
+// from /foods/compare) brings it back as So sánh left it: the food's portion sheet with its amount, the search, the filter, the
+// meal, the Khay and the list's place. The portion sheet opens on a new entry, so Back then goes to the list, and once more closes.
+const RETURN_KEY = "h1t_add_return_v1";
+interface AddReturn {
+  meal: MealSlot | null;
+  query: string;
+  filter: FoodFilter;
+  tray: { id: string; grams: number; label: string }[];
+  food: string;
+  grams: string;
+  label: string;
+  scroll: number;
+}
+function takeAddReturn(cameFrom: string | null): AddReturn | null {
+  try {
+    const raw = sessionStorage.getItem(RETURN_KEY);
+    sessionStorage.removeItem(RETURN_KEY);
+    if (!raw || !cameFrom?.startsWith("/foods/compare")) return null;
+    return JSON.parse(raw) as AddReturn;
+  } catch {
+    return null;
+  }
+}
 
 function AddFoodInner({ standalone }: { standalone: boolean }) {
   const router = useRouter();
@@ -391,6 +418,38 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     phoneScrollRef.current?.scrollTo({ top: 0 });
     desktopListRef.current?.scrollTo({ top: 0 });
   }, [query, filter]);
+
+  // Back from the comparison (RETURN_KEY). Where the screen came from is read in the first render, before the root layout files
+  // this route in the in-app history.
+  const [cameFrom] = useState(lastInAppPath);
+  const pendingScroll = useRef<number | null>(null);
+  useEffect(() => {
+    const back = takeAddReturn(cameFrom);
+    if (!back) return;
+    if (back.meal) setOverrideSlot(back.meal);
+    setQuery(back.query);
+    setFilter(back.filter);
+    setTray(
+      back.tray.flatMap((t) => {
+        const food = catalogFoodById(t.id);
+        return food ? [{ food, grams: t.grams, label: t.label }] : [];
+      })
+    );
+    pendingScroll.current = back.scroll;
+    const food = catalogFoodById(back.food);
+    if (!food) return;
+    setSelectedFood(food);
+    setGramsInput(back.grams);
+    setSelectedServingLabel(back.label);
+    // Once, on the mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const el = isDesktop ? desktopListRef.current : phoneScrollRef.current;
+    if (pendingScroll.current === null || !ready || list.foods.length === 0 || !el) return;
+    el.scrollTop = pendingScroll.current;
+    pendingScroll.current = null;
+  }, [ready, list, isDesktop]);
 
   // The tour's search step starts with "phở" typed, so the results are already there to tap
   useEffect(() => {
@@ -1035,6 +1094,21 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         onClose={() => setCompareFoodId(null)}
         lockedIds={compareFoodId ? [compareFoodId] : []}
         onConfirm={(ids) => {
+          const back: AddReturn = {
+            meal: overrideSlot,
+            query,
+            filter,
+            tray: tray.map((t) => ({ id: t.food.id, grams: t.grams, label: t.label })),
+            food: compareFoodId ?? ids[0],
+            grams: gramsInput,
+            label: selectedServingLabel,
+            scroll: (isDesktop ? desktopListRef.current : phoneScrollRef.current)?.scrollTop ?? 0,
+          };
+          try {
+            sessionStorage.setItem(RETURN_KEY, JSON.stringify(back));
+          } catch {
+            // Storage blocked: Back finds the + sheet as a new one
+          }
           setCompareFoodId(null);
           navigateFromSheet(router, compareHref(ids));
         }}
