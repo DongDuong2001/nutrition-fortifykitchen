@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { NutrientGrid } from "@/components/overview/parts/nutrient-grid";
 import { Expand } from "@/components/ui/expand";
 import { HeroBar } from "@/components/overview/parts/hero-card";
@@ -26,10 +27,10 @@ function Chevron() {
 }
 
 /**
- * The Vi chất card of Tóm tắt (dark): how many of the 22 counted nutrients reach their target, one continuous
- * bar, and what is lowest. Tapping opens the NutrientGrid, lowest share first.
+ * The Vi chất card of Tóm tắt (dark): how many of the Level's nutrients reach their target (the count Hôm nay shows), one
+ * continuous bar, and what is lowest. Tapping opens the NutrientGrid of all 22, lowest share first, and "Đủ 22 vi chất ›".
  */
-export function MicroCard({ board }: { board: MicroBoard }) {
+export function MicroCard({ board, allHref }: { board: MicroBoard; allHref: string }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(0);
   const hint =
@@ -82,6 +83,9 @@ export function MicroCard({ board }: { board: MicroBoard }) {
             <span>Gần đủ {board.counts.ganDu}</span>
             <span>Đạt {board.counts.dat}</span>
           </p>
+          <Link href={allHref} className="mt-1 inline-flex min-h-11 items-center text-cap font-bold text-sky no-underline">
+            Đủ 22 vi chất ›
+          </Link>
       </Expand>
     </section>
   );
