@@ -6,7 +6,7 @@ import { en } from "@/lib/i18n/en";
 /**
  * Vietnamese must not move: every vi value, character for character, as it stood in the components before they read
  * from t() (settings-home-screen.tsx at 3f4e1cd; profile-cards.tsx AppCard, pwa/install-row.tsx and
- * sign-out-confirm.tsx at de3d1a1, the commit before this one). {x} is a template slot where the component had an
+ * sign-out-confirm.tsx at 72a9385, the branch's base). {x} is a template slot where the component had an
  * expression.
  */
 const ORIGINAL_VI: Record<string, string> = {

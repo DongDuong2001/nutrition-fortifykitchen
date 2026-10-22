@@ -279,6 +279,8 @@ A second AST pass lists visible strings with no diacritic (apps/web full scan, s
 
 ## Commands used
 
+The scripts below were run from the overnight scratchpad (session B, 23/10) and are not in the repo; the commands show the method.
+
 ```
 # scratchpad: /private/tmp/claude-501/-Users-haovu310-Documents-HITMicro/bfba1a71-8478-48b4-9494-1e41f7a3db73/scratchpad/i18n/
 node tools/extract.cjs raw.json        # TypeScript 5.9 AST (npx cache, nothing installed): JsxText, StringLiteral, NoSubstitutionTemplateLiteral, TemplateExpression

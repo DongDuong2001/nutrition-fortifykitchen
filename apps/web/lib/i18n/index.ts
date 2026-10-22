@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { loadSettings } from "@/lib/settings";
 import { vi, type MessageKey, type Message } from "./vi";
 import { en } from "./en";
@@ -52,10 +52,16 @@ export function translate(locale: Locale, key: MessageKey, params: Params = {}):
 
 export type T = (key: MessageKey, params?: Params) => string;
 
-/** t() for a component. Vietnamese on the server and the first paint (no mismatch); the saved locale after mount. */
+const noSubscribe = () => () => {};
+const serverLocale = (): Locale => "vi";
+
+/**
+ * t() for a component. Hydration renders Vietnamese (the server's snapshot, no mismatch), then the saved locale; a component
+ * mounted later (a sheet, a toast) reads the saved locale on its first render, so it never shows a frame of Vietnamese.
+ * The locale changes only on the Ngôn ngữ page, which is another screen, so there is nothing to subscribe to.
+ */
 export function useT(): T {
-  const [locale, setLocale] = useState<Locale>("vi");
-  useEffect(() => setLocale(currentLocale()), []);
+  const locale = useSyncExternalStore(noSubscribe, currentLocale, serverLocale);
   return (key, params) => translate(locale, key, params);
 }
 

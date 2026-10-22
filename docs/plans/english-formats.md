@@ -4,7 +4,7 @@ Repo `/Users/haovu310/Documents/HITMicro/nutrition-fk-main-gate` at `8eeb7b7`. E
 
 ## Summary
 
-- The app is hard-wired to **vi-VN** and to the **Asia/Ho_Chi_Minh** day. Numbers go through one module (`lib/format.ts`, 4 `Intl.NumberFormat` call sites + 3 module-level instances, all `"vi-VN"`), dates are built by hand as `dd/mm` strings with Vietnamese weekday words. There is **no** use of `toLocaleString`, `toLocaleDateString`, `toLocaleTimeString`, `Intl.RelativeTimeFormat`, `Intl.PluralRules` or `Intl.ListFormat` anywhere in app/components/hooks/lib (grep, non-test code).
+- The app is hard-wired to **vi-VN** and to the **Asia/Ho_Chi_Minh** day. Numbers go through one module (`lib/format.ts`, 4 `Intl.NumberFormat` call sites + 3 module-level instances, all `"vi-VN"`), dates are built by hand as `dd/mm` strings with Vietnamese weekday words. There is **no** use of `toLocaleString`, `toLocaleDateString`, `toLocaleTimeString`, `Intl.RelativeTimeFormat`, `Intl.PluralRules` or `Intl.ListFormat` anywhere in app/components/hooks/lib on main (grep, non-test code); the foundation's `lib/i18n/index.ts` is the first `Intl.PluralRules`.
 - `Intl.DateTimeFormat` appears only in `lib/vn-time.ts` (3 formatters, all using `sv-SE`/`en-US` as a parsing trick, not for display; they must NOT follow the UI locale).
 - Decimal handling is duplicated: one shared parser (`lib/parse-number.ts`) plus at least 10 inline `.replace(",", ".")` / `.replace(".", ",")` sites.
 - User settings `decimalSeparator` (comma/dot), `energyUnit` (kcal/kJ) and `language` exist (`lib/settings.ts:8-10`) and are saved by `/settings/language`, but **no formatter or parser reads them**.
