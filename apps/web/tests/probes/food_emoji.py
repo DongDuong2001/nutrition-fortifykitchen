@@ -68,7 +68,8 @@ def run(browser, width, text):
     pg.wait_for_timeout(800)
     big = pg.locator(f"main {TILE}").first.bounding_box()
     check(big is not None and round(big["width"]) == 112, f"{tag}: the food page has a 112 px tile ({big})")
-    check(pg.locator(f"main {TILE}").first.inner_text().strip() == "🍗", "Ức gà is 🍗")
+    check(pg.locator(f"main {TILE}").first.get_attribute("data-emoji") == "🍗", "Ức gà is 🍗")
+    check("🍗" not in pg.locator("h1").first.inner_text(), "the emoji is not part of the page's text")
     pg.screenshot(path=str(SHOTS / f"food-emoji-food-{tag}.png"))
     ctx.close()
 
