@@ -103,3 +103,4 @@ V3 is not clearly worse: every row is within the run-to-run spread (a first pass
 ## Gates
 - gate:fast after each commit: green.
 - **gate:full (709a5e1): all green, 749 s.** typecheck, lint:design, vitest, build:demo, test:align (74 s), test:hydration (107 s), probe:all (719 s: 134 PASS, 4 REPORT, 1 QUAR = design-floor-landing.py, 0 FAIL, 1 SKIP), check:live-bundle. The first gate:full on this branch was red (cc2_unify.py: the headers are transparent; cc_44.py: the share key wrapped at 100 %); both fixes are in the last two commits.
+- **gate:full after the ChipScroller review fix: all green, 748 s** (probe:all 134 PASS, 4 REPORT, 1 QUAR, 0 FAIL, 1 SKIP; test:align, test:hydration and check:live-bundle ok).
