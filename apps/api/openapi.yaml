@@ -143,6 +143,163 @@ components:
           nullable: true
         training_prefs:
           type: object
+        updated_at:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          description: updated_at again, under the web's name. Set on every update of the row (trigger, migration 000015).
+        macroMode:
+          $ref: '#/components/schemas/MacroMode'
+        macroRatios:
+          $ref: '#/components/schemas/MacroRatios'
+        macroFixed:
+          $ref: '#/components/schemas/MacroFixed'
+        customEnergyKcal:
+          $ref: '#/components/schemas/CustomEnergyKcal'
+        customTargets:
+          $ref: '#/components/schemas/CustomTargets'
+
+    MacroMode:
+      type: string
+      nullable: true
+      enum: [default, ratios, fixed, keto, null]
+      description: How the macros are split. null = not set (the coach formula).
+
+    MacroRatios:
+      type: object
+      nullable: true
+      description: Percentages of the energy target, each 0–100, adding up to 100 (±1). null = not set.
+      additionalProperties: false
+      required: [proteinPct, carbsPct, fatPct]
+      properties:
+        proteinPct:
+          type: number
+          minimum: 0
+          maximum: 100
+        carbsPct:
+          type: number
+          minimum: 0
+          maximum: 100
+        fatPct:
+          type: number
+          minimum: 0
+          maximum: 100
+      example: {"proteinPct": 25, "carbsPct": 55, "fatPct": 20}
+
+    MacroFixed:
+      type: object
+      nullable: true
+      description: Fixed grams per day, each 0–1000. null = not set.
+      additionalProperties: false
+      required: [proteinGrams, carbsGrams, fatGrams]
+      properties:
+        proteinGrams:
+          type: number
+          minimum: 0
+          maximum: 1000
+        carbsGrams:
+          type: number
+          minimum: 0
+          maximum: 1000
+        fatGrams:
+          type: number
+          minimum: 0
+          maximum: 1000
+      example: {"proteinGrams": 150, "carbsGrams": 200, "fatGrams": 60}
+
+    CustomEnergyKcal:
+      type: integer
+      nullable: true
+      minimum: 800
+      maximum: 8000
+      description: A daily kcal target the user set. null = not set.
+
+    CustomTargets:
+      type: object
+      nullable: true
+      description: >-
+        A custom daily target per vitamin or mineral, in the nutrient's own unit. Keys: the 21 DRI ids (calcium,
+        phosphorus, magnesium, iron, zinc, selenium, copper, manganese, potassium, vitamin_a, vitamin_d, vitamin_e,
+        vitamin_k, vitamin_c, b1, b2, b3, b5, b6, folate, b12; not sodium, not the macros); values 0–100000. An empty
+        object is stored as null. Stored only: the API's own targets (day summary, trends) do not read it yet.
+      additionalProperties:
+        type: number
+        minimum: 0
+        maximum: 100000
+      example: {"calcium": 1200, "vitamin_d": 20}
+
+    DayTemplateItem:
+      type: object
+      required: [foodId, servingLabel, grams]
+      properties:
+        foodId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: The food's id as the web has it (a catalogue uuid or a device-only id); not checked against nutrition.foods.
+        servingLabel:
+          type: string
+          maxLength: 80
+          example: 1 tô
+        grams:
+          type: number
+          minimum: 0
+          maximum: 5000
+
+    DayTemplateMeal:
+      type: object
+      required: [slot, items]
+      properties:
+        slot:
+          type: string
+          enum: [breakfast, lunch, pre_workout, snack, dinner]
+        items:
+          type: array
+          minItems: 1
+          maxItems: 40
+          items:
+            $ref: '#/components/schemas/DayTemplateItem'
+
+    DayTemplateInput:
+      type: object
+      required: [name, tag, meals]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+          description: Trimmed by the server; 1–60 characters after trimming.
+        tag:
+          type: string
+          enum: [tap, nghi, khac]
+        meals:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: At most one meal per slot.
+          items:
+            $ref: '#/components/schemas/DayTemplateMeal'
+        createdAt:
+          type: string
+          format: date-time
+          description: >-
+            When the template was first saved on the device (keeps its place in the list). Optional; absent or ahead of
+            the server's clock, the server's time is used. A replace keeps the first created_at.
+
+    DayTemplate:
+      allOf:
+        - $ref: '#/components/schemas/DayTemplateInput'
+        - type: object
+          required: [id, createdAt, updatedAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            updatedAt:
+              type: string
+              format: date-time
 
     FoodPortion:
       type: object
@@ -395,6 +552,20 @@ paths:
                   nullable: true
                 training_prefs:
                   type: object
+                macroMode:
+                  $ref: '#/components/schemas/MacroMode'
+                macroRatios:
+                  $ref: '#/components/schemas/MacroRatios'
+                macroFixed:
+                  $ref: '#/components/schemas/MacroFixed'
+                customEnergyKcal:
+                  $ref: '#/components/schemas/CustomEnergyKcal'
+                customTargets:
+                  $ref: '#/components/schemas/CustomTargets'
+      description: >-
+        The five target settings (macroMode, macroRatios, macroFixed, customEnergyKcal, customTargets) are optional
+        each: a key left out keeps the stored value, JSON null clears it, and an invalid value is a 400 whose
+        error.fields names the field.
       responses:
         '200':
           description: Profile updated successfully
@@ -402,6 +573,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        '400':
+          description: A target setting is invalid (error.fields has a message per field)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '401':
           description: Unauthorized
           content:
@@ -1056,6 +1233,105 @@ paths:
       responses:
         '200':
           description: Saved meal deleted
+
+  /day-templates:
+    get:
+      summary: The user's live Ngày ăn mẫu, newest first (created_at)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: The live templates (soft-deleted ones are left out)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DayTemplate'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /day-templates/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Made by the client, so a save sent again (offline) is the same template.
+        schema:
+          type: string
+          format: uuid
+    put:
+      summary: Create or replace a Ngày ăn mẫu (idempotent)
+      description: >-
+        Sending the same body again gives the same result. A template the user deleted comes back. At most 50 live
+        templates per user.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DayTemplateInput'
+      responses:
+        '200':
+          description: The template as stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DayTemplate'
+        '400':
+          description: The id is not a uuid, or a field is invalid (error.fields has a message per field)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: >-
+            ID_CONFLICT: the id is another user's template. CONFLICT: the user already has 50 live templates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      summary: Delete a Ngày ăn mẫu (soft delete, idempotent)
+      description: 200 again when sent again, and for an id that is not the user's (nothing is told about it).
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Deleted (or already gone)
+        '400':
+          description: The id is not a uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /days/{date}/entries/from-saved/{id}:
     post:
