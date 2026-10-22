@@ -32,7 +32,7 @@ import {
 } from "@/lib/day-templates";
 import { useDayTemplateRows, useTemplatePillHidden } from "@/hooks/use-day-templates";
 import type { PickerOption } from "./template-picker-sheet";
-import { pastDayData, useDiary } from "@/lib/diary-store";
+import { pastDayData, useDiary, useDiaryToast } from "@/lib/diary-store";
 import { formatDesktopDate } from "@/lib/format";
 import { kcalLabel, sumKcal } from "@/lib/kcal";
 import { trainingTile } from "@/lib/diary-rows";
@@ -55,7 +55,8 @@ import {
 import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
 import { FoodList } from "./food-list";
-import { markUsed } from "@/lib/onboarding-store";
+import { loadFlags, markShareNudgeDay, markUsed, onboardingDisabled } from "@/lib/onboarding-store";
+import { SHARE_NUDGE_TEXT, dayWellFed, shareNudgeDue } from "@/lib/share-nudge";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
@@ -84,11 +85,19 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
+/**
+ * share-spotlight: whether today was over the nudge's line the last time Hôm nay looked, for this app open. Module state, not a ref, so an
+ * add that leaves Hôm nay and comes back (Tự nhập, a food page) still counts as the day getting there; a new app open starts unknown.
+ */
+let lastWellFed: { iso: string; value: boolean } | null = null;
+
 /** The picker's first card: Chép hôm qua (Chép hôm kia on yesterday). */
 const YESTERDAY_OPTION = "yesterday";
 
-/** V3-SPEC §3.1: the share button is a 44 px glass circle with a cobalt glyph */
-const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt");
+/** share-spotlight (Hao 22/10): the share button is a 44 px glass pill, the cobalt glyph and "Chia sẻ" (people missed the bare icon) */
+const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt")
+  .replace("h-11 w-11", "min-h-11 gap-2 whitespace-nowrap")
+  .replace("p-0", "py-0 pl-3 pr-4 text-callout font-bold");
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
@@ -416,6 +425,24 @@ function HomeContent() {
     () => (mode.kind === "day" ? levelSummary(shown.nutrients, nutrientTargets, countedIds) : undefined),
     [mode.kind, shown, nutrientTargets, countedIds]
   );
+  // share-spotlight: when today first reaches 80 % of its kcal with five vitamins or minerals at Gần đủ or Đạt, a 4 s toast offers
+  // Chia sẻ (lib/share-nudge). It waits until Hôm nay is on screen and the toast up now (an add's Hoàn tác) has gone.
+  const dayValues = useMemo(() => valuesFromDay(day), [day]);
+  const wellFed = dayWellFed({ kcal: dayValues.kcal, kcalTarget: day.calories.targetMin, values: dayValues.nutrients, targets: nutrientTargets, ids: countedIds });
+  const [nudgePending, setNudgePending] = useState(false);
+  useEffect(() => {
+    if (!hydrated || isPast || !todayIso) return;
+    const was = lastWellFed?.iso === viewIso ? lastWellFed.value : null;
+    lastWellFed = { iso: viewIso, value: wellFed };
+    if (!onboardingDisabled() && shareNudgeDue({ flags: loadFlags(), todayIso, was, now: wellFed })) setNudgePending(true);
+  }, [hydrated, isPast, todayIso, viewIso, wellFed]);
+  const { toast } = useDiaryToast();
+  useEffect(() => {
+    if (!nudgePending || toast || pathname !== HOME_ROUTE || isPast || !todayIso) return;
+    setNudgePending(false);
+    markShareNudgeDay(todayIso);
+    notify(SHARE_NUDGE_TEXT, "share");
+  }, [nudgePending, toast, pathname, isPast, todayIso, notify]);
   const macroTargets = useMemo(
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
@@ -721,6 +748,7 @@ function HomeContent() {
               className={`${SHARE_BUTTON} disabled:cursor-default disabled:opacity-50`}
             >
               <IconShare />
+              <span aria-hidden="true">Chia sẻ</span>
             </button>
             </div>
           }

@@ -6,6 +6,8 @@
  * Each host says whether it has something to show (setInterruptionDue) and asks before it opens (claimInterruption): it may
  * only if nothing has opened yet and nothing of a higher rank is due. A tip also waits while a field has focus or a sheet is moving
  * (see interruptionBlockedByUi). Pure module state, no React; the hosts subscribe to be told when to look again.
+ * One exception (share-spotlight, Hao 22/10): once "Có gì mới" has opened and closed, one tip that is made to follow it (the share tip)
+ * may open right after it, in the same app open (followWhatsNew).
  */
 import { HOME_ROUTE } from "@/lib/nav";
 
@@ -14,6 +16,7 @@ export type Interruption = "whats-new" | "install" | "tip";
 const RANK: Record<Interruption, number> = { "whats-new": 0, install: 1, tip: 2 };
 
 let shown: Interruption | null = null;
+let followed = false;
 let version = 0;
 // Which hosts have said, at least once, whether they are due. Có gì mới is lazy and may come late: on Hôm nay the others wait for its
 // report (up to REPORT_GRACE_MS after the page loaded) so a slow start cannot give its place to the install pop-up or a tip.
@@ -67,6 +70,19 @@ export function claimInterruption(kind: Interruption): boolean {
   return true;
 }
 
+/** "Có gì mới" opened this app open and nothing has followed it yet: the one tip that may follow it can open now. */
+export function mayFollowWhatsNew(): boolean {
+  return shown === "whats-new" && !followed;
+}
+
+/** That tip is about to open: true when it may (and then nothing else follows). */
+export function claimFollowWhatsNew(): boolean {
+  if (!mayFollowWhatsNew()) return false;
+  followed = true;
+  notify();
+  return true;
+}
+
 /** What opened this app open, if anything. */
 export function interruptionShown(): Interruption | null {
   return shown;
@@ -86,6 +102,7 @@ export function subscribeInterruption(listener: () => void): () => void {
 export function resetInterruptions(): void {
   reported.clear();
   shown = null;
+  followed = false;
   version = 0;
   due.clear();
   listeners.clear();

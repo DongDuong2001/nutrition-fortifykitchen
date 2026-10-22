@@ -17,6 +17,12 @@ export interface Tip {
   round?: boolean;
   /** A primary button that closes the tip and does what it explains ("Thử ngay"); "Đã hiểu" then stays as a text button */
   tryLabel?: string;
+  /** The text button in place of "Đã hiểu" when closing the tip only puts it off ("Để sau"); the card then has no "Tắt mọi mẹo" */
+  laterLabel?: string;
+  /** Shown again after it was seen, as long as this holds (the share tip: until "Để sau" twice). Without it a tip shows once. */
+  again?: (flags: OnboardingFlags) => boolean;
+  /** May open right after "Có gì mới" closes, in the same app open (lib/interruption followWhatsNew) */
+  afterWhatsNew?: boolean;
   /** The usage events that mean the user already knows this feature */
   used: readonly string[];
   /** It explains something inside an open sheet: the only tips that may show while one is open */
@@ -51,8 +57,8 @@ export interface TipContext extends PortionControls {
  */
 export type PortionControls = Partial<Record<"stepper" | "multiply" | "cook" | "egg" | "tray" | "add-nutrient", boolean>>;
 
-/** The share tip waits until today holds this many foods. */
-export const SHARE_TIP_MIN_FOODS = 3;
+/** share-spotlight: "Để sau" this many times and the share tip stops. */
+export const SHARE_TIP_LATER_MAX = 2;
 
 const home = (c: TipContext) => c.pathname === HOME_ROUTE;
 const today = (c: TipContext) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday > 0;
@@ -83,6 +89,20 @@ export const TIPS: readonly Tip[] = [
     used: ["retry-unsaved"],
     when: (c) => today(c) && (c.unsaved ?? 0) > 0,
   },
+  // share-spotlight (Hao 22/10): people miss the share button. Today with one food or more (an empty day makes an empty image), until
+  // the account shares (or taps Thử ngay) or puts it off twice; first of Hôm nay's tips, and the one that may follow "Có gì mới"
+  {
+    id: "home-share",
+    target: "home-share",
+    tryLabel: "Thử ngay",
+    laterLabel: "Để sau",
+    title: "Chia sẻ ngày ăn của bạn",
+    body: "Ảnh tóm tắt đẹp, gửi ngay cho bạn bè hoặc HLV.",
+    used: ["share-day", "share-tip-try"],
+    again: (f) => (f.shareLater ?? 0) < SHARE_TIP_LATER_MAX,
+    afterWhatsNew: true,
+    when: today,
+  },
   {
     id: "home-logged",
     target: "home-food-list",
@@ -98,16 +118,6 @@ export const TIPS: readonly Tip[] = [
     body: "Chạm nút + màu xanh ở dòng tên bữa để thêm món vào bữa ăn đó.",
     used: ["meal-add"],
     when: today,
-  },
-  {
-    id: "home-share",
-    target: "home-share",
-    round: true,
-    tryLabel: "Thử ngay",
-    title: "Chia sẻ ngày ăn của bạn",
-    body: "Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng.",
-    used: ["share-day"],
-    when: (c) => today(c) && c.foodsToday >= SHARE_TIP_MIN_FOODS,
   },
   // Ngày ăn mẫu (feat/ngay-mau): the pill is on an empty day of Hôm nay that can be added to (today, yesterday), so the tip waits there
   {
@@ -331,14 +341,28 @@ export const TIP_GAP_MS = 24 * 3600_000;
  * While a sheet is open only the sheet's own tips can show (the page's would point under it). Given `now`, nothing
  * shows within TIP_GAP_MS of the last tip shown (without it the pick is as before).
  */
-export function pickTip({ ctx, flags, tourActive, now }: { ctx: TipContext; flags: OnboardingFlags; tourActive: boolean; now?: number }): Tip | null {
+export function pickTip({
+  ctx,
+  flags,
+  tourActive,
+  now,
+  afterWhatsNew = false,
+}: {
+  ctx: TipContext;
+  flags: OnboardingFlags;
+  tourActive: boolean;
+  now?: number;
+  /** "Có gì mới" was what opened this app open: only a tip that may follow it can show */
+  afterWhatsNew?: boolean;
+}): Tip | null {
   if (tourActive || flags.tipsOff) return null;
   if (now !== undefined && flags.tipShownAt != null && now - flags.tipShownAt < TIP_GAP_MS) return null;
-  return TIPS.find((t) => tipDue(t, ctx, flags)) ?? null;
+  return TIPS.find((t) => (!afterWhatsNew || t.afterWhatsNew) && tipDue(t, ctx, flags)) ?? null;
 }
 
-/** This tip fits the screen and the user has neither seen it nor used what it explains. */
+/** This tip fits the screen, the user has not seen it (or it may show again) and has never used what it explains. */
 export function tipDue(tip: Tip, ctx: TipContext, flags: OnboardingFlags): boolean {
   if (ctx.sheetOpen && !tip.inSheet) return false;
-  return tip.when(ctx) && !flags.seen.includes(tip.id) && !tip.used.some((u) => flags.used.includes(u));
+  const seen = tip.again ? !tip.again(flags) : flags.seen.includes(tip.id);
+  return tip.when(ctx) && !seen && !tip.used.some((u) => flags.used.includes(u));
 }

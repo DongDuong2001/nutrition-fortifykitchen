@@ -76,12 +76,21 @@ def interruptions():
         pg.wait_for_timeout(7000)
         seen = set(pg.evaluate("[...window.__seen]"))
         check("whats-new" in seen, f"1: Có gì mới opens first ({sorted(seen)})")
-        check("tip" not in seen, "1: and no tip opens over it or after it in the same app open")
+        check("tip" not in seen, "1: and no tip opens over it")
         later = pg.get_by_role("button", name="Để sau")
         if later.count():
             later.first.click()
         pg.wait_for_timeout(4000)
-        check("tip" not in set(pg.evaluate("[...window.__seen]")), "1: …even after Có gì mới is closed (one interruption per app open)")
+        # share-spotlight (Hao 22/10): the share tip is the one tip that may follow Có gì mới once it is closed; no other tip, and nothing after it
+        tip_text = pg.locator('[data-onboarding-card]:not([data-state="closed"])').all_inner_texts()
+        check("tip" not in set(pg.evaluate("[...window.__seen]")) or (len(tip_text) == 1 and "Chia sẻ ngày ăn của bạn" in tip_text[0]), f"1: after Có gì mới is closed only the share tip may follow ({tip_text[:1]})")
+        later = pg.locator('[data-onboarding-card]').get_by_role("button", name="Để sau")
+        if later.count():
+            later.first.click()
+            pg.wait_for_timeout(500)
+        pg.evaluate("window.__seen = new Set()")
+        pg.wait_for_timeout(4000)
+        check("tip" not in set(pg.evaluate("[...window.__seen]")), "1: …and nothing after it (one interruption per app open, plus the share tip)")
         ctx.close()
         # a slow start (slow network, a slow CPU): Có gì mới is lazy and late, the install pop-up and a tip are due too; Có gì mới still wins
         due_install = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": False, "firstSeenIso": "2026-01-01"}}
@@ -104,7 +113,8 @@ def interruptions():
         home(pg)
         pg.wait_for_timeout(5000)
         check("tip" in set(pg.evaluate("[...window.__seen]")), "1: the next app open shows a tip")
-        got = pg.get_by_role("button", name="Đã hiểu")
+        # The first tip of Hôm nay is the share tip now (Để sau), the others close with Đã hiểu
+        got = pg.locator('[data-onboarding-card]').get_by_role("button", name=re.compile("^(Đã hiểu|Để sau)$"))
         if got.count():
             got.first.click()
             pg.wait_for_timeout(1500)
@@ -114,7 +124,7 @@ def interruptions():
         ctx.close()
         # a tip may come over the field the sheet focused itself (the add tips belong there) but not over one the person has touched or typed in:
         # the sheet marks its own focus (data-autofocused) and the mark goes at the first touch or key
-        settings = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": HOME_TIPS, "used": [], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": RELEASE}, **NO_INSTALL}
+        settings = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": HOME_TIPS, "used": ["share-day"], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": RELEASE}, **NO_INSTALL}
         ctx, pg = seeded(browser, settings)
         home(pg)
         pg.wait_for_timeout(800)

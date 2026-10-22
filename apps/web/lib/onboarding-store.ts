@@ -1,6 +1,7 @@
 import { onboardingSwitchHonoured } from "./demo";
 import { loadSettings, saveSettings } from "./settings";
 import {
+  markShareLaterIn,
   markTipShownIn,
   markTourStartedIn,
   markUsedIn,
@@ -61,6 +62,11 @@ function update(change: (flags: OnboardingFlags) => OnboardingFlags): Onboarding
 export const markTipSeen = (id: string) => update((f) => markTipShownIn(f, id, Date.now()));
 /** A feature was used (long-press edit, meal + Thêm, tray add, compare, create food, 7/30 toggle …): its tip stops. */
 export const markUsed = (event: string) => update((f) => markUsedIn(f, event));
+/** share-spotlight: "Để sau" on the share tip (it stops after two) */
+export const markShareLater = () => update(markShareLaterIn);
+/** The share tip was shown on this day, or the "chia sẻ nhé?" toast: each keeps the other off that day */
+export const markShareTipDay = (iso: string) => update((f) => ({ ...f, shareTipIso: iso }));
+export const markShareNudgeDay = (iso: string) => update((f) => ({ ...f, shareNudgeIso: iso }));
 export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));
 export const finishTour = () => update((f) => ({ ...f, tourDone: true }));
 export const openReplay = () => update((f) => ({ ...f, replayOpened: true }));

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  claimFollowWhatsNew,
   claimInterruption,
   interruptionBlockedByUi,
+  mayFollowWhatsNew,
   interruptionShown,
   REPORT_GRACE_MS,
   mayInterrupt,
@@ -13,6 +15,26 @@ import {
 // fix/polish-1020 item 1: one interruption per app open, in the order Có gì mới > install pop-up > a tip.
 
 beforeEach(resetInterruptions);
+
+describe("the tip that follows Có gì mới (share-spotlight)", () => {
+  it("may open once, right after Có gì mới, and after nothing else", () => {
+    expect(mayFollowWhatsNew()).toBe(false);
+    expect(claimInterruption("whats-new")).toBe(true);
+    expect(claimInterruption("tip")).toBe(false);
+    expect(mayFollowWhatsNew()).toBe(true);
+    expect(claimFollowWhatsNew()).toBe(true);
+    expect(claimFollowWhatsNew()).toBe(false);
+    expect(mayFollowWhatsNew()).toBe(false);
+  });
+
+  it("not after the install pop-up or a tip", () => {
+    expect(claimInterruption("install")).toBe(true);
+    expect(claimFollowWhatsNew()).toBe(false);
+    resetInterruptions();
+    expect(claimInterruption("tip")).toBe(true);
+    expect(claimFollowWhatsNew()).toBe(false);
+  });
+});
 
 describe("one interruption per app open", () => {
   it("the first to ask opens; nothing else opens after it, whatever its rank", () => {

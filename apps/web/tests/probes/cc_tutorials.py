@@ -2,8 +2,8 @@
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
 - Several unseen releases: an account that saw 18b gets 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
-  Thử ngay runs the joined tour oldest first, capped at the newest 8: on Hôm nay that is 21c's two and 22a's six (So sánh món is in the portion panel;
-  custom-food-nutrients' + Thêm vi chất khác is the + of the bar there), so 21b's steps go too. Every older tour is cut by the cap
+  Thử ngay runs the joined tour oldest first, capped at the newest 8: on Hôm nay that is 21c's first and 22a's seven (So sánh món is in the portion
+  panel; custom-food-nutrients' + Thêm vi chất khác is the + of the bar there; share-spotlight points at the share button), so 21b's steps go too. Every older tour is cut by the cap
   (the older steps' own checks are in lib/__tests__/releases.test.ts). The counter reads n/8; Xong ends it,
   entries unchanged
 - An account that saw 18c gets 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d, with Thử ngay
@@ -42,20 +42,21 @@ OLD_TIPS = [
     "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
-RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# The newest 8 of the joined tour on Hôm nay: 21c's two (Đồ ăn của Minh Hào: the Khám phá tab; Đổi nguyên liệu: Thành phần, a meal's + on Hôm nay)
-# and 22a's six that are on Hôm nay: V3's meal +, Ngày tập pill and Khám phá tab, feat/ngay-mau's two (the ⋯ of the day, the Chép ngày ăn mẫu pill,
-# which is the meal headers when the day has food) and custom-food-nutrients' + Thêm vi chất khác (the + of the bar); So sánh món is in the
-# portion panel, and 21b and everything older is cut by the cap
+# share-spotlight: the share tip shows again after it was seen (until Để sau twice) and may follow Có gì mới; a returning user has shared once
+RETURNING = {"tourDone": True, "seen": OLD_TIPS, "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
+# The newest 8 of the joined tour on Hôm nay: 21c's first (Đồ ăn của Minh Hào: the Khám phá tab) and 22a's seven that are on Hôm nay: V3's meal +,
+# Ngày tập pill and Khám phá tab, feat/ngay-mau's two (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has
+# food), custom-food-nutrients' + Thêm vi chất khác (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel,
+# and 21c's Đổi nguyên liệu, 21b and everything older are cut by the cap
 STEPS = [
     ("Đồ ăn của Minh Hào", ["nav-explore"]),
-    ("Đổi nguyên liệu", ["meal-add", "nav-add"]),
     ("Thêm vào từng bữa", ["meal-add", "nav-add"]),
     ("Ngày tập", ["training-pill", "day-date"]),
     ("Nhóm món có màu", ["nav-explore"]),
     ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]),
     ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]),
     ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]),
+    ("Chia sẻ ngày ăn", ["home-share"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
@@ -196,8 +197,8 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped. Step 1 (Đồ ăn của Minh Hào) points at the Khám phá tab: with no tab, step 2 (Đổi nguyên liệu, which
-    # falls back to a meal's +) shows
+    # Steps whose target is gone are skipped. Step 1 (Đồ ăn của Minh Hào) points at the Khám phá tab: with no tab, step 2 (Thêm vào từng bữa, a
+    # meal's +) shows
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     check("Mới · 1/8" in step_text(pg), "skip: on step 1")
@@ -212,17 +213,17 @@ def skipped(browser):
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
     check(ring_holds(pg, ["meal-add", "nav-add"]) is not None, "skip: the ring is on a meal's +")
     # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the meal +s and the bar's + gone,
-    # steps 2 and 3 have nothing: step 4 (the Ngày tập pill) shows
+    # step 2 has nothing: step 3 (the Ngày tập pill) shows
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"], [data-tour=\"dish-parts\"]').forEach(el => el.remove())")
     for _ in range(30):
         pg.wait_for_timeout(500)
-        if "Mới · 4/8" in step_text(pg):
+        if "Mới · 3/8" in step_text(pg):
             break
-    check("Mới · 4/8" in step_text(pg), f"gone mid-step: steps 2 and 3 are skipped and the Ngày tập pill shows ({step_text(pg)[:30]!r})")
+    check("Mới · 3/8" in step_text(pg), f"gone mid-step: step 2 is skipped and the Ngày tập pill shows ({step_text(pg)[:30]!r})")
     check(ring_holds(pg, ["training-pill", "day-date"]) is not None, "gone mid-step: the ring is on the Ngày tập pill")
     shot(pg, "skipped")
     # With the pill, the date, the Khám phá tab, the ⋯ and the meal headers gone too, the last steps have no target: the tour ends
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"training-pill\"], [data-tour=\"day-date\"], [data-tour=\"nav-explore\"], [data-tour=\"dish-parts\"], [data-tour=\"explore-minh-hao\"], [data-tour=\"day-menu\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"]').forEach(el => el.removeAttribute('data-tour'))")
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"training-pill\"], [data-tour=\"day-date\"], [data-tour=\"nav-explore\"], [data-tour=\"dish-parts\"], [data-tour=\"explore-minh-hao\"], [data-tour=\"day-menu\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"home-share\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name=re.compile("^(Tiếp|Xong)$")).click()
     for _ in range(40):
         pg.wait_for_timeout(500)

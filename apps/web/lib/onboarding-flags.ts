@@ -19,11 +19,30 @@ export interface OnboardingFlags {
   whatsNewSeen: string | null;
   /** When the last tip was shown (epoch ms): at most one tip in 24 h (design-floor, V3 22/10) */
   tipShownAt?: number | null;
+  /** share-spotlight: how many times "Để sau" closed the share tip (it stops at 2) */
+  shareLater?: number;
+  /** The day (YYYY-MM-DD) the share tip was shown: the "chia sẻ nhé?" toast never comes the same day */
+  shareTipIso?: string | null;
+  /** The day the "chia sẻ nhé?" toast was shown: at most once a day */
+  shareNudgeIso?: string | null;
 }
 
-export const DEFAULT_FLAGS: OnboardingFlags = { tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null, tipShownAt: null };
+export const DEFAULT_FLAGS: OnboardingFlags = {
+  tourDone: false,
+  tipsOff: false,
+  seen: [],
+  used: [],
+  replayOpened: false,
+  tourStartedIso: null,
+  whatsNewSeen: null,
+  tipShownAt: null,
+  shareLater: 0,
+  shareTipIso: null,
+  shareNudgeIso: null,
+};
 
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+const isoDay = (v: unknown): string | null => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
 
 /** Whatever was stored, as flags: a wrong type falls back to the default for that flag. */
 export function parseFlags(raw: unknown): OnboardingFlags {
@@ -35,9 +54,12 @@ export function parseFlags(raw: unknown): OnboardingFlags {
     seen: strings(v.seen),
     used: strings(v.used),
     replayOpened: v.replayOpened === true,
-    tourStartedIso: typeof v.tourStartedIso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.tourStartedIso) ? v.tourStartedIso : null,
+    tourStartedIso: isoDay(v.tourStartedIso),
     whatsNewSeen: typeof v.whatsNewSeen === "string" ? v.whatsNewSeen : null,
     tipShownAt: typeof v.tipShownAt === "number" && Number.isFinite(v.tipShownAt) ? v.tipShownAt : null,
+    shareLater: typeof v.shareLater === "number" && Number.isInteger(v.shareLater) && v.shareLater > 0 ? v.shareLater : 0,
+    shareTipIso: isoDay(v.shareTipIso),
+    shareNudgeIso: isoDay(v.shareNudgeIso),
   };
 }
 
@@ -50,6 +72,9 @@ export const markUsedIn = (flags: OnboardingFlags, event: string): OnboardingFla
 
 /** Turning tips back on starts them over (every tip can show once more); what was used stays used. */
 export const setTipsOffIn = (flags: OnboardingFlags, off: boolean): OnboardingFlags => ({ ...flags, tipsOff: off, seen: off ? flags.seen : [] });
+
+/** "Để sau" on the share tip: one more time it was put off. */
+export const markShareLaterIn = (flags: OnboardingFlags): OnboardingFlags => ({ ...flags, shareLater: (flags.shareLater ?? 0) + 1 });
 
 export const markTourStartedIn = (flags: OnboardingFlags, iso: string): OnboardingFlags => ({ ...flags, tourStartedIso: iso });
 
