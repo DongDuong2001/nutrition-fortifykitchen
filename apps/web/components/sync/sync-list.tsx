@@ -108,9 +108,6 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
             Thử lại
           </PillButton>
         )}
-        <PillButton type="button" variant="secondary" onClick={onClose}>
-          Đóng
-        </PillButton>
       </div>
     </Sheet>
   );

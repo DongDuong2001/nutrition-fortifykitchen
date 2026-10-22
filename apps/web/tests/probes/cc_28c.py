@@ -148,7 +148,7 @@ def run(browser, size, tag):
     check("Hỏi HLV để lên Level" in dlg.inner_text(), f"{tag} explainer: how to move up")
     check(len({round(r.bounding_box()["x"]) for r in rows.all()}) == 1 and len({round(r.bounding_box()["width"]) for r in rows.all()}) == 1, f"{tag} explainer: rows share edges")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-explainer-{w}.png"))
-    dlg.get_by_role("button", name="Đóng").last.click()
+    dlg.get_by_role("button", name="Đóng").click()
     pg.wait_for_timeout(300)
 
     # Hôm nay: the label and the linked card

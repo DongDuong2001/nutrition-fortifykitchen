@@ -233,9 +233,6 @@ export function DayMenuSheet({
         <span className="text-callout font-bold text-text">Lưu ngày này thành mẫu</span>
         <span className="text-cap leading-tight text-secondary">{hasEntries ? "Chép lại cả ngày bằng một chạm" : "Chưa có món nào"}</span>
       </button>
-      <PillButton type="button" variant="secondary" onClick={onClose}>
-        Đóng
-      </PillButton>
     </Sheet>
   );
 }

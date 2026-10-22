@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "./ui/sheet";
 import { useDiary } from "../lib/diary-store";
 import { dayEntries, dayStatus, entriesKcal, monthGrid, monthOf, shiftMonth, type DayStatus } from "../lib/day-history";
@@ -43,9 +42,6 @@ export function CalendarSheet({ open, onClose, selectedIso, onPick }: CalendarSh
   return (
     <Sheet open={open} onClose={onClose} title="Chọn ngày" desktopDialog>
       <CalendarMonth selectedIso={selectedIso} onPick={onPick} />
-      <PillButton type="button" variant="secondary" onClick={onClose}>
-        Đóng
-      </PillButton>
     </Sheet>
   );
 }
