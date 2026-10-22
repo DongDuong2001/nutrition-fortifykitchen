@@ -121,7 +121,7 @@ function FoodDetailInner() {
   if (isRecipe && !recipesReady) {
     return (
       <AppShell>
-        <h1 className="sr-only">Món của tôi</h1>
+        <h1 className="sr-only">Món ăn của tôi</h1>
         <div role="status" aria-busy="true" className="mx-auto h-40 w-full max-w-[560px] rounded-2xl bg-level-empty motion-safe:animate-pulse lg:mx-0" />
       </AppShell>
     );
@@ -172,8 +172,9 @@ function FoodDetailInner() {
         title={food.nameVi}
         subtitle={
           recipe ? (
-            <span>
-              Món của tôi · {recipe.servings} phần · {recipe.ingredients.length} nguyên liệu
+            // 13 px so the line stays on one line between the Back and the heart (254 px at 390) with the longer "Món ăn của tôi"
+            <span className="text-cap lg:text-sm">
+              Món ăn của tôi · {recipe.servings} phần · {recipe.ingredients.length} nguyên liệu
             </span>
           ) : (
           <span className="inline-flex items-center flex-wrap gap-1">
@@ -304,7 +305,7 @@ function FoodDetailInner() {
             variant="secondary"
             href={`/foods/new?from=${encodeURIComponent(food.id)}${searchParams.get("meal") ? `&meal=${searchParams.get("meal")}` : ""}`}
           >
-            Tùy chỉnh thành món của tôi
+            Tùy chỉnh món này
           </PillButton>
         )}
 

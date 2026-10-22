@@ -122,7 +122,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(600)
     detail_url = pg.url
     head = squash(pg.locator("header").first.text_content())
-    check("Cơm chiên thử" in head and "Món của tôi · 2 phần · 2 nguyên liệu" in head, f"{tag}: header subtitle ({head[:100]})")
+    check("Cơm chiên thử" in head and "Món ăn của tôi · 2 phần · 2 nguyên liệu" in head, f"{tag}: header subtitle ({head[:100]})")
     # cc-53b: a dish by the phần keeps its unit: a Phần | Gam toggle and a ×N amount, 1 phần by default
     units = pg.get_by_role("group", name="Đơn vị khẩu phần").locator("visible=true").first
     check(units.get_by_role("button", name="Phần", exact=True).get_attribute("aria-pressed") == "true", f"{tag}: Phần is the default unit")
@@ -140,7 +140,7 @@ def run(browser, size, tag):
     # reload keeps it
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("Món của tôi · 2 phần · 2 nguyên liệu" in squash(pg.locator("header").first.text_content()), f"{tag}: the recipe survives a reload")
+    check("Món ăn của tôi · 2 phần · 2 nguyên liệu" in squash(pg.locator("header").first.text_content()), f"{tag}: the recipe survives a reload")
 
     # edit
     pg.get_by_role("region", name="Trong 1 phần", exact=True).get_by_role("link", name="Sửa").click()

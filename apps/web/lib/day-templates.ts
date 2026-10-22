@@ -12,7 +12,7 @@ export { DAY_TEMPLATES_KEY, TEMPLATE_PILL_HIDDEN_KEY };
 
 /**
  * Ngày ăn mẫu (feat/ngay-mau): a whole day saved on this device and copied back into an empty day in one tap. Front end only, like
- * Bữa ăn của tôi (lib/saved-meals) and the macro split: nothing here reaches the server, and a copy goes through the same
+ * Bữa ăn đã lưu (lib/saved-meals) and the macro split: nothing here reaches the server, and a copy goes through the same
  * add path as Chép hôm qua (diary-store copyEntries). The foods and portions are the shape saved meals use.
  */
 export type DayTemplateTag = "tap" | "nghi" | "khac";
@@ -165,7 +165,7 @@ export function parseDayTemplates(raw: string | null): DayTemplate[] {
 
 // ---- what a copy adds, and what the cards show ----
 
-/** The saved foods of one meal as a saved meal, so the add path and its rules (no energy, gone from the catalogue) are the one Bữa ăn của tôi uses. */
+/** The saved foods of one meal as a saved meal, so the add path and its rules (no energy, gone from the catalogue) are the one Bữa ăn đã lưu uses. */
 const asSavedMeal = (template: DayTemplate, meal: DayTemplateMeal) => ({ id: template.id, name: template.name, items: meal.items, createdAt: template.createdAt });
 
 /** The entries one copy adds: one per food that still exists and has energy, in each meal's own slot, in the template's order. */

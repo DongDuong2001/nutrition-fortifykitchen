@@ -10,7 +10,7 @@ import { openSyncList } from "@/lib/sync-ui";
 import { usePathname } from "next/navigation";
 
 /**
- * The app's one toast, from the diary store. Every "Đã thêm …" (a tray, a portion, a recent, a Bữa ăn của tôi, Chỉ ghi kcal, a copy),
+ * The app's one toast, from the diary store. Every "Đã thêm …" (a tray, a portion, a recent, a Bữa ăn đã lưu, Chỉ ghi kcal, a copy),
  * "Đã xóa …" and "Đã chuyển …" offers Hoàn tác, "Đã lưu …" offers Xem (Khám phá), "Chưa lưu được món" offers Thử lại. Every action
  * ends its toast at once. The store ends it after its duration. cc-55: the countdown bar is
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).

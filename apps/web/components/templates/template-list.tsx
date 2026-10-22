@@ -12,9 +12,9 @@ import { formatAmount } from "@/lib/format";
 import { tagLabel } from "@/lib/day-templates";
 import { HOME_ROUTE } from "@/lib/home-route";
 
-const EMPTY_TEXT = "Chưa có ngày mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.";
+const EMPTY_TEXT = "Chưa có ngày ăn mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.";
 
-/** NMList: one card per saved day (name, tag, "N món · X kcal", a level bar against today's kcal target), then + Tạo ngày mẫu. */
+/** NMList: one card per saved day (name, tag, "N món · X kcal", a level bar against today's kcal target), then + Tạo ngày ăn mẫu. */
 export function DayTemplateList() {
   const { data, hydrated } = useDiary();
   const { rows } = useDayTemplateRows();
@@ -51,7 +51,7 @@ export function DayTemplateList() {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
         </svg>
-        Tạo ngày mẫu
+        Tạo ngày ăn mẫu
       </PillButton>
       <p className="m-0 text-center text-cap leading-snug text-secondary">Mẹo: ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.</p>
     </>

@@ -2,7 +2,7 @@ import type { FoodItem, FoodSourceRef } from "./foods";
 
 // Recipe dishes for mock and demo mode, with the raw ingredients they are made of (USDA SR Legacy rows, per 100 g).
 // Generated from food-research (batch 2, section 8). A dish carries `recipe`, so its food page offers
-// "Tùy chỉnh thành món của tôi". Per 100 g of the cooked dish; estimates, since the ratios are a home standard.
+// "Tùy chỉnh món này". Per 100 g of the cooked dish; estimates, since the ratios are a home standard.
 
 const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients`, verified: false });
 

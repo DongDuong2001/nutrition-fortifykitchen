@@ -290,7 +290,7 @@ export function FoodList({
   addDate?: string;
   isEmpty: boolean;
   /**
-   * The "Chép ngày mẫu" pill at the top of the meals card of an empty day (it opens the picker, which also holds Hôm qua), and its ×
+   * The "Chép ngày ăn mẫu" pill at the top of the meals card of an empty day (it opens the picker, which also holds Hôm qua), and its ×
    * (hides the pill for this day only). Absent: no pill, the plain empty line shows.
    */
   templatePill?: { onOpen: () => void; onHide: () => void; hideLabel: string } | null;
@@ -321,15 +321,11 @@ export function FoodList({
     <div ref={listRef} data-food-scroll className="min-w-0 flex-1 overflow-hidden rounded-card bg-card lg:min-h-0 lg:overflow-y-auto lg:overscroll-y-contain lg:border lg:border-card-border lg:shadow-card">
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {/* cc-64 (A8): the first food of the day closes this row (150 ms) while the food's row rises in, so the list does
-          not jump up 44 px. An empty day offers "Chép ngày mẫu" (NMEmpty); a day that is only viewed, or whose pill was hidden with
+          not jump up 44 px. An empty day offers "Chép ngày ăn mẫu" (NMEmpty); a day that is only viewed, or whose pill was hidden with
           its ×, keeps the plain line */}
       <Expand open={isEmpty && !!templatePill}>
         {shownPill && (
-          <>
-            {/* The empty line stays for screen readers while the pill stands in for it on the page */}
-            <p className="sr-only">{`Chưa có món nào ${dayWord}`}</p>
-            <TemplatePill onOpen={shownPill.onOpen} onHide={shownPill.onHide} hideLabel={shownPill.hideLabel} />
-          </>
+          <TemplatePill onOpen={shownPill.onOpen} onHide={shownPill.onHide} hideLabel={shownPill.hideLabel} emptyText={`Chưa có món nào ${dayWord}`} />
         )}
       </Expand>
       <Expand open={isEmpty && !templatePill} className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">

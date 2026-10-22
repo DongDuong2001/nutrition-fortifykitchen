@@ -5,7 +5,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, s
 - Tap a food: hero label and caption change, Sửa shows; tap again: back. Tap a meal header: meal mode and ⋯.
 - A food with a missing micronutrient has the grey dot; an empty slot reads "Chưa ăn · Thêm" and links to /add.
 - 20+ foods: only the list scrolls, meal headers stick.
-- Past day: ⋯ in meal mode opens a sheet with only Lưu thành.
+- Past day: ⋯ in meal mode opens a sheet with only Lưu bữa này.
 - Today: bars in the four level colours (Hao, 16/10), long press enters multi-select (Hao, 17/10), not /entry. Past day: four levels, no Sửa, no ⋯, no long press.
 - Links /micros?date= and /training?date=.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_22.py
@@ -167,7 +167,7 @@ def run(browser, size, tag):
     menu.click()
     pg.wait_for_timeout(300)
     sheet = pg.get_by_role("dialog").inner_text()
-    check("Lưu thành" in sheet and "Chép hôm qua" not in sheet and "Xóa bữa này" not in sheet, f"{tag} past-day sheet offers only Lưu thành")
+    check("Lưu bữa này" in sheet and "Chép hôm qua" not in sheet and "Xóa bữa này" not in sheet, f"{tag} past-day sheet offers only Lưu bữa này")
     if w == 390:
         pg.screenshot(path=os.path.join(SHOTS, "cc-22-fix-meal-past-390.png"))
     pg.keyboard.press("Escape")
@@ -215,11 +215,11 @@ def run(browser, size, tag):
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     go(pg, "/app")
-    # feat/ngay-mau: an empty day shows the Chép ngày mẫu pill in place of the "Chưa có món nào hôm nay" line (the line returns when its × hides the pill);
+    # feat/ngay-mau: an empty day shows the Chép ngày ăn mẫu pill in place of the "Chưa có món nào hôm nay" line (the line returns when its × hides the pill);
     # Chép hôm qua is the first card of the pill's picker, no longer a button of the day
-    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 1, f"{tag} Chép ngày mẫu pill on the empty day")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").count() == 1, f"{tag} Chép ngày ăn mẫu pill on the empty day")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{tag} no Chép hôm qua button on the empty day")
-    pg.get_by_role("button", name="Ẩn gợi ý ngày mẫu hôm nay").first.click()
+    pg.get_by_role("button", name="Ẩn gợi ý ngày ăn mẫu hôm nay").first.click()
     pg.wait_for_timeout(500)
     check("Chưa có món nào hôm nay" in pg.inner_text("body"), f"{tag} empty day line after the pill's ×")
     add = pg.get_by_role("link", name=re.compile("^Thêm vào Bữa sáng"))

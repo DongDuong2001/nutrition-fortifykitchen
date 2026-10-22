@@ -247,7 +247,7 @@ export function recipeToDraft(recipe: Recipe): RecipeDraft {
 }
 
 /**
- * The draft of "Tùy chỉnh thành món của tôi": a catalogue dish with a `recipe` becomes an editable recipe of the
+ * The draft of "Tùy chỉnh món này": a catalogue dish with a `recipe` becomes an editable recipe of the
  * user's own (named "<tên món> (của tôi)", one serving, its ingredients in grams, the cooked weight). Null when the
  * food has no recipe.
  */

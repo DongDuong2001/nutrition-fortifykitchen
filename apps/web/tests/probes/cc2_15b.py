@@ -125,7 +125,7 @@ def run(browser, name, size):
 
     go(pg, "/explore")
     t = text(pg)
-    for line in ("Món bạn vừa ghi sẽ hiện ở đây.", "Yêu thích · 0 món", "Bữa ăn của tôi · 0 bữa", "Món của tôi · 0 món"):  # V3: the empty states are the zero counts of the Của bạn rows
+    for line in ("Món bạn vừa ghi sẽ hiện ở đây.", "Yêu thích · 0 món", "Bữa ăn đã lưu · 0 bữa", "Món ăn của tôi · 0 món"):  # V3: the empty states are the zero counts of the Của bạn rows
         check(line in t, f"{where} explore: {line!r}")
     clean(pg, f"{where} explore")
     shot(pg, "explore", name)

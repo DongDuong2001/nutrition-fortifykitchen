@@ -1,4 +1,4 @@
-"""cc-42: the first-meal tour, the first-visit tips, the add tray, the create-food modes and "Tùy chỉnh thành món của tôi".
+"""cc-42: the first-meal tour, the first-visit tips, the add tray, the create-food modes and "Tùy chỉnh món này".
 
 Production demo build, 390x844 (and 1440x900 for the tips and the desktop tour). Every other probe starts with the tour and
 tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
@@ -9,7 +9,7 @@ tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
 - Tips: one per screen at 390 and 1440, none on the second visit, none after "Tắt mọi mẹo", none for a used feature
 - Tray: three foods ticked, one bar, Xem lại, one add, one undo for all three
 - Tạo món: Tính từ nguyên liệu by default, Tự nhập with the amber notice, multi-select ingredient picker, request button (demo)
-- Tùy chỉnh thành món của tôi: on a recipe dish only, pre-fills name and ingredients
+- Tùy chỉnh món này: on a recipe dish only, pre-fills name and ingredients
 - Keyboard: Esc closes a tip (Đã hiểu) and skips the tour; Tab stays in the card
 - Cài đặt: Xem lại hướng dẫn with the Mới pill, the tips switch
 - Share tip (home-share): at 3 foods today, not at 2, not on a past day, not after a share; round 44 px hole centred on the
@@ -510,9 +510,9 @@ def customise(browser):
     _seed.onboarding(False)
     ctx, pg = ctx_page(browser, PHONE)
     go(pg, "/foods/food-cha-la")
-    check(pg.get_by_role("link", name="Tùy chỉnh thành món của tôi").count() == 0 and pg.get_by_text("Tùy chỉnh thành món của tôi").count() == 0, "customise: no button on a food without a recipe")
+    check(pg.get_by_role("link", name="Tùy chỉnh món này").count() == 0 and pg.get_by_text("Tùy chỉnh món này").count() == 0, "customise: no button on a food without a recipe")
     go(pg, "/foods/food-com-dau-do")
-    btn = pg.get_by_text("Tùy chỉnh thành món của tôi")
+    btn = pg.get_by_text("Tùy chỉnh món này")
     check(btn.count() == 1, "customise: the button is on a recipe dish")
     shot(pg, "customise-390")
     btn.click()

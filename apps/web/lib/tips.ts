@@ -114,7 +114,7 @@ export const TIPS: readonly Tip[] = [
     id: "day-template",
     target: "day-template-pill",
     title: "Chép cả ngày bằng một chạm",
-    body: "Chạm Chép ngày mẫu để chép một ngày đã lưu, hoặc Hôm qua, vào ngày còn trống này. Chạm × nếu hôm nay bạn muốn tự ghi.",
+    body: "Chạm Chép ngày ăn mẫu để chép một ngày đã lưu, hoặc Hôm qua, vào ngày còn trống này. Chạm × nếu hôm nay bạn muốn tự ghi.",
     used: ["day-template"],
     when: (c) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday === 0,
   },

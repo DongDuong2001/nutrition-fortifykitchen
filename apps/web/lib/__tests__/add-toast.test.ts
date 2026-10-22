@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MOCK_FOODS } from "../mock/foods";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { addedToast, ADD_TOAST_MS, toastAfterAction, undoIdsOf } from "../add-toast";
 import { entryNumbers, removeAddedIn, type AddedDiaryEntry, type DiaryEdits } from "../diary-edits";
 import type { ToastInfo } from "../diary-store";
@@ -24,6 +26,7 @@ describe("the toast after an add", () => {
     expect(t.message).toBe("Đã thêm Trứng 1 quả vào Bữa trưa");
     expect(t.undoIds).toEqual(["e1"]);
     expect(t.durationMs).toBe(ADD_TOAST_MS);
+    expect(ADD_TOAST_MS).toBe(4000);
   });
 
   it("adds into the same meal while the toast is up update it in place, and its Hoàn tác takes out both", () => {
@@ -94,5 +97,31 @@ describe("ending a toast after its action", () => {
 
   it("an action that already cleared the toast leaves it cleared", () => {
     expect(toastAfterAction(null, shown)).toBeNull();
+  });
+});
+
+// Every toast that adds food is ADD_TOAST_MS (4 s); only a delete's Hoàn tác, and a move's, keep UNDO_TOAST_MS (8 s). Read from the store's
+// source: each `durationMs: …` line is looked at together with the `kind:` of its own setToast call (the line above or the same line).
+describe("toast durations in the diary store", () => {
+  const lines = readFileSync(join(__dirname, "..", "diary-store.tsx"), "utf8").split("\n");
+  const sites = lines
+    .map((line, i) => ({ line, i }))
+    .filter(({ line }) => /durationMs: (ADD_TOAST_MS|UNDO_TOAST_MS)/.test(line))
+    .map(({ line, i }) => ({
+      duration: /durationMs: (ADD_TOAST_MS|UNDO_TOAST_MS)/.exec(line)![1],
+      kind: /kind: ("[a-z]+"|undoMoves[^,]*)/.exec(lines.slice(Math.max(0, i - 6), i + 1).join("\n"))?.[1] ?? "",
+    }));
+
+  it("every undoable toast (a tray, a copy, a saved meal, a Ngày ăn mẫu, Chỉ ghi kcal) is ADD_TOAST_MS", () => {
+    const undoable = sites.filter((s) => s.kind === '"undoable"');
+    expect(undoable.length).toBe(4);
+    for (const s of undoable) expect(s.duration).toBe("ADD_TOAST_MS");
+  });
+
+  it("every delete toast is UNDO_TOAST_MS, and the constant is 8 s", () => {
+    const deleted = sites.filter((s) => s.kind === '"deleted"');
+    expect(deleted.length).toBeGreaterThanOrEqual(3);
+    for (const s of deleted) expect(s.duration).toBe("UNDO_TOAST_MS");
+    expect(readFileSync(join(__dirname, "..", "diary-store.tsx"), "utf8")).toMatch(/const UNDO_TOAST_MS = 8000;/);
   });
 });

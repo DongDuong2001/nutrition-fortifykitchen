@@ -2,7 +2,7 @@
 
 At 390 and 1280, in the demo account: Hôm nay's ⋯ saves the day as a template (summary, name from the training state, tag, toast); Khám phá
 › Của bạn counts it and /explore/ngay-mau lists it; the editor renames it and drops a food (a draft, not saved), then Lưu keeps the name;
-on an empty day the "Chép ngày mẫu" pill opens the picker (Hôm qua first, then the template), Chép vào copies every entry through the diary's
+on an empty day the "Chép ngày ăn mẫu" pill opens the picker (Hôm qua first, then the template), Chép vào copies every entry through the diary's
 copy (the same entries and kcal as the template, one toast), Hoàn tác leaves the day empty again; Hôm qua copies the same way; the pill's × hides
 it for that day only (a next day shows it again); the template's Xóa mẫu asks first and the picker then has only Hôm qua and the empty-state line.
 Screenshots: .screenshots/ngay-mau/<screen>-<width>.png (save sheet, list, editor, empty day, picker, toast), to hold next to design/v3/ngay-mau/renders.
@@ -151,7 +151,7 @@ def run(browser, width, height):
     check(cards.count() == 1, f"{tag}: one template card ({cards.count()})")
     card = flat(cards.first.inner_text())
     check("Ngày tập" in card and f"{saved_count} món · {saved_kcal} kcal" in card and "%" in card, f"{tag}: the card has the name, tag, N món · X kcal and a level % ({card!r})")
-    check(pg.locator("a:visible", has_text="Tạo ngày mẫu").count() == 1, f"{tag}: + Tạo ngày mẫu")
+    check(pg.locator("a:visible", has_text="Tạo ngày ăn mẫu").count() == 1, f"{tag}: + Tạo ngày ăn mẫu")
     shot(pg, "NMList", tag, full=True)
     cards.first.click()
     pg.wait_for_url(re.compile(r".*/explore/ngay-mau/[^/]+$"), timeout=8000)
@@ -194,19 +194,19 @@ def run(browser, width, height):
     # ---- an empty day: the pill and the picker ----
     empty_the_day(pg)
     check(day_state(pg)[0] == "Cả ngày · 0 món", f"{tag}: the day is empty ({day_state(pg)})")
-    pill = pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true")
-    check(pill.count() == 1, f"{tag}: the Chép ngày mẫu pill is on the empty day")
+    pill = pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true")
+    check(pill.count() == 1, f"{tag}: the Chép ngày ăn mẫu pill is on the empty day")
     check(pg.locator("[data-tour='day-template-pill']:visible").count() == 1, f"{tag}: the pill is a tour target")
     targets_ok(pill, f"{tag}: the pill")
-    hide = pg.get_by_role("button", name="Ẩn gợi ý ngày mẫu hôm nay").locator("visible=true")
+    hide = pg.get_by_role("button", name="Ẩn gợi ý ngày ăn mẫu hôm nay").locator("visible=true")
     targets_ok(hide, f"{tag}: the pill's ×")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{tag}: no Chép hôm qua button of its own")
     shot(pg, "NMEmpty", tag, full=True)
 
     pill.first.click()
     pg.wait_for_timeout(700)
-    picker = pg.get_by_role("dialog", name="Chọn ngày mẫu")
-    check(picker.count() == 1, f"{tag}: the pill opens Chọn ngày mẫu")
+    picker = pg.get_by_role("dialog", name="Chọn ngày ăn mẫu")
+    check(picker.count() == 1, f"{tag}: the pill opens Chọn ngày ăn mẫu")
     radios = picker.get_by_role("radio")
     names = [flat(r.inner_text()) for r in radios.all()]
     check(len(names) == 2 and names[0].lower().startswith("hôm qua") and names[1].lower().startswith("tập nặng"), f"{tag}: Hôm qua first, then the template ({[n[:20] for n in names]})")
@@ -231,15 +231,15 @@ def run(browser, width, height):
     check(copied == (f"Cả ngày · {saved_count} món", saved_kcal), f"{tag}: the copy added the template's foods and kcal ({copied} vs {saved_count} món, {saved_kcal})")
     toast = toast_text(pg)
     check(f"Đã chép Tập nặng · {saved_count} món" in toast and "Hoàn tác" in toast, f"{tag}: one toast with Hoàn tác ({toast!r})")
-    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 0, f"{tag}: the pill goes once the day has food")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").count() == 0, f"{tag}: the pill goes once the day has food")
     shot(pg, "NMToast", tag)
     pg.get_by_role("button", name="Hoàn tác").locator("visible=true").first.click()
     pg.wait_for_timeout(900)
     check(day_state(pg) == ("Cả ngày · 0 món", "0"), f"{tag}: Hoàn tác leaves the day empty again ({day_state(pg)})")
-    check(pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true").count() == 1, f"{tag}: the pill is back on the empty day")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true").count() == 1, f"{tag}: the pill is back on the empty day")
 
     # Hôm qua, the old Chép hôm qua
-    pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true").first.click()
+    pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true").first.click()
     pg.wait_for_timeout(700)
     picker.get_by_role("radio").nth(0).click()
     picker.get_by_role("button", name=re.compile(r"^Chép vào ")).click()
@@ -253,9 +253,9 @@ def run(browser, width, height):
     check(day_state(pg) == ("Cả ngày · 0 món", "0"), f"{tag}: Hoàn tác leaves the day empty after Hôm qua too")
 
     # ---- the × hides the pill for that day only ----
-    pg.get_by_role("button", name="Ẩn gợi ý ngày mẫu hôm nay").locator("visible=true").first.click()
+    pg.get_by_role("button", name="Ẩn gợi ý ngày ăn mẫu hôm nay").locator("visible=true").first.click()
     pg.wait_for_timeout(600)
-    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 0, f"{tag}: × hides the pill")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").count() == 0, f"{tag}: × hides the pill")
     line = pg.get_by_text("Chưa có món nào hôm nay").locator("visible=true")
     box = line.first.bounding_box() if line.count() else None
     check(box is not None and box["height"] >= 11, f"{tag}: the plain empty line shows instead ({box})")
@@ -263,10 +263,10 @@ def run(browser, width, height):
     check(stored == ["2026-10-15"], f"{tag}: the hidden day is stored by date ({stored})")
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(800)
-    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 0, f"{tag}: it stays hidden after a reload")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").count() == 0, f"{tag}: it stays hidden after a reload")
     pg.clock.set_fixed_time(NEXT_DAY)
     home(pg)
-    check(pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true").count() == 1, f"{tag}: the next day shows the pill again")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true").count() == 1, f"{tag}: the next day shows the pill again")
     pg.clock.set_fixed_time(NOW)
 
     # ---- delete the template: it asks first; the picker then has Hôm qua and the empty-state line ----
@@ -285,18 +285,18 @@ def run(browser, width, height):
     pg.get_by_role("dialog").locator("visible=true").first.get_by_role("button", name="Xóa mẫu").click()
     pg.wait_for_url(re.compile(r".*/explore/ngay-mau$"), timeout=8000)
     pg.wait_for_timeout(800)
-    check("Chưa có ngày mẫu" in pg.inner_text("main"), f"{tag}: the list is empty after the delete")
+    check("Chưa có ngày ăn mẫu" in pg.inner_text("main"), f"{tag}: the list is empty after the delete")
     stored_templates = pg.evaluate(f"() => localStorage.getItem('{TEMPLATES_KEY}')")
     check(stored_templates == "[]", f"{tag}: the stored list is empty ({stored_templates})")
     go(pg, "/explore")
     check("Ngày ăn mẫu · 0 mẫu" in flat(pg.locator("section[aria-labelledby=explore-yours]").inner_text()), f"{tag}: Của bạn counts 0 mẫu")
     pg.evaluate(f"() => localStorage.removeItem('{PILL_KEY}')")
     home(pg)
-    pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true").first.click()
+    pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true").first.click()
     pg.wait_for_timeout(700)
-    picker = pg.get_by_role("dialog", name="Chọn ngày mẫu")
+    picker = pg.get_by_role("dialog", name="Chọn ngày ăn mẫu")
     text = flat(picker.inner_text())
-    check(picker.get_by_role("radio").count() == 1 and "Chưa có ngày mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu." in text, f"{tag}: no template: Hôm qua and the empty-state line ({text[:120]!r})")
+    check(picker.get_by_role("radio").count() == 1 and "Chưa có ngày ăn mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu." in text, f"{tag}: no template: Hôm qua and the empty-state line ({text[:120]!r})")
     shot(pg, "NMPickerEmpty", tag)
 
     check(not errors, f"{tag}: no page errors ({errors[:2]})")

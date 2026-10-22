@@ -35,7 +35,7 @@ describe("food categories data", () => {
       "Đồ ngọt & ăn vặt",
       "Thực phẩm bổ sung",
       "Gia vị",
-      "Món của tôi",
+      "Món ăn của tôi",
     ]);
   });
 
@@ -64,7 +64,7 @@ describe("groupFoodsByCategory", () => {
     expect(ids(groups[1].foods)).toEqual(["b", "c"]);
   });
 
-  it("treats a food without a category as Món của tôi", () => {
+  it("treats a food without a category as Món ăn của tôi", () => {
     const foods = [{ id: "x" }] as FoodItem[];
     expect(groupFoodsByCategory(foods).map((g) => g.key)).toEqual(["cua_toi"]);
   });
@@ -167,7 +167,7 @@ describe("a food with an unknown category", () => {
     expect(isKnownCategory(undefined)).toBe(false);
   });
 
-  it("counts as Món của tôi without being the user's own food", () => {
+  it("counts as Món ăn của tôi without being the user's own food", () => {
     expect(categoryOf(odd)).toBe("cua_toi");
     expect(isOwnFood(odd)).toBe(false);
   });

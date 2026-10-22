@@ -30,10 +30,10 @@ export interface TemplatePickerSheetProps {
   onApply: (id: string) => void;
 }
 
-/** "Chọn ngày mẫu" (NMPicker): one radio card per day (Hôm qua first when it has food), then one button that copies it. */
+/** "Chọn ngày ăn mẫu" (NMPicker): one radio card per day (Hôm qua first when it has food), then one button that copies it. */
 export function TemplatePickerSheet({ open, onClose, ...body }: TemplatePickerSheetProps) {
   return (
-    <Sheet open={open} onClose={onClose} title="Chọn ngày mẫu" titleId="template-picker-title" desktopDialog className="bg-page!">
+    <Sheet open={open} onClose={onClose} title="Chọn ngày ăn mẫu" titleId="template-picker-title" desktopDialog className="bg-page!">
       <PickerBody {...body} onClose={onClose} />
     </Sheet>
   );
@@ -46,7 +46,7 @@ function PickerBody({ options, hasTemplates, kcalTarget, applyLabel, onApply, on
   return (
     <div className="flex flex-col gap-4 pt-2">
       {options.length > 0 && (
-        <div role="radiogroup" aria-label="Ngày mẫu" className="flex flex-col gap-2">
+        <div role="radiogroup" aria-label="Ngày ăn mẫu" className="flex flex-col gap-2">
           {options.map((o) => {
             const on = current?.id === o.id;
             return (
@@ -80,7 +80,7 @@ function PickerBody({ options, hasTemplates, kcalTarget, applyLabel, onApply, on
 
       {!hasTemplates && (
         <p data-align-group="template-picker" className="m-0 rounded-2xl border border-transparent bg-card px-4 py-3 text-cap leading-snug text-secondary shadow-ring">
-          Chưa có ngày mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.
+          Chưa có ngày ăn mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.
         </p>
       )}
 

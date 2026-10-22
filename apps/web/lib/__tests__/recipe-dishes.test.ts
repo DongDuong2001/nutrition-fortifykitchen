@@ -5,7 +5,7 @@ import { draftToRecipe, parseAmount, perServingNutrients, recipeDraftFromFood } 
 const lookup = (id: string) => MOCK_FOODS.find((f) => f.id === id) ?? null;
 const dishes = MOCK_FOODS.filter((f) => f.recipe);
 
-describe("mock recipe dishes (Tùy chỉnh thành món của tôi)", () => {
+describe("mock recipe dishes (Tùy chỉnh món này)", () => {
   it("has at least cơm đậu đỏ, cơm ngũ đậu and cháo đậu xanh", () => {
     expect(dishes.map((d) => d.nameVi)).toEqual(expect.arrayContaining(["Cơm đậu đỏ", "Cơm ngũ đậu (thập cẩm)", "Cháo đậu xanh"]));
   });

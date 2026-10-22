@@ -81,7 +81,7 @@ describe("the one-off food of a changed dish", () => {
     expect(readRecipes().filter((r) => r.oneOff)).toHaveLength(1);
   });
 
-  it("is found by id (a diary row, a recent) and listed nowhere: not in a list, not in Món của tôi", () => {
+  it("is found by id (a diary row, a recent) and listed nowhere: not in a list, not in Món ăn của tôi", () => {
     const food = saveEditedDish(phoBo, edited().ingredients)!;
     expect(catalogFoodById(food.id)).toBeDefined();
     expect(browsableFoods().map((f) => f.id)).not.toContain(food.id);

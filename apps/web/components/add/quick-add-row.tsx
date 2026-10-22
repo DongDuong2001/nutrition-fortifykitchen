@@ -15,7 +15,7 @@ export interface QuickAddRowProps {
 }
 
 /**
- * One tap adds. A row of the add sheet and of Bữa ăn của tôi in Khám phá: the whole left part is the add button
+ * One tap adds. A row of the add sheet and of Bữa ăn đã lưu in Khám phá: the whole left part is the add button
  * (name, meta, a + mark), the right part is a separate 44 px control. Row min 52 px (UI-RULES row pattern).
  */
 export function QuickAddRow({ name, meta, addLabel, onAdd, trailing, withBorderTop = true, card = false }: QuickAddRowProps) {

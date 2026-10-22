@@ -37,7 +37,7 @@ export function useSavedMealRows() {
 }
 
 /**
- * Bữa ăn của tôi (the pushed screen /explore/meals; Khám phá shows it as a row of Của bạn): each saved meal is one tap that adds every food to the meal of the time of day
+ * Bữa ăn đã lưu (the pushed screen /explore/meals; Khám phá shows it as a row of Của bạn): each saved meal is one tap that adds every food to the meal of the time of day
  * (one undo toast removes them all). The ⋯ renames or deletes it. `limit` shows the newest few with a link to all.
  */
 export function SavedMealsCard({ limit }: { limit?: number }) {
@@ -63,7 +63,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
   return (
     <Card as="section" aria-labelledby="explore-saved-meals" className="flex flex-col gap-1">
       <div className="flex min-h-11 items-center justify-between gap-2">
-        <SectionTitle id="explore-saved-meals">Bữa ăn của tôi</SectionTitle>
+        <SectionTitle id="explore-saved-meals">Bữa ăn đã lưu</SectionTitle>
         {limit && rows.length > limit && (
           <Link href="/explore/meals" className="flex min-h-11 items-center text-cap font-bold text-cobalt no-underline">
             Xem tất cả ({rows.length})
@@ -80,8 +80,8 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
               <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1z" />
             </svg>
           </span>
-          <p className="m-0 text-callout font-semibold">Chưa có Bữa ăn của tôi</p>
-          <p className="m-0 text-cap leading-snug text-secondary">Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu thành Bữa ăn của tôi.</p>
+          <p className="m-0 text-callout font-semibold">Chưa có Bữa ăn đã lưu</p>
+          <p className="m-0 text-cap leading-snug text-secondary">Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu bữa này.</p>
           <Link href={HOME_ROUTE} className="flex min-h-11 items-center gap-1 text-cap font-bold text-cobalt no-underline">
             Mở Hôm nay
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
