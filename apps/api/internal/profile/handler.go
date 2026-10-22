@@ -86,6 +86,11 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	p, err := h.service.UpsertProfile(r.Context(), userID, req)
 	if err != nil {
+		var fieldErrs FieldErrors
+		if errors.As(err, &fieldErrs) {
+			response.FieldErrors(w, http.StatusBadRequest, fieldErrs.Error(), fieldErrs)
+			return
+		}
 		if isProfileValidationError(err) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return

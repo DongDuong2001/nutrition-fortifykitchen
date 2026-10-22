@@ -23,6 +23,18 @@ type Profile struct {
 	Targets                any       `json:"targets,omitempty"`
 	CreatedAt              time.Time `json:"created_at"`
 	UpdatedAt              time.Time `json:"updated_at"`
+
+	// Target settings (migration 000015), camelCase like the web's lib/profile.ts. null = not set.
+	MacroMode        *string            `json:"macroMode"`
+	MacroRatios      *MacroRatios       `json:"macroRatios"`
+	MacroFixed       *MacroFixed        `json:"macroFixed"`
+	CustomEnergyKcal *int               `json:"customEnergyKcal"`
+	CustomTargets    map[string]float64 `json:"customTargets"`
+	// UpdatedAtJS is updated_at again under the web's name: the web compares it with the device's last change.
+	UpdatedAtJS time.Time `json:"updatedAt"`
+
+	// Settings is what a save changes in the target settings (never serialised).
+	Settings TargetSettingsPatch `json:"-"`
 }
 
 type WeightLog struct {
@@ -33,15 +45,22 @@ type WeightLog struct {
 }
 
 type UpsertProfileRequest struct {
-	Sex                    string   `json:"sex"`
-	BirthYear              int      `json:"birth_year"`
-	WeightKg               float64  `json:"weight_kg"`
-	Goal                   string   `json:"goal"`
-	TrainingMinutesDefault *int     `json:"training_minutes_default,omitempty"`
-	NearPeriod             *bool    `json:"near_period,omitempty"`
-	Language               *string  `json:"language,omitempty"`
-	DisplayName            *string  `json:"display_name,omitempty"`
-	TrainingPrefs          any      `json:"training_prefs,omitempty"`
+	Sex                    string  `json:"sex"`
+	BirthYear              int     `json:"birth_year"`
+	WeightKg               float64 `json:"weight_kg"`
+	Goal                   string  `json:"goal"`
+	TrainingMinutesDefault *int    `json:"training_minutes_default,omitempty"`
+	NearPeriod             *bool   `json:"near_period,omitempty"`
+	Language               *string `json:"language,omitempty"`
+	DisplayName            *string `json:"display_name,omitempty"`
+	TrainingPrefs          any     `json:"training_prefs,omitempty"`
+
+	// Target settings: a key left out keeps the stored value, null clears it (ParseTargetSettings).
+	MacroMode        Nullable `json:"macroMode"`
+	MacroRatios      Nullable `json:"macroRatios"`
+	MacroFixed       Nullable `json:"macroFixed"`
+	CustomEnergyKcal Nullable `json:"customEnergyKcal"`
+	CustomTargets    Nullable `json:"customTargets"`
 }
 
 type UpsertWeightRequest struct {

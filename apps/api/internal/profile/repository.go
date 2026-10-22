@@ -6,9 +6,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
 )
 
@@ -25,7 +25,8 @@ func NewRepository(pool *pgxpool.Pool) *PostgresRepository {
 func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (*Profile, error) {
 	query := `
 		SELECT user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
-		       near_period, language, reminders, COALESCE(training_prefs, '{}'::jsonb), display_name, COALESCE(role, 'user'), created_at, updated_at
+		       near_period, language, reminders, COALESCE(training_prefs, '{}'::jsonb), display_name, COALESCE(role, 'user'), created_at, updated_at,
+		       macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets
 		FROM nutrition.profiles
 		WHERE user_id = $1
 	`
@@ -33,6 +34,7 @@ func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (
 	err := r.pool.QueryRow(ctx, query, userID).Scan(
 		&p.UserID, &p.Sex, &p.BirthYear, &p.WeightKg, &p.Goal, &p.TrainingMinutesDefault,
 		&p.NearPeriod, &p.Language, &p.Reminders, &p.TrainingPrefs, &p.DisplayName, &p.Role, &p.CreatedAt, &p.UpdatedAt,
+		&p.MacroMode, &p.MacroRatios, &p.MacroFixed, &p.CustomEnergyKcal, &p.CustomTargets,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -40,6 +42,7 @@ func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (
 		}
 		return nil, err
 	}
+	p.UpdatedAtJS = p.UpdatedAt
 	return &p, nil
 }
 
@@ -71,8 +74,10 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 	query := `
 		INSERT INTO nutrition.profiles (
 			user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
-			near_period, language, display_name, training_prefs, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now())
+			near_period, language, display_name, training_prefs, updated_at,
+			macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now(),
+			$11::text, $13::jsonb, $15::jsonb, $17::int, $19::jsonb)
 		ON CONFLICT (user_id) DO UPDATE SET
 			sex = EXCLUDED.sex,
 			birth_year = EXCLUDED.birth_year,
@@ -83,11 +88,23 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 			language = EXCLUDED.language,
 			display_name = COALESCE(EXCLUDED.display_name, nutrition.profiles.display_name),
 			training_prefs = CASE WHEN $10::jsonb != '{}'::jsonb THEN $10::jsonb ELSE nutrition.profiles.training_prefs END,
+			-- Target settings: only the ones the request names (true) are written; null clears
+			macro_mode = CASE WHEN $12::bool THEN EXCLUDED.macro_mode ELSE nutrition.profiles.macro_mode END,
+			macro_ratios = CASE WHEN $14::bool THEN EXCLUDED.macro_ratios ELSE nutrition.profiles.macro_ratios END,
+			macro_fixed = CASE WHEN $16::bool THEN EXCLUDED.macro_fixed ELSE nutrition.profiles.macro_fixed END,
+			custom_energy_kcal = CASE WHEN $18::bool THEN EXCLUDED.custom_energy_kcal ELSE nutrition.profiles.custom_energy_kcal END,
+			custom_targets = CASE WHEN $20::bool THEN EXCLUDED.custom_targets ELSE nutrition.profiles.custom_targets END,
 			updated_at = now()
 	`
+	st := p.Settings
 	_, err := r.pool.Exec(ctx, query,
 		p.UserID, p.Sex, p.BirthYear, p.WeightKg, p.Goal, p.TrainingMinutesDefault,
 		p.NearPeriod, p.Language, p.DisplayName, string(prefsJSON),
+		st.MacroMode.Value, st.MacroMode.Set,
+		st.MacroRatios.Value, st.MacroRatios.Set,
+		st.MacroFixed.Value, st.MacroFixed.Set,
+		st.CustomEnergyKcal.Value, st.CustomEnergyKcal.Set,
+		st.CustomTargets.Value, st.CustomTargets.Set,
 	)
 	return err
 }
