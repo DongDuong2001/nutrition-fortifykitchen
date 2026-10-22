@@ -83,10 +83,11 @@ export function FoodEmptyState({
           {filter !== "all" && clearFilterButton}
           {/* feedback-mailto board 4: two equal buttons, enter it yourself now or ask for it to be added */}
           <div className="mt-2 grid w-full grid-cols-2 gap-2">
-            <PillButton variant="primary" href={newFoodHref}>
+            {/* md pills grow with the text (lg is a fixed 52 px): at 360 px and 150 % text the labels take two lines */}
+            <PillButton variant="primary" size="md" fullWidth href={newFoodHref} className="min-h-12 text-callout">
               Tự nhập
             </PillButton>
-            <PillButton variant="secondary" type="button" onClick={() => onRequestFood?.(query.trim())} aria-haspopup="dialog">
+            <PillButton variant="secondary" size="md" fullWidth type="button" onClick={() => onRequestFood?.(query.trim())} aria-haspopup="dialog" className="min-h-12 text-callout">
               Yêu cầu thêm món
             </PillButton>
           </div>

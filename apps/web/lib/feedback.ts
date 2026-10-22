@@ -86,11 +86,14 @@ export function mailtoUrl({ subject, body }: { subject: string; body: string }):
   return `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-/** "iPhone · Safari", "Android · Chrome", "Mac · Chrome": the platform and the browser from a user agent. */
-export function deviceName(ua: string): string {
+/**
+ * "iPhone · Safari", "Android · Chrome", "Mac · Chrome": the platform and the browser from a user agent. iPadOS sends a Mac user
+ * agent: a "Mac" with a touch screen (`touchPoints` > 1) is an iPad.
+ */
+export function deviceName(ua: string, touchPoints = 0): string {
   const os = /iPhone/.test(ua)
     ? "iPhone"
-    : /iPad/.test(ua)
+    : /iPad/.test(ua) || (/Macintosh/.test(ua) && touchPoints > 1)
       ? "iPad"
       : /Android/.test(ua)
         ? "Android"

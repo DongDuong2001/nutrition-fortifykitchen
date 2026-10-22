@@ -96,5 +96,9 @@ describe("deviceName", () => {
     expect(deviceName("Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36")).toBe("Android · Chrome");
     expect(deviceName("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 Edg/126.0")).toBe("Windows · Edge");
     expect(deviceName("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5; rv:128.0) Gecko/20100101 Firefox/128.0")).toBe("Mac · Firefox");
+    // iPadOS asks for desktop sites with a Mac user agent; its touch screen gives it away
+    const ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15";
+    expect(deviceName(ipad, 5)).toBe("iPad · Safari");
+    expect(deviceName(ipad, 0)).toBe("Mac · Safari");
   });
 });

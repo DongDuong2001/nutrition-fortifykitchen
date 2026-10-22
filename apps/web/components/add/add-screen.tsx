@@ -760,7 +760,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // The live catalogue is not here yet (or did not come): say that, never "no foods"
   const onPickSimilar = useCallback((food: FoodItem) => pickFood(food), [pickFood]);
   const clearFilter = useCallback(() => setFilter("all"), [setFilter]);
-  const requestFood = useCallback((search: string) => openFeedback({ type: "food", screen: "Thêm món", search, stacked: true }), []);
+  const requestFood = useCallback((search: string) => openFeedback({ type: "food", screen: "Thêm món", search, stacked: !standalone }), [standalone]);
   // Memoised with the list's other props (listPick): a keystroke in the grams field must not redraw the list
   const emptyState = useMemo(
     () =>
@@ -803,6 +803,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   );
 
   const createFoodLink = useMemo(() => <CreateFoodButton href={newFoodHref} />, [newFoodHref]);
+  // A search with no match has its own Tự nhập (FoodEmptyState): no second "Tạo món mới" under it (one control per action)
+  const searchMissed = !catalogPending && !catalogFailed && query.trim() !== "" && list.foods.length === 0;
 
   // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray. Stable between renders
   // (the callbacks read the latest handlers through a ref), so a keystroke in the grams field does not redraw the list.
@@ -914,7 +916,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                     isFavourite={isFavouriteFood}
                     showSourceTag={query.trim() !== ""}
                     empty={emptyState}
-                    footer={createFoodLink}
+                    footer={searchMissed ? null : createFoodLink}
                     className="h-[360px] overflow-y-auto pb-1"
                   />
                 </SwitchGlide>
@@ -1011,7 +1013,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   isFavourite={isFavouriteFood}
                   showSourceTag={query.trim() !== ""}
                   empty={emptyState}
-                  footer={createFoodLink}
+                  footer={searchMissed ? null : createFoodLink}
                 />
               </SwitchGlide>
               )}

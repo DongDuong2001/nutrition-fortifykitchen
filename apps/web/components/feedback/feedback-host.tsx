@@ -68,29 +68,26 @@ export function FeedbackHost() {
 
 function FeedbackSteps({ request }: { request: FeedbackRequest }) {
   const [type, setType] = useState<FeedbackType | null>(request.type ?? null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const firstRender = useRef(true);
-  // A step change moves focus to the new step's title, so a screen reader hears where it is
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    headingRef.current?.focus();
-  }, [type]);
+  // After a step change the new step's title takes the focus when it mounts (SwitchGlide draws the old step for 80 ms first,
+  // so a ref shared by both titles would focus the one that is leaving)
+  const [switched, setSwitched] = useState(false);
+  const go = (next: FeedbackType | null) => {
+    setSwitched(true);
+    setType(next);
+  };
 
   return (
     <SwitchGlide id={type ? "send" : "pick"} order={type ? 1 : 0}>
-      {type ? (
-        <SendStep type={type} request={request} onBack={() => setType(null)} headingRef={headingRef} />
-      ) : (
-        <PickStep onPick={setType} headingRef={headingRef} />
-      )}
+      {type ? <SendStep type={type} request={request} onBack={() => go(null)} focusTitle={switched} /> : <PickStep onPick={go} focusTitle={switched} />}
     </SwitchGlide>
   );
 }
 
-function StepHeader({ title, back, headingRef }: { title: string; back?: () => void; headingRef: React.RefObject<HTMLHeadingElement | null> }) {
+function StepHeader({ title, back, focusTitle }: { title: string; back?: () => void; focusTitle: boolean }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focusTitle) headingRef.current?.focus();
+  }, [focusTitle]);
   return (
     <div className="-mx-4 mb-1 grid grid-cols-[44px_1fr_44px] items-center gap-2 px-4 pt-1 pb-2">
       <button
@@ -111,10 +108,10 @@ function StepHeader({ title, back, headingRef }: { title: string; back?: () => v
   );
 }
 
-function PickStep({ onPick, headingRef }: { onPick: (type: FeedbackType) => void; headingRef: React.RefObject<HTMLHeadingElement | null> }) {
+function PickStep({ onPick, focusTitle }: { onPick: (type: FeedbackType) => void; focusTitle: boolean }) {
   return (
     <div className="flex flex-col gap-2">
-      <StepHeader title="Góp ý & hỗ trợ" headingRef={headingRef} />
+      <StepHeader title="Góp ý & hỗ trợ" focusTitle={focusTitle} />
       <p className="m-0 text-callout leading-snug text-secondary">Bạn muốn gửi gì? Mình đọc hết từng email và trả lời sớm nhất có thể.</p>
       <ul className="m-0 flex list-none flex-col p-0">
         {FEEDBACK_TYPES.map((t, i) => (
@@ -140,12 +137,12 @@ function SendStep({
   type,
   request,
   onBack,
-  headingRef,
+  focusTitle,
 }: {
   type: FeedbackType;
   request: FeedbackRequest;
   onBack: () => void;
-  headingRef: React.RefObject<HTMLHeadingElement | null>;
+  focusTitle: boolean;
 }) {
   const { notify } = useDiary();
   const [code, setCode] = useState("");
@@ -167,7 +164,7 @@ function SendStep({
           food: request.food,
           search: request.search,
           version: process.env.NEXT_PUBLIC_APP_VERSION || "?",
-          device: typeof navigator === "undefined" ? "" : deviceName(navigator.userAgent),
+          device: typeof navigator === "undefined" ? "" : deviceName(navigator.userAgent, navigator.maxTouchPoints),
           accountCode: code,
           at,
         },
@@ -188,7 +185,7 @@ function SendStep({
 
   return (
     <div className="flex flex-col gap-3">
-      <StepHeader title="Gửi qua…" back={onBack} headingRef={headingRef} />
+      <StepHeader title="Gửi qua…" back={onBack} focusTitle={focusTitle} />
       <section aria-label="Email sẽ được soạn sẵn" data-align-group="feedback-send" className="flex flex-col gap-2 rounded-card bg-page p-4">
         <span className="text-cap font-bold text-secondary">Email sẽ được soạn sẵn</span>
         <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
