@@ -133,7 +133,7 @@ def targets_ok(pg, selector, label):
 
 # cc-49/51 tips on Hôm nay (Chưa lưu, kéo xuống, chạm vi chất) are seen too, so the sheet is not waiting for a tip
 # share-spotlight: the share tip may follow Có gì mới and shows again after it was seen, so these accounts have shared once (share_spotlight.py tests it)
-SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"], "used": ["share-day"]}
+SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists", "meal-focus"], "used": ["share-day"]}
 
 
 def wrapped_titles(pg, titles):
