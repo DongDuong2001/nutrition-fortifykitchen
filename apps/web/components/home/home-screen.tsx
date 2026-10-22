@@ -872,7 +872,7 @@ function HomeContent() {
                 extras={extras}
                 groups={groups}
                 summary={levelCounts}
-                fiber={{ value: shown.fiber, target: macroTargets.fiber }}
+                fiberTarget={macroTargets.fiber}
                 targets={nutrientTargets}
                 selected={selected}
                 microsHref={`/micros?date=${viewIso}`}

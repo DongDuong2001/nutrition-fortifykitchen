@@ -25,7 +25,7 @@ export const NutrientColumn = memo(function NutrientColumn({
   microsHref,
   onNutrient,
   summary,
-  fiber,
+  fiberTarget,
 }: {
   values: HomeValues;
   /** Amounts of the extras by id (null = unknown). */
@@ -38,8 +38,9 @@ export const NutrientColumn = memo(function NutrientColumn({
   onNutrient?: (id: string) => void;
   /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
   summary?: { reached: number; total: number; lacking: string[] };
-  /** C3: Chất xơ in its own section above the first group (not counted in x/N đạt); its target is the day's fibre target */
-  fiber?: { value: number | null; target: number | null };
+  /** C3: Chất xơ in its own section above the first group (not counted in x/N đạt), against the day's fibre target. A number,
+   *  not an object, so the memoised column still skips a render when nothing changed. Left out: no Chất xơ row. */
+  fiberTarget?: number | null;
 }) {
   return (
     <aside
@@ -49,7 +50,7 @@ export const NutrientColumn = memo(function NutrientColumn({
       }`}
     >
       {/* cc-61: the verdict covers every group below (N is minerals plus vitamins), so it heads the column, above the first band.
-          Whole-pixel heights (a 24 px numeral line, 18 px text lines) keep the whole-row cut of the area clean. */}
+          Whole-pixel heights (a 40 px numeral line, 20 px text lines) keep the whole-row cut of the area clean. */}
       {summary && (
         // C3: the count is the column's biggest number (40 px, cobalt), "đạt" 17 px; the lacking names in full ink and bolder than
         // their label (Hao's canvas comment). Only the label is at 75 %: an opacity on the parent would fade the names too.
@@ -69,16 +70,16 @@ export const NutrientColumn = memo(function NutrientColumn({
         </p>
       )}
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
-      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "") + (fiber ? "+fiber" : "")}>
-        {fiber && (
+      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "") + (fiberTarget !== undefined ? "+fiber" : "")}>
+        {fiberTarget !== undefined && (
           <section aria-label="Chất xơ" className="flex shrink-0 flex-col">
             <MicroRow
               id="fiber"
               name="Chất xơ"
               title
               unit="g"
-              value={fiber.value}
-              target={fiber.target}
+              value={values.fiber}
+              target={fiberTarget}
               onNutrient={onNutrient}
               className="relative before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-divider before:content-['']"
             />
