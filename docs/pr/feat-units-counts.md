@@ -71,7 +71,7 @@ These are foods whose default serving was a count, and they now read per 100 g (
 - "Tổng quan đếm vi chất như Hôm nay"
 - "Số trung bình ghi rõ"
 
-`sw.js` VERSION 2026-10-22.4. PR 1 adds "Khẩu phần mở ngay trong bảng" to the same entry and VERSION .3: whichever merges second keeps both items and takes the next free VERSION.
+`sw.js` VERSION 2026-10-22.4. PR 1 (#56) was closed by Hao, so 22c holds only these items; take the next free VERSION at merge.
 
 ## Tests
 - **Unit:**
