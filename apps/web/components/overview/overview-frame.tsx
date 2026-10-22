@@ -6,6 +6,7 @@ import type { Period } from "@/lib/period";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
 import { Segmented } from "@/components/ui/segmented";
+import { TabWash } from "@/components/ui/tab-wash";
 import { EnterGlide } from "@/components/ui/enter-glide";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
@@ -199,6 +200,7 @@ function FrameInner({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <TabWash tone="overview" />
       <AppHeader
         variant="tab"
         layout="wide"
@@ -210,6 +212,7 @@ function FrameInner({ children }: { children: React.ReactNode }) {
             label="Tổng quan"
             alignGroup="overview-tabs"
             nowrap
+            accent="teal"
             className="lg:max-w-[480px]"
             items={TABS.map((tab) => ({ key: tab.id, label: tab.label, href: `${tab.href}${query}` }))}
             value={active}
@@ -218,7 +221,7 @@ function FrameInner({ children }: { children: React.ReactNode }) {
         }
       />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-0 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
+      <main className="relative mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-0 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
         {/* The period control; Tóm tắt draws it itself, between the hero and the scoreboard */}
         {active !== "summary" && (
           <PeriodControl compact heading={period ? periodHeading(period) : ""} period={period} length={length} />

@@ -60,6 +60,28 @@
     box-shadow: 0 0 0 1px var(--color-card-border), 0 10px 28px rgb(0 0 0 / 0.16);
   }
 }
+/* The wash of a tab root (components/ui/tab-wash): the tab's colour at its peak alpha at the top, 0.4 of it at 55 %, none at 100 %.
+   Phone only; the component hides it from lg. */
+.tab-wash {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--wash-color) calc(var(--wash-alpha) * 100%), transparent) 0%,
+    color-mix(in srgb, var(--wash-color) calc(var(--wash-alpha) * 40%), transparent) 55%,
+    transparent 100%
+  );
+}
+.tab-wash-home {
+  --wash-color: var(--color-wash-home);
+  --wash-alpha: var(--wash-alpha-home);
+}
+.tab-wash-overview {
+  --wash-color: var(--color-wash-overview);
+  --wash-alpha: var(--wash-alpha-overview);
+}
+.tab-wash-explore {
+  --wash-color: var(--color-wash-explore);
+  --wash-alpha: var(--wash-alpha-explore);
+}
 /* A glass bar inside a surface (the sheet's header): the blur and the fill, no lift */
 @utility glass-bar {
   background-color: var(--color-glass-sheet);
@@ -270,6 +292,24 @@
   /* The tab bar's fill: 0.86 white in light, 0.82 of rgb(28 28 30) in dark (the dark column is not built yet, the value waits here) */
   --color-glass-tab: rgba(255, 255, 255, 0.86);
   --color-glass-tab-dark: rgba(28, 28, 30, 0.82);
+  /* Tab colours (Hao 22/10, boards AccTongQuan and AccKhamPha): the active bottom-nav tab and Tổng quan's active sub-tab. Hôm nay and
+     Cài đặt stay cobalt. The -dark values wait for the dark column (V3-SPEC), like the other -dark tokens. */
+  --color-tab-teal: #008198;
+  --color-tab-teal-dark: #00D2E0;
+  --color-tab-orange: #C55300;
+  --color-tab-orange-dark: #FF9230;
+  /* The colour wash at the top of a tab root (boards TintHomNay, AccTongQuan, AccKhamPha): its colour and its peak alpha per tab */
+  --color-wash-home: var(--color-cobalt);
+  --color-wash-overview: #00C3D0;
+  --color-wash-overview-dark: #00D2E0;
+  --color-wash-explore: #FF8D28;
+  --color-wash-explore-dark: #FF9230;
+  --wash-alpha-home: 0.16;
+  --wash-alpha-home-dark: 0.3;
+  --wash-alpha-overview: 0.18;
+  --wash-alpha-overview-dark: 0.24;
+  --wash-alpha-explore: 0.28;
+  --wash-alpha-explore-dark: 0.22;
   /* The + button's tinted glass and its glow */
   --color-glass-cobalt: rgba(36, 87, 245, 0.88);
 

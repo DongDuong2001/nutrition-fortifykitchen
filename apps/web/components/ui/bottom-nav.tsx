@@ -14,10 +14,18 @@ export interface BottomNavProps {
   className?: string;
 }
 
+// The active tab's colour (Hao 22/10): Hôm nay and Cài đặt stay cobalt, Tổng quan is teal, Khám phá orange
+const ACTIVE_COLOR: Record<NavTab, string> = {
+  today: "text-cobalt",
+  overview: "text-tab-teal",
+  explore: "text-tab-orange",
+  settings: "text-cobalt",
+};
+
 /**
  * H1T MICRO tab bar (V3-SPEC §4): Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt, a floating Liquid Glass capsule
  * 16 px in from the sides and 24 px above the bottom (safe area added), 64 px tall; content scrolls under it.
- * Labels in --color-glass-tab-off; the selected tab's icon is filled and it and its label are cobalt. The + is a 52 px
+ * Labels in --color-glass-tab-off; the selected tab's icon is filled and it and its label take the tab's colour (cobalt, teal, orange). The + is a 52 px
  * cobalt tinted-glass circle with its glow (D-NAV-07: an action, never selected like a tab).
  */
 export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
@@ -37,7 +45,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
         className={`m-tint relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-micro leading-tight no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
-          isActive ? "font-bold text-cobalt" : "font-semibold text-glass-tab-off hover:text-text"
+          isActive ? `font-bold ${ACTIVE_COLOR[item.tab]}` : "font-semibold text-glass-tab-off hover:text-text"
         }`}
       >
         <NavIcon tab={item.tab} filled={isActive} />

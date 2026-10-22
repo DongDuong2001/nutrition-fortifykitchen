@@ -29,6 +29,7 @@ export function Segmented<K extends string>({
   className = "",
   alignGroup,
   nowrap = false,
+  accent,
 }: {
   items: SegmentedItem<K>[];
   value: K;
@@ -42,12 +43,18 @@ export function Segmented<K extends string>({
   className?: string;
   alignGroup?: string;
   nowrap?: boolean;
+  /** The selected segment is filled with a tab colour (Tổng quan's sub-tabs: teal, white text) instead of the white pill. */
+  accent?: "teal";
 }) {
   const track = `rounded-xl bg-seg-track p-1 ${fill ? "grid" : "inline-flex"} ${nowrap ? "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : ""} ${className}`;
   const style = fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(${nowrap ? "max-content" : "0"}, 1fr))` } : undefined;
   const pill = (on: boolean) =>
     `relative flex min-h-9 w-full items-center justify-center rounded-[9px] py-1 text-center text-cap leading-tight transition-press ${nowrap ? "whitespace-nowrap px-1" : "px-3"} ${
-      on ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]" : "font-semibold text-secondary"
+      on
+        ? accent === "teal"
+          ? "bg-tab-teal font-bold text-on-accent"
+          : "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]"
+        : "font-semibold text-secondary"
     }`;
   const cell = "-my-1 flex min-h-11 min-w-11 items-center justify-center no-underline transition-press active:scale-[0.97] motion-reduce:active:scale-100";
   const body = items.map((item) => {

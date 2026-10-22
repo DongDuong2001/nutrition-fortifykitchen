@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useDeferredValue, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
+import { TabWash } from "@/components/ui/tab-wash";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { IconTile } from "@/components/ui/icon-tile";
@@ -92,6 +93,7 @@ export default function ExplorePage() {
 
   return (
     <QueryProvider>
+      <TabWash tone="explore" />
       <AppHeader
         variant="tab"
         title="Khám phá"
@@ -101,7 +103,7 @@ export default function ExplorePage() {
         search={<SearchField />}
       />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-4">
+      <main className="relative mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-4">
         {/* Phone: the groups are Nhóm món below, so only the demo shortcuts stay as chips; desktop: the whole row */}
         {demoChips.length > 0 && (
           <div className="lg:hidden">

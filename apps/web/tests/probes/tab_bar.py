@@ -1,6 +1,7 @@
-"""The phone tab bar: its fill, its blur and its shadow.
+"""The phone tab bar: its fill, its blur and its shadow, and (v3-cleanup item 9b) the colour of the active tab.
 
 Item 7: the glass is 0.86 white (rgba(255, 255, 255, 0.86)), keeps its 24 px blur, and its shadow reaches 10 px down and 28 px out at 0.16.
+Item 9b: Hôm nay and Cài đặt are cobalt, Tổng quan teal #008198 and Khám phá orange #C55300 when active, the label and the icon alike.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tab_bar.py
 """
 # PROBE_COVERS: components/ui/bottom-nav.tsx components/ui/nav-icons.tsx app/globals.css app/(app)/(tabs)/**
@@ -12,7 +13,7 @@ from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 problems = []
-TABS = ["/app", "/trends", "/explore", "/settings"]
+TABS = [("/app", "Hôm nay", "rgb(36, 87, 245)"), ("/trends", "Tổng quan", "rgb(0, 129, 152)"), ("/explore", "Khám phá", "rgb(197, 83, 0)"), ("/settings", "Cài đặt", "rgb(36, 87, 245)")]
 
 
 def check(cond, msg):
@@ -26,7 +27,7 @@ def main():
         browser = p.chromium.launch()
         ctx = browser.new_context(viewport={"width": 390, "height": 844})
         pg = ctx.new_page()
-        for route in TABS:
+        for route, name, color in TABS:
             pg.goto(BASE + route, wait_until="networkidle")
             pg.wait_for_timeout(400)
             bar = pg.locator("nav[aria-label='Điều hướng chính'] > .glass-tab").first
@@ -34,6 +35,9 @@ def main():
             check(s["bg"] == "rgba(255, 255, 255, 0.86)", f"{route}: the tab bar is 0.86 white ({s['bg']})")
             check("blur(24px)" in s["bf"], f"{route}: the blur stays at 24 px ({s['bf']})")
             check("0px 10px 28px" in s["sh"] and "0.16" in s["sh"], f"{route}: the shadow is 0 10 28 at 0.16 ({s['sh']})")
+            tab = bar.locator("a[aria-current=page]")
+            got = tab.evaluate("e => { const l = e.querySelector('span'); return { label: getComputedStyle(l).color, icon: getComputedStyle(e.querySelector('svg')).color, text: l.textContent }; }")
+            check(got["text"] == name and got["label"] == color and got["icon"] == color, f"{route}: {name} is active in {color} ({got})")
         browser.close()
     print(f"\n{len(problems)} problem(s)")
     sys.exit(1 if problems else 0)
