@@ -51,9 +51,28 @@ function NumberField({ value, onCommit, min, max, className, "aria-label": ariaL
   );
 }
 
+/**
+ * fix/macro-split-save: the form mounts only once the store has loaded the saved profile, so its fields start from the
+ * saved split (before, they started from the sample profile's 25/55/20 and never caught up).
+ */
 export function MacroTargetsScreen() {
+  const { hydrated } = useDiary();
+  if (!hydrated) {
+    return (
+      <AppShell alignContainer="macro-targets-page">
+        <AppHeader variant="sub" title="Mục tiêu đa lượng" backHref="/settings/targets" layout="wide" />
+        <main className="mx-auto w-full max-w-[560px] p-4 lg:mx-0 lg:max-w-[1240px] lg:p-8">
+          <div className="h-64 rounded-2xl bg-divider animate-pulse motion-reduce:animate-none" />
+        </main>
+      </AppShell>
+    );
+  }
+  return <MacroTargetsForm />;
+}
+
+function MacroTargetsForm() {
   const router = useRouter();
-  const { profile, targets, hydrated, updateProfile, notify } = useDiary();
+  const { profile, targets, updateProfile, notify } = useDiary();
 
   // Mode: "ratios" | "fixed" | "keto" | "default"
   const [mode, setMode] = useState<MacroTargetMode>(profile.macroMode ?? "ratios");
@@ -150,17 +169,6 @@ export function MacroTargetsScreen() {
     setTimeout(() => {
       router.push("/settings/targets");
     }, 600);
-  }
-
-  if (!hydrated) {
-    return (
-      <AppShell alignContainer="macro-targets-page">
-        <AppHeader variant="sub" title="Mục tiêu đa lượng" backHref="/settings/targets" layout="wide" />
-        <main className="mx-auto w-full max-w-[560px] p-4 lg:mx-0 lg:max-w-[1240px] lg:p-8">
-          <div className="h-64 rounded-2xl bg-divider animate-pulse motion-reduce:animate-none" />
-        </main>
-      </AppShell>
-    );
   }
 
   return (

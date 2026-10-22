@@ -471,3 +471,7 @@
 ## fix/source-tags (20/10/2026)
 - [ ] (Hao) The food page and source sheet name the `asean` source "ASEAN" (it said "Khác" before; the search tag is "ASEAN" as asked). The rows are PhilFCT (Philippine FCT, ASEAN FCDB), e.g. Bông so đũa, Cá cơm cả xương. Options: (a) "ASEAN" as built, like "Tài liệu" (my pick: short and the same as the tag), (b) "PhilFCT (ASEAN)", like "CNF (Canada)", (c) other words. lib/source-names.ts is the one place to change it.
 
+
+## fix/macro-split-save (22/10/2026)
+- [ ] (Dong) Profile columns `macro_mode`, `macro_ratios`, `macro_fixed`, `custom_energy_kcal` and `custom_targets` in PUT /me/profile and GET /me, so the macro split and the custom targets follow the account across devices. Until then they are kept per device: `LOCAL_ONLY_PROFILE_KEYS` in apps/web/lib/profile.ts, and adopting the server's profile keeps them (`withLocalOnly`).
+- [ ] (Hao) The live-like probe pass (`LIVE_BUILD=1`, a live build with `NEXT_PUBLIC_SUPABASE_URL=http://localhost:54399`) is stopped at /signin on a fresh live build: the setup gate does not see the faked Supabase session. The existing `hotfix_supp_log.py` stops there too, so it is the shared harness, not this change. macro-split.py's demo pass runs in probe:all; the adopt path is covered by `withLocalOnly`'s unit tests. Worth a look at the cookie the probes fake (`sb-localhost-auth-token`) against @supabase/ssr 0.12.
