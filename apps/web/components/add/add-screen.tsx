@@ -51,7 +51,9 @@ import type { DishEdit } from "@/lib/dish-recipes";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
-import { takeBackSheetEntries } from "@/lib/sheet-history";
+import { navigateFromSheet, takeBackSheetEntries } from "@/lib/sheet-history";
+import { compareHref } from "@/lib/food-compare";
+import { ComparePicker } from "@/components/foods/compare-picker";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import { useUnsavedWork } from "@/lib/unsaved-work";
@@ -306,6 +308,15 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       document.removeEventListener("keydown", note, true);
     };
   }, []);
+  // feat/compare-in-add: So sánh in the portion panel opens the compare picker with this food locked (one sheet at a time,
+  // D-SHT-01: on a phone the portion sheet closes first). Confirming goes to the comparison the way the food page does
+  // (navigateFromSheet: the picker's entry becomes the comparison, so Back comes back to the add sheet).
+  const [compareFoodId, setCompareFoodId] = useState<string | null>(null);
+  const openCompare = useCallback(() => {
+    if (!selectedFood) return;
+    setCompareFoodId(selectedFood.id);
+    if (!isDesktop) setSelectedFood(null);
+  }, [selectedFood, isDesktop]);
   const closePortionSheet = useCallback(() => {
     const id = selectedFood?.id;
     const { el: opener, touch } = portionOpener.current;
@@ -861,6 +872,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
               <div className="min-h-0 w-[340px] shrink-0 self-stretch overflow-y-auto overscroll-contain">
                 {selectedFood ? (
                   <PortionPanel
+                    onCompare={openCompare}
                     food={selectedFood}
                     gramsInput={gramsInput}
                     setGramsInput={setGramsInput}
@@ -1018,6 +1030,16 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       </>
       )}
 
+      <ComparePicker
+        open={compareFoodId !== null}
+        onClose={() => setCompareFoodId(null)}
+        lockedIds={compareFoodId ? [compareFoodId] : []}
+        onConfirm={(ids) => {
+          setCompareFoodId(null);
+          navigateFromSheet(router, compareHref(ids));
+        }}
+      />
+
       {/* The portion sheet (phone): V3, the page grey behind the panel's white cards (V3Portion) */}
       <Sheet
         open={selectedFood !== null && !isDesktop}
@@ -1030,6 +1052,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
             <PortionPanel
+              onCompare={openCompare}
               food={selectedFood}
               gramsInput={gramsInput}
               setGramsInput={setGramsInput}
