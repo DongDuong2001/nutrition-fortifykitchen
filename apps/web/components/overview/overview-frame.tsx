@@ -209,6 +209,7 @@ function FrameInner({ children }: { children: React.ReactNode }) {
             as="nav"
             label="Tổng quan"
             alignGroup="overview-tabs"
+            nowrap
             className="lg:max-w-[480px]"
             items={TABS.map((tab) => ({ key: tab.id, label: tab.label, href: `${tab.href}${query}` }))}
             value={active}
