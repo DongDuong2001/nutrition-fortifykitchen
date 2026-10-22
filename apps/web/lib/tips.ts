@@ -339,6 +339,15 @@ export const TIPS: readonly Tip[] = [
     used: ["meal-focus"],
     when: today,
   },
+  // feat/hero-macro-kcal: the hero's macros can be tapped, which nothing on them says (AGENTS.md Tutorials b): now the last tip of Hôm nay
+  {
+    id: "hero-macro",
+    target: "hero-macro",
+    title: "Kcal từ đạm, tinh bột, béo",
+    body: "Chạm Tinh bột, Đạm hoặc Chất béo ở thẻ đen để xem số kcal từ nó. Chạm lần nữa để quay lại.",
+    used: ["hero-macro"],
+    when: today,
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */

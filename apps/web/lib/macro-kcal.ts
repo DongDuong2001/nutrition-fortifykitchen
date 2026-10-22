@@ -14,11 +14,5 @@ export function macroKcal(macro: HeroMacro, grams: number | null): number | null
   return grams === null || !Number.isFinite(grams) ? null : Math.round(grams * KCAL_PER_GRAM[macro]);
 }
 
-/** The macro's share of the kcal shown, a whole percent; null when either is unknown or nothing was eaten. */
-export function macroKcalShare(kcal: number | null, totalKcal: number | null): number | null {
-  if (kcal === null || totalKcal === null || !(totalKcal > 0)) return null;
-  return Math.round((kcal / totalKcal) * 100);
-}
-
 /** A tap on a macro: it is picked, or cleared when it was the one picked. */
 export const toggleMacro = (current: HeroMacro | null, tapped: HeroMacro): HeroMacro | null => (current === tapped ? null : tapped);

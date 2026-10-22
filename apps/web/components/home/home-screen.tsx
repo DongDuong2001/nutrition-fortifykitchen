@@ -831,10 +831,10 @@ function HomeContent() {
             finished={isPast}
             selected={selected}
             kcalNote={unknownKcalNote(modeEntries(mode, entries))}
-            countKey={`${viewIso} ${JSON.stringify(mode)}`}
+            countKey={heroMacroKey}
             macro={heroMacro}
             onMacro={(m) => {
-              if (m) markUsed("hero-macro");
+              if (m) markUsed("hero-macro");  // the tip of the same name
               setHeroMacro(m);
             }}
           />

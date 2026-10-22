@@ -7,7 +7,7 @@ import { LevelBar } from "@/components/ui/level-bar";
 import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
 import { Expand } from "@/components/ui/expand";
-import { HERO_MACRO_LABEL, macroKcal, macroKcalShare, toggleMacro, type HeroMacro } from "@/lib/macro-kcal";
+import { HERO_MACRO_LABEL, macroKcal, toggleMacro, type HeroMacro } from "@/lib/macro-kcal";
 
 // The 32 px pill sits inside a 44 px hit area: the row is 32 px high, so the negative margin takes the extra 12 px back
 const PILL = "m-on-ink-press -my-1.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-on-dark no-underline hover:text-sky";
@@ -86,7 +86,7 @@ export function HomeHero({
     { ref: kcalRef, format: (n) => kcalValue(n) },
     { ref: pctRef, format: (n) => (picked ? pctLabel(n, values.kcal) : pctLabel(n, kcalTarget.min)) },
   ]);
-  const kcalPct = picked ? macroKcalShare(pickedKcal, values.kcal) ?? 0 : kcalKnown ?? 0;
+  const kcalPct = picked ? pctOf(pickedKcal, values.kcal) ?? 0 : kcalKnown ?? 0;
   const shownLabel = picked ? `${HERO_MACRO_LABEL[picked]} · ${values[picked] === null ? "—" : formatAmount(values[picked], "g")} g` : label;
   return (
     <>
@@ -152,12 +152,13 @@ export function HomeHero({
                       "aria-pressed": on,
                       "aria-label": `${m.label} ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, "g")} g`}, ${kcal === null ? "chưa rõ" : kcalValue(kcal)} kcal`,
                       "data-hero-macro": m.key,
+                      "data-tour": m.key === "protein" ? "hero-macro" : undefined,
                       onClick: () => onMacro?.(toggleMacro(picked, m.key)),
                     }
                   : {})}
                 className={`flex min-w-0 flex-col gap-1 ${
                   Cell === "button"
-                    ? `-mx-1 min-h-11 cursor-pointer rounded-lg border-0 bg-transparent px-1 py-1 text-left text-on-dark m-on-ink-press transition-press ${on ? "ring-2 ring-inset ring-sky" : ""}`
+                    ? `-mx-1 -my-1 min-h-11 cursor-pointer rounded-lg border-0 bg-transparent px-1 py-1 text-left text-on-dark m-tint m-tint-dark transition-press ${on ? "ring-2 ring-inset ring-sky" : ""}`
                     : ""
                 }`}
               >

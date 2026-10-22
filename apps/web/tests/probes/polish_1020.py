@@ -30,7 +30,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 NO_INSTALL = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}}
 RELEASE = re.search(r'id:\s*"(20\d\d-\d\d-\d\d[a-z]?)"', (ROOT / "lib" / "releases.ts").read_text(encoding="utf-8")).group(1)
 # Every tip of Hôm nay, seen: only the tips of /add and its sheets can still come
-HOME_TIPS = ["sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "haptics", "meal-focus"]
+HOME_TIPS = ["sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "haptics", "meal-focus", "hero-macro"]
 problems = []
 
 

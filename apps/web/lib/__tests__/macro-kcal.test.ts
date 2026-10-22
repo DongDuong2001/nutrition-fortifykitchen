@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { HERO_MACRO_LABEL, macroKcal, macroKcalShare, toggleMacro } from "../macro-kcal";
-import { groupMeals, sumEntries, type HomeEntry } from "../home";
+import { HERO_MACRO_LABEL, macroKcal, toggleMacro } from "../macro-kcal";
+import { groupMeals, pctOf, sumEntries, type HomeEntry } from "../home";
+
+// The share of the kcal shown is the hero's pctOf (a whole percent, null when unknown or nothing was eaten)
+const macroKcalShare = pctOf;
 
 const entry = (id: string, slot: HomeEntry["slot"], kcal: number | null, protein: number | null, carbs: number | null, fat: number | null): HomeEntry =>
   ({ id, name: id, qty: "100 g", grams: 100, slot, kcal, protein, carbs, fat, fiber: null, nutrients: {}, quick: false }) as HomeEntry;
