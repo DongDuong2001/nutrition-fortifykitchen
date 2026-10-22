@@ -4,6 +4,9 @@ On a phone, Hôm nay, Tổng quan and Khám phá draw one TabWash: aria-hidden, 
 tab's colour at A, 0.4 A at 55 % and none at 100 % (Hôm nay cobalt 0.16, Tổng quan teal 0.18, Khám phá orange 0.28); the header
 and the content paint over it. From 1024 px the wash is hidden. Cài đặt and the pushed screens have none. Tổng quan's active chip is
 filled teal #007F96 with white text; the others are as they were.
+The chip rows' side fades are a mask on the row (ChipScroller), not an overlay: Khám phá's row at 390 px does not overflow, so it has no mask
+and the pixel at its right edge is the wash; at 360 px with 150 % text it overflows, so its right edge fades and, scrolled to the end, its
+left edge fades instead; the add sheet's filter row (the sheet variant) has no fades.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tab_wash.py
 """
 # PROBE_COVERS: components/ui/tab-wash.tsx components/ui/app-header.tsx components/ui/segmented.tsx components/overview/overview-frame.tsx app/globals.css app/(app)/(tabs)/**
@@ -13,6 +16,7 @@ import sys
 
 import _demo  # noqa: F401
 from playwright.sync_api import sync_playwright
+from _header_paint import _pixel, expected
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 problems = []
@@ -68,6 +72,41 @@ def main():
         chips = phone.evaluate("() => [...document.querySelectorAll('nav[aria-label=\"Tổng quan\"] a')].map((a) => { const s = a.querySelector('span'); const c = getComputedStyle(s); return [s.textContent.trim(), c.backgroundColor, c.color, a.getAttribute('aria-current')]; })")
         check(chips[0][1] == "rgb(0, 127, 150)" and chips[0][2] == "rgb(255, 255, 255)" and chips[0][3] == "page", f"the active chip is teal with white text ({chips[0]})")
         check(all(c[1] == "rgba(0, 0, 0, 0)" and c[2] == "rgb(99, 99, 102)" for c in chips[1:]), f"the others are unchanged ({chips[1:]})")
+        # ---- the chip rows' fades (ChipScroller mask)
+        ROW = "[role=group][aria-label='Huấn luyện viên và bảng xếp hạng']"
+        FADES = """(row) => { const c = getComputedStyle(row); const r = row.getBoundingClientRect();
+          return { edges: row.dataset.fadeEdges ?? null, mask: c.maskImage || c.webkitMaskImage, right: r.right, top: r.top, height: r.height, over: row.scrollWidth > row.clientWidth + 1 }; }"""
+        phone.goto(BASE + "/explore", wait_until="networkidle")
+        phone.wait_for_timeout(500)
+        row = phone.locator(ROW).first
+        f = row.evaluate(FADES)
+        check(not f["over"] and f["edges"] == "none" and f["mask"] == "none", f"/explore at 390: the row does not overflow, so no fade ({f})")
+        y = f["top"] + f["height"] / 2
+        shot = phone.screenshot(clip={"x": f["right"] - 3, "y": y, "width": 1, "height": 1})
+        got, _ = _pixel(shot)
+        want = expected("/explore", y)
+        check(all(abs(got[i] - want[i]) <= 3 for i in range(3)), f"/explore at 390: the pixel at the row's right edge is the wash (rgb{got}, expected rgb{tuple(round(v) for v in want)})")
+        big = browser.new_context(viewport={"width": 360, "height": 780}).new_page()
+        big.goto(BASE + "/explore", wait_until="networkidle")
+        big.evaluate("document.documentElement.style.fontSize = '24px'")
+        big.wait_for_timeout(400)
+        brow = big.locator(ROW).first
+        f = brow.evaluate(FADES)
+        check(f["over"] and f["edges"] == "right" and "linear-gradient" in f["mask"], f"/explore at 360, 150 % text: the row overflows and fades on the right only ({f['edges']})")
+        brow.evaluate("(e) => { e.scrollLeft = e.scrollWidth; }")
+        big.wait_for_timeout(300)
+        f = brow.evaluate(FADES)
+        check(f["edges"] == "left" and "linear-gradient" in f["mask"], f"/explore at 360, 150 % text, scrolled to the end: fades on the left only ({f['edges']})")
+        # the add sheet's filter row sits in the sheet's header: no fades there
+        sheet = browser.new_context(viewport={"width": 360, "height": 780}).new_page()
+        sheet.goto(BASE + "/add", wait_until="networkidle")
+        sheet.wait_for_timeout(700)
+        srow = sheet.locator("[data-add-panel] [role=group][aria-label='Lọc món theo nhóm']").first
+        f = srow.evaluate(FADES)
+        check(f["edges"] is None and f["mask"] == "none", f"the add sheet's filter row at 360 has no fades ({f['edges']}, {f['mask']})")
+        sheet.screenshot(path=os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots", "v3-cleanup", "add-filter-row-360-after.png"), clip={"x": 0, "y": 0, "width": 360, "height": 260})
+        big.screenshot(path=os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots", "v3-cleanup", "explore-chip-row-360-text150-after.png"), clip={"x": 0, "y": 0, "width": 360, "height": 360})
+
         desk = browser.new_context(viewport={"width": 1440, "height": 900}).new_page()
         for route, *_ in WASHED:
             desk.goto(BASE + route, wait_until="networkidle")
