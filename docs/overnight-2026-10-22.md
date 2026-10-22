@@ -45,6 +45,9 @@ Brief: ~/Documents/HITMicro/prompts/overnight-1022-v3.md (Job 1 → Job 2 → Jo
   - the "merge #44 first" note is in #45's body;
   - #45 and #46 were opened as soon as their gate:full was green;
   - Job 4 is Part A only.
+- **review-0630** (read 07:00, final): no routine actions and no must fix. All four PRs are judged ready to merge. Should fix:
+  - Item 1 is done in 703bb31: the design-floor quarantine reason now names what really fails. design-floor.py was run alone to check.
+  - Items 2–4 (the footer Đóng, the unused code, the 150 % share key) are the follow-up under "What's left".
 - **ack.md** has a line for each review.
 
 ## What's left
