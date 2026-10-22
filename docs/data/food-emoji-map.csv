@@ -1,6 +1,6 @@
 id,name,category,emoji,source
 2ae05275-22a8-4e26-9b90-d78c946bb00e,Bánh bông lan EasyGYM,an_vat,🍰,rule
-db39233e-51f6-4b85-bd66-5a44185df087,Bánh tráng nướng,an_vat,🍰,rule
+db39233e-51f6-4b85-bd66-5a44185df087,Bánh tráng nướng,an_vat,🍪,category
 a99a52c7-4e45-4844-ac76-dfb25df18551,Mật mía,an_vat,🍯,rule
 a9741a61-11c5-4cf1-b45b-8a514ac1ff61,"Mật mía (USDA, chung)",an_vat,🍯,rule
 a26731bf-4d86-44dd-bd9d-32c1c41405be,Mật mía Golden Barrel (blackstrap),an_vat,🍯,rule
@@ -531,8 +531,8 @@ baa7ce9f-03e6-4b60-a25a-9ef41155abb9,Cá nục (sống),dam,🐟,rule
 866f64d0-7307-41ba-82d8-29ecad6e0de7,Cá rô đồng (sống),dam,🐟,rule
 5b1c23d5-f10d-4fd4-801c-46f75aa693bf,Cá rô phi (nấu chín),dam,🐟,rule
 e34c2275-6ac2-444c-b22d-89409603901d,Cá rô phi (sống),dam,🐟,rule
-651ff490-dea2-4e01-a5ec-8bbefca59066,Cá saba Na Uy (nướng),dam,🐟,rule
-92329915-909a-432e-997f-d28a82c24305,Cá saba Na Uy (sống),dam,🐟,rule
+651ff490-dea2-4e01-a5ec-8bbefca59066,Cá saba Na Uy (nướng),dam,🍗,category
+92329915-909a-432e-997f-d28a82c24305,Cá saba Na Uy (sống),dam,🍗,category
 701b12cf-827d-4a23-94e3-632356720f43,Cá thát lát (cá lác),dam,🐟,rule
 cf6fa9c3-081f-4e90-ad0f-b8f8f0d78837,Cá thát lát (luộc),dam,🐟,rule
 28221ba2-37ac-4d64-9dc2-d5c3131d8ebc,Cá thu (chín),dam,🐟,rule
@@ -559,8 +559,8 @@ fef0ee8f-38b9-48cf-82b0-ca76a354e14a,Đậu đen (hạt khô),dam,🌰,rule
 a5c10ef0-f8f4-4536-8daf-682d38d5b89b,Đậu đen (luộc),dam,🍗,category
 cd672dfc-541c-4fc2-9381-a9420804acb6,Đậu đỏ (hạt khô),dam,🌰,rule
 4fc10e79-e2d7-4ee7-b3c9-97109c39948d,Đậu đỏ (luộc),dam,🍗,category
-1eb3f8bf-9b6f-4910-adcf-2ffe01cef9c6,Đậu gà (hạt khô),dam,🍗,rule
-654ad423-e4e4-4f5e-be36-247e6a8cbcdb,Đậu gà (luộc),dam,🍗,rule
+1eb3f8bf-9b6f-4910-adcf-2ffe01cef9c6,Đậu gà (hạt khô),dam,🍗,category
+654ad423-e4e4-4f5e-be36-247e6a8cbcdb,Đậu gà (luộc),dam,🍗,category
 49999be4-d813-46cc-8908-a8490b3dff36,Đậu hũ (đậu phụ trắng),dam,🍗,category
 a63beff1-c34b-4b8b-b337-86c0d72c7a0c,Đậu hũ chiên,dam,🍗,category
 2b3d806a-de75-44dd-b553-1a49af17a198,Đậu hũ non,dam,🍗,category
@@ -644,7 +644,7 @@ cd142e49-82ee-4caf-ab2f-b5785cf174e1,Sườn non heo (sống),dam,🥩,rule
 4a89f1f1-a52e-42b5-af81-b75c4de84fef,Tàu hủ chiên nồi chiên không dầu,dam,🍗,category
 03bcdfd2-fc3a-4bd4-a31a-3df56e772639,Tàu hủ trắng cứng (hấp/luộc),dam,🍗,category
 2c4faf5b-1545-4145-ad80-6f98ef987d9a,Tempeh,dam,🍗,category
-3c821b6a-cf6f-4bfc-b165-cfdabee604d1,Tép (tép gạo),dam,🦐,rule
+3c821b6a-cf6f-4bfc-b165-cfdabee604d1,Tép (tép gạo),dam,🍚,rule
 aaf95995-2cd7-4ff2-a7cc-2f39642e08ed,Tép khô,dam,🦐,rule
 f5efe0d8-da96-43b2-b657-79699889be23,Thăn ngoại bò (áp chảo/nướng),dam,🥩,rule
 e0bfb3e9-e506-423c-92c4-db03aa459aef,Thăn ngoại bò (sống),dam,🥩,rule
@@ -683,7 +683,7 @@ e3422c4e-c961-4c49-a7e2-09b36a64b292,Tôm khô,dam,🦐,rule
 876c75a5-7d16-442e-b67d-215677cec6e7,Tôm sú (nướng),dam,🦐,rule
 03e8249c-8c19-4e35-8d27-a17a9f5dc0ad,Tôm thẻ (luộc),dam,🦐,rule
 574722b9-0d74-4e11-b960-afc4bcb4bffa,Tôm thẻ (tôm chân trắng),dam,🦐,rule
-57a8a036-e342-46c0-913b-6b3579883f2d,Trai sông (trai nước ngọt),dam,🥤,rule
+57a8a036-e342-46c0-913b-6b3579883f2d,Trai sông (trai nước ngọt),dam,🦪,rule
 ebb84b5d-8157-4ac3-b7c5-e7921c71fa89,Trứng cút,dam,🥚,rule
 0974a8f9-974a-4e57-8707-89d00c641008,Trứng gà,dam,🥚,rule
 981e7ac8-79f0-41c7-a37e-3663d0fb718c,Trứng gà (sống),dam,🥚,rule
@@ -767,7 +767,7 @@ ff5aa595-0d31-4296-9398-62be47972f54,Nước cốt chanh ta (có hạt),gia_vi,�
 d66f07e7-3a6c-457b-8a42-978f4897fe6b,Nước mắm cá,gia_vi,🧂,category
 9921288f-65a9-43b5-a8e1-5782ab90b423,Ớt tươi,gia_vi,🌶️,rule
 664fdb27-ddb1-44ce-a63e-867196741a05,Riềng,gia_vi,🧂,category
-141144f4-ee04-4860-a31e-b4689565885c,Ruột chanh dây,gia_vi,🍋,rule
+141144f4-ee04-4860-a31e-b4689565885c,Ruột chanh dây,gia_vi,🧂,category
 20f5f717-218e-4d2b-8832-ef70dd7d788f,Sả,gia_vi,🧂,category
 3654f72e-8768-4835-9094-8946c27c21db,Sa tế,gia_vi,🧂,category
 0c46e19e-ecd8-4c5f-889b-aea27b81cec1,Tiêu đen xay,gia_vi,🧂,category
@@ -833,10 +833,10 @@ edf48b17-fb44-4933-84c9-f7adc27c43c5,Má đùi gà nấu chậm Minh Hào,mon_vi
 ad31beec-d22f-4bdc-9406-60dc557c2c5e,Mì Quảng,mon_viet,🍜,rule
 7edc9c8e-65d1-49db-9708-db11949bb228,Mì xào,mon_viet,🍜,rule
 928e2231-b5f4-49a0-9564-af0e9d635d13,Mì Ý sốt cà Minh Hào,mon_viet,🍜,rule
-8312e106-c2ac-45c3-a2db-cc51935d2da2,Nấm đùi gà xào tỏi,mon_viet,🍗,rule
+8312e106-c2ac-45c3-a2db-cc51935d2da2,Nấm đùi gà xào tỏi,mon_viet,🍄,rule
 b712ab57-e3da-455e-b257-5462da64f045,Nem lụi,mon_viet,🍜,category
 08ade368-4f37-48f1-95b7-71680872d1c4,Ốc luộc sả,mon_viet,🦪,rule
-c3aa271a-4d5c-4ea5-b317-37da07903094,Ốc xào me,mon_viet,🦪,rule
+c3aa271a-4d5c-4ea5-b317-37da07903094,Ốc xào me,mon_viet,🍜,category
 b4b52838-895c-4875-b5e2-0762be89f40f,Phở bò,mon_viet,🍜,rule
 c27615c1-71be-47c3-a96a-9206b8aa2536,Phở gà,mon_viet,🍜,rule
 429c6b9e-228f-430a-a6b8-d69416611f81,Rau muống xào tỏi,mon_viet,🧄,rule
@@ -885,9 +885,9 @@ d54599d6-18f2-4e6d-949e-75a6d73be39f,Cà tím (luộc),rau,🥦,category
 71dbd8b4-949a-48a7-8db9-42f2736a7664,Cà tím (sống),rau,🥦,category
 09ca07fb-6993-4e20-a539-03255b9e7a39,Cải bẹ xanh (luộc),rau,🥬,rule
 4b2933cb-faaa-49ed-b454-0c80bc9a2d0c,Cải bẹ xanh (sống),rau,🥬,rule
-a04cc509-864b-41da-a15c-a4fbd7be2bc5,Cải bó xôi (luộc),rau,🍚,rule
-e1445ec4-ea79-488b-9af9-0fc50932daf4,Cải bó xôi (sống),rau,🍚,rule
-efe1decb-c3d5-452b-b845-397add135388,Cải bó xôi (Spinach),rau,🍚,rule
+a04cc509-864b-41da-a15c-a4fbd7be2bc5,Cải bó xôi (luộc),rau,🥬,rule
+e1445ec4-ea79-488b-9af9-0fc50932daf4,Cải bó xôi (sống),rau,🥬,rule
+efe1decb-c3d5-452b-b845-397add135388,Cải bó xôi (Spinach),rau,🥬,rule
 0f776f3f-f4a2-4c4d-b308-52c0b0ed6f59,Cải cúc (tần ô),rau,🥬,rule
 a8d34759-f2d8-48a6-923c-fbebdcf6a72f,Cải làn (luộc),rau,🥬,rule
 eeccad3f-709d-428a-9500-d37896471ee8,Cải làn (sống),rau,🥬,rule
@@ -922,8 +922,8 @@ fe398eaf-06cb-4577-a4ed-1cff64b35e8d,Diếp cá (rau giấp cá),rau,🐟,rule
 c93636e9-b95a-4c18-903f-7e070b27a1bd,Dưa cải chua,rau,🥬,rule
 5f9d053f-c580-4765-957b-53a6934487df,Dưa gang,rau,🥦,category
 00c72520-c84c-4df6-829b-2466546fbd81,Dưa leo (cả vỏ),rau,🥒,rule
-46a90079-297c-451f-b570-fe06988859f8,Đậu bắp (luộc),rau,🌽,rule
-7a59d39f-b377-4fd2-bbf6-5ac44e261028,Đậu bắp (sống),rau,🌽,rule
+46a90079-297c-451f-b570-fe06988859f8,Đậu bắp (luộc),rau,🥦,category
+7a59d39f-b377-4fd2-bbf6-5ac44e261028,Đậu bắp (sống),rau,🥦,category
 f431d6a1-890c-478e-9284-9b36f778f018,Đậu đũa,rau,🥦,category
 d8e51452-2c50-4b92-94d2-452f9bc148da,Đậu đũa (luộc),rau,🥦,category
 9dda03e8-b4c6-45ee-89d0-f03048ab6cc8,"Đậu Hà Lan (hạt, luộc)",rau,🌰,rule
@@ -942,7 +942,7 @@ e38608fa-ced7-4954-977b-99c59c2e4d93,Hành củ (hành tím),rau,🧅,rule
 7502127a-a182-4e68-8aa5-5e11bb8a8224,Hành lá,rau,🧅,rule
 ec16ca9e-6c87-4d80-8a07-7f69f5ffdba4,Hành tây,rau,🧅,rule
 06c2d1bf-8362-4fbb-a5e4-7e272b15e7f9,"Hẹ lá (bông hẹ, hoa hẹ)",rau,🥦,category
-e61f5631-12df-42fb-acb6-676ff9384e2e,Hoa chuối (bắp chuối),rau,🌽,rule
+e61f5631-12df-42fb-acb6-676ff9384e2e,Hoa chuối (bắp chuối),rau,🥦,category
 5a21f058-b07f-4e33-bfc5-ba88c654695a,"Hoa thiên lý (hoa lý, bông thiên lý)",rau,🥦,category
 a6d52646-e5c3-4307-883c-e9ceb5ad1cb2,Húng lủi,rau,🥦,category
 1cb32db4-0f1f-43d4-8843-f680bd97a487,Húng quế,rau,🥦,category
@@ -971,7 +971,7 @@ b358d8af-6b17-4cd0-8429-bf4d73f9bf3a,Mùi tàu (ngò tây),rau,🥦,category
 eb7990b5-94ae-4209-afbf-bcfe7fdfc68a,Nấm đầu khỉ,rau,🍄,rule
 154c96de-008b-48e0-9f56-ca3e1d9ac5a3,Nấm đông cô (nấu chín),rau,🍄,rule
 4ef73769-16a0-4441-8c0b-d37dd471e237,Nấm đông cô (tươi),rau,🍄,rule
-8bc9afdd-387b-436f-b6ab-c063ccfcd71b,Nấm đùi gà,rau,🍗,rule
+8bc9afdd-387b-436f-b6ab-c063ccfcd71b,Nấm đùi gà,rau,🍄,rule
 18d615d1-a372-4653-9826-2c1033d46d04,Nấm hải sản (shimeji),rau,🍄,rule
 6ad9c562-1b4f-4e14-808d-91a11518b708,Nấm hương khô,rau,🍄,rule
 0471ca29-aedd-4521-9fe9-ef6553b3c949,Nấm kim châm,rau,🍄,rule
@@ -1038,9 +1038,9 @@ ff033fd7-0060-4594-80c1-c5daeb2e45d6,Phô mai Vinamilk,sua,🧀,rule
 953af437-5692-40f2-acef-23e4137373b7,Probi sữa chua uống hương cam,sua,🥣,rule
 85d5bed5-35d1-4bc5-bbfe-170571cc8b97,Probi sữa chua uống hương dâu,sua,🥣,rule
 503a5fbc-41a9-40ff-8309-d1afb831dc75,Probi sữa chua uống hương dứa,sua,🥣,rule
-a922e836-5fb1-4ede-9643-e060b17a4951,Probi sữa chua uống hương dưa gang,sua,🥣,rule
+a922e836-5fb1-4ede-9643-e060b17a4951,Probi sữa chua uống hương dưa gang,sua,🥛,category
 b35c4676-29d0-4c62-94fc-ab80b588bc5d,Probi sữa chua uống hương việt quất,sua,🥣,rule
-8b7fece2-707a-4453-8aa5-85d7819321fe,Probi sữa chua uống lựu đỏ ít đường,sua,🥣,rule
+8b7fece2-707a-4453-8aa5-85d7819321fe,Probi sữa chua uống lựu đỏ ít đường,sua,🥛,category
 ea410de7-64b1-4620-86fc-170b9bc630e3,Probi sữa chua uống men sống có đường,sua,🥣,rule
 bb38b23f-2369-4b2c-a422-2d568afe41d7,Probi sữa chua uống men sống ít đường,sua,🥣,rule
 46e01ff7-186b-4427-9572-7adb9ff60552,Probi sữa chua uống men sống không đường,sua,🥣,rule
@@ -1056,17 +1056,17 @@ c671eccc-22a4-4cd9-b1d5-15e4fb87adfc,SuSu sữa chua uống hương táo nho,sua
 0d8c2c3e-b46d-4e77-9f02-695590132540,Sữa chua ăn Vinamilk Green Farm ít đường,sua,🥣,rule
 ef3bd225-cc7c-49b6-bfb2-cc74ff51dbab,Sữa chua ăn Vinamilk ít đường,sua,🥣,rule
 d46652a3-8f04-4db7-8167-f3b402424562,Sữa chua ăn Vinamilk không đường,sua,🥣,rule
-1686a13d-bb80-4d42-8aa4-9b15b4b8620b,Sữa chua ăn Vinamilk lựu đỏ ít đường collagen,sua,🥣,rule
+1686a13d-bb80-4d42-8aa4-9b15b4b8620b,Sữa chua ăn Vinamilk lựu đỏ ít đường collagen,sua,🥛,category
 d5bc842c-fbb5-4f8c-bf8b-ddd7f7b70d5f,Sữa chua ăn Vinamilk nha đam,sua,🥣,rule
 197ab27f-d5c4-48ef-86e5-f61cacf7f0da,Sữa chua ăn Vinamilk trân châu đường đen,sua,🥣,rule
 fc6c40ee-5984-44f5-8512-4a82f2512fa4,Sữa chua Hy Lạp không đường,sua,🥣,rule
 6a256223-b7f7-44e2-bc0f-e4a075d948bc,Sữa chua không đường,sua,🥣,rule
-87fefd49-6790-4403-9f55-8a89c1a1d31b,Sữa chua thực vật Vinamilk yến mạch chanh dây xoài,sua,🥣,rule
+87fefd49-6790-4403-9f55-8a89c1a1d31b,Sữa chua thực vật Vinamilk yến mạch chanh dây xoài,sua,🥛,category
 23d53840-ce5c-4b5b-8e03-b952e8376b69,Sữa chua uống Long Thành,sua,🥣,rule
-94e89cd5-58eb-4562-982b-b9116f5cc476,Sữa đặc có đường Ông Thọ nhãn đỏ,sua,🥛,rule
-485a2e63-7cdd-488e-b288-2e52e9c24c3d,Sữa đặc có đường Ông Thọ nhãn vàng,sua,🥛,rule
-2faca909-d346-4a8b-9457-453e22a16c8d,Sữa đặc có đường Ông Thọ nhãn xanh biển,sua,🥛,rule
-7c40debc-7779-4f1a-84b5-1dc4446f042a,Sữa đặc có đường Ông Thọ nhãn xanh lá,sua,🥛,rule
+94e89cd5-58eb-4562-982b-b9116f5cc476,Sữa đặc có đường Ông Thọ nhãn đỏ,sua,🥛,category
+485a2e63-7cdd-488e-b288-2e52e9c24c3d,Sữa đặc có đường Ông Thọ nhãn vàng,sua,🥛,category
+2faca909-d346-4a8b-9457-453e22a16c8d,Sữa đặc có đường Ông Thọ nhãn xanh biển,sua,🥛,category
+7c40debc-7779-4f1a-84b5-1dc4446f042a,Sữa đặc có đường Ông Thọ nhãn xanh lá,sua,🥛,category
 6b877ab5-28df-49f0-a1e9-c18ad8739059,Sữa đặc Ông Thọ vị dâu,sua,🥛,rule
 bc92fc73-39df-4760-820a-d4d3e45bdcf3,Sữa đặc Ông Thọ vị sôcôla,sua,🥛,rule
 e06cfceb-454b-4f8a-8ded-ed5a0db58945,Sữa tươi không đường,sua,🥛,rule
@@ -1075,8 +1075,8 @@ dd11bde6-2e54-468a-823e-ceedcc3eb15d,TH true MILK sữa tươi tiệt trùng có
 43510e85-c341-484e-99be-788f6619f4ca,Vinamilk ADM A2 ít đường,sua,🥛,category
 85e5356d-f8e4-433d-a235-872a7222ab79,Vinamilk Flex cao đạm giàu canxi không lactoza,sua,🥛,category
 4f0f75e1-0960-4d8e-a0d2-323383d37057,Vinamilk Flex không lactoza giàu canxi,sua,🥛,category
-b03f59a3-ef4a-47e3-82f4-81aca1fd6d6d,Vinamilk Green Farm sữa chua uống hương cam hoa bưởi,sua,🥣,rule
-62340880-ae57-4b6a-9519-4a76f6f5f361,Vinamilk Green Farm sữa chua uống hương vải hoa nhài,sua,🥣,rule
+b03f59a3-ef4a-47e3-82f4-81aca1fd6d6d,Vinamilk Green Farm sữa chua uống hương cam hoa bưởi,sua,🥛,category
+62340880-ae57-4b6a-9519-4a76f6f5f361,Vinamilk Green Farm sữa chua uống hương vải hoa nhài,sua,🥛,category
 7289dd26-f669-4029-9cd7-e57edff24ec5,Vinamilk Green Farm sữa chua uống ít đường,sua,🥣,rule
 ee0f5e8c-9200-492a-aa15-393b97b2babf,Vinamilk Green Farm sữa tươi A2 không đường,sua,🥛,rule
 b6e33b7b-c43a-41d6-885d-e6b8e5d61431,Vinamilk Green Farm sữa tươi cao đạm ít béo,sua,🥛,rule
@@ -1120,19 +1120,19 @@ fb8741ba-a48e-4ccd-9212-5ce7b7c15158,Bánh naan,tinh_bot,🍚,category
 54929a8c-5c6d-4bf3-ac84-d6710fe903ae,Bánh tortilla bột mì,tinh_bot,🍚,category
 ae81ed8c-c1d5-42f2-a97a-4e0ce3d531e9,Bánh tráng,tinh_bot,🍚,category
 1edc97e3-2a7e-4c70-8012-0f664e2e8a67,Bắp/ngô ngọt,tinh_bot,🌽,rule
-14a8be39-9835-4c3a-bbb2-7057669a7db8,Bột gạo (sống),tinh_bot,🍚,category
+14a8be39-9835-4c3a-bbb2-7057669a7db8,Bột gạo (sống),tinh_bot,🍚,rule
 95fdc14a-cae8-4f01-8b96-817eb2040d00,Bột mì (khô),tinh_bot,🍚,category
 3e5c2d52-a700-45f9-b69c-bc6a3c105d24,Bột năng (bột sắn),tinh_bot,🍚,category
 b9067c21-44fc-4bc6-9cee-033a0e955c75,Bột sắn dây,tinh_bot,🍚,category
 eb9dbe1c-a2f0-4ba6-91fd-39cbae6d9e3a,Bún (sợi tươi),tinh_bot,🍜,rule
-d7fd9f6d-b4ed-48c2-9488-f03c870da72f,Bún gạo lứt (khô),tinh_bot,🍜,rule
+d7fd9f6d-b4ed-48c2-9488-f03c870da72f,Bún gạo lứt (khô),tinh_bot,🍚,rule
 d680b3e2-0daa-4893-b94e-23dc4e398c89,Bún khô,tinh_bot,🍜,rule
 37742c9c-6bf4-4597-8828-a7337f0e563c,Bún khô (luộc),tinh_bot,🍜,rule
 849126d9-e36a-4555-be9e-88d9b1b9a2da,Cháo đậu xanh,tinh_bot,🍚,category
 c9540f57-0406-4b82-a28c-d1c4a860fc6b,Cốm (tươi),tinh_bot,🍚,category
 8b56438f-e8ea-49f6-ab92-c2426499aadd,Cơm đậu đen,tinh_bot,🍚,rule
 d33e33f5-9c5a-44d5-86e2-d72eb43c81e7,Cơm đậu đỏ,tinh_bot,🍚,rule
-5f1b4f4f-7166-41a0-8ae4-e40d1043a758,Cơm đậu gà,tinh_bot,🍚,rule
+5f1b4f4f-7166-41a0-8ae4-e40d1043a758,Cơm đậu gà,tinh_bot,🍚,category
 3fe7f2fb-7f72-41ba-9bbb-6b7e4734e6d6,Cơm đậu ngự,tinh_bot,🍚,rule
 6dd63c5c-b280-4207-92e3-8aa45580ae32,Cơm đậu trắng,tinh_bot,🍚,rule
 57ff64a1-816d-4be2-a404-d52c0c758524,"Cơm đậu tươi (Hà Lan, đậu nành, bắp)",tinh_bot,🍚,rule
@@ -1149,18 +1149,18 @@ a1c0e688-c5ff-4a02-967f-3fd9952501ae,Củ dong,tinh_bot,🍚,category
 fab25dac-18bb-48d4-87aa-e58e8941e9bb,Củ sắn dây (luộc),tinh_bot,🍚,category
 0a6a6d7c-b63d-4184-b41e-601caa3124e6,Củ từ (luộc),tinh_bot,🍚,category
 08573db5-f2c9-43c3-9848-dd301c0a4846,Củ từ (sống),tinh_bot,🍚,category
-2c24c9e9-87e0-4d8a-a516-bfbed87f9b8d,Gạo lứt (hạt khô),tinh_bot,🌰,rule
-afe07225-0eea-4d3c-96d9-b9bb26fab80c,Gạo lứt đen (hạt khô),tinh_bot,🌰,rule
-7bb30933-a674-46f0-8626-f4b5fbd08070,Gạo lứt đỏ (hạt khô),tinh_bot,🌰,rule
-d772f809-437d-429e-a811-1728751a5924,Gạo lứt huyết rồng (hạt khô),tinh_bot,🌰,rule
-b72db1ed-e266-4ac1-87c7-5fa30752c203,Gạo nàng hương (hạt khô),tinh_bot,🌰,rule
-eab193a5-272e-4b2b-8657-f66ca41d6f74,Gạo nếp (hạt khô),tinh_bot,🌰,rule
-8a552509-5a6e-49da-9d71-68a5a2d3894e,Gạo nếp cái (hạt khô),tinh_bot,🌰,rule
-136af842-d8bf-4055-86b1-b97e88414222,Gạo nếp thường (hạt khô),tinh_bot,🌰,rule
-a33ef70b-d0fa-4ed8-86fa-267ded81c8c9,Gạo ST25 (hạt khô),tinh_bot,🌰,rule
-26745d48-fa07-4366-81d7-db4fdc34ec50,Gạo tám thơm (hạt khô),tinh_bot,🍍,rule
-52a7df59-ad36-4144-b7b0-33b1018ab6e4,Gạo tẻ giã tay (hạt khô),tinh_bot,🌰,rule
-dba5ee2e-f7df-4a24-b86d-e44ac0631f94,"Gạo tẻ trắng (xát máy, hạt khô)",tinh_bot,🌰,rule
+2c24c9e9-87e0-4d8a-a516-bfbed87f9b8d,Gạo lứt (hạt khô),tinh_bot,🍚,rule
+afe07225-0eea-4d3c-96d9-b9bb26fab80c,Gạo lứt đen (hạt khô),tinh_bot,🍚,rule
+7bb30933-a674-46f0-8626-f4b5fbd08070,Gạo lứt đỏ (hạt khô),tinh_bot,🍚,rule
+d772f809-437d-429e-a811-1728751a5924,Gạo lứt huyết rồng (hạt khô),tinh_bot,🍚,rule
+b72db1ed-e266-4ac1-87c7-5fa30752c203,Gạo nàng hương (hạt khô),tinh_bot,🍚,rule
+eab193a5-272e-4b2b-8657-f66ca41d6f74,Gạo nếp (hạt khô),tinh_bot,🍚,rule
+8a552509-5a6e-49da-9d71-68a5a2d3894e,Gạo nếp cái (hạt khô),tinh_bot,🍚,rule
+136af842-d8bf-4055-86b1-b97e88414222,Gạo nếp thường (hạt khô),tinh_bot,🍚,rule
+a33ef70b-d0fa-4ed8-86fa-267ded81c8c9,Gạo ST25 (hạt khô),tinh_bot,🍚,rule
+26745d48-fa07-4366-81d7-db4fdc34ec50,Gạo tám thơm (hạt khô),tinh_bot,🍚,rule
+52a7df59-ad36-4144-b7b0-33b1018ab6e4,Gạo tẻ giã tay (hạt khô),tinh_bot,🍚,rule
+dba5ee2e-f7df-4a24-b86d-e44ac0631f94,"Gạo tẻ trắng (xát máy, hạt khô)",tinh_bot,🍚,rule
 99e2bbe9-17e1-4110-9c0a-74b79887c7a4,Hạt dẻ (luộc/hấp),tinh_bot,🌰,rule
 3deb3c28-896e-4a3e-b35e-cde146b33fa7,Hạt dẻ (sống),tinh_bot,🌰,rule
 f1835d29-1c2f-45b5-be2d-191a57f4eedb,Hạt kê (khô),tinh_bot,🌰,rule
@@ -1238,15 +1238,15 @@ cd72c2e8-be27-42d3-9667-0132355b25aa,Chuối,trai_cay,🍌,rule
 a2d96422-28a2-44f0-a369-12bd8fb1733e,Chuối sứ (chuối tây),trai_cay,🍌,rule
 55d886d7-3ae7-46d2-a682-1f0974e34cf2,Chuối tiêu,trai_cay,🍌,rule
 215643b1-1884-4100-9617-ac1d14cf9063,Cóc,trai_cay,🍎,category
-b0818a72-99b2-4112-9119-16ad2ad7fa38,Cơm dừa già (cùi dừa),trai_cay,🍚,rule
-f05d07cd-871b-49fd-b9ae-e9a45de67b5a,Cơm dừa non (cùi dừa non),trai_cay,🍚,rule
+b0818a72-99b2-4112-9119-16ad2ad7fa38,Cơm dừa già (cùi dừa),trai_cay,🥥,rule
+f05d07cd-871b-49fd-b9ae-e9a45de67b5a,Cơm dừa non (cùi dừa non),trai_cay,🥥,rule
 18bfa2a8-5c58-4b6e-8a15-c3bdfa74af39,Dâu da (dâu gia),trai_cay,🍓,rule
 23980016-6314-46f7-bfb0-14622fd9ff81,Dâu tằm (sống),trai_cay,🍓,rule
 6d26cd8d-004e-496e-adc6-407b5d7df2eb,Dâu tây,trai_cay,🍓,rule
 9ceb8447-e136-4b06-bc30-e335408054f5,Dưa bở,trai_cay,🍎,category
 eb61f727-0e1c-46d2-85f2-31436ff3c5e5,Dưa hấu,trai_cay,🍉,rule
 1b44fab3-30c3-43ba-817c-2504d065ed21,Dưa hồng,trai_cay,🍎,category
-e2887386-735a-4c6c-9085-e42eac83509e,Dưa lê,trai_cay,🍐,rule
+e2887386-735a-4c6c-9085-e42eac83509e,Dưa lê,trai_cay,🍎,category
 2f20f1b6-6714-4ca9-b54d-ff2ca0b9df4b,Dưa lưới,trai_cay,🍎,category
 63fb98b9-5fc8-4ff9-ab05-9724957e254e,Dứa ta (khóm),trai_cay,🍍,rule
 3d50866e-ebe9-48a4-b38c-c1bd76985d18,Đào,trai_cay,🍑,rule

@@ -48,8 +48,15 @@ const NO_EMOJI_FRUITS = [
 ];
 
 export const EMOJI_RULES: readonly Rule[] = [
-  { words: NO_EMOJI_FRUITS, emoji: null, only: ["trai_cay", "an_vat", "do_uong"] },
-  { words: ["đậu phụ", "đậu hũ", "hạt nêm", "nước mắm", "bơ bò", "bơ lạt", "bơ thực vật"], emoji: null },
+  // Anywhere: "Ruột chanh dây" is not a lemon whatever its category
+  { words: NO_EMOJI_FRUITS, emoji: null },
+  // Names that hold another rule's word but are not that food ("Đậu bắp" is okra, not corn; "Đậu gà" is chickpeas)
+  { words: ["đậu phụ", "đậu hũ", "hạt nêm", "nước mắm", "bơ bò", "bơ lạt", "bơ thực vật", "đậu bắp", "hoa chuối", "bắp chuối", "dưa lê", "đậu gà", "bánh tráng"], emoji: null },
+  { words: ["gạo"], emoji: "🍚" },
+  { words: ["nấm đùi gà"], emoji: "🍄" },
+  { words: ["cải bó xôi"], emoji: "🥬" },
+  { words: ["cơm dừa"], emoji: "🥥" },
+  { words: ["trai sông", "trai"], emoji: "🦪", only: ["dam", "mon_viet"] },
   { words: ["quả bơ", "trái bơ"], emoji: "🥑" },
   { words: ["cá cơm"], emoji: "🐟" },
   // Drinks
@@ -101,7 +108,9 @@ export const EMOJI_RULES: readonly Rule[] = [
   { words: ["chanh"], emoji: "🍋" },
   { words: ["dưa hấu"], emoji: "🍉" },
   { words: ["nho"], emoji: "🍇" },
-  { words: ["dứa", "thơm"], emoji: "🍍" },
+  { words: ["dứa"], emoji: "🍍" },
+  // "thơm" is pineapple only as a fruit or a drink: "Gạo tám thơm" is fragrant rice
+  { words: ["thơm"], emoji: "🍍", only: ["trai_cay", "do_uong", "an_vat"] },
   { words: ["xoài"], emoji: "🥭" },
   { words: ["dừa"], emoji: "🥥" },
   { words: ["bơ"], emoji: "🥑", only: ["trai_cay"] },

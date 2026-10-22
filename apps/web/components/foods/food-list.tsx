@@ -151,7 +151,7 @@ function FoodListView({
           disabled={disabled}
           onClick={() => onPick(food)}
           onPointerDown={() => prefetchDishParts(food)}
-          className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
+          className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 ${add ? "py-1.5" : "py-2"} pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen || tray ? "pr-1" : "pr-4"
           } ${selected && !carried ? "bg-cobalt-tint" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >

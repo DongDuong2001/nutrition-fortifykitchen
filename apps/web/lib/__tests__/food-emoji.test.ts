@@ -96,6 +96,21 @@ describe("foodEmoji: name rules", () => {
     }
   });
 
+  it("names that hold another rule's word (the review sheet's rule rows)", () => {
+    expect(foodEmoji(food("Gạo tám thơm", "tinh_bot"))).toBe("🍚");
+    expect(foodEmoji(food("Đậu bắp", "rau"))).toBe(CATEGORY_EMOJI.rau);
+    expect(foodEmoji(food("Hoa chuối (bắp chuối)", "rau"))).toBe(CATEGORY_EMOJI.rau);
+    expect(foodEmoji(food("Dưa lê", "trai_cay"))).toBe(CATEGORY_EMOJI.trai_cay);
+    expect(foodEmoji(food("Trai sông (trai nước ngọt)", "dam"))).toBe("🦪");
+    expect(foodEmoji(food("Đậu gà", "dam"))).toBe(CATEGORY_EMOJI.dam);
+    expect(foodEmoji(food("Nấm đùi gà", "rau"))).toBe("🍄");
+    expect(foodEmoji(food("Cải bó xôi", "rau"))).toBe("🥬");
+    expect(foodEmoji(food("Cơm dừa", "beo"))).toBe("🥥");
+    expect(foodEmoji(food("Ruột chanh dây", "gia_vi"))).toBe(CATEGORY_EMOJI.gia_vi);
+    expect(foodEmoji(food("Bánh tráng nướng", "an_vat"))).toBe(CATEGORY_EMOJI.an_vat);
+    expect(foodEmoji(food("Nước ép thơm", "do_uong"))).toBe("🍍");
+  });
+
   it("rules limited to a category: butter is not an avocado, oyster sauce is not olive oil, cream is not ice cream", () => {
     expect(foodEmoji(food("Bơ lạt", "sua"))).toBe(CATEGORY_EMOJI.sua);
     expect(foodEmoji(food("Dầu hào", "gia_vi"))).toBe(CATEGORY_EMOJI.gia_vi);
@@ -138,7 +153,7 @@ describe("only Unicode 13 or older, no ZWJ sequences", () => {
   });
 });
 
-// docs/data/food-emoji-map.csv, the review sheet for Hao: EMOJI_MAP=<path to a GET /foods export (a list of rows)> npm run scan:emoji
+// docs/data/food-emoji-map.csv, the review sheet for Hao: EMOJI_MAP=<path to a GET /foods export (a list of rows)> npx vitest run lib/__tests__/food-emoji.test.ts
 describe.runIf(!!process.env.EMOJI_MAP)("food-emoji-map.csv", () => {
   it("writes every catalogue food with its emoji and where it came from", () => {
     type Row = { id: string; name_vi: string; category?: string; source?: string; brand?: string };
