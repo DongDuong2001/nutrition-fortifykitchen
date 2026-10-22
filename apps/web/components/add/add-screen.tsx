@@ -46,7 +46,7 @@ import {
 } from "@/lib/meal-slot";
 import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { addToDraft, draftFor } from "@/lib/template-draft";
-import type { DayTemplateItem } from "@/lib/day-templates";
+import { NEW_TEMPLATE_NAME, type DayTemplateItem } from "@/lib/day-templates";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { Expand } from "@/components/ui/expand";
@@ -118,9 +118,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // the draft; Chỉ ghi kcal is not offered (a template holds foods).
   const mauParam = searchParams.get("mau");
   const [templateTarget] = useState(() => (mauParam ? draftFor(mauParam) : null));
+  const templateName = templateTarget ? templateTarget.name.trim() || NEW_TEMPLATE_NAME : "";
   const toDraft = (slot: MealSlot, items: DayTemplateItem[]): boolean => {
     if (!templateTarget || !addToDraft(templateTarget.id, slot, items)) return false;
-    notify(`Đã thêm ${items.length} món vào ${templateTarget.name} · ${getMealSlotNameVi(slot)}`);
+    notify(`Đã thêm ${items.length} món vào ${templateName} · ${getMealSlotNameVi(slot)}`);
     return true;
   };
   const addFoodEntry: typeof diary.addFoodEntry = templateTarget
@@ -132,8 +133,11 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const addSavedMeal: typeof diary.addSavedMeal = templateTarget ? (meal, slot) => void toDraft(slot, meal.items) : diary.addSavedMeal;
   // A reload (or a link) lost the draft: never fall back to the diary for foods meant for a template; say so and go back
   const lostTemplate = mauParam !== null && templateTarget === null;
+  const lostHandled = useRef(false);
   useEffect(() => {
-    if (!lostTemplate) return;
+    // Once (React's development double effect would go Back twice)
+    if (!lostTemplate || lostHandled.current) return;
+    lostHandled.current = true;
     notify("Ngày ăn mẫu chưa lưu đã đóng. Mở lại để thêm món.");
     goBack();
   }, [lostTemplate, notify, goBack]);
@@ -146,7 +150,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // Template mode goes back to the editor (null: Back), never on to Hôm nay
   const homeHref = templateTarget ? null : addToDay ? `${HOME_ROUTE}?date=${addToDay}` : HOME_ROUTE;
   const dayText = templateTarget
-    ? ` · ${templateTarget.name}`
+    ? ` · ${templateName}`
     : addToDay
       ? ` · ${formatDayLabel(addToDay, new Date(`${todayIso}T12:00:00+07:00`)).toLocaleLowerCase("vi-VN")}`
       : "";
@@ -594,7 +598,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       if (saved) {
         tourAction("portion-confirmed");
         // The panel slides down like the ✕ does and the portion sheet over it goes with it (no hard cut)
-        leave(homeHref);
+        leave(homeHref, false, true);
         setSelectedFood(null);
       }
     } finally {
@@ -619,7 +623,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   };
 
   // A tray with foods in it, an open portion sheet or the Chỉ ghi kcal form is something a reload would lose: the update waits (lib/unsaved-work)
-  useUnsavedWork("add-sheet", tray.length > 0 || selectedFood !== null || quickOpen);
+  // Template mode: the Ngày ăn mẫu being built is only in memory until its Lưu, so an update waits for it too
+  useUnsavedWork("add-sheet", tray.length > 0 || selectedFood !== null || quickOpen || templateTarget !== null);
   const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
   const trayAddable = canAddTray(tray);
   const handleAddTray = () => {
@@ -627,7 +632,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     setIsSubmitting(true);
     if (addFoodEntries(tray, mealSlot, addToDay)) {
       // The tray is left as it is: it goes with the sheet, so the button never reads "Thêm 0 món" while the sheet slides away
-      leave(homeHref);
+      leave(homeHref, false, true);
     } else {
       setIsSubmitting(false);
     }
@@ -645,7 +650,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     setIsSubmitting(true);
     try {
       await addFoodEntry(food, grams, mealSlot, label, { undoable: true, day: addToDay });
-      leave(homeHref);
+      leave(homeHref, false, true);
     } finally {
       setIsSubmitting(false);
     }
@@ -655,7 +660,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     if (closingRef.current || oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
     addSavedMeal(meal, mealSlot, addToDay);
-    leave(homeHref);
+    leave(homeHref, false, true);
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
@@ -664,7 +669,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     const result = addQuickEntry(input, mealSlot, addToDay);
     if (result.ok) {
       oneTapLock.current = true;
-      leave(homeHref);
+      leave(homeHref, false, true);
       setQuickOpen(false);
     }
     return result;
@@ -682,10 +687,11 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // page under the sheet, or on to `href` (Hôm nay) when the sheet was not opened from it. `instant`: Esc on a keyboard
   // goes at once (a keyboard action never waits for an animation).
   const leave = useCallback(
-    (href: string | null, instant = false) => {
+    // `committed`: an add that leaves (a grab during the slide must not bring the sheet back, even when it goes Back, as in template mode)
+    (href: string | null, instant = false, committed = href !== null) => {
       if (closingRef.current) return;
       closingRef.current = true;
-      committedRef.current = href !== null;
+      committedRef.current = committed;
       // The entries of sheets still open over this one (a portion sheet when its Thêm adds): they go with the route
       const sheetEntries = takeBackSheetEntries();
       if (typeof window !== "undefined") {
@@ -707,7 +713,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         if (panelRef.current) setInertExceptDrag(panelRef.current, true);
         if (href === null || previousInAppPath() === HOME_ROUTE) {
           // Back lands on the page under the sheet, and takes the entries of any sheet over this one with it
-          if (href === null) goBack();
+          // A portion sheet still open over this one (template mode's Thêm): its entry goes with the sheet's own
+          if (href === null) sheetEntries > 0 ? window.history.go(-(1 + sheetEntries)) : goBack();
           else window.history.go(-(1 + sheetEntries));
         } else router.replace(href);
       };
@@ -808,7 +815,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           getMeta={getFoodMeta}
           onPickSimilar={onPickSimilar}
           onClearFilter={clearFilter}
-          newFoodHref={newFoodHref}
+          newFoodHref={templateTarget ? null : newFoodHref}
           onRequestFood={requestFood}
         />
       ),
@@ -949,7 +956,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                     isFavourite={isFavouriteFood}
                     showSourceTag={query.trim() !== ""}
                     empty={emptyState}
-                    footer={searchMissed ? null : createFoodLink}
+                    footer={searchMissed || templateTarget ? null : createFoodLink}
                     className="h-[360px] overflow-y-auto pb-1"
                   />
                 </SwitchGlide>
@@ -975,7 +982,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
               <div data-portion-pane className="min-h-0 w-[340px] shrink-0 self-stretch overflow-y-auto">
                 {selectedFood ? (
                   <PortionPanel
-                    onCompare={openCompare}
+                    onCompare={templateTarget ? undefined : openCompare}
+              hideDetail={templateTarget !== null}
                     food={selectedFood}
                     gramsInput={gramsInput}
                     setGramsInput={setGramsInput}
@@ -1051,7 +1059,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   isFavourite={isFavouriteFood}
                   showSourceTag={query.trim() !== ""}
                   empty={emptyState}
-                  footer={searchMissed ? null : createFoodLink}
+                  footer={searchMissed || templateTarget ? null : createFoodLink}
                 />
               </SwitchGlide>
               )}
@@ -1170,7 +1178,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
             <PortionPanel
-              onCompare={openCompare}
+              onCompare={templateTarget ? undefined : openCompare}
+              hideDetail={templateTarget !== null}
               food={selectedFood}
               gramsInput={gramsInput}
               setGramsInput={setGramsInput}

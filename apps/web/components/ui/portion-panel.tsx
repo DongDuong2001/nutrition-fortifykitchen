@@ -45,6 +45,8 @@ export interface PortionPanelProps {
   onClose?: () => void;
   /** feat/compare-in-add: "So sánh" under the kcal card (V3Portion) opens the compare picker with this food locked. */
   onCompare?: () => void;
+  /** feat/template-builder: no "Xem chi tiết →" (the food page's Thêm logs to the diary, not to the template being built) */
+  hideDetail?: boolean;
 }
 
 /**
@@ -70,6 +72,7 @@ export function PortionPanel({
   notice: addNotice,
   onClose,
   onCompare,
+  hideDetail = false,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
@@ -183,6 +186,7 @@ export function PortionPanel({
               {rowName(food)}
             </h2>
           </div>
+          {!hideDetail && (
           <div className="flex shrink-0 flex-col items-end">
             <Link
               href={`/foods/${food.id}${mealSlot ? `?meal=${mealSlot}` : ""}`}
@@ -192,6 +196,7 @@ export function PortionPanel({
               Xem chi tiết →
             </Link>
           </div>
+          )}
         </div>
         {food.tipVi && (
           <div data-align-group="portion" data-align-edge="left" className="line-clamp-2 w-full text-cap leading-snug text-secondary">

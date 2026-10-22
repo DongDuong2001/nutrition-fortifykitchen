@@ -14,7 +14,8 @@ import { Sheet } from "@/components/ui/sheet";
 import { MEAL_DOT } from "@/components/home/meal-dot";
 import { TagDot } from "@/components/templates/template-parts";
 import { useDiary } from "@/lib/diary-store";
-import { useBack } from "@/hooks/use-back";
+import { lastInAppPath, useBack } from "@/hooks/use-back";
+import { useUnsavedWork } from "@/lib/unsaved-work";
 import { useDayTemplateRows } from "@/hooks/use-day-templates";
 import { CATALOG_FOODS, catalogFoodById, catalogVersion, subscribeCatalog, type FoodItem } from "@/lib/catalog";
 import {
@@ -104,9 +105,13 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
   // The draft: the saved template's copy, or the day built from scratch. The + sheet's template mode writes to it too, so the
   // editor reads it from the store. It goes when the editor is left, unless the editor went to the + sheet (holdDraft).
   const stored = useSyncExternalStore(subscribeDraft, () => draftFor(id), () => null);
-  const [first] = useState(() => stored ?? (template ? draftOf(template) : null));
+  // A stored draft is taken back only on the way back from the + sheet it went to (or a new day, which only lives as a draft): a
+  // draft left behind some other way (the + sheet, then So sánh or a tab) is dropped, so a saved template never opens on stale edits
+  const [first] = useState(() =>
+    stored && (stored.isNew || lastInAppPath() === "/add") ? stored : template ? draftOf(template) : stored
+  );
   useEffect(() => {
-    if (!draftFor(id) && first) startDraft(first);
+    if (first && draftFor(id) !== first) startDraft(first);
     return () => {
       releaseDraft(id);
     };
@@ -136,6 +141,9 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
   const kcalMax = data.calories.targetMax;
   const pct = pctOf(totals.kcal, kcalMin);
   const foodCount = templateItemCount(meals);
+  // Only in memory until Lưu: an app update waits while there is something to lose
+  const dirty = isNew || (template !== null && JSON.stringify({ name, tag, meals }) !== JSON.stringify({ name: template.name, tag: template.tag, meals: template.meals }));
+  useUnsavedWork("template-editor", dirty);
 
   function save() {
     if (foodCount === 0) {
@@ -241,7 +249,6 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
                     href={`/add?meal=${slot}&mau=${encodeURIComponent(id)}`}
                     onClick={() => holdDraft(id)}
                     aria-label={`Thêm vào ${fullName}`}
-                    data-tour={slot === "breakfast" ? "template-meal-add" : undefined}
                     className="ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center text-cobalt no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
@@ -295,9 +302,12 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
       </section>
 
       <div className="mt-1 flex flex-col items-center gap-1">
-        <PillButton type="button" variant="secondary" onClick={applyToToday} className={OUTLINE_PILL}>
-          Áp dụng cho hôm nay
-        </PillButton>
+        {/* A day built from scratch is applied once it is saved (Áp dụng would leave it unsaved) */}
+        {!isNew && (
+          <PillButton type="button" variant="secondary" onClick={applyToToday} className={OUTLINE_PILL}>
+            Áp dụng cho hôm nay
+          </PillButton>
+        )}
         {/* Xóa is last, in destructive red, and asks first. A day built from scratch is not saved yet: Back drops it */}
         {!isNew && (
         <button

@@ -1,4 +1,4 @@
-import { addTemplateItems, templateItemCount, type DayTemplate, type DayTemplateItem, type DayTemplateMeal, type DayTemplateTag } from "./day-templates";
+import { addTemplateItems, type DayTemplate, type DayTemplateItem, type DayTemplateMeal, type DayTemplateTag } from "./day-templates";
 import type { MealSlot } from "./meal-slot";
 
 /**
@@ -84,5 +84,3 @@ export function discardDraft(id: string): void {
   held = false;
   emit();
 }
-
-export const draftFoodCount = (d: TemplateDraft): number => templateItemCount(d.meals);
