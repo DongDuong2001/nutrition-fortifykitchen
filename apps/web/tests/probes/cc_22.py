@@ -215,9 +215,9 @@ def run(browser, size, tag):
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     go(pg, "/app")
-    # feat/ngay-mau: an empty day shows the Chép ngày mẫu pill in place of the "Chưa có món nào hôm nay" line (the line returns when its × hides the pill);
+    # feat/ngay-mau: an empty day shows the Chép ngày ăn mẫu pill in place of the "Chưa có món nào hôm nay" line (the line returns when its × hides the pill);
     # Chép hôm qua is the first card of the pill's picker, no longer a button of the day
-    check(pg.get_by_role("button", name="Chép ngày mẫu").count() == 1, f"{tag} Chép ngày mẫu pill on the empty day")
+    check(pg.get_by_role("button", name="Chép ngày ăn mẫu").count() == 1, f"{tag} Chép ngày ăn mẫu pill on the empty day")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{tag} no Chép hôm qua button on the empty day")
     pg.get_by_role("button", name="Ẩn gợi ý ngày ăn mẫu hôm nay").first.click()
     pg.wait_for_timeout(500)

@@ -7,8 +7,9 @@ At 360 px, at 360 with the root font at 150 % and at 390:
 - /explore/cua_toi is headed "Món ăn của tôi"; /explore/meals "Bữa ăn đã lưu" with the subtitle "Thêm lại cả bữa bằng một chạm";
   /explore/ngay-mau "Ngày ăn mẫu".
 - A recipe dish (Cơm đậu đỏ) offers "Tùy chỉnh món này"; it makes a recipe whose page says "Món ăn của tôi · N phần · N nguyên liệu".
-- On an empty day the pill keeps "Chép ngày mẫu" ("Chép ngày ăn mẫu" does not fit the card at 360 or 390 px); its size is reported, not
-  asserted (the old label already wraps there). The picker is "Chọn ngày ăn mẫu".
+- On an empty day the meals card shows its line ("Chưa có món nào hôm nay") with the × at the top right, and under it the copy button "Chép ngày ăn mẫu"
+  in a row of its own: 44 px tall, the full width of the card, one line, inside the card and not cut off, at 360 and 390 (at 150 % text the label is wider than the card, so it wraps to a second line, never cut). The picker
+  is "Chọn ngày ăn mẫu".
 Shots: .screenshots/v3-rename/<name>-<360|360-text150|390>.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/rename_labels.py
 """
@@ -134,17 +135,26 @@ def main():
             # the pill on an empty day
             ctx, pg = page(browser, size, big, empty_day=True)
             go(pg, "/app", big)
-            pill = pg.get_by_role("button", name="Chép ngày mẫu").locator("visible=true")
-            check(pill.count() == 1, f"{name} empty day: the pill reads Chép ngày mẫu")
+            pill = pg.get_by_role("button", name="Chép ngày ăn mẫu").locator("visible=true")
+            check(pill.count() == 1, f"{name} empty day: the pill reads Chép ngày ăn mẫu")
             if pill.count():
                 info = pill.first.evaluate(
                     """(b) => { const card = b.closest('[data-food-scroll]') || b.parentElement; const r = b.getBoundingClientRect(), c = card.getBoundingClientRect();
-                      const range = document.createRange(); range.selectNodeContents(b);
-                      return { lines: new Set([...range.getClientRects()].map((q) => Math.round(q.top))).size, inside: r.left >= c.left - 1 && r.right <= c.right + 1, clipped: b.scrollWidth > b.clientWidth + 1, width: r.width, card: c.width }; }"""
+                      const label = b.querySelector('span'); const lr = document.createRange(); lr.selectNodeContents(label);
+                      const tile = label.querySelector('span[aria-hidden]');
+                      return { lines: new Set([...lr.getClientRects()].filter((q) => q.width > 20).map((q) => Math.round(q.top))).size,
+                               inside: r.left >= c.left - 1 && r.right <= c.right + 1, clipped: label.scrollWidth > label.clientWidth + 1,
+                               width: Math.round(r.width), card: Math.round(c.width), height: Math.round(r.height), fullWidth: r.width >= c.width - 28,
+                               tile: !!tile && tile.parentElement.getBoundingClientRect().width > 0 }; }"""
                 )
-                # Reported, not asserted: "Chép ngày ăn mẫu" does not fit the 148 to 178 px card, so the label stays "Chép ngày mẫu"; that label
-                # itself already wraps to two lines in the pill (a 100 to 130 px button beside its ×), as it did before this branch
+                check(info["inside"] and not info["clipped"], f"{name} empty day: the pill sits inside its card and is not cut off ({info})")
                 print(f"  {name} empty day: pill {info}")
+                if big:
+                    # at 150 % text the label is wider than any card of the phone: it wraps to a second line inside a taller pill, never cut off
+                    print(f"  {name} empty day: pill {info}")
+                else:
+                    check(info["lines"] == 1, f"{name} empty day: the pill is one line ({info['lines']})")
+                    check(abs(info["height"] - 44) <= 1 and info["fullWidth"], f"{name} empty day: its own 44 px row, the full width of the card ({info})")
                 pill.first.scroll_into_view_if_needed()
                 pg.screenshot(path=str(OUT / f"pill-{name}.png"))
                 pill.first.click()

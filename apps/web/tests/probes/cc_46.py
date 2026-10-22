@@ -151,7 +151,7 @@ def once(browser):
     check(all(t in text for t in ITEMS), "the release's items")
     wrapped = wrapped_titles(pg, ITEMS)
     check(not wrapped, f"each item title of 21c fits on one line at 390 px (wrapped: {wrapped})")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 21c has an 8-step tour, 7 of them on Hôm nay (the ⋯ of the day and the Chép ngày mẫu pill among them)")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 21c has an 8-step tour, 7 of them on Hôm nay (the ⋯ of the day and the Chép ngày ăn mẫu pill among them)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -296,8 +296,8 @@ def home_tour(browser):
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
     # feat/v3-redesign extends 21c with three steps first (a meal's +, the Ngày tập pill, the Khám phá tab) and feat/ngay-mau with two at the end (the ⋯ of the
-    # day, the Chép ngày mẫu pill): 21b's 2 + 21c's 7 on Hôm nay (So sánh món is in the portion panel) = 9, cut to 8: 21b keeps its first step
-    steps = [("Một con số", ["home-hero"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày mẫu", ["day-template-pill", "meal-pill"])]
+    # day, the Chép ngày ăn mẫu pill): 21b's 2 + 21c's 7 on Hôm nay (So sánh món is in the portion panel) = 9, cut to 8: 21b keeps its first step
+    steps = [("Một con số", ["home-hero"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()

@@ -38,7 +38,7 @@ export function useDayTemplateRows() {
   return { rows, templates, setTemplates };
 }
 
-/** The "Chép ngày mẫu" pill's ×: whether the pill is hidden for a date, and hiding it for that date only. */
+/** The "Chép ngày ăn mẫu" pill's ×: whether the pill is hidden for a date, and hiding it for that date only. */
 export function useTemplatePillHidden(iso: string | null, todayIso: string | null): { hidden: boolean; hide: () => void } {
   const hiddenDates = useSyncExternalStore(pillStore.subscribe, pillStore.get, pillStore.getServer);
   return {

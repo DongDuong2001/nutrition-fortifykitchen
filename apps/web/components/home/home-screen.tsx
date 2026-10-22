@@ -274,7 +274,7 @@ function HomeContent() {
   const countedIds = useMemo(() => countedForLevel(level), [level]);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  // Ngày ăn mẫu: the save sheet (day ⋯) and the picker (the "Chép ngày mẫu" pill)
+  // Ngày ăn mẫu: the save sheet (day ⋯) and the picker (the "Chép ngày ăn mẫu" pill)
   const [isSaveDayOpen, setIsSaveDayOpen] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);

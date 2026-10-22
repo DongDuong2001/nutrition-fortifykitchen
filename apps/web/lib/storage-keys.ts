@@ -13,7 +13,7 @@ import { OFFLINE_OUTBOX_KEY } from "./legacy-outbox-owner";
 // Named here, not in lib/saved-meals: that file pulls the whole diary (diary-edits, the sample foods) and this one is
 // on the sign-in page's path (cc-58)
 export const SAVED_MEALS_KEY = "h1t_saved_meals_v1";
-// Ngày ăn mẫu (feat/ngay-mau): the saved days, and the days whose "Chép ngày mẫu" pill was hidden with its ×. Device only, per account,
+// Ngày ăn mẫu (feat/ngay-mau): the saved days, and the days whose "Chép ngày ăn mẫu" pill was hidden with its ×. Device only, per account,
 // like the macro split; a `day_templates` table would let them follow the account (OPEN_QUESTIONS)
 export const DAY_TEMPLATES_KEY = "h1t_day_templates_v1";
 export const TEMPLATE_PILL_HIDDEN_KEY = "h1t_template_pill_hidden_v1";

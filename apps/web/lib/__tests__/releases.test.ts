@@ -171,7 +171,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs, Đồ ăn của Minh Hào, the glide, Đổi nguyên liệu and Ngày ăn mẫu: plain words, and an 8-step tour (the last two on Hôm nay: the ⋯ of the day, then the Chép ngày mẫu pill)", () => {
+  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs, Đồ ăn của Minh Hào, the glide, Đổi nguyên liệu and Ngày ăn mẫu: plain words, and an 8-step tour (the last two on Hôm nay: the ⋯ of the day, then the Chép ngày ăn mẫu pill)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
@@ -184,11 +184,11 @@ describe("unseenReleases (what Có gì mới lists)", () => {
       ["portion-compare", "portion-detail", null, "So sánh món"],
       ["dish-parts", "meal-add", null, "Đổi nguyên liệu"],
       ["day-menu", "home-hero", null, "Lưu cả ngày thành mẫu"],
-      ["day-template-pill", "meal-pill", null, "Chép ngày mẫu"],
+      ["day-template-pill", "meal-pill", null, "Chép ngày ăn mẫu"],
     ]);
     // The item of Ngày ăn mẫu (feat/ngay-mau): a title and a body, no colon inside a sentence
     expect(r?.items.at(-2)?.icon).toBe("meal");
-    expect(r?.items.at(-2)?.body).toContain("Chép ngày mẫu");
+    expect(r?.items.at(-2)?.body).toContain("Chép ngày ăn mẫu");
     // The rename line (feat/rename-labels): the three new names in one item
     expect(r?.items.at(-1)).toEqual({ icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." });
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
@@ -282,8 +282,8 @@ describe("joinedTour (what Thử ngay runs)", () => {
   const T21A = ["Về Hôm nay"];
   const T21B = ["Một con số", "Vi chất theo DRI"];
   // feat/v3-redesign extends 21c with three steps first (a meal's +, the Ngày tập pill, the Khám phá tab); feat/ngay-mau adds two at the end
-  // (the ⋯ of the day, the Chép ngày mẫu pill)
-  const T21C = ["Thêm vào từng bữa", "Ngày tập", "Nhóm món có màu", "Đồ ăn của Minh Hào", "So sánh món", "Đổi nguyên liệu", "Lưu cả ngày thành mẫu", "Chép ngày mẫu"];
+  // (the ⋯ of the day, the Chép ngày ăn mẫu pill)
+  const T21C = ["Thêm vào từng bữa", "Ngày tập", "Nhóm món có màu", "Đồ ăn của Minh Hào", "So sánh món", "Đổi nguyên liệu", "Lưu cả ngày thành mẫu", "Chép ngày ăn mẫu"];
   // 30 steps from 18c on, 8 at most: the oldest releases give up their last steps first, and 21c alone is 8, so it goes whole and every older tour goes
   const CAPPED = T21C;
 

@@ -2,7 +2,7 @@
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
 - Several unseen releases: an account that saw 18b gets 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
-  Thử ngay runs the joined tour oldest first, capped at the newest 8: 21c alone is 8 steps now (feat/ngay-mau added the ⋯ of the day and the Chép ngày mẫu pill),
+  Thử ngay runs the joined tour oldest first, capped at the newest 8: 21c alone is 8 steps now (feat/ngay-mau added the ⋯ of the day and the Chép ngày ăn mẫu pill),
   and one of them (So sánh món) is in the portion panel, so the 7 on Hôm nay are preceded by 21b's first step (Một con số, the kcal target). Every older tour is cut by the cap
   (the older steps' own checks are in lib/__tests__/releases.test.ts). The counter reads n/8; Xong ends it,
   entries unchanged
@@ -45,7 +45,7 @@ OLD_TIPS = [
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
 # The newest 8 of the joined tour: cc-73b's 21b first step (the kcal target) and 21c's seven that are on Hôm nay: V3's meal +, Ngày tập pill and
 # Khám phá tab, Đồ ăn của Minh Hào (the Khám phá tab), Đổi nguyên liệu (Thành phần, a meal's + on Hôm nay), and feat/ngay-mau's two (the ⋯ of
-# the day, the Chép ngày mẫu pill, which is the meal headers when the day has food); So sánh món is in the portion panel, and everything older
+# the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has food); So sánh món is in the portion panel, and everything older
 # is cut by the cap (21c alone is 8 steps)
 STEPS = [
     ("Một con số", ["home-hero"]),
@@ -55,7 +55,7 @@ STEPS = [
     ("Đồ ăn của Minh Hào", ["nav-explore"]),
     ("Đổi nguyên liệu", ["meal-add", "nav-add"]),
     ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]),
-    ("Chép ngày mẫu", ["day-template-pill", "meal-pill"]),
+    ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
