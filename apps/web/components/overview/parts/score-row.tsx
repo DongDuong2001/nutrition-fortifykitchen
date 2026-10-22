@@ -64,6 +64,7 @@ export function ScoreRow({
         <span className="text-right text-cap font-semibold text-secondary">{row.change}</span>
         <span className="min-w-0">
           <span className={`font-display font-extrabold leading-none tabular-nums tracking-display ${levels ? "text-[2.5rem]" : "text-[2.75rem]"}`}>{row.value}</span>
+          {row.valueNote && row.value !== "—" && <span className="ml-1 text-cap font-semibold text-secondary">{row.valueNote}</span>}
           <span className="block text-cap text-secondary">{row.sub}</span>
         </span>
         <span className={`flex flex-col items-end justify-center ${levels ? "gap-2" : "gap-1"}`}>

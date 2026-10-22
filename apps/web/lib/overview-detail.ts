@@ -25,6 +25,8 @@ export interface ScoreRowData {
   title: string;
   /** The period average (or the latest weight), formatted; "—" when unknown */
   value: string;
+  /** Beside the number: "TB/ngày" for a period's average (overnight 22→23/10: the big numbers read as a day's); none for the weight */
+  valueNote?: string;
   /** "kcal / 1.950–2.275", "g / 128–176 · 24% kcal" */
   sub: string;
   /** The change in words */
@@ -50,6 +52,9 @@ const ROW_INFO: Record<BoardKey, { title: string; unit: string; target: keyof Co
 };
 
 /** A scoreboard row for kcal, đạm, chất béo, tinh bột or chất xơ over the period of `overview`. */
+/** What a period's big number is: the average of a day */
+export const AVERAGE_NOTE = "TB/ngày";
+
 export function macroScoreRow(input: {
   key: BoardKey;
   overview: Overview;
@@ -71,6 +76,7 @@ export function macroScoreRow(input: {
     key,
     title: info.title,
     value: average === null ? "—" : formatNumber(Math.round(average)),
+    valueNote: AVERAGE_NOTE,
     sub: `${info.unit} / ${formatRange(range.min, range.max)}${share}`,
     change: changeLine(average, previous, info.unit, length),
     days,
