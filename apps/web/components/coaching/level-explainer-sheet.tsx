@@ -1,7 +1,6 @@
 "use client";
 
 import { Sheet } from "@/components/ui/sheet";
-import { PillButton } from "@/components/ui/pill-button";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { LEVELS, type Level } from "@/lib/coaching-link";
 import { ASK_COACH_TEXT, levelSummaryLine } from "@/lib/level-copy";
@@ -36,9 +35,6 @@ export function LevelExplainerSheet({ open, onClose, level }: { open: boolean; o
         })}
       </ol>
       <p className="m-0 px-1 text-callout font-bold text-text">{ASK_COACH_TEXT}</p>
-      <PillButton type="button" variant="secondary" onClick={onClose}>
-        Đóng
-      </PillButton>
     </Sheet>
   );
 }

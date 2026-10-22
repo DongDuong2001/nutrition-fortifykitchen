@@ -34,10 +34,9 @@ REPORT_ONLY = {"ag04_audit.py", "screenshots.py", "cc_66_shots.py", "cc_66_weigh
 # QUAR and does not fail the run, so a red probe:all means a regression. Past its expiry date it counts again.
 # name: (reason, expires YYYY-MM-DD)
 QUARANTINE = {
-    # feat/v3-redesign: every screen is ported; what still fails is /landing (cobalt text on ink 3,0–3,3:1, 11–13 px text
-    # and nav links 20 px tall, all there before V3) and, at 200 % text, targets under 44 px wide on /app, /settings/profile
-    # and /trends* (day bars, minute chips). Remove this line once it is green.
-    "design-floor.py": ("/landing fails D-COL-01/D-TYPE-01/D-CTL-01/D-LAY-04 (before V3); at 200 % text /app, /settings/profile, /trends* fail D-CTL-01", "2026-10-29"),
+    # design-floor.py is green on every app screen (v3-cleanup: the targets under 44 px wide at 200 % text on /app,
+    # /settings/profile and /trends* got hit areas). /landing is its own probe so it cannot hide a regression elsewhere.
+    "design-floor-landing.py": ("/landing fails D-COL-01 (cobalt text on ink 3,0-3,3:1), D-TYPE-01 (11-13 px text), D-CTL-01 (nav links 20 px tall) and D-LAY-04; all of it was there before V3", "2026-10-29"),
 }
 TIMEOUT_S = 180
 DEFAULT_WORKERS = 6

@@ -16,7 +16,8 @@ export interface SegmentedItem<K extends string> {
  * The segmented control (V3-SPEC §1 segTrack, design-floor 8): a #E3E3E8 track with 4 px padding and 12 px corners on
  * the page; each segment is a 44 px hit area around a 36 px pill, the selected one white with a hairline ring and bold
  * ink text, the others secondary. Equal columns (`fill`, the default: AGENTS layout rule 4) or fitted to their labels.
- * Links get aria-current; buttons get aria-pressed inside a labelled group.
+ * Links get aria-current; buttons get aria-pressed inside a labelled group. `nowrap` (the four Tổng quan tabs): a label never
+ * wraps, the pill keeps 4 px at the sides, and a track too narrow for the longest label scrolls sideways (320 px).
  */
 export function Segmented<K extends string>({
   items,
@@ -27,6 +28,8 @@ export function Segmented<K extends string>({
   as = "group",
   className = "",
   alignGroup,
+  nowrap = false,
+  accent,
 }: {
   items: SegmentedItem<K>[];
   value: K;
@@ -39,12 +42,19 @@ export function Segmented<K extends string>({
   as?: "group" | "nav" | "tabs";
   className?: string;
   alignGroup?: string;
+  nowrap?: boolean;
+  /** The selected segment is filled with a tab colour (Tổng quan's sub-tabs: teal, white text) instead of the white pill. */
+  accent?: "teal";
 }) {
-  const track = `rounded-xl bg-seg-track p-1 ${fill ? "grid" : "inline-flex"} ${className}`;
-  const style = fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` } : undefined;
+  const track = `rounded-xl bg-seg-track p-1 ${fill ? "grid" : "inline-flex"} ${nowrap ? "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : ""} ${className}`;
+  const style = fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(${nowrap ? "max-content" : "0"}, 1fr))` } : undefined;
   const pill = (on: boolean) =>
-    `relative flex min-h-9 w-full items-center justify-center rounded-[9px] px-3 py-1 text-center text-cap leading-tight transition-press ${
-      on ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]" : "font-semibold text-secondary"
+    `relative flex min-h-9 w-full items-center justify-center rounded-[9px] py-1 text-center text-cap leading-tight transition-press ${nowrap ? "whitespace-nowrap px-1" : "px-3"} ${
+      on
+        ? accent === "teal"
+          ? "bg-tab-teal font-bold text-on-accent"
+          : "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]"
+        : "font-semibold text-secondary"
     }`;
   const cell = "-my-1 flex min-h-11 min-w-11 items-center justify-center no-underline transition-press active:scale-[0.97] motion-reduce:active:scale-100";
   const body = items.map((item) => {

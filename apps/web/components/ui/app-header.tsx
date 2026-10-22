@@ -180,7 +180,7 @@ export function AppHeader({
 
   return (
     <header
-      className={`w-full flex-none select-none bg-page text-text ${className}`}
+      className={`relative w-full flex-none select-none bg-page text-text ${variant === "tab" || variant === "daily" ? "max-lg:bg-transparent" : ""} ${className}`}
     >
       {back && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-sticky h-6 bg-linear-to-b from-page to-transparent lg:hidden" />}
       <div
@@ -227,7 +227,9 @@ export function AppHeader({
                 <div className={back ? "flex min-h-11 items-center" : undefined}>
                   <Title
                     title={typeof title === "string" ? title : undefined}
-                    className={`m-0 break-words font-display italic font-extrabold leading-tight uppercase tracking-display line-clamp-2 lg:text-display-sm ${
+                    // Saira's marks (Ụ, Ề, dấu nặng) and the slant of the italic reach past the line box, which the clamp cuts: 0.2em of padding above and
+                    // below and 0.15em on the right keep them, and the same negative margins leave the layout where it was
+                    className={`-my-[0.2em] -mr-[0.15em] break-words py-[0.2em] pr-[0.15em] font-display italic font-extrabold leading-tight uppercase tracking-display line-clamp-2 lg:text-display-sm ${
                       back ? (typeof title === "string" && title.length > 18 ? "text-2xl" : "text-headline") : variant === "tab" ? "text-display" : "text-2xl"
                     }`}
                   >

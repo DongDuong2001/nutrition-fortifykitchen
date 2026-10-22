@@ -223,7 +223,7 @@ function ShareCapture({
 
   return createPortal(
     <div ref={hostRef} aria-hidden="true" inert style={{ position: "fixed", top: 0, left: -10000, width: SHARE_CSS_WIDTH, pointerEvents: "none" }}>
-      <ShareDay model={model} />
+      <ShareDay model={model} largeText={parseFloat(getComputedStyle(document.documentElement).fontSize) > 16.5} />
     </div>,
     document.body
   );

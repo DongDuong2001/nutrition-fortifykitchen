@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
+import { TabWash } from "@/components/ui/tab-wash";
 import { IconShare } from "@/components/ui/icons";
 import { setHomeDay } from "@/lib/home-scroll";
 import { copyMeals, dayEntries, entriesKcal, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
@@ -681,6 +682,7 @@ function HomeContent() {
             : "lg:h-dvh"
         }`}
       >
+        {!selecting && <TabWash tone="home" />}
         {selecting ? (
           sheets && <sheets.SelectHeader
             count={chosenCount}
@@ -761,7 +763,7 @@ function HomeContent() {
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <main className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <main className="relative mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}

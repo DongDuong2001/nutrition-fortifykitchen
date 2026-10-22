@@ -57,7 +57,7 @@ function ChoiceGrid({ items, columns }: { items: ChoiceItem[]; columns: number }
           aria-label={item.ariaLabel}
           disabled={item.disabled}
           onClick={item.onClick}
-          className={`flex h-12 items-center justify-center rounded-full border-0 px-2 text-center text-callout active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+          className={`hit-44 relative flex h-12 items-center justify-center rounded-full border-0 px-2 text-center text-callout active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
             item.active ? "bg-ink font-bold text-on-dark" : "bg-surface font-semibold text-text"
           } ${item.disabled ? "cursor-default opacity-50 active:scale-100" : "cursor-pointer"}`}
         >

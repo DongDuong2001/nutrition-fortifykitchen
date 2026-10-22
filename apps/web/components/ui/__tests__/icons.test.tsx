@@ -1,60 +1,21 @@
 import { describe, expect, it } from "vitest";
-import React from "react";
-import { renderToString } from "react-dom/server";
-import {
-  IconEye,
-  IconEyeOff,
-  IconCheck,
-  IconHome,
-  IconTarget,
-  IconSparkles,
-} from "../icons";
+import { renderToStaticMarkup } from "react-dom/server";
+import { IconShare, SHARE_ICON_PATH } from "../icons";
 
-describe("MynaUI Icon Adapter", () => {
-  it("renders IconEye with default attributes", () => {
-    const html = renderToString(<IconEye />);
-    expect(html).toContain("<svg");
-    expect(html).toContain('aria-hidden="true"');
-    expect(html).toContain('width="22"');
-    expect(html).toContain('height="22"');
+describe("IconShare", () => {
+  it("is V3's iOS share glyph: the path, a 24 box, stroke 1.8 with round caps and joins", () => {
+    expect(SHARE_ICON_PATH).toBe("M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7");
+    const html = renderToStaticMarkup(<IconShare />);
+    expect(html).toContain(`d="${SHARE_ICON_PATH}"`);
+    expect(html).toContain('viewBox="0 0 24 24"');
     expect(html).toContain('stroke-width="1.8"');
+    expect(html).toContain('stroke-linecap="round"');
+    expect(html).toContain('stroke-linejoin="round"');
     expect(html).toContain('stroke="currentColor"');
   });
 
-  it("renders IconEyeOff for password visibility toggle", () => {
-    const html = renderToString(<IconEyeOff size={20} />);
-    expect(html).toContain("<svg");
-    expect(html).toContain('width="20"');
-  });
-
-  it("renders navigation and domain icons", () => {
-    const homeHtml = renderToString(<IconHome size={24} />);
-    const targetHtml = renderToString(<IconTarget />);
-    const sparklesHtml = renderToString(<IconSparkles />);
-
-    expect(homeHtml).toContain("<svg");
-    expect(targetHtml).toContain("<svg");
-    expect(sparklesHtml).toContain("<svg");
-  });
-
-  it("supports custom aria-label for accessible icon-only controls", () => {
-    const html = renderToString(<IconCheck aria-hidden="false" aria-label="Đã hoàn tất" />);
-    expect(html).toContain('aria-label="Đã hoàn tất"');
-    expect(html).toContain('role="img"');
-    expect(html).not.toContain('aria-hidden="true"><svg');
-  });
-
-  it("stays decorative (hidden from assistive technology) without a label", () => {
-    const html = renderToString(<IconCheck />);
-    expect(html).toContain('aria-hidden="true"');
-    expect(html).not.toContain("role=");
-  });
-
-  it("is the same size and stroke as the navigation icons: 22 px, 1,8", () => {
-    for (const Icon of [IconHome, IconTarget, IconSparkles, IconCheck]) {
-      const html = renderToString(<Icon />);
-      expect(html).toContain('width="22"');
-      expect(html).toContain('stroke-width="1.8"');
-    }
+  it("stays decorative until it is unhidden with a label", () => {
+    expect(renderToStaticMarkup(<IconShare />)).toContain('aria-hidden="true"');
+    expect(renderToStaticMarkup(<IconShare aria-hidden={false} aria-label="Chia sẻ" />)).toContain('role="img"');
   });
 });

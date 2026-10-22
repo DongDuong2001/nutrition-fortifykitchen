@@ -180,13 +180,6 @@ export function MealMenuSheet({
               </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-1 min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-callout font-bold text-text m-tint"
-          >
-            Đóng
-          </button>
         </>
       )}
     </Sheet>

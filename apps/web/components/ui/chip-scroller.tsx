@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export interface ChipScrollerItem {
   id: string;
@@ -23,14 +23,35 @@ export interface ChipScrollerProps {
 
 /**
  * ChipGroup's `scroll` row (it used to be its own ChipRow): one row of pill chips. Same colours and 44 px height as the ChipGroup md chips.
- * On phone it scrolls sideways: a right fade always shows, and a left fade shows once the row is scrolled.
- * From 1024 px it wraps onto more lines, with no scrolling and no fades.
+ * On phone it scrolls sideways. The fades are a mask on the row itself (24 px each side), so they fade into whatever is behind it (the
+ * page, a card, a tab's colour wash): the right one shows only while there is more to the right, the left one once the row is scrolled,
+ * and a row that does not overflow has none. From 1024 px it wraps onto more lines, with no scrolling and no fades.
  * The active chip is brought into view.
  */
 export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge, sheet = false }: ChipScrollerProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [scrolled, setScrolled] = useState(false);
+  // Which edges have more row behind them (only the phone's one-line row scrolls; the sheet header's row has no fades)
+  const [edges, setEdges] = useState({ left: false, right: false });
   const activeId = items.find((it) => it.active)?.id;
+
+  const measure = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || sheet) return;
+    const left = scroller.scrollLeft > 0;
+    const right = scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
+    setEdges((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
+  }, [sheet]);
+
+  // Measured on mount, on resize of the row or of its chips (a label that loads late, a larger text size) and after each scroll
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || sheet) return;
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    for (const child of Array.from(scroller.children)) observer.observe(child);
+    return () => observer.disconnect();
+  }, [measure, sheet, items.length]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -45,14 +66,21 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
     scroller.scrollTo({ left: chip.offsetLeft - (scroller.clientWidth - chip.offsetWidth) / 2 });
   }, [activeId]);
 
+  // The mask of the row (only its alpha counts, so currentColor is the opaque stop): opaque in the middle, 24 px of fade at each edge that has more behind it; none when nothing overflows
+  const mask = sheet || (!edges.left && !edges.right)
+    ? "none"
+    : `linear-gradient(to right, ${edges.left ? "transparent 0, currentColor 24px" : "currentColor 0"}, ${edges.right ? "currentColor calc(100% - 24px), transparent 100%" : "currentColor 100%"})`;
+
   return (
     <div data-align-group={dataAlignGroup} data-align-edge={dataAlignEdge} className="relative">
       <div
         ref={scrollerRef}
         role="group"
         aria-label={ariaLabel}
-        onScroll={(e) => setScrolled(e.currentTarget.scrollLeft > 0)}
-        className={`relative flex flex-nowrap gap-2 overflow-x-auto scrollbar-none lg:flex-wrap lg:overflow-visible ${
+        onScroll={measure}
+        data-fade-edges={sheet ? undefined : `${edges.left ? "left" : ""}${edges.left && edges.right ? " " : ""}${edges.right ? "right" : ""}` || "none"}
+        style={{ "--chip-mask": mask } as React.CSSProperties}
+        className={`relative flex flex-nowrap gap-2 overflow-x-auto scrollbar-none [-webkit-mask-image:var(--chip-mask)] [mask-image:var(--chip-mask)] lg:flex-wrap lg:overflow-visible lg:[-webkit-mask-image:none] lg:[mask-image:none] ${
           sheet ? "-mx-4 scroll-px-4 px-4 lg:mx-0 lg:px-0" : "pr-8 lg:pr-0"
         }`}
       >
@@ -76,24 +104,6 @@ export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGr
           </button>
         ))}
       </div>
-      {!sheet && (
-      <>
-      <div
-        aria-hidden="true"
-        data-fade="left"
-        className={`pointer-events-none absolute inset-y-0 left-0 w-8 transition-opacity lg:hidden ${
-          scrolled ? "opacity-100" : "opacity-0"
-        }`}
-        style={{ background: "linear-gradient(to right, var(--color-card), transparent)" }}
-      />
-      <div
-        aria-hidden="true"
-        data-fade="right"
-        className="pointer-events-none absolute inset-y-0 right-0 w-10 lg:hidden"
-        style={{ background: "linear-gradient(to left, var(--color-card), transparent)" }}
-      />
-      </>
-      )}
     </div>
   );
 }

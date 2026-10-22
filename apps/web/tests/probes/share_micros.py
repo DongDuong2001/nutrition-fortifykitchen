@@ -21,6 +21,8 @@ from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 HOME_TAG = os.environ.get("SHARE_MICROS_HOME", "")
+# SHARE_KEY_TAG=<tag> saves the colour key at 150 % text as .screenshots/share-key-150-<tag>.png (before / after)
+KEY_TAG = os.environ.get("SHARE_KEY_TAG", "")
 WEB = Path(__file__).resolve().parent.parent.parent
 OUT = WEB.parent.parent / "docs" / "screenshots" / "share-micros"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -140,9 +142,17 @@ COLUMN = """() => {
   const lastRow = Math.max(...rows.map((r) => r.getBoundingClientRect().bottom), ...bars.map((b) => b.bottom));
   const footer = document.querySelector('[data-share-footer]');
   const s = summary.getBoundingClientRect(), k = key.getBoundingClientRect(), a = aside.getBoundingClientRect();
+  // Each key item holds its own label: nothing runs past the item's box, and no two items overlap (150 % text wraps the label)
+  const items = [...key.querySelectorAll('li')];
+  const keyOverflow = items.filter((li) => li.scrollWidth > li.clientWidth + 1).map((li) => li.innerText.trim() + ' ' + li.scrollWidth + '/' + li.clientWidth);
+  const keyOverlap = [];
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    const a = items[i].getBoundingClientRect(), b = items[j].getBoundingClientRect();
+    if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1) keyOverlap.push(items[i].innerText.trim() + ' × ' + items[j].innerText.trim());
+  }
   const keyLines = lines.filter((l) => key.contains(document.elementFromPoint(l.r.left + 1, l.r.top + 1)));
   return {
-    overlap, onBar, rows: rows.length, bars: bars.length,
+    overlap, onBar, keyOverflow, keyOverlap, rows: rows.length, bars: bars.length,
     firstRow, lastRow, summaryTop: s.top, summaryBottom: s.bottom, keyTop: k.top, keyBottom: k.bottom, asideBottom: a.bottom,
     footerTop: footer ? footer.getBoundingClientRect().top : null,
     summaryText: summary.innerText.replace(/\\s+/g, ' ').trim(),
@@ -159,7 +169,7 @@ def check(cond, msg):
     return cond
 
 
-def new_context(browser, entries, size):
+def new_context(browser, entries, size, text=100):
     ctx = browser.new_context(viewport=size, accept_downloads=True)
     seed = ""
     if entries is not None:
@@ -169,12 +179,15 @@ def new_context(browser, entries, size):
     ctx.add_init_script("try {" + seed + "} catch (e) {}")
     ctx.add_init_script("Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });")
     ctx.add_init_script(GRAB_SVG)
+    if text != 100:
+        # The phone's text size (as cc_64_worst_case): every rem in the image grows with it
+        ctx.add_init_script("document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '%d%%'; });" % text)
     return ctx
 
 
-def share(browser, kind, level, engine="chromium"):
-    tag = f"{kind}-L{level}" + ("" if engine == "chromium" else f"-{engine}")
-    ctx = new_context(browser, DAYS[kind], {"width": 390, "height": 844})
+def share(browser, kind, level, engine="chromium", text=100):
+    tag = f"{kind}-L{level}" + ("" if engine == "chromium" else f"-{engine}") + ("" if text == 100 else f"-text{text}")
+    ctx = new_context(browser, DAYS[kind], {"width": 390, "height": 844}, text)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
     pg.goto(f"{BASE}/app?level={level}", wait_until="networkidle")
@@ -190,7 +203,7 @@ def share(browser, kind, level, engine="chromium"):
     with pg.expect_download() as info:
         dlg.get_by_role("button", name="Lưu ảnh").click()
     # The a11y pass draws the same image as Chromium (the share page ignores the text scale): kept out of docs
-    path = (SHOTS if engine == "a11y" else OUT) / f"share-{tag}.png"
+    path = (SHOTS if engine == "a11y" or text != 100 else OUT) / f"share-{tag}.png"
     info.value.save_as(str(path))
     w = pg.evaluate(
         "async (b64) => { const i = new Image(); i.src = 'data:image/png;base64,' + b64; await i.decode(); return i.naturalWidth; }",
@@ -202,27 +215,33 @@ def share(browser, kind, level, engine="chromium"):
     if not check(bool(svgs), f"{tag}: the SVG of the image was grabbed"):
         return
     body = urllib.parse.unquote(svgs[-1].split(",", 1)[1])
-    for stress in (False, True):
-        column_checks(browser, body, kind, level, tag + (" (text 0,15 px/char wider)" if stress else ""), stress)
+    for mode in ("", "stress"):
+        column_checks(browser, body, kind, level, tag + MODE_TAG[mode], mode, text)
 
 
 # A phone draws the SVG a hair wider than it laid out the page (another rasteriser, rounding at the 1080 px scale):
 # the column must still not run over itself
 STRESS = "[data-share-root] aside * { letter-spacing: 0.15px !important; }"
+MODE_TAG = {"": "", "stress": " (text 0,15 px/char wider)"}
 
 
-def column_checks(browser, body, kind, level, tag, stress):
+def column_checks(browser, body, kind, level, tag, mode, text=100):
     lay = browser.new_context(viewport={"width": 1080, "height": 900})
     lp = lay.new_page()
-    lp.set_content('<!doctype html><html><head>' + (f"<style>{STRESS}</style>" if stress else "") + '</head><body style="margin:0">' + body + "</body></html>")
+    lp.set_content('<!doctype html><html><head>' + (f"<style>{STRESS}</style>" if mode == "stress" else "") + '</head><body style="margin:0">' + body + "</body></html>")
     lp.wait_for_timeout(300)
     r = lp.evaluate(COLUMN)
+    if text != 100 and KEY_TAG and kind == "mixed" and level == 0:
+        lp.locator('[data-share-root] aside[aria-label="Vi chất"] ul').screenshot(path=str(SHOTS / f"share-key-150-{KEY_TAG}.png"))
     lay.close()
     if not check(r is not None, f"{tag}: the nutrient column is in the SVG"):
         return
     want_rows = 8 if level <= 1 else 28
     check(r["rows"] == want_rows, f"{tag}: every row drawn ({r['rows']}/{want_rows})")
     check(not r["overlap"], f"{tag}: no text line crosses another in the column ({r['overlap'][:4]})")
+    # The stress pass widens every glyph after the columns were fixed: a label may then run 2 px into the card's padding, so it
+    # only has to stay clear of its neighbours there
+    check(not (r["keyOverflow"] if not mode else []) and not r["keyOverlap"], f"{tag}: the colour key wraps inside its items, none overlaps ({r['keyOverflow']} {r['keyOverlap']})")
     check(not r["onBar"], f"{tag}: no text over a bar ({r['onBar'][:4]})")
     check(r["summaryBottom"] <= r["firstRow"] + 0.5, f"{tag}: summary above the first row (summary bottom {r['summaryBottom']:.1f} ≤ first row {r['firstRow']:.1f})")
     check(r["keyTop"] >= r["lastRow"] - 0.5, f"{tag}: colour key below the last row (key {r['keyTop']:.1f} ≥ last row {r['lastRow']:.1f})")
@@ -262,6 +281,12 @@ def main():
             for level in (0, 5):
                 share(a11y, kind, level, "a11y")
         a11y.close()
+        # The text size at 150 % (a phone's accessibility setting): the colour key wraps instead of running into itself
+        big = p.chromium.launch()
+        for kind in ("mixed", "short"):
+            for level in (0, 5):
+                share(big, kind, level, text=150)
+        big.close()
         try:
             webkit = p.webkit.launch()
         except Exception as e:

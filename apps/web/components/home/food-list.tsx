@@ -10,7 +10,6 @@ import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
 import { useDiary } from "@/lib/diary-store";
 import { haptic } from "@/lib/haptics";
-import { inkPill } from "./ink-pill";
 import { MEAL_DOT } from "./meal-dot";
 import { TemplatePill } from "@/components/templates/template-pill";
 import { useRowMotion } from "./row-motion";
@@ -23,19 +22,9 @@ const MOVE_LIMIT_PX = 10;
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
-// fix/dish-portion-label: the amount of every food row (Hôm nay, the share image, Chọn nhiều món) takes at most 40 % of
+// fix/dish-portion-label: the amount of every food row (Hôm nay, Chọn nhiều món) takes at most 40 % of
 // the row and wraps there, so a long amount never squeezes the name to one letter per line; a short one is unchanged
 const AMOUNT_GUARD = "max-w-[40%] shrink-0 text-right leading-none";
-
-/** The share image's row: the same row without the button, long press or dot. A long name wraps. */
-function ShareFoodRow({ entry }: { entry: HomeEntry }) {
-  return (
-    <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
-      <span data-share-wrap className="min-w-0 break-words text-cap font-semibold leading-snug">{entry.name}</span>
-      <span className={`${AMOUNT_GUARD} font-display text-callout font-bold tabular-nums text-text tracking-label`}>{portionLabel(entry)}</span>
-    </div>
-  );
-}
 
 function FoodRow({
   entry,
@@ -287,7 +276,6 @@ export function FoodList({
   onLongPressSelect,
   onMoveFood,
   touchDrag = true,
-  share = false,
   select,
   dayKey = "",
   onPullRefresh,
@@ -312,8 +300,6 @@ export function FoodList({
   onMoveFood?: (entryId: string, targetSlot: HomeMeal["slot"]) => void;
   /** cc-70: foods lift after a hold and drag to another meal with a finger. False while a sheet is open. */
   touchDrag?: boolean;
-  /** The share image: meals with no food are left out, nothing is a control, no legend. */
-  share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
   select?: SelectProps;
   /** The day shown: rows of another day are a new list, so no row enters, leaves or moves when it changes (cc-51); the day itself slides in (home-screen .m-day-*). */
@@ -323,33 +309,11 @@ export function FoodList({
 }) {
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
   const { listRef, rowsOf } = useRowMotion(meals, dayKey);
-  const pull = usePullRefresh(listRef, onPullRefresh, !share && !select && !readOnly);
+  const pull = usePullRefresh(listRef, onPullRefresh, !select && !readOnly);
   // The pill keeps its place while the empty row closes (the first food of the day)
   const lastPill = useRef<NonNullable<typeof templatePill> | null>(null);
 
   if (select) return <SelectList meals={meals} select={select} />;
-  if (share) {
-    const pill = inkPill(true);
-    return (
-      <div className="min-w-0 flex-1 bg-page pb-3">
-        {meals
-          .filter((meal) => meal.entries.length > 0)
-          .map((meal) => (
-            <section key={meal.slot} aria-label={meal.fullName}>
-              <div className={pill.wrap}>
-                <div data-ink-pill className={`${pill.pill} justify-between bg-ink text-on-dark`}>
-                  <span className={pill.label}>{meal.label}</span>
-                  <span className={pill.kcal}>{kcalLabel(meal.kcal)}</span>
-                </div>
-              </div>
-              {meal.entries.map((entry) => (
-                <ShareFoodRow key={entry.id} entry={entry} />
-              ))}
-            </section>
-          ))}
-      </div>
-    );
-  }
   if (templatePill) lastPill.current = templatePill;
   const shownPill = templatePill ?? lastPill.current;
   return (
@@ -429,7 +393,7 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
+                className="hit-44 relative flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
               >
                 <span aria-hidden="true" className={`h-2 w-2 flex-none rounded-full ${MEAL_DOT[meal.slot]}`} />
                 <span className="whitespace-nowrap font-display text-callout font-extrabold uppercase leading-[1.1] tracking-[0.01em]">{meal.label}</span>
@@ -449,7 +413,7 @@ export function FoodList({
                   data-export="hide"
                   data-tour="meal-add"
                   data-testid="meal-add"
-                  className="inline-flex h-11 w-11 flex-none items-center justify-center text-cobalt no-underline transition-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt active:scale-[0.97] motion-reduce:active:scale-100"
+                  className="relative inline-flex h-11 w-11 flex-none items-center justify-center text-cobalt no-underline transition-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt active:scale-[0.97] motion-reduce:active:scale-100"
                 >
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
                     <path d="M12 5v14M5 12h14" />

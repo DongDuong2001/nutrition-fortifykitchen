@@ -3,7 +3,7 @@
 Phone (V3): a header on the grey page (no ink slab) with the Saira title (34 px on a tab root and on Thiết lập xong, 28 px on
 a pushed screen); one h1; the back chevron is at least 44 px where there is one.
 Desktop: no full-width ink element at the top of the window, h1 is 32 px, the header starts at the same top offset.
-Everywhere: no all-caps text outside the h1, Saira display text and Hôm nay's ink pills (cc-44); no horizontal scroll.
+Everywhere: no all-caps text outside the h1, Saira display text; no horizontal scroll.
 Screenshots: .screenshots/cc2-unify-{overview,diary,explore,settings,micros,food}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_unify.py
 """
@@ -14,6 +14,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
+from _header_paint import header_on_page
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
@@ -70,14 +71,18 @@ HEADER_JS = """() => {
     if (!Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) continue;
     if (!vis(el)) continue;
     if (cs.fontFamily.toLowerCase().includes('saira')) continue;
-    // cc-44: Hôm nay's ink pills (meal and group headers) are uppercase by design
-    if (el.closest('[data-ink-pill]')) continue;
     caps.push((el.textContent || '').trim().slice(0, 30));
   }
   out.caps = caps;
   out.hScroll = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > window.innerWidth;
   return out;
 }"""
+
+
+def painted(pg, route, bg, where):
+    """A tab header's fill is the page, or transparent over what is painted there (the page, or the page under the tab's wash)."""
+    ok, detail = header_on_page(pg, route, bg)
+    return ok, f"{where}: V3 header sits on the page ({detail})"
 
 
 def check(cond, msg):
@@ -114,7 +119,7 @@ def main():
                         check(h["bg"] != "rgb(17, 19, 23)" or h["width"] < 1000, f"{where}: no full-width ink header on desktop")
                     elif route in ("/app", "/explore"):
                         # V3 tab roots on the grey page: Hôm nay a 24 px title beside the wordmark, Khám phá the 34 px large title; 16 px sides
-                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(*painted(pg, route, h["bg"], where))
                         check(h["size"] == ("24px" if route == "/app" else "34px"), f"{where}: V3 title size ({h['size']})")
                         check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
                         check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
@@ -126,12 +131,12 @@ def main():
                         check(h["top"] == (16 if route == "/setup/done" else 0), f"{where}: header at the top ({h['top']})")
                     elif route in V3_SETTINGS:
                         # V3 Cài đặt: the tab root has a 34 px page title, its push screens the glass Back and a 28 px title, all on the grey page
-                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(*painted(pg, route, h["bg"], where))
                         check(h["size"] == ("34px" if route == "/settings" else "28px"), f"{where}: V3 title size ({h['size']})")
                         check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
                     elif route.startswith("/trends"):
                         # V3: Tổng quan is a 34 px page title on the grey page (no ink slab)
-                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(*painted(pg, route, h["bg"], where))
                         check(h["size"] == "34px", f"{where}: V3 large title 34px ({h['size']})")
                         check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
                         check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
