@@ -5,7 +5,9 @@ For /app, /settings/profile, /trends and /trends/body at 390x844, at 1440x900 an
 (200 %): .screenshots/v3-cleanup/<screen>-<390|1440|text200>-<tag>.png. The sheets reachable from Hôm nay (the nutrient sources, the
 calendar, the day menu) are opened at 390 and checked for exactly one control named
 Đóng (the leading Close) and no second one at the foot.
-SHOTS_TAG=before|after names the files (default "after").
+SHOTS_TAG=before|after names the files (default "after"). SHOTS_ONLY=pairs saves the tab roots, /trends/energy and /targets at 390 in light, each next
+to its canvas render in ~/Documents/HITMicro/design/v3/renders (when that folder exists): <name>-390-light-vs-canvas.png.
+The app has no dark column yet (V3-SPEC's dark map is one :root block later), so there is no dark shot.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v3_cleanup_shots.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/settings/profile/** app/(app)/(tabs)/trends/** components/calendar-sheet.tsx components/home/** components/sync/** components/coaching/** components/diary/meal-menu-sheet.tsx components/settings/profile-cards.tsx components/overview/**
@@ -21,6 +23,7 @@ TAG = os.environ.get("SHOTS_TAG", "after")
 NOW = "2026-10-15T10:00:00+07:00"
 OUT = Path(__file__).resolve().parent.parent.parent / ".screenshots" / "v3-cleanup"
 OUT.mkdir(parents=True, exist_ok=True)
+SHOTS_DIR = OUT.parent
 # the screen, its route and the control the shot is centred on
 SCREENS = [
     ("app", "/app", "[data-meal-header] button[aria-label^='Xem riêng']"),
@@ -69,6 +72,45 @@ def screens(browser):
             ctx.close()
 
 
+RENDERS = Path.home() / "Documents" / "HITMicro" / "design" / "v3" / "renders"
+PAIRS = [("home", "/app", "V3HomNayB"), ("overview", "/trends", "V3TongQuan"), ("explore", "/explore", "V3KhamPhaB"), ("energy", "/trends/energy", "V3TrendsEnergy"), ("targets", "/settings/targets", "V3Targets")]
+
+
+def side_by_side(browser, app_png, render, out):
+    """The app shot on the left, the canvas render on the right, at the same height."""
+    html = OUT / "_pair.html"
+    html.write_text(
+        '<body style="margin:0;display:flex;gap:16px;align-items:flex-start;background:#888">'
+        f'<img src="{app_png.as_uri()}" style="height:844px"><img src="{render.as_uri()}" style="height:844px"></body>'
+    )
+    pg = browser.new_page(viewport={"width": 1000, "height": 844})
+    pg.goto(html.as_uri())
+    pg.wait_for_timeout(300)
+    pg.screenshot(path=str(out))
+    pg.close()
+    html.unlink()
+
+
+def pairs(browser):
+    for name, route, render in PAIRS:
+        ctx = browser.new_context(viewport={"width": 390, "height": 844})
+        pg = ctx.new_page()
+        pg.clock.set_fixed_time(NOW)
+        pg.goto(BASE + route, wait_until="networkidle")
+        pg.wait_for_timeout(800)
+        shot = OUT / f"{name}-390-light.png"
+        pg.screenshot(path=str(shot))
+        ctx.close()
+        if (RENDERS / f"{render}.png").exists():
+            side_by_side(browser, shot, RENDERS / f"{render}.png", OUT / f"{name}-390-light-vs-canvas.png")
+        else:
+            print(f"[SKIP] {name}: no canvas render {render}.png")
+    # the share image at 150 % text (made by share_micros.py)
+    img = SHOTS_DIR / "share-mixed-L0-text150.png"
+    if img.exists() and (RENDERS / "V3ShareB.png").exists():
+        side_by_side(browser, img, RENDERS / "V3ShareB.png", OUT / "share-text150-vs-canvas.png")
+
+
 def one_close(pg, dlg, label):
     """The sheet has its leading Close and nothing else named Đóng; shot saved."""
     buttons = dlg.get_by_role("button", name="Đóng")
@@ -111,10 +153,14 @@ def sheets(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        if os.environ.get("SHOTS_ONLY") != "sheets":
-            screens(browser)
-        if os.environ.get("SHOTS_ONLY") != "screens":
-            sheets(browser)
+        only = os.environ.get("SHOTS_ONLY")
+        if only == "pairs":
+            pairs(browser)
+        else:
+            if only != "sheets":
+                screens(browser)
+            if only != "screens":
+                sheets(browser)
         browser.close()
     print(f"\n{len(problems)} problem(s); screenshots in {OUT}")
     sys.exit(1 if problems else 0)
