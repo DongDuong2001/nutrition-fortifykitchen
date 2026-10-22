@@ -86,7 +86,7 @@ window.__shareSnaps = [];
       keyGrid: (() => { const li = [...r.querySelectorAll('li')].filter(x => ['Thiếu <50%', 'Trung bình', 'Gần đủ', 'Đạt ≥100%'].includes(x.textContent.trim())); if (li.length !== 4) return null;
         const q = li.map(x => x.getBoundingClientRect()), sw = li.map(x => x.firstElementChild.getBoundingClientRect()); const ul = li[0].parentElement;
         const g = getComputedStyle(ul); return { labels: li.map(x => x.textContent.trim()), lefts: q.map(x => x.left), tops: q.map(x => x.top), heights: q.map(x => x.height), widths: q.map(x => x.width), swW: sw[0].width,
-          colGap: g.columnGap, rowGap: g.rowGap, fs: getComputedStyle(li[0]).fontSize, nowrap: li.map(x => getComputedStyle(x).whiteSpace), colRight: ul.getBoundingClientRect().right, rights: q.map(x => x.right), swatchLabelGap: getComputedStyle(li[0]).columnGap, display: g.display }; })(),
+          colGap: g.columnGap, rowGap: g.rowGap, fs: getComputedStyle(li[0]).fontSize, colRight: ul.getBoundingClientRect().right, rights: q.map(x => x.right), swatchLabelGap: getComputedStyle(li[0]).columnGap, display: g.display }; })(),
       sections: [...r.querySelectorAll('section[aria-label]')].map(s => s.getAttribute('aria-label')).filter(n => n.startsWith('Bữa')),
       header: !!r.querySelector('header:not([data-share-header]), nav'),
     });
@@ -274,7 +274,7 @@ def check_frame(s, tag, label):
     check(k["display"] == "grid" and k["labels"] == ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"], f"{tag} {label}: the key is a grid in the order Thiếu, Trung bình / Gần đủ, Đạt ({k['labels']})")
     check(abs(k["tops"][0] - k["tops"][1]) < 0.5 and abs(k["tops"][2] - k["tops"][3]) < 0.5 and k["tops"][2] > k["tops"][0] and abs(k["lefts"][0] - k["lefts"][2]) < 0.5 and abs(k["lefts"][1] - k["lefts"][3]) < 0.5 and k["lefts"][1] > k["lefts"][0], f"{tag} {label}: 2 columns by 2 rows")
     check(k["colGap"] == "4px" and k["rowGap"] == "8px" and k["swatchLabelGap"] == "4px" and k["fs"] == "11px", f"{tag} {label}: gaps 4 / 8 / 4 and 11 px labels (4 px between the columns: Thiếu <50% is 76 px wide in the 74 px column of the design) ({k['colGap']}, {k['rowGap']}, {k['swatchLabelGap']}, {k['fs']})")
-    check(all(w == "nowrap" for w in k["nowrap"]) and all(h < 16 for h in k["heights"]), f"{tag} {label}: labels never wrap ({k['heights']})")
+    check(all(h < 16 for h in k["heights"]), f"{tag} {label}: at 100 % text every label is on one line ({k['heights']}); share_micros checks the wrap at 150 %")
     check(max(k["rights"]) <= k["colRight"] + 0.5, f"{tag} {label}: the grid stays inside the column")
     check_cards(s, tag, label)
 

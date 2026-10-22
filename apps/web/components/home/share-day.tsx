@@ -159,16 +159,14 @@ function ShareMicros({ model }: { model: ShareModel }) {
       <div aria-hidden="true" className="mx-3 mt-1 h-px bg-divider" />
       <ul
         aria-label="Mức đạt"
-        className="m-0 mt-auto grid list-none grid-cols-2 gap-x-1 gap-y-2 p-3 text-micro font-semibold leading-[0.875rem] text-secondary"
+        className="m-0 mt-auto grid list-none grid-cols-[repeat(2,minmax(min-content,max-content))] gap-x-1 gap-y-2 p-3 text-micro font-semibold leading-[0.875rem] text-secondary"
       >
+        {/* A column is as wide as its longest label when that fits (one line at 100 % text) and never narrower than its longest word, so at 150 % "Thiếu <50%" wraps to two lines; the swatch stays on the first line */}
         {key.map((item) => (
-          <li
-            key={item.label}
-            className="flex items-center gap-1 whitespace-nowrap"
-          >
+          <li key={item.label} className="flex items-start gap-1">
             <span
               aria-hidden="true"
-              className="h-2.5 w-2.5 flex-none rounded-[3px]"
+              className="mt-0.5 h-2.5 w-2.5 flex-none rounded-[3px]"
               style={{ backgroundColor: item.color }}
             />
             {item.label}
