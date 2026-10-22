@@ -176,7 +176,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-22a");
     expect(r?.date).toBe("22/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ chất xơ, đường và mọi vi chất trên nhãn"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn"]);
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([
       ["meal-add", "nav-add", null, "Thêm vào từng bữa"],
       ["training-pill", "day-date", null, "Ngày tập"],

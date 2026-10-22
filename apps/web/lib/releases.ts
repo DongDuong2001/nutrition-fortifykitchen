@@ -50,8 +50,8 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." },
       {
         icon: "meal",
-        title: "Nhập đủ chất xơ, đường và mọi vi chất trên nhãn",
-        body: "Tự nhập món giờ có chất xơ, đường, chất béo bão hòa, trans, cholesterol và sodium theo thứ tự trên nhãn. Chạm + Thêm vi chất khác để nhập thêm vitamin và khoáng chất.",
+        title: "Nhập đủ vi chất trên nhãn",
+        body: "Nhập đủ chất xơ, đường và mọi vi chất trên nhãn khi tự nhập món, theo đúng thứ tự trên nhãn. Chạm + Thêm vi chất khác để thêm vitamin và khoáng chất.",
       },
     ],
     tour: [
