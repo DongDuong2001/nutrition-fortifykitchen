@@ -1,8 +1,8 @@
 """cc_tutorials: the "Có gì mới" releases and tours, and the one-time tips (hotfix/tutorials, cc-53 units, cc-53b portions).
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
-- Several unseen releases: an account that saw 18b gets 22b, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
-  Thử ngay runs the joined tour oldest first, capped at the newest 8 (22b has no tour): on Hôm nay that is 21c's first and 22a's seven (So sánh món is in the portion
+- Several unseen releases: an account that saw 18b gets 22c, 22b, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
+  Thử ngay runs the joined tour oldest first, capped at the newest 8 (22b and 22c have no tour): on Hôm nay that is 21c's first and 22a's seven (So sánh món is in the portion
   panel; custom-food-nutrients' + Thêm vi chất khác is the + of the bar there; share-spotlight points at the share button), so 21b's steps go too. Every older tour is cut by the cap
   (the older steps' own checks are in lib/__tests__/releases.test.ts). The counter reads n/8; Xong ends it,
   entries unchanged
@@ -36,7 +36,7 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 TOUCH = {"has_touch": True, "is_mobile": True}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-22b"
+RELEASE = "2026-10-22c"
 # Every tip that existed before 18c: a returning user has seen them
 OLD_TIPS = [
     "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
@@ -155,7 +155,7 @@ def start_tour(pg):
     check("Khẩu phần theo gam" in text and text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký"), "…and cc-53b's 18f above that")
     check("Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Giữ rồi kéo món sang bữa khác" in text and text.index("Thêm món mượt hơn") < text.index("Danh sách Giàu … có hai thẻ") < text.index("Mục tiêu rõ ràng hơn") < text.index("Bấm chữ H1T MICRO để về Hôm nay") < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam"), "…and 21c, 21b, the follow-ups' 21a, the overnight 20b, cc-70's 20a, cc-68's 19b and cc-67's 19a on top")
     check("Thực phẩm bổ sung\n" not in text + "\n" and "Đồng bộ ổn định hơn" not in text, "…not 18b or 18, which were seen")
-    check(sheet(pg).locator("section").count() == 13, "thirteen groups, one per release (22b's one item on top)")
+    check(sheet(pg).locator("section").count() == 14, "fourteen groups, one per release (22c's one item on top, then 22b's)")
     try_now = sheet(pg).get_by_role("button", name="Thử ngay (1 phút)")
     check(try_now.count() == 1, "Thử ngay (1 phút): the unseen releases have a tour")
     shot(pg, "sheet")
@@ -169,7 +169,7 @@ def tour(browser):
     before = entries(pg)
     start_tour(pg)
     check(sheet(pg).count() == 0, "Thử ngay closes the sheet")
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (22b) is marked seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (22c) is marked seen")
     for i, (title, targets) in enumerate(STEPS):
         ok = visible(card(pg))
         text = step_text(pg)
@@ -360,7 +360,7 @@ def seen_18c(browser):
     shot(pg, "seen-18c")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(500)
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks the newest (22b) seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks the newest (22c) seen")
     ctx.close()
     # (A new account never sees it: cc_46.py new_account)
 
