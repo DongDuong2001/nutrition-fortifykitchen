@@ -135,25 +135,26 @@ describe("unseenReleases (what Có gì mới lists)", () => {
   const ids = (seen: string | null) => unseenReleases(seen).map((r) => r.id);
 
   it("every release newer than the last one seen, newest first", () => {
-    expect(ids("2026-10-18b")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(ids("2026-10-17")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
+    expect(ids("2026-10-18b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids("2026-10-17")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
   });
 
-  it("seen 18c: 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d; … seen 20a: 21b, 21a and 20b; seen 20b: 21b and 21a; seen 21a: only 21b; seen the newest: nothing", () => {
-    expect(ids("2026-10-18c")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
-    expect(ids("2026-10-18e")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
-    expect(ids("2026-10-18f")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
-    expect(ids("2026-10-19a")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
-    expect(ids("2026-10-19b")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
-    expect(ids("2026-10-20a")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
-    expect(ids("2026-10-20b")).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a"]);
-    expect(ids("2026-10-21a")).toEqual(["2026-10-21c", "2026-10-21b"]);
-    expect(ids("2026-10-21b")).toEqual(["2026-10-21c"]);
-    expect(ids("2026-10-21c")).toEqual([]);
+  it("seen 18c: 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d; … seen 20a: 21b, 21a and 20b; seen 20b: 21b and 21a; seen 21a: only 21b; seen 21c: only 22a; seen the newest: nothing", () => {
+    expect(ids("2026-10-18c")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
+    expect(ids("2026-10-18e")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
+    expect(ids("2026-10-18f")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
+    expect(ids("2026-10-19a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
+    expect(ids("2026-10-19b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
+    expect(ids("2026-10-20a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
+    expect(ids("2026-10-20b")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a"]);
+    expect(ids("2026-10-21a")).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b"]);
+    expect(ids("2026-10-21b")).toEqual(["2026-10-22a", "2026-10-21c"]);
+    expect(ids("2026-10-21c")).toEqual(["2026-10-22a"]);
+    expect(ids("2026-10-22a")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-21c"]);
+    expect(ids(null)).toEqual(["2026-10-22a"]);
   });
 
   it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
@@ -171,18 +172,16 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs, Đồ ăn của Minh Hào, the glide, Đổi nguyên liệu and Ngày ăn mẫu: plain words, and an 8-step tour (the last two on Hôm nay: the ⋯ of the day, then the Chép ngày ăn mẫu pill)", () => {
+  it("the newest release (2026-10-22a) is the stack on top of 21c (V3, the + on each meal, coloured groups, quiet tips, So sánh, Ngày ăn mẫu, the new names): plain words and a 6-step tour (the last two on Hôm nay: the ⋯ of the day, then the Chép ngày ăn mẫu pill)", () => {
     const r = latestRelease();
-    expect(r?.id).toBe("2026-10-21c");
-    expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu"]);
+    expect(r?.id).toBe("2026-10-22a");
+    expect(r?.date).toBe("22/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu"]);
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([
       ["meal-add", "nav-add", null, "Thêm vào từng bữa"],
       ["training-pill", "day-date", null, "Ngày tập"],
       ["nav-explore", null, null, "Nhóm món có màu"],
-      ["explore-minh-hao", "nav-explore", null, "Đồ ăn của Minh Hào"],
       ["portion-compare", "portion-detail", null, "So sánh món"],
-      ["dish-parts", "meal-add", null, "Đổi nguyên liệu"],
       ["day-menu", "home-hero", null, "Lưu cả ngày thành mẫu"],
       ["day-template-pill", "meal-pill", null, "Chép ngày ăn mẫu"],
     ]);
@@ -194,6 +193,16 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
     for (const s of r?.tour ?? []) expect(s.body).not.toContain(":");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
+  });
+
+  it("2026-10-21c is exactly what is live on main: the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs, Đồ ăn của Minh Hào, the glide and Đổi nguyên liệu, with its 2-step tour", () => {
+    const r = RELEASES.find((x) => x.id === "2026-10-21c");
+    expect(r?.date).toBe("21/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]);
+    expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([
+      ["explore-minh-hao", "nav-explore", null, "Đồ ăn của Minh Hào"],
+      ["dish-parts", "meal-add", null, "Đổi nguyên liệu"],
+    ]);
   });
 
   it("19a no longer claims VN 2016 or the Bộ Y tế", () => {
@@ -281,11 +290,11 @@ describe("joinedTour (what Thử ngay runs)", () => {
   const T20B = ["Mở lịch"];
   const T21A = ["Về Hôm nay"];
   const T21B = ["Một con số", "Vi chất theo DRI"];
-  // feat/v3-redesign extends 21c with three steps first (a meal's +, the Ngày tập pill, the Khám phá tab); feat/ngay-mau adds two at the end
-  // (the ⋯ of the day, the Chép ngày ăn mẫu pill)
-  const T21C = ["Thêm vào từng bữa", "Ngày tập", "Nhóm món có màu", "Đồ ăn của Minh Hào", "So sánh món", "Đổi nguyên liệu", "Lưu cả ngày thành mẫu", "Chép ngày ăn mẫu"];
-  // 30 steps from 18c on, 8 at most: the oldest releases give up their last steps first, and 21c alone is 8, so it goes whole and every older tour goes
-  const CAPPED = T21C;
+  const T21C = ["Đồ ăn của Minh Hào", "Đổi nguyên liệu"];
+  // 22a (the stack: V3, So sánh, Ngày ăn mẫu): a meal's +, the Ngày tập pill, the Khám phá tab, So sánh, the ⋯ of the day, the Chép ngày ăn mẫu pill
+  const T22A = ["Thêm vào từng bữa", "Ngày tập", "Nhóm món có màu", "So sánh món", "Lưu cả ngày thành mẫu", "Chép ngày ăn mẫu"];
+  // 30 steps from 18c on, 8 at most: the oldest releases give up their last steps first, and 21c + 22a are 8 together, so they go whole and every older tour goes
+  const CAPPED = [...T21C, ...T22A];
 
   it("seen 18b: 18c, 18e, 18f, 19a, 19b, then 20a (oldest first; 18d has no tour), cut to 8 steps from the end of the oldest tours (the newest tours are whole)", () => {
     expect(titles("2026-10-18b")).toEqual(CAPPED);
@@ -299,19 +308,20 @@ describe("joinedTour (what Thử ngay runs)", () => {
     expect(titles("2026-10-18e")).toEqual(CAPPED);
   });
 
-  it("seen 18f: the 19a, 19b, 20a, 20b, 21a, 21b and 21c tours, cut to 8 (19a goes, 19b keeps one); … seen 20a: 20b, 21a, 21b and 21c; seen 20b: 21a, 21b and 21c; seen 21a: 21b and 21c", () => {
+  it("seen 18f: the 19a, 19b, 20a, 20b, 21a, 21b, 21c and 22a tours, cut to 8 (19a goes, 19b keeps one); … seen 20a: 20b, 21a, 21b, 21c and 22a; seen 20b: 21a, 21b, 21c and 22a; seen 21a: 21b, 21c and 22a", () => {
     expect(titles("2026-10-18f")).toEqual(CAPPED);
     expect(titles("2026-10-19a")).toEqual(CAPPED);
     expect(titles("2026-10-19b")).toEqual(CAPPED);
     expect(titles("2026-10-20a")).toEqual(CAPPED);
     expect(titles("2026-10-20b")).toEqual(CAPPED);
-    expect(titles("2026-10-21a")).toEqual(T21C); // 21b's two steps give way to the 8 of 21c
+    expect(titles("2026-10-21a")).toEqual(CAPPED); // 21b's two steps give way to the 8 of 21c and 22a
   });
 
   it("releases without a tour add nothing", () => {
     expect(titles("2026-10-17")).toEqual(CAPPED);
-    expect(titles("2026-10-21b")).toEqual(T21C);
-    expect(titles("2026-10-21c")).toEqual([]);
+    expect(titles("2026-10-21b")).toEqual(CAPPED);
+    expect(titles("2026-10-21c")).toEqual(T22A);
+    expect(titles("2026-10-22a")).toEqual([]);
   });
 
   // Hôm nay as "Thử ngay" sees it: 18c's, 18e's (through the Ngày tập pill), 18f's, 19b's and 20a's controls
@@ -320,18 +330,18 @@ describe("joinedTour (what Thử ngay runs)", () => {
 
   it("seen 18b, on Hôm nay: the steps on the page, so the cap keeps the newest 8 of those", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
-    expect(ids).toEqual(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place to an older step: 21c's 7 on the page
+    expect(ids).toEqual(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place to an older step: 22a's 5 and 21c's 2 on the page
     // and the first step of 21b (the older tours give up their last steps first)
-    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([T21B[0], ...T21C.filter((t) => t !== "So sánh món")]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([T21B[0], ...T21C, ...T22A.filter((t) => t !== "So sánh món")]);
   });
 
   it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
-    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
+    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
     expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 30 }, (_, i) => i));
-    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C]);
+    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A]);
   });
 
   it("the cap still holds after the filter: more than 8 steps on the page drops the oldest release's last ones", () => {

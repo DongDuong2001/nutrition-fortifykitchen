@@ -31,6 +31,31 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // feat/v3-redesign + feat/compare-in-add + feat/ngay-mau + feat/rename-labels (Hao 22/10): one entry for the stack, on top of 21c, which is live. The
+  // tour points at Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab,
+  // So sánh in the portion panel, the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero when the day has no food yet) and the "Chép ngày ăn mẫu"
+  // pill of an empty day (the meals' headers when the day already has food)
+  {
+    id: "2026-10-22a",
+    date: "22/10",
+    items: [
+      { icon: "home", title: "Giao diện mới: sáng hơn, nhiều màu hơn", body: "Nền xám nhạt với thẻ trắng, chữ to rõ hơn. Mỗi vi chất và mỗi nhóm món có màu riêng, thanh dưới nổi lên và trong mờ." },
+      { icon: "meal", title: "Nút + ở từng bữa", body: "Mỗi bữa ở Hôm nay có nút + màu xanh ngay dòng tên bữa, chạm là thêm món vào đúng bữa đó." },
+      { icon: "bars", title: "Nhóm món có biểu tượng màu", body: "Khám phá có lưới Nhóm món với biểu tượng màu. Khi thêm món, mỗi chip nhóm cũng có biểu tượng, món Tinh bột, Đạm, Chất béo hiện luôn lượng của nhóm đó." },
+      { icon: "home", title: "Mẹo không làm phiền", body: "Mỗi ngày hiện nhiều nhất một mẹo, và bước hướng dẫn nào cũng có nút Bỏ qua." },
+      { icon: "bars", title: "So sánh món ngay khi đang thêm", body: "Chọn một món để thêm, chạm So sánh ngay dưới số kcal rồi chọn thêm món để xem cạnh nhau." },
+      { icon: "meal", title: "Ngày ăn mẫu", body: "Lưu cả ngày thành mẫu ở nút ⋯ của Hôm nay. Ngày còn trống thì chạm Chép ngày ăn mẫu để chép lại bằng một chạm, Hoàn tác được." },
+      { icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." },
+    ],
+    tour: [
+      { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
+      { target: "training-pill", fallback: "day-date", title: "Ngày tập", body: "Nút Ngày tập nằm cạnh ngày, bên phải. Chạm để đổi số phút tập hôm nay." },
+      { target: "nav-explore", title: "Nhóm món có màu", body: "Ở Khám phá, mỗi nhóm món có biểu tượng màu riêng. Chạm một nhóm để xem các món trong nhóm." },
+      { target: "portion-compare", fallback: "portion-detail", title: "So sánh món", body: "Đang chọn khẩu phần, chạm So sánh để đặt món này cạnh món khác." },
+      { target: "day-menu", fallback: "home-hero", title: "Lưu cả ngày thành mẫu", body: "Mở nút ⋯ trên thẻ kcal rồi chọn Lưu ngày này thành mẫu. Cần ngày đã có món." },
+      { target: "day-template-pill", fallback: "meal-pill", title: "Chép ngày ăn mẫu", body: "Ngày còn trống thì chạm Chép ngày ăn mẫu ở đầu thẻ bữa ăn, chọn một mẫu hoặc Hôm qua." },
+    ],
+  },
   // swap-ingredients (Hao 21/10, in 21c because 21c is not live yet: no release 21d): in Thành phần a part with alternatives has "Đổi nguyên liệu"
   // (Bánh khoai nướng: sữa chua Hy Lạp or thường, bột hạnh nhân or bột mì, hạnh nhân lát or hạt bí, siro cây phong or mật ong). The select carries
   // its own label in plain sight, so no tip; its tour step points at Thành phần (the + Thêm button when no dish is open on Hôm nay).
@@ -39,19 +64,10 @@ export const RELEASES: readonly Release[] = [
   // for all of them. No tip, on purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác,
   // Thực phẩm / Thực phẩm bổ sung, Đồ ăn của Minh Hào). feat/glide adds "Chuyển nhóm, chuyển tab mượt hơn" (no control to learn, so no tour step). The first tour step is the Khám phá carousel, which is not on Hôm nay: it points at
   // the Khám phá tab there (fallback) and at the carousel itself wherever it is on screen
-  // feat/v3-redesign (Hao 22/10, V3 "vibrant + glass"): extends 21c, which is not live yet (no deploy since 20/10). The tour points at
-  // Hôm nay controls: a meal's + (falls back to the + of the bar), the Ngày tập pill (falls back to the date), the Khám phá tab.
-  // feat/ngay-mau (Hao 22/10): Ngày ăn mẫu extends 21c too. Two tour steps on Hôm nay: the ⋯ of the day (where Lưu ngày này thành mẫu is; the hero
-  // when the day has no food yet) and the "Chép ngày ăn mẫu" pill of an empty day (the meals' headers when the day already has food)
   {
     id: "2026-10-21c",
     date: "21/10",
     items: [
-      { icon: "home", title: "Giao diện mới: sáng hơn, nhiều màu hơn", body: "Nền xám nhạt với thẻ trắng, chữ to rõ hơn. Mỗi vi chất và mỗi nhóm món có màu riêng, thanh dưới nổi lên và trong mờ." },
-      { icon: "meal", title: "Nút + ở từng bữa", body: "Mỗi bữa ở Hôm nay có nút + màu xanh ngay dòng tên bữa, chạm là thêm món vào đúng bữa đó." },
-      { icon: "bars", title: "Nhóm món có biểu tượng màu", body: "Khám phá có lưới Nhóm món với biểu tượng màu. Khi thêm món, mỗi chip nhóm cũng có biểu tượng, món Tinh bột, Đạm, Chất béo hiện luôn lượng của nhóm đó." },
-      { icon: "home", title: "Mẹo không làm phiền", body: "Mỗi ngày hiện nhiều nhất một mẹo, và bước hướng dẫn nào cũng có nút Bỏ qua." },
-      { icon: "bars", title: "So sánh món ngay khi đang thêm", body: "Chọn một món để thêm, chạm So sánh ngay dưới số kcal rồi chọn thêm món để xem cạnh nhau." },
       { icon: "meal", title: "Thêm món mượt hơn", body: "Bấm dấu + thì bảng thêm món trượt lên ngay trên màn hình bạn đang xem. Thêm xong, bảng trượt xuống và món mới hiện ở Hôm nay." },
       { icon: "meal", title: "Thêm nhầm thì Hoàn tác", body: "Thêm xong bấm Hoàn tác trong vài giây là bỏ đúng những món vừa thêm, dù là một món hay cả khay." },
       { icon: "home", title: "Danh sách món gọn hơn", body: "Mỗi nhóm hiện vài món đầu, bấm Xem thêm để xem tiếp. Bảng chọn khẩu phần có nút ✕ để đóng." },
@@ -60,18 +76,10 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Tab Đồ ăn của Minh Hào", body: "Có tab Đồ ăn của Minh Hào để chọn nhanh các món của Fortify Kitchen. Khi thêm món, chip này nằm ngay sau Tất cả, và ở Khám phá có hàng thẻ riêng." },
       { icon: "home", title: "Chuyển nhóm, chuyển tab mượt hơn", body: "Đổi nhóm món, đổi thẻ hay chuyển tab ở thanh dưới thì nội dung trượt vào nhẹ nhàng, không còn đổi cái bụp. Mở danh sách Giàu … chỉ trượt một lần." },
       { icon: "meal", title: "Đổi nguyên liệu trong món", body: "Món có Thành phần cho đổi nguyên liệu, như sữa chua thường hay Hy Lạp, hạnh nhân hay hạt bí. Chọn ở dòng Đổi nguyên liệu, số gam giữ nguyên, và món ghi lại đúng theo bạn chọn." },
-      { icon: "meal", title: "Ngày ăn mẫu", body: "Lưu cả ngày thành mẫu ở nút ⋯ của Hôm nay. Ngày còn trống thì chạm Chép ngày ăn mẫu để chép lại bằng một chạm, Hoàn tác được." },
-      { icon: "meal", title: "Đổi tên cho dễ hiểu", body: "Món ăn của tôi, Bữa ăn đã lưu, Ngày ăn mẫu." },
     ],
     tour: [
-      { target: "meal-add", fallback: "nav-add", title: "Thêm vào từng bữa", body: "Mỗi bữa có nút + màu xanh ở dòng tên bữa. Chạm để thêm món vào đúng bữa đó." },
-      { target: "training-pill", fallback: "day-date", title: "Ngày tập", body: "Nút Ngày tập nằm cạnh ngày, bên phải. Chạm để đổi số phút tập hôm nay." },
-      { target: "nav-explore", title: "Nhóm món có màu", body: "Ở Khám phá, mỗi nhóm món có biểu tượng màu riêng. Chạm một nhóm để xem các món trong nhóm." },
       { target: "explore-minh-hao", fallback: "nav-explore", title: "Đồ ăn của Minh Hào", body: "Ở Khám phá có hàng thẻ Đồ ăn của Minh Hào. Khi thêm món, chạm chip cùng tên để chọn nhanh." },
-      { target: "portion-compare", fallback: "portion-detail", title: "So sánh món", body: "Đang chọn khẩu phần, chạm So sánh để đặt món này cạnh món khác." },
       { target: "dish-parts", fallback: "meal-add", title: "Đổi nguyên liệu", body: "Mở Thành phần của món. Nguyên liệu nào đổi được thì có dòng Đổi nguyên liệu, chọn loại bạn dùng." },
-      { target: "day-menu", fallback: "home-hero", title: "Lưu cả ngày thành mẫu", body: "Mở nút ⋯ trên thẻ kcal rồi chọn Lưu ngày này thành mẫu. Cần ngày đã có món." },
-      { target: "day-template-pill", fallback: "meal-pill", title: "Chép ngày ăn mẫu", body: "Ngày còn trống thì chạm Chép ngày ăn mẫu ở đầu thẻ bữa ăn, chọn một mẫu hoặc Hôm qua." },
     ],
   },
   // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI
