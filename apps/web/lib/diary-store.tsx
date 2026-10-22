@@ -1469,7 +1469,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setSavedMeals((prev) => [meal, ...prev]);
       setEdits((prev) => dismissUndoIn(prev));
       setToast({
-        message: `Đã lưu ${meal.name} vào Bữa ăn đã lưu · ${meal.items.length} món`,
+        message: `Đã lưu ${meal.name} · ${meal.items.length} món`,
         kind: "saved",
         mealSlot: null,
         durationMs: ADDED_TOAST_MS,

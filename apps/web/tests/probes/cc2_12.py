@@ -215,11 +215,11 @@ def check_home_meals(browser, size_name, size):
     pg.locator("button[aria-label^='Xem riêng']:visible").first.click()
     pg.wait_for_timeout(300)
     pill = pg.locator("button[aria-label^='Tùy chọn']:visible")
-    check(pill.count() >= 1, f"{size_name} past day: a meal with food offers its ⋯ (Lưu vào Bữa ăn đã lưu)")
+    check(pill.count() >= 1, f"{size_name} past day: a meal with food offers its ⋯ (Lưu bữa này)")
     pill.first.click()
     pg.wait_for_timeout(300)
     dialog = re.sub(r"\s+", " ", pg.locator("[role=dialog]").first.inner_text())
-    check("Lưu vào Bữa ăn đã lưu" in dialog, f"{size_name} past day ⋯: Lưu vào Bữa ăn đã lưu is offered")
+    check("Lưu bữa này" in dialog, f"{size_name} past day ⋯: Lưu bữa này is offered")
     check("Xóa bữa này" not in dialog and "Chép hôm qua" not in dialog, f"{size_name} past day ⋯: no Xóa bữa này or Chép hôm qua")
     ctx.close()
 
@@ -230,7 +230,7 @@ def check_saved_meals(browser, size_name, size):
     go(pg, "/app")
     open_meal_menu(pg, "Bữa sáng")
     pg.wait_for_timeout(300)
-    pg.get_by_role("button", name=re.compile("Lưu vào Bữa ăn đã lưu")).click()
+    pg.get_by_role("button", name=re.compile("Lưu bữa này")).click()
     pg.wait_for_timeout(200)
     name_input = pg.locator("#save-meal-name")
     check(name_input.input_value() == "Bữa sáng 12/10", f"{size_name} save: default name is '<Bữa> <dd/mm>' ({name_input.input_value()!r})")
@@ -238,12 +238,12 @@ def check_saved_meals(browser, size_name, size):
     name_input.fill("Sáng của tôi")
     pg.get_by_role("button", name="Lưu", exact=True).click()
     pg.wait_for_timeout(400)
-    check("Đã lưu Sáng của tôi vào Bữa ăn đã lưu" in toast_text(pg), f"{size_name} save: toast confirms ({toast_text(pg)!r})")
+    check("Đã lưu Sáng của tôi" in toast_text(pg), f"{size_name} save: toast confirms ({toast_text(pg)!r})")
 
     # an empty meal cannot be saved
     open_meal_menu(pg, "Bữa tối")
     pg.wait_for_timeout(300)
-    save_btn = pg.get_by_role("button", name=re.compile("Lưu vào Bữa ăn đã lưu"))
+    save_btn = pg.get_by_role("button", name=re.compile("Lưu bữa này"))
     check(save_btn.is_disabled(), f"{size_name} save: an empty meal's item is disabled")
     pg.keyboard.press("Escape")
 

@@ -81,7 +81,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
             </svg>
           </span>
           <p className="m-0 text-callout font-semibold">Chưa có Bữa ăn đã lưu</p>
-          <p className="m-0 text-cap leading-snug text-secondary">Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu vào Bữa ăn đã lưu.</p>
+          <p className="m-0 text-cap leading-snug text-secondary">Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu bữa này.</p>
           <Link href={HOME_ROUTE} className="flex min-h-11 items-center gap-1 text-cap font-bold text-cobalt no-underline">
             Mở Hôm nay
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

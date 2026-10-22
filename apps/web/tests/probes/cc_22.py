@@ -5,7 +5,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, s
 - Tap a food: hero label and caption change, Sửa shows; tap again: back. Tap a meal header: meal mode and ⋯.
 - A food with a missing micronutrient has the grey dot; an empty slot reads "Chưa ăn · Thêm" and links to /add.
 - 20+ foods: only the list scrolls, meal headers stick.
-- Past day: ⋯ in meal mode opens a sheet with only Lưu vào Bữa ăn đã lưu.
+- Past day: ⋯ in meal mode opens a sheet with only Lưu bữa này.
 - Today: bars in the four level colours (Hao, 16/10), long press enters multi-select (Hao, 17/10), not /entry. Past day: four levels, no Sửa, no ⋯, no long press.
 - Links /micros?date= and /training?date=.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_22.py
@@ -167,7 +167,7 @@ def run(browser, size, tag):
     menu.click()
     pg.wait_for_timeout(300)
     sheet = pg.get_by_role("dialog").inner_text()
-    check("Lưu vào" in sheet and "Chép hôm qua" not in sheet and "Xóa bữa này" not in sheet, f"{tag} past-day sheet offers only Lưu vào")
+    check("Lưu bữa này" in sheet and "Chép hôm qua" not in sheet and "Xóa bữa này" not in sheet, f"{tag} past-day sheet offers only Lưu bữa này")
     if w == 390:
         pg.screenshot(path=os.path.join(SHOTS, "cc-22-fix-meal-past-390.png"))
     pg.keyboard.press("Escape")
