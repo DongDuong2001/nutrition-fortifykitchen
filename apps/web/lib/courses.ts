@@ -72,7 +72,25 @@ function liveApi(): CoursesApi {
   };
 }
 
+const saved = new Set<() => void>();
+
+/**
+ * Runs `cb` after any call saved a lesson's progress. A screen that lists the course (its "Học tiếp", its checks) asks again then:
+ * the reader saves the place as it unmounts, which can be after the course screen under it has already read the course.
+ */
+export function onProgressSaved(cb: () => void): () => void {
+  saved.add(cb);
+  return () => void saved.delete(cb);
+}
+
 /** The API for this build: the server in live mode, this browser's mock otherwise. `viewer` only matters to the mock. */
 export function coursesApi(viewer: CourseViewer): CoursesApi {
-  return isLiveMode() ? liveApi() : mockCoursesApi(viewer);
+  const api = isLiveMode() ? liveApi() : mockCoursesApi(viewer);
+  return {
+    ...api,
+    async progress(courseId, lessonId, body) {
+      await api.progress(courseId, lessonId, body);
+      saved.forEach((cb) => cb());
+    },
+  };
 }

@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   COURSE_TONES,
+  accentBackground,
   completesAt,
   courseLock,
   lessonMeta,
   lockLabel,
   nextLesson,
   partTone,
+  partToneIndex,
   progressText,
   resumeOf,
   segmentsOn,
@@ -161,5 +163,12 @@ describe("tones: two deep-* tokens at 135° under the rainbow shade", () => {
     expect(tileBackground(9)).toBe(tileBackground(1));
     expect(tileBackground(-1)).toBe(tileBackground(7));
     expect(partTone(2)).toBe(COURSE_TONES[2][0]);
+  });
+  it("the accent bar is the pair top to bottom", () => {
+    expect(accentBackground(1)).toBe(`linear-gradient(180deg, ${COURSE_TONES[1][0]}, ${COURSE_TONES[1][1]})`);
+  });
+  it("parts take the course's tone, then the next ones, wrapping at 8", () => {
+    expect([0, 1, 2].map((i) => partToneIndex(0, i))).toEqual([0, 1, 2]);
+    expect([0, 1, 2].map((i) => partToneIndex(7, i))).toEqual([7, 0, 1]);
   });
 });

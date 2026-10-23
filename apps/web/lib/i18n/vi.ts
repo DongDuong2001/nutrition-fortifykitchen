@@ -47,8 +47,6 @@ export const vi = {
   "settings.support": "Hỗ trợ",
   "settings.support.feedback": "Góp ý & hỗ trợ",
   "settings.support.feedback.hint": "Báo lỗi, sai số liệu, yêu cầu thêm món",
-  "settings.support.documents": "Tài liệu",
-  "settings.support.documents.hint": "Quy tắc và tài liệu của app",
   "settings.app.addToHome": "Thêm vào màn hình chính",
   "settings.app.install": "Cài ứng dụng lên điện thoại",
   "settings.app.terms": "Điều khoản dịch vụ",

@@ -144,7 +144,13 @@ export const tileBackground = (tone: number): string =>
 /** A lesson tile inside a part: the pair without the shade (an IconTile, 44 px). */
 export const pairBackground = (tone: number): string => `linear-gradient(135deg, ${toneAt(tone)[0]}, ${toneAt(tone)[1]})`;
 
+/** The 4 px accent bar before a course's title: the pair top to bottom. */
+export const accentBackground = (tone: number): string => `linear-gradient(180deg, ${toneAt(tone)[0]}, ${toneAt(tone)[1]})`;
+
 export const partTone = (tone: number): string => toneAt(tone)[0];
+
+/** The colour index of part `i` of a course: the course's tone, then the next ones (the design's parts each have their own pair). */
+export const partToneIndex = (courseTone: number, i: number): number => (courseTone + i) % COURSE_TONES.length;
 
 /** "22/10" for the "cập nhật" line of a tile. */
 export function dayMonth(iso: string): string {
