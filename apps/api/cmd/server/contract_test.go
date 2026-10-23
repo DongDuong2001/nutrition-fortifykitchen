@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"nutrition-api/internal/config"
@@ -103,6 +104,14 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 			}
 			if rec.Code == http.StatusMethodNotAllowed {
 				t.Errorf("method %s not allowed on %s (got 405)", rt.method, rt.path)
+			}
+
+			if strings.HasPrefix(rt.path, "/api/v1") {
+				cc := rec.Header().Get("Cache-Control")
+				expected := "private, no-cache, no-store, max-age=0, must-revalidate"
+				if cc != expected {
+					t.Errorf("route %s %s Cache-Control = %q; want %q", rt.method, rt.path, cc, expected)
+				}
 			}
 		})
 	}
