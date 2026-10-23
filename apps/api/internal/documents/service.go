@@ -29,8 +29,7 @@ func (s *Service) Get(ctx context.Context, name string) (*Document, error) {
 	return s.repo.Get(ctx, name)
 }
 
-// Put writes the document when req.Code is a live access code. The name and size are checked first, so a bad request
-// never spends a code check.
+// Put writes the document (the route is for coaches and admins only).
 func (s *Service) Put(ctx context.Context, userID uuid.UUID, name string, req PutRequest) (*Meta, error) {
 	if !ValidName(name) {
 		return nil, ErrBadName
@@ -38,10 +37,19 @@ func (s *Service) Put(ctx context.Context, userID uuid.UUID, name string, req Pu
 	if len(req.Content) > MaxContentBytes {
 		return nil, ErrTooLarge
 	}
-	if err := s.Check(ctx, req.Code); err != nil {
+	return s.repo.Upsert(ctx, name, req.Content, userID, req.BaseUpdatedAt)
+}
+
+// Open is a learner's read: the document, when code is a live access code. The name is checked first, so a bad request never
+// spends a code check.
+func (s *Service) Open(ctx context.Context, name, code string) (*Document, error) {
+	if !ValidName(name) {
+		return nil, ErrBadName
+	}
+	if err := s.Check(ctx, code); err != nil {
 		return nil, err
 	}
-	return s.repo.Upsert(ctx, name, req.Content, userID, req.BaseUpdatedAt)
+	return s.repo.Get(ctx, name)
 }
 
 // Check is nil for a live access code and ErrBadCode otherwise.
