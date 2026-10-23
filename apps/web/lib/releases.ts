@@ -43,6 +43,12 @@ export const RELEASES: readonly Release[] = [
         body: "Cài đặt có mục Góp ý & hỗ trợ. Báo lỗi, báo sai số liệu hay yêu cầu thêm món, app soạn sẵn email cho bạn.",
       },
       { icon: "home", title: "Hôm nay dễ đọc hơn", body: "Số to hơn, chữ đậm hơn. Chất xơ có dòng riêng ở đầu cột vi chất, ngay dưới số vi chất đạt." },
+      // feat/documents: Tài liệu in Cài đặt › Hỗ trợ. No tour, as this entry has none (its controls are text buttons, data-tour documents-edit and documents-upload are there for one)
+      {
+        icon: "home",
+        title: "Tài liệu của app ngay trong Cài đặt",
+        body: "Cài đặt › Tài liệu liệt kê các quy tắc và tài liệu của app. Có mã truy cập thì sửa hay tải lên tệp mới ngay tại đó.",
+      },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
