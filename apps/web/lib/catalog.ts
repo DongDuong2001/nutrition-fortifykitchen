@@ -64,15 +64,20 @@ export interface FoodSourceRef {
 // A serving by weight or volume stays ("100 g", "3 oz", "200 ml"); a count ("1 quả", "1 chén") goes
 const BY_WEIGHT = /^[\d.,/ ]+\s*(?:g|kg|oz|ml|l)(?=$|[\s(])/i;
 
+/** Chanh and chanh dây (Hao, overnight 22→23/10): with eggs, the only foods that go by the quả. */
+export const isChanh = (nameVi: string | undefined): boolean => /^chanh(?=$|\s)/i.test((nameVi ?? "").trim());
+const QUA_SERVING = /^1 quả(?=$|[\s(])/i;
+
 /**
  * cc-67 (Hao 19/10): fruit goes by grams of the edible part, so no trái, quả, múi or chén serving stays (the numbers are per
  * 100 g of flesh already). The other foods with a peel, shell or bone lose theirs in the database
- * (docs/data/edible-part-portions-2026-10-19.json, scripts/edible-part.ts).
+ * (docs/data/edible-part-portions-2026-10-19.json, scripts/edible-part.ts). Chanh and chanh dây keep their quả, first.
  */
-export function weighedFruit<T extends { category?: string; servings: FoodServing[] }>(food: T): T {
+export function weighedFruit<T extends { category?: string; nameVi?: string; servings: FoodServing[] }>(food: T): T {
   if (food.category !== "trai_cay") return food;
-  const kept = food.servings.filter((s) => BY_WEIGHT.test(s.label));
-  if (kept.length === food.servings.length) return food;
+  const qua = isChanh(food.nameVi) ? food.servings.filter((s) => QUA_SERVING.test(s.label.trim())) : [];
+  const kept = [...qua, ...food.servings.filter((s) => BY_WEIGHT.test(s.label))];
+  if (kept.length === food.servings.length && kept.every((s, i) => s === food.servings[i])) return food;
   return { ...food, servings: kept.length > 0 ? kept : [{ label: "100 g", grams: 100 }] };
 }
 

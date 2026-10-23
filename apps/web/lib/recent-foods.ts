@@ -1,5 +1,5 @@
 import type { FoodItem } from "./catalog";
-import { MAX_UNIT_COUNT, unitPortionText, parseUnitAmount, parseUnitServing } from "./portion";
+import { MAX_UNIT_COUNT, defaultServing, unitPortionText, parseUnitAmount, parseUnitServing } from "./portion";
 
 /** A recently logged food, with the serving it was logged with. */
 export interface RecentFood {
@@ -70,7 +70,7 @@ export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRe
     return { food, grams, label: `${grams} g` };
   }
 
-  const first = food.servings[0] ?? { label: "100 g", grams: 100 };
+  const first = defaultServing(food);
   return { food, grams: first.grams, label: first.label };
 }
 

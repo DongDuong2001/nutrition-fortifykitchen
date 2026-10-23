@@ -26,13 +26,14 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 CHIP = "Đồ ăn của Minh Hào"
-# name → kcal of its first portion (kcal per 100 g × the portion's grams ÷ 100, rounded half up): lib/mock/sample-foods.ts
+# name → kcal of its default serving (lib/portion defaultServing; kcal per 100 g × the grams ÷ 100, rounded half up): lib/mock/sample-foods.ts
 EXPECTED = {
     "Ức gà nấu chậm Minh Hào (mẫu demo)": ("1 phần lẻ (150 g sống)", int(136 * 150 / 100 + 0.5)),
     "Tôm thẻ nấu chậm Minh Hào (mẫu demo)": ("1 phần lẻ (150 g sống)", int(87 * 150 / 100 + 0.5)),
     "Mì Ý sốt cà Minh Hào (mẫu demo)": ("1 phần", int(102.2 * 370.9 / 100 + 0.5)),
-    # The cake is a dish with a public recipe (Đồ ngọt & ăn vặt): the only row here with Thành phần
-    "Bánh khoai nướng Minh Hào": ("1 miếng (1/10 khuôn)", int(210.6 * 102.8 / 100 + 0.5)),
+    # The cake is a dish with a public recipe (Đồ ngọt & ăn vặt): the only row here with Thành phần. It is weighed in grams, so it is
+    # listed per 100 g (overnight 22→23/10: grams everywhere), not by the miếng its data lists first
+    "Bánh khoai nướng Minh Hào": ("100 g", int(210.6 + 0.5)),
 }
 PLAIN = "Ức gà nấu chậm Minh Hào (mẫu demo)"
 SAVED_PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Probe"}'

@@ -62,11 +62,17 @@ export function ScoreRow({
       >
         <span className="text-callout font-bold">{row.title}</span>
         <span className="text-right text-cap font-semibold text-secondary">{row.change}</span>
+        {/* The number and the days share one row that wraps: with large text the days go under the number instead of over it */}
+        <span className="col-span-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <span className="min-w-0">
-          <span className={`font-display font-extrabold leading-none tabular-nums tracking-display ${levels ? "text-[2.5rem]" : "text-[2.75rem]"}`}>{row.value}</span>
+          <span className="flex flex-wrap items-baseline gap-x-1">
+            <span className={`font-display font-extrabold leading-none tabular-nums tracking-display ${levels ? "text-[2.5rem]" : "text-[2.75rem]"}`}>{row.value}</span>
+            {/* The period's average of a day (overnight 22→23/10) */}
+            {row.valueNote && row.value !== "—" && <span className="text-cap font-semibold text-secondary">{row.valueNote}</span>}
+          </span>
           <span className="block text-cap text-secondary">{row.sub}</span>
         </span>
-        <span className={`flex flex-col items-end justify-center ${levels ? "gap-2" : "gap-1"}`}>
+        <span className={`ml-auto flex flex-col items-end justify-center ${levels ? "gap-2" : "gap-1"}`}>
           {row.target && (
             <span aria-hidden="true" className="flex gap-1">
               {row.days.map((d) => (
@@ -81,6 +87,7 @@ export function ScoreRow({
             {row.caption}
             <Chevron />
           </span>
+        </span>
         </span>
       </button>
       <Expand open={open} id={panelId}>

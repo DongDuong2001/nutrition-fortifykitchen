@@ -4,6 +4,7 @@ import { SAMPLE_FOODS } from "../mock/sample-foods";
 import { buildFoodList, categoryOf } from "../food-categories";
 import { dishViewOf, keysOfFood } from "../dish-recipes";
 import { brandToShow, foodRowKcal, foodSourceLabel } from "../food-meta";
+import { defaultServing } from "../portion";
 import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods, isFortifyKitchenFood } from "../fortify-kitchen";
 
 const food = (over: Partial<FoodItem> & { id: string }): FoodItem => ({
@@ -68,8 +69,8 @@ describe("Đồ ăn của Minh Hào", () => {
     for (const row of rows) {
       expect(row.demoOnly, row.id).toBe(true);
       expect(row.recipe, row.id).toBeUndefined();
-      // The kcal on a card is the first portion's: kcal per 100 g × its grams
-      expect(foodRowKcal(row), row.id).toBe(`${Math.round(((row.nutrients.energy ?? 0) * row.servings[0].grams) / 100)} kcal`);
+      // The kcal on a card is the default serving's (lib/portion defaultServing): kcal per 100 g × its grams
+      expect(foodRowKcal(row), row.id).toBe(`${Math.round(((row.nutrients.energy ?? 0) * defaultServing(row).grams) / 100)} kcal`);
       expect(keysOfFood(row).every((k) => k.startsWith("fortify_kitchen|"))).toBe(true);
     }
     for (const row of demo) {

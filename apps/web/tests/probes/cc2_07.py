@@ -222,7 +222,7 @@ def probe_explore(pg, name):
     chips = pg.locator('[aria-label="Lọc món theo nhóm"] button >> visible=true').count()
     groups = pg.locator('nav[aria-label="Nhóm món"] a >> visible=true').count()
     if name == "390":
-        check(groups >= 11, f"{name}: /explore shows the Nhóm món groups ({groups})")
+        check(groups >= 10, f"{name}: /explore shows the Nhóm món groups with foods ({groups})")
     else:
         check(chips >= 3, f"{name}: /explore shows the category chips ({chips})")
     pg.locator('input[type="search"] >> visible=true').fill("trứng")

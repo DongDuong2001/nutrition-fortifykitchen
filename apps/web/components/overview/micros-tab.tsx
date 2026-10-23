@@ -16,6 +16,9 @@ import { microRows } from "@/lib/overview";
 import { microBoard } from "@/lib/overview-board";
 import { microSections, nutrientAttention } from "@/lib/overview-detail";
 import { Card } from "@/components/ui/card";
+import { SectionTitle } from "@/components/ui/section-title";
+import { countedForLevel } from "@/lib/level-nutrients";
+import { useCoaching } from "@/hooks/use-coaching";
 
 /** A level as text on a white card: the deep shade (V3-SPEC §1) */
 const LEVEL_TEXT: Record<NutrientLevel, string> = {
@@ -111,16 +114,19 @@ export function MicrosTab() {
   
   const rows = useMemo(() => microRows(averages, targetDays, targets), [averages, targetDays, targets]);
   const previousRows = useMemo(() => microRows(previousAverages, targetDays, targets), [previousAverages, targetDays, targets]);
-  const board = useMemo(() => microBoard(rows, previousRows), [rows, previousRows]);
+  // "x/N" is over the Level's nutrients, as on Hôm nay; the bars and the lists below keep all 22 (Đủ 22 vi chất)
+  const { level } = useCoaching();
+  const board = useMemo(() => microBoard(rows, previousRows, countedForLevel(level)), [rows, previousRows, level]);
   const sections = useMemo(() => microSections(board), [board]);
   const byKey = useMemo(() => new Map(rows.map((r) => [r.key, r])), [rows]);
 
   // The finished logged days the averages cover, and what was eaten on them
   const finished = useMemo(() => days.filter((d) => d.logged && d.date < todayIso), [days, todayIso]);
   const entries = useMemo(() => finished.flatMap((d) => dayEntries(d.date, todayIso)), [finished, todayIso]);
+  // The lowest of the Level's nutrients, as Hôm nay's "Thiếu nhiều nhất"
   const attention = useMemo(
-    () => nutrientAttention({ micro: rows, entries, loggedDays: finished.length }),
-    [rows, entries, finished.length]
+    () => nutrientAttention({ micro: rows.filter((r) => countedForLevel(level).includes(r.key)), entries, loggedDays: finished.length }),
+    [rows, entries, finished.length, level]
   );
 
   if (!overview.enough) return <NotEnoughData />;
@@ -168,15 +174,19 @@ export function MicrosTab() {
             <HeroBar pct={achievedPct} level scale={{ from: "0", to: `${board.total} vi chất` }} />
           </div>
           <HeroNote>
-            {board.achieved} trên {board.total} vi chất đạt mục tiêu; {board.counts.thieu} đang thiếu.
+            {board.achieved} trên {board.total} vi chất đạt mục tiêu; {board.levelCounts.thieu} đang thiếu.
           </HeroNote>
-          <NutrientBars id="mi-grid" board={board} />
+          {/* The Level's nutrients, as the count above and Hôm nay's column; all 22 are in the lists of Đủ 22 vi chất */}
+          <NutrientBars id="mi-grid" squares={board.levelSquares} counts={board.levelCounts} />
         </HeroCard>
 
         <AttentionList items={items} title="Cần chú ý: thấp nhất kỳ này" />
       </div>
 
-      <section id="mi-sections" aria-label="Vi chất theo mức" className="flex flex-col gap-3 lg:col-span-7">
+      <section id="mi-sections" aria-labelledby="mi-sections-title" className="flex flex-col gap-3 lg:col-span-7">
+        <SectionTitle id="mi-sections-title" className="px-1">
+          Đủ 22 vi chất
+        </SectionTitle>
         {sections.map((section) => (
           <Accordion key={section.level} defaultOpen={section.level !== "dat"} dot={DOT[section.level]} title={section.label} count={section.items.length}>
             {section.items.length === 0 ? (

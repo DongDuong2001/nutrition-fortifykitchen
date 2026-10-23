@@ -11,15 +11,15 @@ const LEGEND: { level: keyof MicroBoard["counts"]; label: string }[] = [
 ];
 
 /**
- * Every nutrient at a glance on the ink hero (V3 Vi chất): one bar per nutrient, lowest share first, in its level
+ * The nutrients at a glance on the ink hero (V3 Vi chất): one bar per nutrient, lowest share first, in its level
  * colour and full at 100% of the target, the real % beside it (white, for contrast). No tap needed; a nutrient with no
  * data has an empty track and "—". The legend under it counts the four levels.
  */
-export function NutrientBars({ id, board }: { id: string; board: MicroBoard }) {
+export function NutrientBars({ id, squares, counts }: { id: string; squares: MicroBoard["squares"]; counts: MicroBoard["counts"] }) {
   return (
     <>
       <ul id={id} aria-label="Từng vi chất, thấp đến cao" className="m-0 flex list-none flex-col gap-1 p-0">
-        {board.squares.map((s) => {
+        {squares.map((s) => {
           const known = s.percentage !== null && s.level !== null;
           return (
             <li
@@ -50,7 +50,7 @@ export function NutrientBars({ id, board }: { id: string; board: MicroBoard }) {
         {LEGEND.map((g) => (
           <span key={g.level} className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className="inline-block h-[9px] w-[9px] rounded-[3px]" style={{ backgroundColor: getLevelColor(g.level, "dark") }} />
-            {g.label} {board.counts[g.level]}
+            {g.label} {counts[g.level]}
           </span>
         ))}
       </p>

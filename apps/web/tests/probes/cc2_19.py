@@ -58,11 +58,12 @@ def run(browser, size_name, size):
     # (c) + (d): Tổng quan › Vi chất
     ctx, pg = new_page(browser, size, "/trends/micros")
     w = f"{size_name} Vi chất"
-    # V3: the Vi chất hero has a bar per nutrient ("Vitamin B1, 26%, Thiếu"), not a square
-    first = pg.locator("li[aria-label^='Vitamin B1,']").first
-    check(first.count() > 0, f"{w}: Vitamin B1 bar is present")
-    names = pg.eval_on_selector_all("li[aria-label*='%']", "els => els.map(e => e.getAttribute('aria-label'))")
-    check(bool(names) and names[0].startswith("Vitamin B1"), f"{w}: lowest nutrient is first ({names[:1]})")
+    # V3: the Vi chất hero has a bar per nutrient of the Level ("Calcium, 58%, Trung bình"; overnight 22→23/10), lowest first;
+    # all 22 are in the lists under Đủ 22 vi chất, Vitamin B1 (the lowest of the 22) first under Thiếu
+    names = pg.eval_on_selector_all("#mi-grid > li[aria-label*='%']", "els => els.map(e => e.getAttribute('aria-label'))")
+    shares = [float(n.split(", ")[1].rstrip("%").replace(".", "").replace(",", ".")) for n in names]
+    check(bool(names) and shares == sorted(shares), f"{w}: the hero's lowest nutrient is first ({names[:1]})")
+    check(pg.locator("#mi-sections a[href='/micros/b1']").count() > 0, f"{w}: Vitamin B1 is in the lists of all 22")
     check(pg.locator("a[href='/micros/b1']").count() > 0, f"{w}: detail link to /micros/b1")
     label = pg.locator("#ov-period").first.inner_text()
     check(" – " in label, f"{w}: period dates use a non-breaking dash ({label!r})")

@@ -12,7 +12,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -115,7 +115,9 @@ describe("pickTip: pull to refresh (cc-51)", () => {
     // cc-51: the nutrient tip comes next on Hôm nay for everyone
     expect(ids(ctx({ touch: false, foodsToday: 1 }), seen)).toBe("nutrient-sources");
     expect(ids(ctx({ touch: true, foodsToday: 1, pastDay: true }), seen)).toBe("past-day");
-    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day"] }))).toBe(null);
+    // Overnight 22→23/10: Xem riêng một bữa (meal-focus) is the last tip of Hôm nay
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day"] }))).toBe("meal-focus");
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus"] }))).toBe(null);
   });
 });
 
@@ -124,7 +126,8 @@ describe("pickTip: tap a nutrient (cc-51)", () => {
     const seen = flags({ seen: ["home-logged", "meal-add"], used: ["share-day"] });
     expect(ids(ctx({ foodsToday: 1 }), seen)).toBe("nutrient-sources");
     expect(ids(ctx({ foodsToday: 1, pastDay: true }), seen)).toBe("past-day");
-    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add"], used: ["nutrient-sources", "share-day"] }))).toBe(null);
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add"], used: ["nutrient-sources", "share-day"] }))).toBe("meal-focus");
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "meal-focus"], used: ["nutrient-sources", "share-day"] }))).toBe(null);
   });
 });
 
@@ -221,7 +224,8 @@ describe("pickTip", () => {
     expect(ids(ctx(), shared([]))).toBe("home-logged");
     expect(ids(ctx(), shared(["home-logged"]))).toBe("meal-add");
     expect(ids(ctx(), shared(["home-logged", "meal-add"]))).toBe("nutrient-sources");
-    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources"]))).toBeNull();
+    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources"]))).toBe("meal-focus");
+    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources", "meal-focus"]))).toBeNull();
   });
 
   it("Hôm nay tips wait for the first food (an empty day has only Chép ngày ăn mẫu), and the past-day tip is for a past day only", () => {
@@ -414,7 +418,7 @@ describe("the Chép ngày ăn mẫu tip (feat/ngay-mau)", () => {
   });
 
   it("is for an empty day that can be added to: not a day with food, not a past day, not select mode, not a sheet over it", () => {
-    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["share-day"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources", "meal-focus"], used: ["share-day"] }))).toBeNull();
     expect(ids(ctx({ foodsToday: 0, pastDay: true }))).toBe("past-day");
     expect(ids(ctx({ foodsToday: 0, selectMode: true }))).toBe("multi-select");
     expect(ids(ctx({ foodsToday: 0, sheetOpen: true }))).toBeNull();

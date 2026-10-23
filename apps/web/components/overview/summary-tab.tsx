@@ -11,6 +11,8 @@ import { microRows } from "@/lib/overview";
 import { attentionRows, microBoard, periodHeading } from "@/lib/overview-board";
 import { macroScoreRow, weightScoreRow } from "@/lib/overview-detail";
 import { targetMinFor } from "@/lib/period";
+import { countedForLevel } from "@/lib/level-nutrients";
+import { useCoaching } from "@/hooks/use-coaching";
 
 /**
  * Tóm tắt (/trends, cc2-31b), direction B: the period row, the scoreboard (Kcal, Đạm, Cân nặng; tap a row for
@@ -25,10 +27,13 @@ export function SummaryTab() {
 
   const micro = useMemo(() => microRows(averages, targetDays, targets), [averages, targetDays, targets]);
   const microPrevious = useMemo(() => microRows(previousAverages, targetDays, targets), [previousAverages, targetDays, targets]);
-  const board = useMemo(() => microBoard(micro, microPrevious), [micro, microPrevious]);
+  // The count is over the Level's nutrients, as Hôm nay's "x/N đạt"; the card's grid keeps all 22
+  const { level } = useCoaching();
+  const board = useMemo(() => microBoard(micro, microPrevious, countedForLevel(level)), [micro, microPrevious, level]);
+  // Cần chú ý names the Level's nutrients, as the card above and Hôm nay
   const attention = useMemo(
-    () => attentionRows({ days: overview.days, proteinMin: targetMinFor("protein", targets), todayIso, micro, length }),
-    [overview.days, targets, todayIso, micro, length]
+    () => attentionRows({ days: overview.days, proteinMin: targetMinFor("protein", targets), todayIso, micro: micro.filter((r) => countedForLevel(level).includes(r.key)), length }),
+    [overview.days, targets, todayIso, micro, length, level]
   );
 
   const periodRow = <PeriodControl compact heading={periodHeading(period)} period={period} length={length} />;
@@ -66,7 +71,7 @@ export function SummaryTab() {
         <Scoreboard key={`${length}-${period.offset}`} rows={rows} />
       </div>
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
-        <MicroCard key={`${length}-${period.offset}`} board={board} />
+        <MicroCard key={`${length}-${period.offset}`} board={board} allHref={hrefWithPeriod("/trends/micros")} />
         <AttentionList items={items} large />
       </div>
     </div>

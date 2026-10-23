@@ -103,22 +103,34 @@ export interface MicroSquare {
 }
 
 export interface MicroBoard {
+  /** How many nutrients the count is over: the Level's list (8, 14, 18 or 22), as Hôm nay's "x/N đạt" */
   total: number;
+  /** How many of those reach their target */
   achieved: number;
   /** Achieved now minus achieved in the previous period; null when the previous period has no numbers */
   change: number | null;
+  /** All 22 by level (the lists of Đủ 22 vi chất) */
   counts: Record<NutrientLevel, number>;
+  /** The Level's nutrients, lowest share first, and their counts by level: what the hero and the card show, as Hôm nay's column */
+  levelSquares: MicroSquare[];
+  levelCounts: Record<NutrientLevel, number>;
   /** Nutrients with no number in the period (no logged food carries a value) */
   unknown: number;
-  /** Lowest share first, unknown last */
+  /** All 22, lowest share first, unknown last */
   squares: MicroSquare[];
-  /** Up to three nutrients under their target, lowest first */
+  /** Up to three of the counted nutrients under their target, lowest first */
   lowest: MicroSquare[];
 }
 
 const achievedOf = (rows: MicroRow[]) => rows.filter((r) => r.percentage !== null && r.percentage >= 100).length;
 
-export function microBoard(rows: MicroRow[], previous: MicroRow[]): MicroBoard {
+/**
+ * The Vi chất board of Tổng quan. `counted`: the Level's nutrients (lib/level-nutrients countedForLevel), so "x/N" is the
+ * count Hôm nay shows (overnight 22→23/10: Tổng quan said 8/22 where Hôm nay said 5/8); all 22 when left out. The squares
+ * and the counts per level always hold all 22.
+ */
+export function microBoard(rows: MicroRow[], previous: MicroRow[], counted?: readonly string[]): MicroBoard {
+  const isCounted = (key: string) => !counted || counted.includes(key);
   const squares: MicroSquare[] = rows
     .map((r) => ({
       key: r.key,
@@ -135,18 +147,25 @@ export function microBoard(rows: MicroRow[], previous: MicroRow[]): MicroBoard {
       if (b.percentage === null) return -1;
       return a.percentage - b.percentage;
     });
-  const counts: Record<NutrientLevel, number> = { thieu: 0, trungbinh: 0, ganDu: 0, dat: 0 };
-  for (const s of squares) if (s.level) counts[s.level] += 1;
-  const achieved = counts.dat;
+  const countsOf = (list: MicroSquare[]) => {
+    const out: Record<NutrientLevel, number> = { thieu: 0, trungbinh: 0, ganDu: 0, dat: 0 };
+    for (const s of list) if (s.level) out[s.level] += 1;
+    return out;
+  };
+  const mine = squares.filter((s) => isCounted(s.key));
+  const levelCounts = countsOf(mine);
+  const achieved = levelCounts.dat;
   const previousKnown = previous.some((r) => r.percentage !== null);
   return {
-    total: squares.length,
+    total: mine.length,
     achieved,
-    change: previousKnown ? achieved - achievedOf(previous) : null,
-    counts,
+    change: previousKnown ? achieved - achievedOf(previous.filter((r) => isCounted(r.key))) : null,
+    counts: countsOf(squares),
+    levelSquares: mine,
+    levelCounts,
     unknown: squares.filter((s) => s.percentage === null).length,
     squares,
-    lowest: squares.filter((s) => s.percentage !== null && s.percentage < 100).slice(0, 3),
+    lowest: mine.filter((s) => s.percentage !== null && s.percentage < 100).slice(0, 3),
   };
 }
 

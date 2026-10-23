@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { countedForLevel } from "../level-nutrients";
 import {
   attentionRows,
   boardDays,
@@ -133,6 +134,32 @@ describe("microBoard (Vi chất card)", () => {
   });
   it("change is the number achieved now minus the previous period's", () => {
     expect(board.change).toBe(board.achieved - prev.filter((r) => r.percentage !== null && r.percentage >= 100).length);
+  });
+});
+
+describe("microBoard over the Level's list (overnight 22→23/10: Tổng quan counts like Hôm nay)", () => {
+  const o = buildOverview({ todayIso: TODAY, today: SAMPLE_DAY, targets: TARGETS, length: 7, offset: 0 });
+  const rows = microRows(o.averages, o.targetDays, TARGETS);
+  const prev = microRows(o.previousAverages, o.targetDays, TARGETS);
+  const counted = countedForLevel(1);
+  const board = microBoard(rows, prev, counted);
+  const mine = rows.filter((r) => counted.includes(r.key));
+  const reached = (list: typeof rows) => list.filter((r) => r.percentage !== null && r.percentage >= 100).length;
+  it("x/N is over the Level's nutrients (8 at Level 1, 14 at Level 2, 22 at Level 4)", () => {
+    expect(board.total).toBe(8);
+    expect(board.achieved).toBe(reached(mine));
+    expect(microBoard(rows, prev, countedForLevel(2)).total).toBe(14);
+    expect(microBoard(rows, prev, countedForLevel(4)).total).toBe(22);
+  });
+  it("the change, the lowest and the Thiếu count are the Level's too", () => {
+    expect(board.change).toBe(reached(mine) - reached(prev.filter((r) => counted.includes(r.key))));
+    for (const l of board.lowest) expect(counted).toContain(l.key);
+    expect(board.levelCounts.thieu).toBe(mine.filter((r) => r.percentage !== null && r.percentage < 50).length);
+    expect(board.levelSquares.map((q) => q.key).sort()).toEqual([...counted].sort());
+  });
+  it("the squares and the counts per level stay all 22 (Đủ 22 vi chất)", () => {
+    expect(board.squares).toHaveLength(22);
+    expect(board.counts.thieu + board.counts.trungbinh + board.counts.ganDu + board.counts.dat + board.unknown).toBe(22);
   });
 });
 

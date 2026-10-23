@@ -41,6 +41,8 @@ describe("macroScoreRow", () => {
     expect(row.days).toHaveLength(7);
     expect(row.unit).toBe("kcal");
     expect(row.sub.startsWith("kcal / ")).toBe(true);
+    // The big number is the period's average of a day (overnight 22→23/10)
+    expect(row.valueNote).toBe("TB/ngày");
     expect(row.caption).toMatch(/^\d\/6 ngày đạt$/);
     expect(row.target).toEqual({ min: TARGETS.calories.min, max: TARGETS.calories.max });
   });
