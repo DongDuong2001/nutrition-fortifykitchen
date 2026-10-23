@@ -13,10 +13,12 @@ export interface FoodRowLinkProps {
   withBorderTop?: boolean;
   /** The food's category as data-category, for the probes (fix/rich-tabs) */
   category?: string;
+  /** Third line, the calm upper-limit line of Đủ 22 vi chất ("Vượt mức an toàn (400 µg)"), on a Giàu … row (A3, 23/10) */
+  note?: string | null;
 }
 
 /** One food in a Khám phá list: name and meta on the left, a figure and a chevron on the right. Min 48 px. */
-export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop = true, category }: FoodRowLinkProps) {
+export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop = true, category, note }: FoodRowLinkProps) {
   return (
     <Link
       href={href}
@@ -29,6 +31,11 @@ export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="line-clamp-2 text-callout font-semibold leading-snug">{name}</span>
         <span className="line-clamp-2 text-cap leading-tight text-secondary">{meta}</span>
+        {note && (
+          <span data-testid="upper-limit-line" className="text-xs font-semibold leading-snug text-secondary">
+            {note}
+          </span>
+        )}
       </span>
       {value && (
         <span className="shrink-0 text-callout font-bold tabular-nums" style={valueColor ? { color: valueColor } : undefined}>
