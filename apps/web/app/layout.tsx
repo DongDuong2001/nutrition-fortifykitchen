@@ -3,10 +3,12 @@ import { Manrope, Saira_Condensed } from "next/font/google";
 import "./globals.css";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
+import { ChunkStale } from "@/components/pwa/chunk-stale";
 import { UnsavedWorkWatch } from "@/components/unsaved-work-watch";
 import { RouteTransition } from "@/components/route-transition";
 import { TouchActive } from "@/components/touch-active";
 import { Vitals } from "@/components/vitals";
+import { CHUNK_RELOAD_SCRIPT } from "@/lib/chunk-reload-script";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
 const manrope = Manrope({
@@ -55,12 +57,15 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
       <head>
+        {/* Before the app: a page left over from an older deploy asks for chunks that are gone; it reloads once (lib/chunk-reload-script) */}
+        <script dangerouslySetInnerHTML={{ __html: CHUNK_RELOAD_SCRIPT }} />
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />
       </head>
       <body className="bg-page text-text antialiased min-h-dvh flex flex-col font-sans">
         <NavHistoryTracker />
         <PwaRegister />
+        <ChunkStale />
         <UnsavedWorkWatch />
         <TouchActive />
         <Vitals />
