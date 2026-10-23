@@ -109,7 +109,7 @@ export function calculateSaltTarget(trainingMinutes = 0, size: TrainingSize | nu
 /** True for the minutes of a preset chip (Nghỉ, 45, 60, 90, 120): any other number of minutes is Tùy chỉnh. */
 export const isPresetMinutes = (minutes: number): boolean => getTrainingDurations().some((d) => d.minutes === minutes);
 
-export { CUSTOM_DURATION_ID, CUSTOM_MINUTES_MAX, CUSTOM_MINUTES_MIN, CUSTOM_MINUTES_STEP, clampTrainingMinutes, serverAcceptsTrainingMinutes } from "./training-limits";
+export { CUSTOM_DURATION_ID, CUSTOM_MINUTES_MAX, CUSTOM_MINUTES_MIN, CUSTOM_MINUTES_STEP, clampTrainingMinutes } from "./training-limits";
 
 /**
  * Available duration buttons on Training screen (Tùy chỉnh comes after them: CUSTOM_DURATION_ID).
