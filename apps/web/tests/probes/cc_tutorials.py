@@ -44,13 +44,12 @@ OLD_TIPS = [
 ]
 # share-spotlight: the share tip shows again after it was seen (until Để sau twice) and may follow Có gì mới; a returning user has shared once
 # meal-focus (22c) and hero-macro (23a, overnight 22→23/10) are the last tips of Hôm nay; seen here, so a reload after Có gì mới stays quiet
-RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
-# The newest 8 of the joined tour on Hôm nay: 21c's first (Đồ ăn của Minh Hào: the Khám phá tab) and 22a's seven that are on Hôm nay: V3's meal +,
-# Ngày tập pill and Khám phá tab, feat/ngay-mau's two (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has
-# food), custom-food-nutrients' + Thêm vi chất khác (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel,
-# and 21c's Đổi nguyên liệu, 21b and everything older are cut by the cap
+RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
+# The newest 8 of the joined tour on Hôm nay: 22a's seven that are on Hôm nay: V3's meal +, Ngày tập pill and Khám phá tab, feat/ngay-mau's two
+# (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has food) and custom-food-nutrients' + Thêm vi chất khác
+# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's one (hero-hold: Giữ để xem món nào góp vào).
+# 21c's Minh Hào step (the oldest) is cut by the cap
 STEPS = [
-    ("Đồ ăn của Minh Hào", ["nav-explore"]),
     ("Thêm vào từng bữa", ["meal-add", "nav-add"]),
     ("Ngày tập", ["training-pill", "day-date"]),
     ("Nhóm món có màu", ["nav-explore"]),
@@ -58,6 +57,7 @@ STEPS = [
     ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]),
     ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]),
     ("Chia sẻ ngày ăn", ["home-share"]),
+    ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
@@ -198,33 +198,33 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped. Step 1 (Đồ ăn của Minh Hào) points at the Khám phá tab: with no tab, step 2 (Thêm vào từng bữa, a
-    # meal's +) shows
+    # Steps whose target is gone are skipped. Step 2 (Ngày tập) points at the Ngày tập pill or the date: with both gone, Tiếp from step 1 skips it
+    # and step 3 (Nhóm món có màu, the Khám phá tab) shows
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     check("Mới · 1/8" in step_text(pg), "skip: on step 1")
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"nav-explore\"], [data-tour=\"explore-minh-hao\"]').forEach(el => el.removeAttribute('data-tour'))")
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"training-pill\"], [data-tour=\"day-date\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
     # Each missing step waits the spotlight's give-up time before it is skipped
     for _ in range(30):
         pg.wait_for_timeout(500)
-        if "Mới · 2/8" in step_text(pg):
-            break
-    check("Mới · 2/8" in step_text(pg), f"skip: step 1 has no target, so step 2 shows ({step_text(pg)[:30]!r})")
-    check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
-    check(ring_holds(pg, ["meal-add", "nav-add"]) is not None, "skip: the ring is on a meal's +")
-    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the meal +s and the bar's + gone,
-    # step 2 has nothing: step 3 (the Ngày tập pill) shows
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"], [data-tour=\"dish-parts\"]').forEach(el => el.remove())")
-    for _ in range(30):
-        pg.wait_for_timeout(500)
         if "Mới · 3/8" in step_text(pg):
             break
-    check("Mới · 3/8" in step_text(pg), f"gone mid-step: step 2 is skipped and the Ngày tập pill shows ({step_text(pg)[:30]!r})")
-    check(ring_holds(pg, ["training-pill", "day-date"]) is not None, "gone mid-step: the ring is on the Ngày tập pill")
+    check("Mới · 3/8" in step_text(pg), f"skip: step 2 has no target, so step 3 shows ({step_text(pg)[:30]!r})")
+    check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
+    check(ring_holds(pg, ["nav-explore"]) is not None, "skip: the ring is on the Khám phá tab")
+    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the Khám phá tab gone, step 3 has
+    # nothing: step 4 (Lưu cả ngày thành mẫu, the ⋯ of the day, or the hero) shows
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"nav-explore\"], [data-tour=\"explore-minh-hao\"], [data-tour=\"dish-parts\"]').forEach(el => el.remove())")
+    for _ in range(30):
+        pg.wait_for_timeout(500)
+        if "Mới · 4/8" in step_text(pg):
+            break
+    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3 is skipped and the day's ⋯ shows ({step_text(pg)[:30]!r})")
+    check(ring_holds(pg, ["day-menu", "home-hero"]) is not None, "gone mid-step: the ring is on the day's ⋯")
     shot(pg, "skipped")
-    # With the pill, the date, the Khám phá tab, the ⋯ and the meal headers gone too, the last steps have no target: the tour ends
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"training-pill\"], [data-tour=\"day-date\"], [data-tour=\"nav-explore\"], [data-tour=\"dish-parts\"], [data-tour=\"explore-minh-hao\"], [data-tour=\"day-menu\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"home-share\"]').forEach(el => el.removeAttribute('data-tour'))")
+    # With the ⋯, the hero, the template pill, the meal headers, the + of the bar, the share button and the macros gone too, the last steps have no target: the tour ends
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-menu\"], [data-tour=\"home-hero\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"add-nutrient\"], [data-tour=\"nav-add\"], [data-tour=\"home-share\"], [data-tour=\"hero-macro\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name=re.compile("^(Tiếp|Xong)$")).click()
     for _ in range(40):
         pg.wait_for_timeout(500)
@@ -323,7 +323,7 @@ def portion_tips(browser):
 
 
 def drag(browser):
-    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
+    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
     go(pg, "/app", 1500)
     check(card(pg).count() == 0, "drag: no tip on Hôm nay before a sheet opens")
     pg.get_by_role("button", name="Tùy chọn ngày").first.tap()

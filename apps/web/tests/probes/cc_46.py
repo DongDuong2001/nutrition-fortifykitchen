@@ -41,7 +41,7 @@ RELEASE = "2026-10-23a"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
 ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn", "Chia sẻ ngày ăn bằng một chạm"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients, share-spotlight (2026-10-22a)
-ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự chọn thời gian tập", "Tự tạo ngày ăn mẫu", "Kcal từ đạm, tinh bột, béo", "Món ăn có biểu tượng cho dễ tìm", "Thêm danh sách Giàu …"]  # the night of 22→23/10 (2026-10-23a, shared by its PRs): no tour
+ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự chọn thời gian tập", "Tự tạo ngày ăn mẫu", "Kcal từ đạm, tinh bột, béo", "Món ăn có biểu tượng cho dễ tìm", "Thêm danh sách Giàu …", "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào"]  # the night of 22→23/10 and 23→24/10 (2026-10-23a, shared by its PRs): one tour step (the hold on the hero)
 ITEMS_2210C = ["Món ghi theo gam", "Tổng quan đếm vi chất như Hôm nay", "Số trung bình ghi rõ"]  # overnight 22→23/10 (2026-10-22c), no tour
 ITEMS_2210B = ["Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy"]  # backend-sync-1022 (2026-10-22b): one item, no tour
 ITEMS_2110C = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add, polish, rich-tabs, minh-hao-tab, glide, swap-ingredients (2026-10-21c, live)
@@ -134,7 +134,7 @@ def targets_ok(pg, selector, label):
 
 # cc-49/51 tips on Hôm nay (Chưa lưu, kéo xuống, chạm vi chất) are seen too, so the sheet is not waiting for a tip
 # share-spotlight: the share tip may follow Có gì mới and shows again after it was seen, so these accounts have shared once (share_spotlight.py tests it)
-SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists", "meal-focus", "hero-macro"], "used": ["share-day"]}
+SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists", "meal-focus", "hero-macro", "hero-hold"], "used": ["share-day"]}
 
 
 def wrapped_titles(pg, titles):
@@ -155,7 +155,7 @@ def once(browser):
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
     check(all(t in text for t in ITEMS_2310A) and ITEMS_2210C[0] not in text, "the release's items (23a), not 22c's")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 0, "no Thử ngay: 23a has no tour")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 23a has a tour (the hold on the hero)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -306,8 +306,8 @@ def home_tour(browser):
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    # 21b's 2 + 21c's 2 + 22a's 7 on Hôm nay (So sánh món is in the portion panel; + Thêm vi chất khác is the + of the bar) = 11, cut to 8
-    steps = [("Đồ ăn của Minh Hào", ["nav-explore"]), ("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]), ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]), ("Chia sẻ ngày ăn", ["home-share"])]
+    # 21b's 2 + 21c's 2 + 22a's 7 on Hôm nay (So sánh món is in the portion panel; + Thêm vi chất khác is the + of the bar) + 23a's 1 = 12, cut to 8 (22a's seven and 23a's one)
+    steps = [("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]), ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]), ("Chia sẻ ngày ăn", ["home-share"]), ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
@@ -340,7 +340,7 @@ def history(browser):
     check(text.index(ITEMS_2310A[0]) < text.index(ITEMS_2210C[0]) < text.index(ITEMS_2210B[0]) < text.index(ITEMS[0]) < text.index(ITEMS_2110C[0]) < text.index(ITEMS_2110B[0]) < text.index(ITEMS_2110A[0]) < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 22c, 22b, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d, 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
-    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 12, "Xem hướng dẫn on 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18c and 17/10 (18d's tour is retired)")
+    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 13, "Xem hướng dẫn on 23a, 22a, 21c, 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18c and 17/10 (18d's tour is retired)")
     targets_ok(pg, "main", "history")
     shot(pg, "history-390")
     replay_1710(pg).click()
