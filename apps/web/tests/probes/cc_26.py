@@ -71,7 +71,7 @@ window.__shareSnaps = [];
       head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const t = h.querySelector('h1'), d = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const c = (e) => { const q = e.getBoundingClientRect(); return { top: q.top, bottom: q.bottom, mid: (q.top + q.bottom) / 2, left: q.left, right: q.right }; };
         const cs0 = getComputedStyle(t), cs1 = d ? getComputedStyle(d) : null;
-        return { height: h.getBoundingClientRect().height, box: c(h), bg: getComputedStyle(h).backgroundColor, col: c(t.parentElement), first: c(t), date: d ? c(d) : null, badge: b ? c(b) : null,
+        return { height: h.getBoundingClientRect().height, box: c(h), bg: getComputedStyle(h).backgroundColor, col: c(t.parentElement), first: c(t), date: d ? c(d) : null, badge: b ? c(b) : null, tag: (() => { const x = b && [...b.querySelectorAll('span')].find((e) => e.style.backgroundColor); return x ? c(x) : null; })(),
           firstFs: parseFloat(cs0.fontSize), firstLh: cs0.lineHeight, firstTransform: cs0.textTransform, firstFamily: cs0.fontFamily, firstWeight: cs0.fontWeight, firstStyle: cs0.fontStyle, firstColor: cs0.color, firstText: t.innerText,
           dateFs: cs1 ? parseFloat(cs1.fontSize) : null, dateWeight: cs1 ? cs1.fontWeight : null, dateColor: cs1 ? cs1.color : null, dateTransform: cs1 ? cs1.textTransform : null,
           paddingTop: parseFloat(getComputedStyle(h).paddingTop), paddingLeft: parseFloat(getComputedStyle(h).paddingLeft), badgeW: b ? b.getBoundingClientRect().width : null, h1s: r.querySelectorAll('h1').length }; })(),
@@ -215,13 +215,15 @@ def snap(pg):
 
 
 def check_head(s, tag, label, named):
-    """Header (V3ShareB): the name (h1, Saira italic 34 px) over the date (2 px), the Level badge centred on that column; 16 px sides, 24 px top."""
+    """Header (V3ShareB): the name (h1, Saira italic 34 px) over the date (2 px), the Level tag on the name line; 16 px sides, 24 px top."""
     h = s and s.get("head")
     if not h:
         check(False, f"{tag} {label}: header geometry was not read")
         return
     check(h["h1s"] == 1, f"{tag} {label}: one h1 ({h['h1s']})")
-    check(h["badge"] is not None and abs(h["col"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: the badge is centred on the name column ({h['col']['mid']:.1f} vs {h['badge']['mid']:.1f})")
+    # feat/level-ui (Share.dc.html): the header aligns to the top; the tag's centre on the name's first line, the pips on the date line
+    line_mid = h["first"]["top"] + float(h["firstLh"].replace("px", "")) / 2 if h["firstLh"].endswith("px") else h["first"]["mid"]
+    check(h["tag"] is not None and abs(line_mid - h["tag"]["mid"]) <= 3, f"{tag} {label}: the tag is centred on the name line ({line_mid:.1f} vs {h['tag']['mid'] if h['tag'] else None})")
     check(h["bg"] == "rgba(0, 0, 0, 0)", f"{tag} {label}: the header sits on the page paper, no band or divider ({h['bg']})")
     check(h["paddingLeft"] == 16 and h["paddingTop"] == 24, f"{tag} {label}: 16 px sides, 24 px top ({h['paddingLeft']}, {h['paddingTop']})")
     check(abs(h["firstFs"] - 34) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",

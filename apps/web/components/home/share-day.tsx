@@ -1,4 +1,5 @@
 import { LevelBadge } from "@/components/profile/level-badge";
+import { MAX_LEVEL } from "@/lib/coaching-link";
 import { formatAmount } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { portionLabel, type HomeMeal } from "@/lib/home";
@@ -173,14 +174,14 @@ export function ShareDay({ model, largeText = false }: { model: ShareModel; larg
         WebkitTextSizeAdjust: "100%",
         textSizeAdjust: "100%",
       }}
-      className="flex flex-col bg-ink font-sans text-text"
+      className="relative flex flex-col bg-ink font-sans text-text"
     >
       {/* The page itself is the paper; the root is ink, so a last image row the page covers only in part stays ink to the corners */}
       <div className="flex flex-1 flex-col bg-page">
         {/* The name is 34 px on a 1.1 line (stacked Vietnamese marks never touch, cc-66 S12). The hero keeps its own 8 px top margin; 4 px more here makes the design's 12 px */}
         <header
           data-share-header
-          className="flex flex-none items-center justify-between gap-3 px-4 pb-1 pt-6"
+          className="flex flex-none items-start justify-between gap-3 px-4 pb-1 pt-6"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <h1
@@ -195,7 +196,9 @@ export function ShareDay({ model, largeText = false }: { model: ShareModel; larg
               </p>
             )}
           </div>
-          <LevelBadge level={model.level} size="share" />
+          {/* Static CSS only (html-to-image draws no blur, mask or animation). The tag's centre on the name line, the pips on the date line:
+              Level 4–5 give back their frame's top air */}
+          <LevelBadge level={model.level} size="share" className={model.level >= 4 ? "-mt-[0.3em]" : ""} />
         </header>
 
         <main className="flex min-h-0 flex-1 flex-col">
@@ -232,7 +235,7 @@ export function ShareDay({ model, largeText = false }: { model: ShareModel; larg
       >
         <span className="flex items-center whitespace-nowrap font-display text-[1.5rem] font-extrabold uppercase italic leading-none">
           <span className="text-on-dark">H1T</span>
-          <span className="ml-1 text-cobalt-on-dark">MICRO</span>
+          <span className={`ml-1 ${model.level === MAX_LEVEL ? "text-gold" : "text-cobalt-on-dark"}`}>MICRO</span>
         </span>
         <span className="flex flex-col items-end gap-0.5 whitespace-nowrap text-right">
           <span className="text-cap font-bold leading-tight text-on-dark">
@@ -243,6 +246,14 @@ export function ShareDay({ model, largeText = false }: { model: ShareModel; larg
           </span>
         </span>
       </footer>
+      {/* Level 5's reward: a 5 px gold frame round the whole image */}
+      {model.level === MAX_LEVEL && (
+        <div
+          aria-hidden="true"
+          data-share-gold-frame
+          className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_5px_var(--color-gold),inset_0_0_0_6px_rgb(17_19_23/0.25)]"
+        />
+      )}
     </div>
   );
 }
