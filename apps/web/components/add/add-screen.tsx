@@ -933,8 +933,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 )}
               </div>
 
-              {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked */}
-              <div className="min-h-0 w-[340px] shrink-0 self-stretch overflow-y-auto overscroll-contain">
+              {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked. The dialog is what scrolls
+                  (the row grows with this pane), so no overscroll-contain here: in Chrome it kept the wheel over the nutrients from
+                  reaching the dialog, and the last micros could not be scrolled to (job 10, 23/10) */}
+              <div data-portion-pane className="min-h-0 w-[340px] shrink-0 self-stretch overflow-y-auto">
                 {selectedFood ? (
                   <PortionPanel
                     onCompare={openCompare}
