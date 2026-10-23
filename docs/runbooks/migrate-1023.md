@@ -14,10 +14,10 @@ Rehearsed 23/10 on a local Postgres 17 in Docker (every migration in order, then
 - So "is it applied?" is answered by looking for its objects (the checks below), and the record of what ran is the STATUS line you post in the night channel after each step.
 - Everything runs in `postgres:17-alpine` (the database is 17; the VPS's own `pg_dump` is 16), with `DATABASE_URL` exported once and never typed on a command line.
 
-The helper used below (paste it once per terminal; the URL stays inside the container's environment):
+The helper used below (paste it once per terminal; the URL stays inside the container's environment). It passes `-i` to Docker only when its input is piped or a file: with `-i` on a terminal, a `psql17` line swallowed every line pasted after it (rehearsal 23/10).
 
 ```bash
-psql17() { docker run --rm -i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 "$@"' psql17 "$@"; }
+psql17() { local i=; [ -t 0 ] || i=-i; docker run --rm $i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 "$@"' psql17 "$@"; }
 ```
 
 ## Order
@@ -38,16 +38,18 @@ Run them in number order. 000021 touches only two new columns of `nutrition.prof
 
 ```bash
 cd ~/Documents/HITMicro/nutrition-fortifykitchen && git fetch origin
-mkdir -p ~/migrations-1023 && for f in up down; do
-  git show origin/feat/profile-level:migrations/000021_profile_level.$f.sql > ~/migrations-1023/000021_profile_level.$f.sql   # origin/main once #88 is merged
+mkdir -p ~/migrations-1023 && for f in migrations/000021_profile_level.up.sql migrations/000021_profile_level.down.sql \
+    docs/runbooks/sql/nutrition-dependents.sql docs/runbooks/sql/nutrition-grants.sql; do
+  git show origin/feat/profile-level:$f > ~/migrations-1023/$(basename $f)   # origin/main once #88 is merged
 done
 M=~/migrations-1023 && ls -l $M
 read -rs DATABASE_URL && export DATABASE_URL       # paste the hitmicro-staging session pooler URI, Enter
 mkdir -p ~/backups
-# 1. Backup: the whole nutrition schema
-docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c \
-  'pg_dump "$DATABASE_URL" --schema=nutrition --no-owner --no-acl' | gzip -9 > ~/backups/staging-before-000021-$(date +%Y%m%d-%H%M).sql.gz
-ls -lh ~/backups | tail -1                                   # not empty
+# 1. Backup: the whole nutrition schema WITH its owners and grants (custom format), and its grants beside it (as text and as SQL)
+B=~/backups/staging-before-000021-$(date +%Y%m%d-%H%M)
+docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c 'pg_dump "$DATABASE_URL" --schema=nutrition -Fc' > $B.dump
+psql17 -c '\dp nutrition.*' > $B.dp.txt && psql17 -c '\ddp' > $B.ddp.txt && psql17 -At < $M/nutrition-grants.sql > $B.grants.sql
+ls -l $B.*                                                   # four files, the .dump not empty
 # 2. Already there? (0 = not applied yet; 2 = applied, stop here)
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"
 # 3. Dry run, rolled back: must end without ERROR
@@ -72,17 +74,19 @@ Only after staging is checked.
 ssh deploy@14.225.210.185
 cd /var/www/nutrition-meals
 git fetch origin
-mkdir -p ~/migrations-1023 && for f in up down; do
-  git show origin/feat/profile-level:migrations/000021_profile_level.$f.sql > ~/migrations-1023/000021_profile_level.$f.sql   # origin/main once #88 is merged
+mkdir -p ~/migrations-1023 && for f in migrations/000021_profile_level.up.sql migrations/000021_profile_level.down.sql \
+    docs/runbooks/sql/nutrition-dependents.sql docs/runbooks/sql/nutrition-grants.sql; do
+  git show origin/feat/profile-level:$f > ~/migrations-1023/$(basename $f)   # origin/main once #88 is merged
 done
 M=~/migrations-1023 && ls -l $M
-psql17() { docker run --rm -i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 "$@"' psql17 "$@"; }
+psql17() { local i=; [ -t 0 ] || i=-i; docker run --rm $i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 "$@"' psql17 "$@"; }
 export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
 mkdir -p ~/backups
-# 1. Backup
-docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c \
-  'pg_dump "$DATABASE_URL" --schema=nutrition --no-owner --no-acl' | gzip -9 > ~/backups/prod-before-000021-$(date +%Y%m%d-%H%M).sql.gz
-ls -lh ~/backups | tail -1
+# 1. Backup (as on staging: owners and grants kept, grants beside it)
+B=~/backups/prod-before-000021-$(date +%Y%m%d-%H%M)
+docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c 'pg_dump "$DATABASE_URL" --schema=nutrition -Fc' > $B.dump
+psql17 -c '\dp nutrition.*' > $B.dp.txt && psql17 -c '\ddp' > $B.ddp.txt && psql17 -At < $M/nutrition-grants.sql > $B.grants.sql
+ls -l $B.*
 # 2. Already there?
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"
 # 3. Dry run (ROLLBACK), read the output
@@ -138,21 +142,49 @@ The UPDATE must print one row with the new `level`; `UPDATE 0` means no profile 
 
 ## Rollback
 
-Down migration first only after the API that does not read the columns is back, or `GET /me` answers 500:
+Two ways back, in this order. The 000021 down file is the normal one: 000021 only adds two columns, so its down file only drops those two (and their checks); nothing else changes and nothing written since is lost. The backup restore is the last resort.
+
+### 1. The 000021 down file (first)
+
+The API that does not read the columns goes back **first**, or `GET /me` answers 500 once they are gone. On production, after the `ssh`, `cd`, `psql17` and `export DATABASE_URL` lines of the production section; on staging, from your Mac as in the staging section.
 
 ```bash
 deploy/deploy.sh <the short sha noted before deploy.sh>       # production, on the VPS
+psql17 -c "SELECT u.email, p.level, p.level_seen FROM nutrition.profiles p JOIN auth.users u ON u.id = p.user_id WHERE p.level > 0"   # note the Levels: they go with the columns
 ( echo 'BEGIN;'; cat ~/migrations-1023/000021_profile_level.down.sql; echo 'COMMIT;' ) | psql17 -q
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"   # 0
 ```
 
-- `000021` down drops the two checks and the two columns: every Level set by SQL is lost, and the web shows Level 0 again. Note the Levels first if they matter: `psql17 -c "SELECT u.email, p.level, p.level_seen FROM nutrition.profiles p JOIN auth.users u ON u.id = p.user_id WHERE p.level > 0"`.
-- Restoring the backup instead, only if the down migration is not enough. The dump recreates the `nutrition` schema, so it is loaded into an emptied one: dropping the schema and loading the dump run in **one transaction**, so an error leaves the database as it was. Everything written after the backup is lost. (The extensions are in `public` and stay. The dump has no grants (`--no-acl`); the API connects as the owner, so it does not need them.)
+The web then shows Level 0 again for everyone.
+
+### 2. Restore the backup (last resort)
+
+Only if the down file is not enough. Everything written after the backup is lost. Run it with the same admin user that took the backup (the same `DATABASE_URL`), so the dump's owners and grants can be set again.
+
+```bash
+# R1. Pick ONE backup: the newest of this environment, printed; type yes to go on
+B=$(ls -t ~/backups/prod-before-000021-*.dump | head -1)     # staging: ~/backups/staging-before-000021-*.dump
+B=${B%.dump}; ls -l $B.dump $B.dp.txt $B.ddp.txt $B.grants.sql
+printf 'Restore from %s.dump ? Type yes: ' "$B"; read -r ok
+# R2. Nothing outside nutrition may depend on it (DROP SCHEMA nutrition CASCADE would drop or break it). Any line: STOP and tell Hao
+deps=$(psql17 -At -F ' | ' < ~/migrations-1023/nutrition-dependents.sql) && checked=yes || checked=no
+if [ "$checked" = yes ] && [ -z "$deps" ]; then echo "R2 ok: nothing outside nutrition depends on it"; else echo "STOP, tell Hao (check ran: $checked):"; echo "$deps"; fi
+# R3. Restore only after yes and a clean R2: drop the schema and load the dump, owners and grants included, in ONE transaction
+[ "$ok" = yes ] && [ "$checked" = yes ] && [ -z "$deps" ] && \
+  ( echo 'BEGIN;'; echo 'DROP SCHEMA nutrition CASCADE;'; docker run --rm -i postgres:17-alpine pg_restore -f - < $B.dump; echo 'COMMIT;' ) | psql17 -q \
+  || echo "R3 did not restore: not confirmed, R2 not clean, or an error (then ROLLBACK: nothing changed)"
+# R4. Checks: the rows of the backup, and the grants as recorded (no diff lines = the same)
+psql17 -Atc "SELECT count(*) FROM nutrition.profiles"
+psql17 -At < ~/migrations-1023/nutrition-grants.sql | diff $B.grants.sql - && echo "grants as before the migration"
+```
+
+- R2 lists views, triggers (for example one on `auth.users` that calls a `nutrition` function), foreign keys and policies outside the schema that depend on it, and functions outside it whose body names it. The restore does not bring those back, so it stops there: Hao decides.
+- If R3 is refused for an owner or a grant (`must be owner of …`, `permission denied …` on an `ALTER … OWNER` or `GRANT` line, possible on Supabase), the transaction rolls back and nothing changed. Then restore without owners and grants and put the recorded grants back in the same transaction, then R4 again:
 
   ```bash
-  ( echo 'BEGIN;'; echo 'DROP SCHEMA nutrition CASCADE;'; gunzip -c ~/backups/prod-before-000021-*.sql.gz; echo 'COMMIT;' ) | psql17 -q
-  # staging: ~/backups/staging-before-000021-*.sql.gz instead
-  psql17 -Atc "SELECT count(*) FROM nutrition.profiles"     # the count from before the migration
+  [ "$ok" = yes ] && [ "$checked" = yes ] && [ -z "$deps" ] && \
+    ( echo 'BEGIN;'; echo 'DROP SCHEMA nutrition CASCADE;'; docker run --rm -i postgres:17-alpine pg_restore -f - --no-owner --no-acl < $B.dump; cat $B.grants.sql; echo 'COMMIT;' ) | psql17 -q
   ```
 
-  Loading the dump without the `DROP SCHEMA` stops at once with `ERROR: schema "nutrition" already exists` (checked in the 23/10 rehearsal).
+  `$B.dp.txt` and `$B.ddp.txt` are the same grants as `\dp` / `\ddp` printed them, to compare by eye.
+- Loading a dump without the `DROP SCHEMA` stops at once with `ERROR: schema "nutrition" already exists`. The extensions (`pg_trgm`, `unaccent`, `pgcrypto`) are in `public` and are not touched.
