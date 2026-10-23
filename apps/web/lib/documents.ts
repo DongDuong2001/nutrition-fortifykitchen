@@ -70,6 +70,7 @@ const MESSAGES: Record<number, string> = {
   401: "Phiên đăng nhập đã hết. Đăng nhập lại rồi thử lại.",
   403: "Mã truy cập không đúng, đã hết hạn hoặc đã bị thu hồi.",
   404: "Không có tài liệu này.",
+  409: "Tài liệu vừa được người khác lưu. Bản nháp của bạn vẫn được giữ: chép lại phần sửa, đóng rồi mở lại để xem bản mới.",
   413: "Tệp quá lớn (tối đa 1 MB).",
 };
 
@@ -98,13 +99,14 @@ export async function listDocuments(): Promise<DocumentMeta[]> {
   return (await api<{ items: DocumentMeta[] }>("/documents")).items;
 }
 
-export async function readDocument(name: string): Promise<string> {
+/** The text and the version (updatedAt) it was read at, which an edit sends back with its save. */
+export async function readDocument(name: string): Promise<{ content: string; updatedAt: string }> {
   if (!isLiveMode()) {
     const doc = mockDocs()[name];
     if (!doc) throw new DocumentsError(404);
-    return doc.content;
+    return doc;
   }
-  return (await api<{ content: string }>(`/documents/${encodeURIComponent(name)}`)).content;
+  return api(`/documents/${encodeURIComponent(name)}`);
 }
 
 /** Resolves when `code` is a live access code; a DocumentsError (403) otherwise. */
@@ -116,16 +118,21 @@ export async function checkAccessCode(code: string): Promise<void> {
   await api("/document-codes/check", send("POST", { code }));
 }
 
-/** Writes `content` as the document `name` (a new one, or over the old one). */
-export async function saveDocument(name: string, content: string, code: string): Promise<void> {
+/**
+ * Writes `content` as the document `name`. An edit passes `baseUpdatedAt`, the version it loaded: if someone saved in between,
+ * nothing is written and a DocumentsError (409) says so. An upload leaves it out and creates or replaces.
+ */
+export async function saveDocument(name: string, content: string, code: string, baseUpdatedAt?: string): Promise<void> {
   if (!isLiveMode()) {
     if (!isDocumentName(name)) throw new DocumentsError(400);
     if (new Blob([content]).size > MAX_DOCUMENT_BYTES) throw new DocumentsError(413);
     if (!mockCodeValid(code)) throw new DocumentsError(403);
-    writeMock(DOCS_KEY, { ...mockDocs(), [name]: { content, updatedAt: new Date().toISOString() } });
+    const docs = mockDocs();
+    if (baseUpdatedAt !== undefined && docs[name]?.updatedAt !== baseUpdatedAt) throw new DocumentsError(docs[name] ? 409 : 404);
+    writeMock(DOCS_KEY, { ...docs, [name]: { content, updatedAt: new Date().toISOString() } });
     return;
   }
-  await api(`/documents/${encodeURIComponent(name)}`, send("PUT", { content, code }));
+  await api(`/documents/${encodeURIComponent(name)}`, send("PUT", { content, code, baseUpdatedAt }));
 }
 
 /**
