@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PillButton } from "@/components/ui/pill-button";
 import { SettingsTile } from "@/components/ui/settings-tile";
 import { DaySummary } from "@/components/templates/template-parts";
@@ -9,16 +10,24 @@ import { TemplateGlyphShapes } from "@/components/templates/template-glyph";
 import { useDiary } from "@/lib/diary-store";
 import { useDayTemplateRows } from "@/hooks/use-day-templates";
 import { formatAmount } from "@/lib/format";
-import { tagLabel } from "@/lib/day-templates";
-import { HOME_ROUTE } from "@/lib/home-route";
+import { NEW_TEMPLATE_NAME, defaultTemplateTag, tagLabel } from "@/lib/day-templates";
+import { newTemplateDraft, startDraft } from "@/lib/template-draft";
+import { generateUuid } from "@/lib/uuid";
 
-const EMPTY_TEXT = "Chưa có ngày ăn mẫu. Ở Hôm nay, mở ⋯ › Lưu ngày này thành mẫu.";
+const EMPTY_TEXT = "Chưa có ngày ăn mẫu. Tạo một ngày mới hoặc lưu một ngày đã ghi ở Hôm nay.";
 
 /** NMList: one card per saved day (name, tag, "N món · X kcal", a level bar against today's kcal target), then + Tạo ngày ăn mẫu. */
 export function DayTemplateList() {
   const { data, hydrated } = useDiary();
   const { rows } = useDayTemplateRows();
+  const router = useRouter();
   const kcalTarget = data.calories.targetMin;
+  // feat/template-builder: a day built meal by meal. The draft lives until Lưu (lib/template-draft); nothing is listed before.
+  const create = () => {
+    const draft = newTemplateDraft({ id: generateUuid(), name: NEW_TEMPLATE_NAME, tag: defaultTemplateTag(data.user.trainingMinutes), now: new Date().toISOString() });
+    startDraft(draft);
+    router.push(`/explore/ngay-mau/${draft.id}`);
+  };
 
   return (
     <>
@@ -46,8 +55,8 @@ export function DayTemplateList() {
         ))
       )}
 
-      {/* "Create" is saving a day: a template needs foods, and the foods are the ones logged on Hôm nay */}
-      <PillButton variant="secondary" href={HOME_ROUTE} className="mt-1 gap-2 border-0! shadow-[inset_0_0_0_1.5px_var(--color-text)]">
+      {/* Two ways to make one: + Tạo ngày ăn mẫu builds a day here, meal by meal; Hôm nay's ⋯ saves a day already logged */}
+      <PillButton variant="secondary" type="button" onClick={create} className="mt-1 gap-2 border-0! shadow-[inset_0_0_0_1.5px_var(--color-text)]">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
         </svg>

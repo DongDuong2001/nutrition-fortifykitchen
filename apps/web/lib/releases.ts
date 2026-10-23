@@ -44,6 +44,11 @@ export const RELEASES: readonly Release[] = [
       },
       { icon: "home", title: "Hôm nay dễ đọc hơn", body: "Số to hơn, chữ đậm hơn. Chất xơ có dòng riêng ở đầu cột vi chất, ngay dưới số vi chất đạt." },
       { icon: "home", title: "Dễ dùng hơn trên máy tính", body: "Rê chuột lên món là thấy sáng lên, các hàng Khám phá có nút xem tiếp, nút Thêm luôn hiện trong hộp thêm món, Esc thoát chọn nhiều món và thanh bên luôn ở yên khi cuộn." },
+      {
+        icon: "meal",
+        title: "Tự tạo ngày ăn mẫu",
+        body: "Ở Khám phá › Ngày ăn mẫu, chạm Tạo ngày ăn mẫu rồi thêm món vào từng bữa. Không cần ghi vào nhật ký trước.",
+      },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
