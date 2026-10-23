@@ -284,6 +284,9 @@
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
+  /* Level badge (Badge.dc.html, 23/10): the Level 0 tag's bottom edge, and Level 5's shadow on a dark surface */
+  --color-level-edge: #C7C7CC;
+  --color-gold-light: #FFF1C7;
   /* The landing footer's warm paper (kiln wordmark footer) */
   --color-kiln-paper: #F3F1EC;
   /* A grey fill with no glass behind it: the sheet's Close circle (V3-SPEC §4, no glass on glass) */
