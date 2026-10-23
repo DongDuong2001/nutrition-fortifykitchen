@@ -65,7 +65,9 @@ func (m *mockLibRepo) GetSavedMealByID(ctx context.Context, userID uuid.UUID, me
 }
 
 func (m *mockLibRepo) CreateSavedMeal(ctx context.Context, userID uuid.UUID, meal *SavedMeal) (*SavedMeal, error) {
-	meal.ID = uuid.New()
+	if meal.ID == uuid.Nil {
+		meal.ID = uuid.New()
+	}
 	m.savedMeals[meal.ID] = meal
 	return meal, nil
 }
@@ -227,5 +229,26 @@ func TestLibraryService_AddFromSaved_AtomicRollback(t *testing.T) {
 	// Assert all-or-nothing: no recents should be written when transaction fails
 	if len(repo.recents) != 0 {
 		t.Fatalf("expected 0 recents recorded on atomic rollback, got %d", len(repo.recents))
+	}
+}
+
+func TestPutSavedMeal_KeepsTheClientIDAndReplaces(t *testing.T) {
+	repo := &mockLibRepo{savedMeals: map[uuid.UUID]*SavedMeal{}}
+	svc := NewService(repo, nil)
+	user, id, food := uuid.New(), uuid.New(), uuid.New()
+
+	first, err := svc.PutSavedMeal(context.Background(), user, id, CreateSavedMealRequest{Name: "Bữa sáng", Items: []SavedMealItem{{FoodID: food, Grams: 60}}})
+	if err != nil || first.ID != id {
+		t.Fatalf("got %v, %v; want the client id %v", first, err, id)
+	}
+	if first.Items[0].PortionLabel != "Khẩu phần" {
+		t.Fatalf("a blank portion label gets the default, got %q", first.Items[0].PortionLabel)
+	}
+	again, err := svc.PutSavedMeal(context.Background(), user, id, CreateSavedMealRequest{Name: "Bữa sáng mới", Items: []SavedMealItem{{FoodID: food, Grams: 80}}})
+	if err != nil || again.ID != id || len(repo.savedMeals) != 1 || repo.savedMeals[id].Name != "Bữa sáng mới" {
+		t.Fatalf("sending the same id again must replace, not add: %v, %d meals", err, len(repo.savedMeals))
+	}
+	if _, err := svc.PutSavedMeal(context.Background(), user, id, CreateSavedMealRequest{Name: ""}); !errors.Is(err, ErrSavedMealNameRequired) {
+		t.Fatalf("a blank name: got %v", err)
 	}
 }

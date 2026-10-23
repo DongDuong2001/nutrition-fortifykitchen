@@ -284,6 +284,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			r.Route("/saved-meals", func(r chi.Router) {
 				r.Get("/", libraryHandler.GetSavedMeals)
 				r.Post("/", libraryHandler.CreateSavedMeal)
+				r.Put("/{id}", libraryHandler.PutSavedMeal)
 				r.Delete("/{id}", libraryHandler.DeleteSavedMeal)
 			})
 
