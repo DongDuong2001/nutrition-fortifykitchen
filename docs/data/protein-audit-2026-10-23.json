@@ -1,0 +1,363 @@
+[
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7003",
+  "name": "Beef, meat, grade I, raw",
+  "name_vi": "Thịt bò nạc",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": "Giàu sắt heme và kẽm sinh khả dụng cao.",
+  "nutrients": {
+   "b1": 0.1,
+   "b2": 0.17,
+   "b3": 4.2,
+   "calcium": 12,
+   "copper": 0.16,
+   "energy": 118,
+   "fat": 3.8,
+   "iron": 3.1,
+   "magnesium": 28,
+   "phosphorus": 226,
+   "potassium": 378,
+   "protein": 21,
+   "sodium": 83,
+   "vitamin_c": 1,
+   "water": 74.1,
+   "zinc": 2.2
+  },
+  "portions": [
+   {
+    "label_vi": "150 g",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7089",
+  "name": "Chicken, breast, raw",
+  "name_vi": "Ức gà phi lê",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": "Đạm tinh khiết, ít mỡ, tối ưu cho phục hồi cơ bắp.",
+  "nutrients": {
+   "b2": 0,
+   "calcium": 23.3,
+   "energy": 134,
+   "fat": 4.7,
+   "iron": 0.69,
+   "phosphorus": 348,
+   "protein": 22.9,
+   "vitamin_a": 9.1,
+   "vitamin_e": 156,
+   "water": 71.2,
+   "zinc": 1
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "150 g",
+    "grams": 150,
+    "sort": 1
+   },
+   {
+    "label_vi": "200 g",
+    "grams": 200,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8011",
+  "name": "Fish, salmon, raw",
+  "name_vi": "Cá hồi",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": "Giàu Omega-3 tự nhiên (EPA + DHA) và Vitamin D.",
+  "nutrients": {
+   "b1": 0.22,
+   "b2": 0.07,
+   "b3": 7,
+   "b5": 0.82,
+   "b6": 0.55,
+   "calcium": 13,
+   "copper": 0.05,
+   "energy": 136,
+   "fat": 5.3,
+   "folate": 9,
+   "iron": 1.1,
+   "magnesium": 31,
+   "manganese": 0.01,
+   "monounsaturated_fat": 1.91,
+   "phosphorus": 230,
+   "polyunsaturated_fat": 1.78,
+   "potassium": 423,
+   "protein": 22,
+   "saturated_fat": 1.13,
+   "selenium": 36.5,
+   "sodium": 46,
+   "vitamin_a": 30,
+   "vitamin_d": 10.9,
+   "vitamin_e": 0.65,
+   "vitamin_k": 0.1,
+   "water": 71.3,
+   "zinc": 0.41
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "150 g",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 3025",
+  "name": "Tofu, raw",
+  "name_vi": "Đậu hũ trắng",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.03,
+   "b2": 0.02,
+   "b3": 0.4,
+   "b5": 0.07,
+   "b6": 0.05,
+   "calcium": 24,
+   "carbs": 1.1,
+   "copper": 0.19,
+   "energy": 97,
+   "fat": 5.4,
+   "fiber": 0.4,
+   "folate": 15,
+   "iron": 2.2,
+   "magnesium": 30,
+   "manganese": 0.61,
+   "monounsaturated_fat": 1.06,
+   "phosphorus": 85,
+   "polyunsaturated_fat": 2.7,
+   "potassium": 121,
+   "protein": 10.9,
+   "saturated_fat": 0.69,
+   "selenium": 8.9,
+   "sodium": 7,
+   "vitamin_c": 0.1,
+   "water": 82,
+   "zinc": 0.8
+  },
+  "portions": [
+   {
+    "label_vi": "1 bìa",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 3025002",
+  "name": "Tofu, boiled",
+  "name_vi": "Tàu hủ trắng cứng (hấp/luộc)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.02,
+   "b2": 0.01,
+   "b3": 0.24,
+   "b5": 0.04,
+   "b6": 0.03,
+   "calcium": 24.2,
+   "carbs": 1.1,
+   "copper": 0.19,
+   "energy": 98,
+   "fat": 5.5,
+   "fiber": 0.4,
+   "folate": 7.58,
+   "iron": 2.22,
+   "magnesium": 30.3,
+   "manganese": 0.61,
+   "monounsaturated_fat": 1.07,
+   "phosphorus": 85.9,
+   "polyunsaturated_fat": 2.73,
+   "potassium": 122,
+   "protein": 11,
+   "saturated_fat": 0.7,
+   "selenium": 8.99,
+   "sodium": 7.07,
+   "vitamin_c": 0.1,
+   "water": 81.8,
+   "zinc": 0.81
+  },
+  "portions": [
+   {
+    "label_vi": "1 miếng nhỏ (80 g)",
+    "grams": 80,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8037",
+  "name": "Clam, raw",
+  "name_vi": "Hến",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b2": 0.12,
+   "b3": 2.3,
+   "calcium": 144,
+   "carbs": 5.1,
+   "energy": 45,
+   "fat": 0.7,
+   "iron": 1.6,
+   "magnesium": 91,
+   "phosphorus": 86,
+   "potassium": 54,
+   "protein": 4.5,
+   "sodium": 86,
+   "water": 88.8
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   }
+  ]
+ },
+ {
+  "source": "vn_table",
+  "source_id": "food-bun-cha",
+  "name": "Vermicelli noodles with grilled pork",
+  "name_vi": "Bún chả Hà Nội",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "calcium": 91.1,
+   "carbs": 17.9,
+   "energy": 136,
+   "fat": 4.4,
+   "fiber": 0.6,
+   "iron": 0.99,
+   "phosphorus": 33.3,
+   "protein": 6.1,
+   "water": 70.6,
+   "zinc": 0.77
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần",
+    "grams": 350,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_fct",
+  "source_id": "food-bun-cha",
+  "name": "Vermicelli noodles with grilled pork",
+  "name_vi": "Bún chả Hà Nội",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": "Thịt nướng than hoa thơm lừng ăn kèm bún tươi và nước chấm đu đủ.",
+  "nutrients": {
+   "calcium": 91.1,
+   "carbs": 17.9,
+   "energy": 136,
+   "fat": 4.4,
+   "fiber": 0.6,
+   "iron": 0.99,
+   "phosphorus": 33.3,
+   "protein": 6.1,
+   "water": 70.6,
+   "zinc": 0.77
+  },
+  "portions": [
+   {
+    "label_vi": "1 suất vừa (450 g)",
+    "grams": 450,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_fct",
+  "source_id": "food-pho-ga",
+  "name": "Rice noodle with chicken",
+  "name_vi": "Phở gà",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": "Thịt gà ta ít béo, nước dùng thanh đạm thơm mùi gừng và hoa hồi.",
+  "nutrients": {
+   "calcium": 95.7,
+   "carbs": 12.3,
+   "energy": 73,
+   "fat": 1,
+   "fiber": 0.6,
+   "iron": 0.65,
+   "phosphorus": 25.2,
+   "protein": 3.8,
+   "water": 81.9,
+   "zinc": 0.38
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô vừa (500 g)",
+    "grams": 500,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 tô lớn (650 g)",
+    "grams": 650,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ }
+]

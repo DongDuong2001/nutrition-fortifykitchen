@@ -1,0 +1,1713 @@
+[
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7018",
+  "name": "Pork, lean and fat meat, raw",
+  "name_vi": "Ba chỉ heo (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.53,
+   "b2": 0.16,
+   "b3": 2.7,
+   "b5": 0.67,
+   "b6": 0.39,
+   "calcium": 9,
+   "copper": 0.06,
+   "energy": 260,
+   "fat": 21.5,
+   "folate": 4,
+   "iron": 1.5,
+   "magnesium": 19,
+   "manganese": 0.01,
+   "monounsaturated_fat": 9.34,
+   "phosphorus": 178,
+   "polyunsaturated_fat": 2.24,
+   "potassium": 285,
+   "protein": 16.5,
+   "saturated_fat": 7.29,
+   "selenium": 28.7,
+   "sodium": 55,
+   "vitamin_a": 10,
+   "vitamin_c": 2,
+   "water": 60.9,
+   "zinc": 1.91
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 lát ba chỉ",
+    "grams": 30,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8003",
+  "name": "Fish, carp, raw",
+  "name_vi": "Cá chép (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.02,
+   "b2": 0.04,
+   "b3": 1.5,
+   "b5": 0.75,
+   "b6": 0.17,
+   "calcium": 17,
+   "copper": 0.06,
+   "energy": 96,
+   "fat": 3.6,
+   "folate": 13,
+   "iron": 0.9,
+   "magnesium": 30,
+   "manganese": 0.04,
+   "monounsaturated_fat": 1.44,
+   "phosphorus": 184,
+   "polyunsaturated_fat": 0.92,
+   "potassium": 397,
+   "protein": 16,
+   "saturated_fat": 0.7,
+   "selenium": 12.6,
+   "sodium": 49,
+   "vitamin_a": 8,
+   "vitamin_d": 24.7,
+   "vitamin_e": 0.63,
+   "vitamin_k": 0.1,
+   "water": 79.1,
+   "zinc": 1.48
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con cá chép (phần ăn được)",
+    "grams": 200,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8062",
+  "name": "Red tilapia",
+  "name_vi": "Cá diêu hồng (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.06,
+   "b2": 0.01,
+   "calcium": 101,
+   "carbs": 3.1,
+   "energy": 111,
+   "fat": 3.3,
+   "iron": 0.96,
+   "phosphorus": 368,
+   "protein": 17.1,
+   "vitamin_a": 3.3,
+   "vitamin_e": 15.8,
+   "water": 75.2,
+   "zinc": 0.7
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 khúc",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8019",
+  "name": "Fish, tuna, raw",
+  "name_vi": "Cá ngừ tươi (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.02,
+   "b2": 0.08,
+   "b3": 4,
+   "b5": 0.75,
+   "b6": 0.9,
+   "calcium": 44,
+   "copper": 0.06,
+   "energy": 87,
+   "fat": 0.3,
+   "folate": 2,
+   "iron": 1,
+   "magnesium": 50,
+   "manganese": 0.01,
+   "monounsaturated_fat": 0.07,
+   "phosphorus": 206,
+   "polyunsaturated_fat": 0.09,
+   "potassium": 518,
+   "protein": 21,
+   "saturated_fat": 0.11,
+   "selenium": 36.5,
+   "sodium": 78,
+   "vitamin_a": 5,
+   "vitamin_c": 1,
+   "vitamin_e": 0.5,
+   "vitamin_k": 0.1,
+   "water": 77.5,
+   "zinc": 0.52
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 lát cá ngừ",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8020",
+  "name": "Fish, anchovy, raw",
+  "name_vi": "Cá nục (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.06,
+   "b2": 0.26,
+   "b3": 14,
+   "b5": 0.65,
+   "b6": 0.14,
+   "calcium": 85,
+   "copper": 0.21,
+   "energy": 111,
+   "fat": 3.3,
+   "folate": 9,
+   "iron": 3.25,
+   "magnesium": 41,
+   "manganese": 0.07,
+   "monounsaturated_fat": 0.81,
+   "phosphorus": 160,
+   "polyunsaturated_fat": 1.12,
+   "potassium": 383,
+   "protein": 20.2,
+   "saturated_fat": 0.87,
+   "selenium": 36.5,
+   "sodium": 104,
+   "vitamin_a": 15,
+   "vitamin_e": 0.57,
+   "vitamin_k": 0.1,
+   "water": 74.9,
+   "zinc": 1.72
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con cá nục (phần ăn được)",
+    "grams": 70,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8026",
+  "name": "Fish, mackerel, kingfish, raw",
+  "name_vi": "Cá thu (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.07,
+   "b2": 0.17,
+   "b3": 6.6,
+   "calcium": 50,
+   "copper": 0.2,
+   "energy": 166,
+   "fat": 10.3,
+   "iron": 1.3,
+   "magnesium": 35,
+   "monounsaturated_fat": 4.08,
+   "phosphorus": 90,
+   "polyunsaturated_fat": 2.75,
+   "potassium": 486,
+   "protein": 18.2,
+   "saturated_fat": 2.38,
+   "sodium": 110,
+   "vitamin_a": 10,
+   "water": 70.2
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 khúc cá thu",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7029002",
+  "name": "Kidney, cow, boiled",
+  "name_vi": "Cật bò (hầm)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.43,
+   "b12": 29.7,
+   "b2": 1.89,
+   "b3": 5.51,
+   "b5": 4.29,
+   "b6": 0.72,
+   "calcium": 12.2,
+   "carbs": 0.4,
+   "cholesterol": 555,
+   "copper": 0.44,
+   "energy": 91,
+   "fat": 2.4,
+   "folate": 66.2,
+   "iron": 9.59,
+   "magnesium": 17.6,
+   "manganese": 0.14,
+   "monounsaturated_fat": 0.79,
+   "phosphorus": 296,
+   "polyunsaturated_fat": 0.74,
+   "potassium": 354,
+   "protein": 16.9,
+   "saturated_fat": 1.17,
+   "selenium": 191,
+   "sodium": 270,
+   "trans_fat": 0.14,
+   "vitamin_a": 446,
+   "vitamin_c": 4.05,
+   "vitamin_d": 1.08,
+   "vitamin_e": 0.24,
+   "water": 78.8,
+   "zinc": 2.59
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7029",
+  "name": "Beef, kidney, raw",
+  "name_vi": "Cật bò (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.4,
+   "b2": 1.75,
+   "b3": 5.1,
+   "b5": 3.97,
+   "b6": 0.67,
+   "calcium": 9,
+   "carbs": 0.3,
+   "copper": 0.32,
+   "energy": 67,
+   "fat": 1.8,
+   "folate": 98,
+   "iron": 7.1,
+   "magnesium": 13,
+   "manganese": 0.1,
+   "monounsaturated_fat": 0.34,
+   "phosphorus": 219,
+   "polyunsaturated_fat": 0.32,
+   "potassium": 262,
+   "protein": 12.5,
+   "saturated_fat": 0.51,
+   "selenium": 141,
+   "sodium": 200,
+   "vitamin_a": 330,
+   "vitamin_c": 6,
+   "vitamin_d": 0.8,
+   "vitamin_e": 0.22,
+   "water": 84.3,
+   "zinc": 1.92
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 quả cật",
+    "grams": 200,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7030002",
+  "name": "Kidney, pig, boiled",
+  "name_vi": "Cật heo (nấu chín)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.41,
+   "b12": 9.18,
+   "b2": 1.21,
+   "b3": 5.19,
+   "b5": 3.38,
+   "b6": 0.48,
+   "calcium": 10.8,
+   "carbs": 0.4,
+   "cholesterol": 431,
+   "copper": 0.6,
+   "energy": 110,
+   "fat": 4.2,
+   "folate": 28.4,
+   "iron": 10.8,
+   "magnesium": 23,
+   "manganese": 0.14,
+   "monounsaturated_fat": 1.45,
+   "phosphorus": 301,
+   "polyunsaturated_fat": 0.35,
+   "potassium": 527,
+   "protein": 17.6,
+   "saturated_fat": 1.41,
+   "selenium": 257,
+   "sodium": 164,
+   "vitamin_a": 203,
+   "vitamin_c": 3.38,
+   "water": 76.3,
+   "zinc": 3.72
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7030",
+  "name": "Pork, kidney, raw",
+  "name_vi": "Cật heo (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.38,
+   "b2": 1.12,
+   "b3": 4.8,
+   "b5": 3.13,
+   "b6": 0.44,
+   "calcium": 8,
+   "carbs": 0.3,
+   "copper": 0.45,
+   "energy": 81,
+   "fat": 3.1,
+   "folate": 42,
+   "iron": 8,
+   "magnesium": 17,
+   "manganese": 0.1,
+   "monounsaturated_fat": 1.07,
+   "phosphorus": 223,
+   "polyunsaturated_fat": 0.26,
+   "potassium": 390,
+   "protein": 13,
+   "saturated_fat": 1.04,
+   "selenium": 190,
+   "sodium": 121,
+   "vitamin_a": 150,
+   "vitamin_c": 5,
+   "water": 82.5,
+   "zinc": 2.75
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 quả cật",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7032",
+  "name": "Pork, leg , raw",
+  "name_vi": "Chân giò heo (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.01,
+   "b2": 0.07,
+   "b3": 1.6,
+   "b5": 0.69,
+   "b6": 0.4,
+   "calcium": 24,
+   "copper": 0.07,
+   "energy": 230,
+   "fat": 18.6,
+   "folate": 7,
+   "iron": 2.1,
+   "magnesium": 20,
+   "manganese": 0.02,
+   "monounsaturated_fat": 8.38,
+   "phosphorus": 106,
+   "polyunsaturated_fat": 2.01,
+   "potassium": 315,
+   "protein": 15.7,
+   "saturated_fat": 6.54,
+   "selenium": 29.4,
+   "sodium": 47,
+   "vitamin_a": 30,
+   "vitamin_c": 0.7,
+   "water": 64.7,
+   "zinc": 1.93
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 khúc chân giò",
+    "grams": 300,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 3025",
+  "name": "Tofu, raw",
+  "name_vi": "Đậu hũ (đậu phụ trắng)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.03,
+   "b2": 0.02,
+   "b3": 0.4,
+   "b5": 0.07,
+   "b6": 0.05,
+   "calcium": 24,
+   "carbs": 1.1,
+   "copper": 0.19,
+   "energy": 97,
+   "fat": 5.4,
+   "fiber": 0.4,
+   "folate": 15,
+   "iron": 2.2,
+   "magnesium": 30,
+   "manganese": 0.61,
+   "monounsaturated_fat": 1.06,
+   "phosphorus": 85,
+   "polyunsaturated_fat": 2.7,
+   "potassium": 121,
+   "protein": 10.9,
+   "saturated_fat": 0.69,
+   "selenium": 8.9,
+   "sodium": 7,
+   "vitamin_c": 0.1,
+   "water": 82,
+   "zinc": 0.8
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1/2 chén",
+    "grams": 124,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 3008",
+  "name": "Kidney bean, white bean, seed, dried",
+  "name_vi": "Đậu trắng (hạt khô)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.54,
+   "b2": 0.18,
+   "b3": 2.1,
+   "b5": 0.78,
+   "b6": 0.4,
+   "calcium": 160,
+   "carbs": 57.4,
+   "energy": 341,
+   "fat": 2.1,
+   "fiber": 3.6,
+   "folate": 394,
+   "iron": 6.8,
+   "monounsaturated_fat": 0.06,
+   "phosphorus": 514,
+   "polyunsaturated_fat": 0.46,
+   "protein": 23.2,
+   "saturated_fat": 0.12,
+   "vitamin_a": 0.83,
+   "vitamin_c": 3,
+   "vitamin_e": 0.22,
+   "vitamin_k": 19,
+   "water": 14
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 nắm",
+    "grams": 30,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 12,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 3010",
+  "name": "Mungo bean",
+  "name_vi": "Đậu xanh (hạt khô)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.72,
+   "b2": 0.15,
+   "b3": 2.4,
+   "b5": 1.91,
+   "b6": 0.38,
+   "calcium": 64,
+   "carbs": 57.8,
+   "copper": 0.88,
+   "energy": 346,
+   "fat": 2.4,
+   "fiber": 4.7,
+   "folate": 625,
+   "iron": 4.8,
+   "magnesium": 270,
+   "monounsaturated_fat": 0.16,
+   "phosphorus": 377,
+   "polyunsaturated_fat": 0.38,
+   "potassium": 1130,
+   "protein": 23.4,
+   "saturated_fat": 0.35,
+   "sodium": 6,
+   "vitamin_a": 2.5,
+   "vitamin_c": 4,
+   "vitamin_e": 0.51,
+   "vitamin_k": 9,
+   "water": 14,
+   "zinc": 1.1
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 nắm",
+    "grams": 30,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 12,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7013",
+  "name": "Chicken, average meat, raw",
+  "name_vi": "Gà ta (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.15,
+   "b2": 0.16,
+   "b3": 8.1,
+   "b5": 0.91,
+   "b6": 0.35,
+   "calcium": 12,
+   "copper": 0.05,
+   "energy": 199,
+   "fat": 13.1,
+   "folate": 6,
+   "iron": 1.5,
+   "magnesium": 29,
+   "manganese": 0.02,
+   "monounsaturated_fat": 5.43,
+   "phosphorus": 200,
+   "polyunsaturated_fat": 2.81,
+   "potassium": 189,
+   "protein": 20.3,
+   "saturated_fat": 3.75,
+   "selenium": 14.4,
+   "sodium": 70,
+   "vitamin_a": 120,
+   "vitamin_c": 4,
+   "vitamin_e": 0.3,
+   "vitamin_k": 1.5,
+   "water": 65.6,
+   "zinc": 1.5
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7039",
+  "name": "Beef, liver, raw",
+  "name_vi": "Gan bò (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.4,
+   "b2": 3,
+   "b3": 17,
+   "b5": 7.71,
+   "b6": 1.08,
+   "calcium": 5,
+   "carbs": 3,
+   "copper": 1.5,
+   "energy": 110,
+   "fat": 3.1,
+   "folate": 290,
+   "iron": 9,
+   "magnesium": 13,
+   "manganese": 0.3,
+   "monounsaturated_fat": 0.48,
+   "phosphorus": 340,
+   "polyunsaturated_fat": 0.47,
+   "potassium": 213,
+   "protein": 17.4,
+   "saturated_fat": 1.23,
+   "selenium": 39.7,
+   "sodium": 110,
+   "vitamin_a": 5060,
+   "vitamin_c": 30,
+   "vitamin_d": 0.4,
+   "vitamin_e": 0.38,
+   "vitamin_k": 3.1,
+   "water": 75.2,
+   "zinc": 4
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "4 oz",
+    "grams": 113,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7040002",
+  "name": "Liver, chicken, boiled",
+  "name_vi": "Gan gà (nấu chín)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.42,
+   "b12": 18.4,
+   "b2": 1.81,
+   "b3": 11.6,
+   "b5": 6.93,
+   "b6": 0.95,
+   "calcium": 29.2,
+   "carbs": 2.8,
+   "cholesterol": 479,
+   "copper": 0.42,
+   "energy": 155,
+   "fat": 4.7,
+   "folate": 408,
+   "iron": 11.4,
+   "magnesium": 23.6,
+   "manganese": 0.28,
+   "monounsaturated_fat": 1.73,
+   "phosphorus": 361,
+   "polyunsaturated_fat": 1.14,
+   "potassium": 465,
+   "protein": 25.3,
+   "saturated_fat": 2.17,
+   "selenium": 75.8,
+   "sodium": 98.6,
+   "trans_fat": 0.09,
+   "vitamin_a": 4580,
+   "vitamin_c": 4.86,
+   "vitamin_e": 0.78,
+   "water": 65.3,
+   "zinc": 3.71
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "3 oz",
+    "grams": 85,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7040",
+  "name": "Chicken, liver, raw",
+  "name_vi": "Gan gà (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.38,
+   "b2": 1.63,
+   "b3": 10.4,
+   "b5": 6.23,
+   "b6": 0.85,
+   "calcium": 21,
+   "carbs": 2,
+   "copper": 0.3,
+   "energy": 111,
+   "fat": 3.4,
+   "folate": 588,
+   "iron": 8.2,
+   "magnesium": 17,
+   "manganese": 0.2,
+   "monounsaturated_fat": 0.88,
+   "phosphorus": 260,
+   "polyunsaturated_fat": 0.58,
+   "potassium": 335,
+   "protein": 18.2,
+   "saturated_fat": 1.1,
+   "selenium": 54.6,
+   "sodium": 71,
+   "vitamin_a": 3300,
+   "vitamin_c": 7,
+   "vitamin_e": 0.7,
+   "water": 75,
+   "zinc": 2.67
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "4 oz",
+    "grams": 113,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7044002",
+  "name": "Tongue, cow, boiled",
+  "name_vi": "Lưỡi bò (hầm)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.08,
+   "b12": 4.33,
+   "b2": 0.17,
+   "b3": 5.49,
+   "b5": 0.75,
+   "b6": 0.35,
+   "calcium": 10,
+   "carbs": 0.3,
+   "cholesterol": 124,
+   "copper": 0.24,
+   "energy": 234,
+   "fat": 17.3,
+   "folate": 5,
+   "iron": 4.29,
+   "magnesium": 22.9,
+   "manganese": 0.04,
+   "monounsaturated_fat": 10.3,
+   "phosphorus": 231,
+   "polyunsaturated_fat": 1.29,
+   "potassium": 450,
+   "protein": 19.4,
+   "saturated_fat": 10,
+   "selenium": 13.4,
+   "sodium": 98.6,
+   "vitamin_c": 2.14,
+   "water": 61.7,
+   "zinc": 4.1
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7044",
+  "name": "Beef, tongue, raw",
+  "name_vi": "Lưỡi bò (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.07,
+   "b2": 0.15,
+   "b3": 4.8,
+   "b5": 0.65,
+   "b6": 0.31,
+   "calcium": 7,
+   "carbs": 0.2,
+   "copper": 0.17,
+   "energy": 164,
+   "fat": 12.1,
+   "folate": 7,
+   "iron": 3,
+   "magnesium": 16,
+   "manganese": 0.03,
+   "monounsaturated_fat": 5.44,
+   "phosphorus": 162,
+   "polyunsaturated_fat": 0.68,
+   "potassium": 315,
+   "protein": 13.6,
+   "saturated_fat": 5.26,
+   "selenium": 9.4,
+   "sodium": 69,
+   "vitamin_c": 3,
+   "water": 73.2,
+   "zinc": 2.87
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7048002",
+  "name": "Chicken gizzard, boiled",
+  "name_vi": "Mề gà (luộc)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.04,
+   "b12": 1.24,
+   "b2": 0.21,
+   "b3": 4.92,
+   "b5": 0.65,
+   "b6": 0.11,
+   "calcium": 61.5,
+   "carbs": 0.8,
+   "cholesterol": 308,
+   "copper": 0.15,
+   "energy": 127,
+   "fat": 1.7,
+   "folate": 3.21,
+   "iron": 8.46,
+   "magnesium": 19.2,
+   "manganese": 0.07,
+   "monounsaturated_fat": 0.66,
+   "phosphorus": 192,
+   "polyunsaturated_fat": 0.46,
+   "potassium": 304,
+   "protein": 27.3,
+   "saturated_fat": 0.68,
+   "selenium": 32.7,
+   "sodium": 88.5,
+   "trans_fat": 0.08,
+   "vitamin_a": 24.4,
+   "vitamin_c": 2.37,
+   "vitamin_e": 0.34,
+   "water": 68.7,
+   "zinc": 3.49
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 cái mề",
+    "grams": 30,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7083002",
+  "name": "Pork, lean meat shoulder, boiled",
+  "name_vi": "Nạc vai heo (nấu chín)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.41,
+   "b2": 0,
+   "calcium": 20.1,
+   "energy": 126,
+   "fat": 6.2,
+   "iron": 0.57,
+   "phosphorus": 366,
+   "protein": 17.6,
+   "vitamin_a": 0.93,
+   "vitamin_e": 2.86,
+   "water": 75.1,
+   "zinc": 2.02
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7053",
+  "name": "Pork, ribs, raw",
+  "name_vi": "Sườn non heo (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.96,
+   "b2": 0.23,
+   "b3": 5.2,
+   "b5": 0.6,
+   "b6": 0.26,
+   "calcium": 7.4,
+   "copper": 0.1,
+   "energy": 187,
+   "fat": 12.8,
+   "folate": 2,
+   "iron": 0.61,
+   "magnesium": 14,
+   "manganese": 0.01,
+   "monounsaturated_fat": 5.42,
+   "phosphorus": 160,
+   "polyunsaturated_fat": 1.43,
+   "potassium": 200,
+   "protein": 17.9,
+   "saturated_fat": 4.69,
+   "selenium": 6.9,
+   "sodium": 60,
+   "vitamin_d": 0.69,
+   "vitamin_e": 0.1,
+   "water": 68.2,
+   "zinc": 3.6
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 miếng sườn",
+    "grams": 60,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7005",
+  "name": "Beef, short loin, top loin, seperable lean only, trimmed to 1/8\" fat, prime, raw",
+  "name_vi": "Thăn ngoại bò (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.08,
+   "b2": 0.12,
+   "b3": 6.7,
+   "b5": 0.68,
+   "b6": 0.65,
+   "calcium": 23,
+   "carbs": 0.1,
+   "copper": 0.08,
+   "energy": 121,
+   "fat": 3.2,
+   "folate": 13,
+   "iron": 1.63,
+   "magnesium": 24,
+   "manganese": 0.01,
+   "monounsaturated_fat": 1.56,
+   "phosphorus": 214,
+   "polyunsaturated_fat": 0.17,
+   "potassium": 361,
+   "protein": 23.1,
+   "saturated_fat": 1.43,
+   "selenium": 31.2,
+   "sodium": 57,
+   "vitamin_e": 0.29,
+   "vitamin_k": 1.2,
+   "water": 72.7,
+   "zinc": 4.05
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7011",
+  "name": "Goat, lean meat, raw",
+  "name_vi": "Thịt dê (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.07,
+   "b2": 0.13,
+   "b3": 4.9,
+   "calcium": 11,
+   "copper": 0.14,
+   "energy": 122,
+   "fat": 4.3,
+   "folate": 5,
+   "iron": 2,
+   "manganese": 0.02,
+   "monounsaturated_fat": 1.03,
+   "phosphorus": 129,
+   "polyunsaturated_fat": 0.17,
+   "potassium": 208,
+   "protein": 20.7,
+   "saturated_fat": 0.71,
+   "selenium": 4.76,
+   "sodium": 44.3,
+   "vitamin_a": 91,
+   "vitamin_c": 1,
+   "water": 74.4,
+   "zinc": 2.16
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7085002",
+  "name": "Pork, lean meat tenderloin, boiled",
+  "name_vi": "Thịt heo nạc (thăn) nấu chín",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.28,
+   "b2": 0,
+   "calcium": 32.4,
+   "carbs": 0,
+   "energy": 100,
+   "fat": 2.5,
+   "iron": 0.61,
+   "phosphorus": 346,
+   "protein": 19.5,
+   "water": 77,
+   "zinc": 1.53
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "3 oz",
+    "grams": 85,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7055002",
+  "name": "Heart, cow, boiled",
+  "name_vi": "Tim bò (hầm)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.36,
+   "b12": 10.1,
+   "b2": 0.58,
+   "b3": 8,
+   "b5": 2.11,
+   "b6": 0.33,
+   "calcium": 7.35,
+   "carbs": 0.9,
+   "cholesterol": 182,
+   "copper": 0.58,
+   "energy": 131,
+   "fat": 4.4,
+   "folate": 2.21,
+   "iron": 7.94,
+   "magnesium": 30.9,
+   "manganese": 0.05,
+   "monounsaturated_fat": 1.67,
+   "phosphorus": 272,
+   "polyunsaturated_fat": 0.8,
+   "potassium": 422,
+   "protein": 22.1,
+   "saturated_fat": 2.03,
+   "selenium": 32.1,
+   "sodium": 144,
+   "trans_fat": 0.26,
+   "vitamin_a": 8.82,
+   "vitamin_c": 5.15,
+   "vitamin_e": 0.26,
+   "water": 71.2,
+   "zinc": 2.5
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 120,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7055",
+  "name": "Beef, heart, raw",
+  "name_vi": "Tim bò (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.31,
+   "b2": 0.49,
+   "b3": 6.8,
+   "b5": 1.79,
+   "b6": 0.28,
+   "calcium": 5,
+   "carbs": 0.6,
+   "copper": 0.4,
+   "energy": 89,
+   "fat": 3,
+   "folate": 3,
+   "iron": 5.4,
+   "magnesium": 21,
+   "manganese": 0.04,
+   "monounsaturated_fat": 0.87,
+   "phosphorus": 185,
+   "polyunsaturated_fat": 0.42,
+   "potassium": 287,
+   "protein": 15,
+   "saturated_fat": 1.05,
+   "selenium": 21.8,
+   "sodium": 98,
+   "vitamin_a": 6,
+   "vitamin_c": 7,
+   "vitamin_e": 0.22,
+   "water": 80.4,
+   "zinc": 1.7
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 phần ăn",
+    "grams": 150,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7056",
+  "name": "Chicken, heart, tươi",
+  "name_vi": "Tim gà (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.15,
+   "b2": 0.73,
+   "b3": 4.88,
+   "b5": 2.56,
+   "b6": 0.36,
+   "calcium": 12,
+   "copper": 0.35,
+   "energy": 114,
+   "fat": 5.5,
+   "folate": 72,
+   "iron": 5.96,
+   "magnesium": 15,
+   "manganese": 0.09,
+   "monounsaturated_fat": 1.4,
+   "phosphorus": 177,
+   "polyunsaturated_fat": 1.6,
+   "potassium": 176,
+   "protein": 16,
+   "saturated_fat": 1.57,
+   "selenium": 4.3,
+   "sodium": 74,
+   "vitamin_a": 9,
+   "vitamin_c": 3.2,
+   "water": 77.5,
+   "zinc": 6.59
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 quả tim gà",
+    "grams": 5,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 xiên tim gà (6 quả)",
+    "grams": 30,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7057",
+  "name": "Pork, heart, raw",
+  "name_vi": "Tim heo (sống)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.34,
+   "b2": 0.49,
+   "b3": 5.7,
+   "b5": 2.52,
+   "b6": 0.39,
+   "calcium": 7,
+   "carbs": 1.2,
+   "copper": 0.41,
+   "energy": 94,
+   "fat": 3.2,
+   "folate": 4,
+   "iron": 5.9,
+   "magnesium": 19,
+   "manganese": 0.06,
+   "monounsaturated_fat": 0.75,
+   "phosphorus": 213,
+   "polyunsaturated_fat": 0.82,
+   "potassium": 294,
+   "protein": 15.1,
+   "saturated_fat": 0.85,
+   "selenium": 10.4,
+   "sodium": 56,
+   "vitamin_a": 8,
+   "vitamin_c": 1,
+   "water": 79.5,
+   "zinc": 2.8
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 quả tim",
+    "grams": 250,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8051",
+  "name": "Shrimp, sea water, raw",
+  "name_vi": "Tôm",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.04,
+   "b2": 0.08,
+   "b3": 2.3,
+   "b5": 0.28,
+   "b6": 0.1,
+   "calcium": 79,
+   "carbs": 0.9,
+   "copper": 0.26,
+   "energy": 82,
+   "fat": 0.9,
+   "folate": 3,
+   "iron": 1.6,
+   "magnesium": 37,
+   "manganese": 0.05,
+   "monounsaturated_fat": 0.08,
+   "phosphorus": 184,
+   "polyunsaturated_fat": 0.13,
+   "potassium": 185,
+   "protein": 17.6,
+   "saturated_fat": 0.12,
+   "selenium": 38,
+   "sodium": 148,
+   "vitamin_a": 20.4,
+   "vitamin_d": 0.05,
+   "vitamin_e": 1.1,
+   "water": 79.2,
+   "zinc": 1.11
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "3 oz",
+    "grams": 85,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8051002",
+  "name": "Shrimp, sea water, boiled",
+  "name_vi": "Tôm luộc",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.04,
+   "b12": 1.16,
+   "b2": 0.08,
+   "b3": 2.07,
+   "b5": 0.22,
+   "b6": 0.1,
+   "calcium": 79,
+   "carbs": 0.9,
+   "cholesterol": 152,
+   "copper": 0.26,
+   "energy": 82,
+   "fat": 0.9,
+   "folate": 3,
+   "iron": 1.6,
+   "magnesium": 37,
+   "manganese": 0.05,
+   "monounsaturated_fat": 0.25,
+   "phosphorus": 184,
+   "polyunsaturated_fat": 0.67,
+   "potassium": 185,
+   "protein": 17.6,
+   "saturated_fat": 0.33,
+   "selenium": 38,
+   "sodium": 148,
+   "vitamin_a": 20.4,
+   "vitamin_d": 0.05,
+   "vitamin_e": 1.1,
+   "water": 79.2,
+   "zinc": 1.11
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "3 oz",
+    "grams": 85,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8051002",
+  "name": "Shrimp, sea water, boiled",
+  "name_vi": "Tôm thẻ (luộc)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.04,
+   "b12": 1.16,
+   "b2": 0.08,
+   "b3": 2.07,
+   "b5": 0.22,
+   "b6": 0.1,
+   "calcium": 79,
+   "carbs": 0.9,
+   "cholesterol": 152,
+   "copper": 0.26,
+   "energy": 82,
+   "fat": 0.9,
+   "folate": 3,
+   "iron": 1.6,
+   "magnesium": 37,
+   "manganese": 0.05,
+   "monounsaturated_fat": 0.25,
+   "phosphorus": 184,
+   "polyunsaturated_fat": 0.67,
+   "potassium": 185,
+   "protein": 17.6,
+   "saturated_fat": 0.33,
+   "selenium": 38,
+   "sodium": 148,
+   "vitamin_a": 20.4,
+   "vitamin_d": 0.05,
+   "vitamin_e": 1.1,
+   "water": 79.2,
+   "zinc": 1.11
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con vừa (thịt)",
+    "grams": 8,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8051",
+  "name": "Shrimp, sea water, raw",
+  "name_vi": "Tôm thẻ (tôm chân trắng)",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.04,
+   "b2": 0.08,
+   "b3": 2.3,
+   "b5": 0.28,
+   "b6": 0.1,
+   "calcium": 79,
+   "carbs": 0.9,
+   "copper": 0.26,
+   "energy": 82,
+   "fat": 0.9,
+   "folate": 3,
+   "iron": 1.6,
+   "magnesium": 37,
+   "manganese": 0.05,
+   "monounsaturated_fat": 0.08,
+   "phosphorus": 184,
+   "polyunsaturated_fat": 0.13,
+   "potassium": 185,
+   "protein": 17.6,
+   "saturated_fat": 0.12,
+   "selenium": 38,
+   "sodium": 148,
+   "vitamin_a": 20.4,
+   "vitamin_d": 0.05,
+   "vitamin_e": 1.1,
+   "water": 79.2,
+   "zinc": 1.11
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con vừa (thịt)",
+    "grams": 10,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7089",
+  "name": "Chicken, breast, raw",
+  "name_vi": "Ức gà",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b2": 0,
+   "calcium": 23.3,
+   "energy": 134,
+   "fat": 4.7,
+   "iron": 0.69,
+   "phosphorus": 348,
+   "protein": 22.9,
+   "vitamin_a": 9.1,
+   "vitamin_e": 156,
+   "water": 71.2,
+   "zinc": 1
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "4 oz",
+    "grams": 113,
+    "sort": 1
+   }
+  ]
+ }
+]
