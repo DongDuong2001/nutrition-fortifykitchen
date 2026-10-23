@@ -57,7 +57,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, map[string]any{"items": list})
 }
 
-// Get handles GET /api/v1/documents/{name}.
+// Get handles GET /api/v1/documents/{name} (coach, admin): the document without a code.
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	doc, err := h.service.Get(r.Context(), chi.URLParam(r, "name"))
 	if err != nil {
@@ -67,7 +67,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, doc)
 }
 
-// Put handles PUT /api/v1/documents/{name} {content, code}: creates or replaces the document when code is a live access code.
+// Put handles PUT /api/v1/documents/{name} {content, baseUpdatedAt?} (coach, admin): creates or replaces the document.
 func (h *Handler) Put(w http.ResponseWriter, r *http.Request) {
 	uid, ok := userID(w, r)
 	if !ok {
@@ -89,6 +89,24 @@ func (h *Handler) Put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.JSON(w, http.StatusOK, meta)
+}
+
+// Open handles POST /api/v1/documents/{name}/open {code}: a learner's read, with a live access code (403 otherwise).
+// The code is in the body, never the URL, so it stays out of logs and history.
+func (h *Handler) Open(w http.ResponseWriter, r *http.Request) {
+	var req CheckRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "invalid request body")
+		return
+	}
+	doc, err := h.service.Open(r.Context(), chi.URLParam(r, "name"), req.Code)
+	if err != nil {
+		h.failed(w, err, "Failed to open document")
+		return
+	}
+	// A learner's copy is not kept by the browser or a proxy
+	w.Header().Set("Cache-Control", "no-store")
+	response.JSON(w, http.StatusOK, doc)
 }
 
 // CheckCode handles POST /api/v1/document-codes/check {code}: 200 for a live code, 403 otherwise.
