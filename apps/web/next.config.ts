@@ -79,6 +79,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "",
     NEXT_PUBLIC_APP_VERSION: APP_VERSION,
     NEXT_PUBLIC_DARK_MODE: process.env.DARK_MODE === "1" ? "1" : "",
+    // ENGLISH=1 at build time turns the English flag on (lib/i18n), the same way
+    NEXT_PUBLIC_ENGLISH: process.env.ENGLISH === "1" ? "1" : "",
   },
   webpack(config, { webpack }) {
     if (process.env.NEXT_PUBLIC_API_MODE === "live") {
