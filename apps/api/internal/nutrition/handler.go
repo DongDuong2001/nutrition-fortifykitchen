@@ -107,6 +107,11 @@ func (h *Handler) GetFoodsRichIn(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, result)
 }
 
+// isCustomFoodInvalid is a refused body (400), as opposed to a food that is not there (404) or a failure of ours (500).
+func isCustomFoodInvalid(err error) bool {
+	return errors.Is(err, ErrNameRequired) || errors.Is(err, ErrInvalidServingSize) || errors.Is(err, ErrNegativeMacronutrients)
+}
+
 // CreateCustomFood handles POST /api/v1/foods/custom
 func (h *Handler) CreateCustomFood(w http.ResponseWriter, r *http.Request) {
 	userID, err := auth.GetUserID(r.Context())
@@ -123,7 +128,7 @@ func (h *Handler) CreateCustomFood(w http.ResponseWriter, r *http.Request) {
 
 	food, err := h.service.CreateCustomFood(r.Context(), userID, req)
 	if err != nil {
-		if errors.Is(err, ErrNameRequired) || errors.Is(err, ErrInvalidServingSize) || errors.Is(err, ErrNegativeMacronutrients) {
+		if isCustomFoodInvalid(err) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
@@ -133,6 +138,44 @@ func (h *Handler) CreateCustomFood(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSON(w, http.StatusCreated, food)
+}
+
+// UpdateCustomFood handles PUT /api/v1/foods/custom/{id}: the body of POST, the same food id. A food that is not the caller's,
+// is archived or is a catalogue food is a 404, never a 403, so ids do not leak.
+func (h *Handler) UpdateCustomFood(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.GetUserID(r.Context())
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "Sign in required")
+		return
+	}
+
+	foodID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.Error(w, http.StatusNotFound, response.CodeNotFound, "Custom food not found")
+		return
+	}
+
+	var req CreateCustomFoodRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid request body")
+		return
+	}
+
+	food, err := h.service.UpdateCustomFood(r.Context(), userID, foodID, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrFoodNotFound):
+			response.Error(w, http.StatusNotFound, response.CodeNotFound, "Custom food not found")
+		case isCustomFoodInvalid(err):
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		default:
+			logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("food_id", foodID.String()).Msg("failed to update custom food")
+			response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to update custom food")
+		}
+		return
+	}
+
+	response.JSON(w, http.StatusOK, food)
 }
 
 // DeleteCustomFood handles DELETE /api/v1/foods/custom/{id}

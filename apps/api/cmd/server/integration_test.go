@@ -312,6 +312,113 @@ func TestCreateEntriesBatch_RollbackOnBadFoodID(t *testing.T) {
 	}
 }
 
+// Job B: PUT /foods/custom/{id}. The same id and the same checks as POST; only the owner's live custom food is found; a diary
+// entry logged before the edit keeps its snapshot, one logged after uses the new values.
+func TestCustomFoodUpdate(t *testing.T) {
+	c, pool, _ := setup(t)
+	other, _, _ := setup(t)
+	today := diary.GetServerToday()
+
+	created := c.must(http.StatusCreated, "POST", "/api/v1/foods/custom", map[string]any{
+		"name_vi": "Bánh IT cũ", "serving_unit": "cái", "serving_size": 50, "calories": 100, "protein": 2, "carbs": 20, "fat": 1,
+	})
+	id := fmt.Sprint(m(created)["id"])
+
+	before := uuid.New()
+	c.must(http.StatusCreated, "POST", "/api/v1/days/"+today+"/entries", map[string]any{
+		"id": before, "kind": "food", "meal_slot": "breakfast", "food_id": id, "grams": 50, "serving_size_g": 50,
+	})
+	if got := dayEntries(c, today)[before.String()]; got == nil || got["calories"] != 100.0 {
+		t.Fatalf("entry before the edit: %v", got)
+	}
+
+	// The owner edits it: 200, the same id, new values, the new portion first
+	body := map[string]any{
+		"name_vi": "Bánh IT mới", "serving_unit": "miếng", "serving_size": 80, "calories": 400, "protein": 8, "carbs": 60, "fat": 12,
+		"micros": map[string]any{"calcium": 40, "iron": nil},
+	}
+	updated := m(c.must(http.StatusOK, "PUT", "/api/v1/foods/custom/"+id, body))
+	if fmt.Sprint(updated["id"]) != id || updated["name_vi"] != "Bánh IT mới" || updated["is_custom"] != true {
+		t.Fatalf("updated food: %v", updated)
+	}
+	per100 := m(updated["per_100g_nutrients"])
+	if per100["calories"] != 500.0 || per100["protein"] != 10.0 || per100["calcium"] != 50.0 || per100["iron"] != nil {
+		t.Fatalf("per 100 g after the edit: %v", per100)
+	}
+	servings := list(updated, "servings")
+	if len(servings) != 2 || m(servings[0])["label"] != "80 miếng" || m(servings[0])["grams"] != 80.0 || m(servings[1])["grams"] != 100.0 {
+		t.Fatalf("servings after the edit: %v", servings)
+	}
+
+	// Read back: GET shows the new values and one pair of portions; search follows the new name (name_search); one row, not two
+	got := m(c.must(http.StatusOK, "GET", "/api/v1/foods/"+id, nil))
+	if got["name_vi"] != "Bánh IT mới" || m(got["per_100g_nutrients"])["calories"] != 500.0 || len(list(got, "servings")) != 2 {
+		t.Fatalf("GET after the edit: %v", got)
+	}
+	if items := list(c.must(http.StatusOK, "GET", "/api/v1/foods?q=banh%20it%20moi&limit=5", nil), "items"); len(items) != 1 || fmt.Sprint(m(items[0])["id"]) != id {
+		t.Fatalf("search by the new name: %v", items)
+	}
+	// (search is fuzzy, so the old name still finds it; the trigger that keeps name_search must have followed the edit)
+	var nameSearch string
+	if err := pool.QueryRow(context.Background(), `SELECT name_search FROM nutrition.foods WHERE id = $1::uuid`, id).Scan(&nameSearch); err != nil || nameSearch != "banh it moi" {
+		t.Fatalf("name_search after the edit: %q (%v)", nameSearch, err)
+	}
+
+	// History is not rewritten: the entry from before keeps its 100 kcal; one logged now uses the new values
+	if got := dayEntries(c, today)[before.String()]; got == nil || got["calories"] != 100.0 {
+		t.Fatalf("an entry logged before the edit changed: %v", got)
+	}
+	after := uuid.New()
+	c.must(http.StatusCreated, "POST", "/api/v1/days/"+today+"/entries", map[string]any{
+		"id": after, "kind": "food", "meal_slot": "lunch", "food_id": id, "grams": 80, "serving_size_g": 80,
+	})
+	if got := dayEntries(c, today)[after.String()]; got == nil || got["calories"] != 400.0 {
+		t.Fatalf("an entry logged after the edit: %v", got)
+	}
+
+	// The same body as POST is checked the same way
+	for name, bad := range map[string]map[string]any{
+		"no name":          {"serving_size": 50},
+		"serving size 0":   {"name_vi": "A", "serving_size": 0},
+		"negative protein": {"name_vi": "A", "serving_size": 50, "protein": -1},
+	} {
+		if status, _ := c.call("PUT", "/api/v1/foods/custom/"+id, bad); status != http.StatusBadRequest {
+			t.Errorf("%s: status %d, want 400", name, status)
+		}
+		if status, _ := c.call("POST", "/api/v1/foods/custom", bad); status != http.StatusBadRequest {
+			t.Errorf("%s on POST: status %d, want 400", name, status)
+		}
+	}
+	if got := m(c.must(http.StatusOK, "GET", "/api/v1/foods/"+id, nil)); got["name_vi"] != "Bánh IT mới" {
+		t.Fatalf("a refused edit changed the food: %v", got)
+	}
+
+	// Another user: 404, never 403, and nothing changes
+	if status, _ := other.call("PUT", "/api/v1/foods/custom/"+id, body); status != http.StatusNotFound {
+		t.Errorf("another user's PUT: %d, want 404", status)
+	}
+	// A catalogue food, a food that does not exist, a malformed id
+	catalogue := insertFood(t, pool, "Cơm catalogue IT", 130)
+	for name, path := range map[string]string{
+		"catalogue food": "/api/v1/foods/custom/" + catalogue.String(),
+		"unknown id":     "/api/v1/foods/custom/" + uuid.NewString(),
+		"malformed id":   "/api/v1/foods/custom/not-a-uuid",
+	} {
+		if status, _ := c.call("PUT", path, body); status != http.StatusNotFound {
+			t.Errorf("%s: %d, want 404", name, status)
+		}
+	}
+	if got := m(c.must(http.StatusOK, "GET", "/api/v1/foods/"+catalogue.String(), nil)); got["name_vi"] != "Cơm catalogue IT" {
+		t.Fatalf("a catalogue food was changed through the custom route: %v", got)
+	}
+
+	// Archived (deleted) food: 404
+	c.must(http.StatusOK, "DELETE", "/api/v1/foods/custom/"+id, nil)
+	if status, _ := c.call("PUT", "/api/v1/foods/custom/"+id, body); status != http.StatusNotFound {
+		t.Errorf("an archived food: %d, want 404", status)
+	}
+}
+
 // The user's Level (migration 000021): a new row starts at 0/0, an admin's UPDATE is what GET /me shows, the user's own
 // save moves levelSeen (stored at most as that Level) and never level.
 func TestProfileLevel(t *testing.T) {

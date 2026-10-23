@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
 )
@@ -114,5 +115,89 @@ func TestSearchFoods_PassesClampedLimit(t *testing.T) {
 		if !strings.Contains(rec.Body.String(), `"limit":`+strconv.Itoa(tt.wantLimit)) {
 			t.Errorf("%s: response does not echo limit %d: %s", tt.target, tt.wantLimit, rec.Body.String())
 		}
+	}
+}
+
+// PUT /foods/custom/{id} (Job B)
+type updateSpy struct {
+	Service
+	err     error
+	gotUser uuid.UUID
+	gotFood uuid.UUID
+	gotReq  CreateCustomFoodRequest
+	calls   int
+}
+
+func (s *updateSpy) UpdateCustomFood(ctx context.Context, userID, foodID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+	s.calls++
+	s.gotUser, s.gotFood, s.gotReq = userID, foodID, req
+	if s.err != nil {
+		return nil, s.err
+	}
+	return &FoodDetail{ID: foodID, NameVi: req.NameVi, IsCustom: true, Source: "custom"}, nil
+}
+
+func putCustomFood(h *Handler, id, body string, signedIn bool) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodPut, "/foods/custom/"+id, strings.NewReader(body))
+	rc := chi.NewRouteContext()
+	rc.URLParams.Add("id", id)
+	ctx := context.WithValue(req.Context(), chi.RouteCtxKey, rc)
+	if signedIn {
+		ctx = context.WithValue(ctx, auth.UserIDKey, uuid.New())
+	}
+	rec := httptest.NewRecorder()
+	h.UpdateCustomFood(rec, req.WithContext(ctx))
+	return rec
+}
+
+func TestUpdateCustomFood_OKReturnsTheFoodWithTheSameID(t *testing.T) {
+	spy := &updateSpy{}
+	id := uuid.New()
+	rec := putCustomFood(NewHandler(spy), id.String(), `{"name_vi":"Bánh","serving_size":50,"calories":120}`, true)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if spy.gotFood != id || spy.gotReq.NameVi != "Bánh" || spy.gotReq.ServingSize != 50 {
+		t.Errorf("service got id %s req %+v", spy.gotFood, spy.gotReq)
+	}
+	if !strings.Contains(rec.Body.String(), id.String()) {
+		t.Errorf("body should carry the food: %s", rec.Body.String())
+	}
+}
+
+func TestUpdateCustomFood_NotYoursOrGoneIs404Never403(t *testing.T) {
+	spy := &updateSpy{err: ErrFoodNotFound}
+	rec := putCustomFood(NewHandler(spy), uuid.NewString(), `{"name_vi":"x","serving_size":1}`, true)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d: %s", rec.Code, rec.Body.String())
+	}
+	rec = putCustomFood(NewHandler(&updateSpy{}), "not-a-uuid", `{"name_vi":"x","serving_size":1}`, true)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("a bad id: expected 404, got %d", rec.Code)
+	}
+}
+
+func TestUpdateCustomFood_ValidationIs400AndInternalErrorIsNotLeaked(t *testing.T) {
+	for _, sentinel := range []error{ErrNameRequired, ErrInvalidServingSize, ErrNegativeMacronutrients} {
+		rec := putCustomFood(NewHandler(&updateSpy{err: sentinel}), uuid.NewString(), `{"name_vi":"x"}`, true)
+		if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), sentinel.Error()) {
+			t.Errorf("%v: expected 400 with sentinel message, got %d: %s", sentinel, rec.Code, rec.Body.String())
+		}
+	}
+	rec := putCustomFood(NewHandler(&updateSpy{err: errors.New("pq: deadlock detected on foods")}), uuid.NewString(), `{"name_vi":"x"}`, true)
+	if rec.Code != http.StatusInternalServerError || strings.Contains(rec.Body.String(), "pq:") {
+		t.Errorf("expected a clean 500, got %d: %s", rec.Code, rec.Body.String())
+	}
+	spy := &updateSpy{}
+	if rec := putCustomFood(NewHandler(spy), uuid.NewString(), `{not json`, true); rec.Code != http.StatusBadRequest || spy.calls != 0 {
+		t.Errorf("a broken body: expected 400 and no service call, got %d (%d calls)", rec.Code, spy.calls)
+	}
+}
+
+func TestUpdateCustomFood_NeedsSignIn(t *testing.T) {
+	spy := &updateSpy{}
+	rec := putCustomFood(NewHandler(spy), uuid.NewString(), `{"name_vi":"x","serving_size":1}`, false)
+	if rec.Code != http.StatusUnauthorized || spy.calls != 0 {
+		t.Fatalf("expected 401 and no service call, got %d (%d calls)", rec.Code, spy.calls)
 	}
 }
