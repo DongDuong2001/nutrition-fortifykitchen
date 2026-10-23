@@ -47,7 +47,7 @@ export const RELEASES: readonly Release[] = [
       {
         icon: "home",
         title: "Tài liệu của app ngay trong Cài đặt",
-        body: "Cài đặt › Tài liệu liệt kê các quy tắc và tài liệu của app. Có mã truy cập thì sửa hay tải lên tệp mới ngay tại đó.",
+        body: "Cài đặt › Tài liệu liệt kê các quy tắc và tài liệu của app. HLV tạo mã truy cập cho bạn, nhập mã là sửa hay tải lên tệp mới ngay tại đó.",
       },
     ],
   },
