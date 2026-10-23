@@ -10,8 +10,9 @@
  *   and everything when Data Saver is on or on a low-end phone (2 GB or 4 cores, cc-64); reduced motion keeps the
  *   change as a 120 ms cross-fade (cc-62).
  * navKind is pure; the rest is a tiny store fed by popstate. Pages never import it (it would be copied into their
- * chunks): a screen that goes back in code lands on a parent path, and the /add sheet that slid down by itself says
- * so on the page (data-sheet-route with data-state="closed").
+ * chunks): a screen that goes back in code lands on a parent path, the /add sheet that slid down by itself says
+ * so on the page (data-sheet-route with data-state="closed"), and a header's back link (a push to the parent) marks
+ * <html data-nav-back> (fix/training-close-motion).
  */
 import { NAV_TABS } from "./nav";
 
@@ -90,7 +91,11 @@ export function navKindFor(pathname: string): NavKind {
   if (current?.path === pathname) return current.kind;
   const from = current?.path ?? null;
   const popped = poppedTo === path(pathname);
-  let kind = navKind(from, pathname, { back: popped, sheetClosed: false });
+  // A screen's own back link (components/ui/app-header) marks the page: the change is a Back though it is a push
+  const root = document.documentElement;
+  const backLink = root.dataset.navBack === "1";
+  delete root.dataset.navBack;
+  let kind = navKind(from, pathname, { back: popped || backLink, sheetClosed: false });
   if (kind !== "sheet-up" && motionOff()) kind = "none";
   poppedTo = null;
   current = { path: pathname, kind, popped };

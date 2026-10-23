@@ -153,8 +153,16 @@ export function AppHeader({
   const prevDisabled = !onPrev;
   const nextDisabled = !onNext || canGoNext === false || (canGoNext === undefined && dateLabel.startsWith("Hôm nay"));
 
+  // fix/training-close-motion: a header's back link is a push to the parent (Hôm nay for Ngày tập and Đủ 22 vi chất), which
+  // lib/nav-direction would play as a tab change, with no slide. The mark makes it play the Back slide (the push in reverse). It
+  // stays a link: going Back in the history instead could land on a form the in-app history only took for the parent.
+  const backLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    document.documentElement.dataset.navBack = "1";
+  };
+
   const back = backHref ? (
-    <Link href={backHref} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
+    <Link href={backHref} onClick={backLink} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </Link>
   ) : onBack ? (

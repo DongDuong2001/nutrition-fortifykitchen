@@ -70,3 +70,25 @@ describe("isLowEndDevice (cc-64 P5, hard cut instead of a slide)", () => {
     expect(isLowEndDevice({ deviceMemory: 4, hardwareConcurrency: 2 } as { deviceMemory?: number })).toBe(false);
   });
 });
+
+describe("navKindFor: a header's back link (fix/training-close-motion)", () => {
+  it("reads <html data-nav-back> once: the push to the parent tab is a Back, the next change is not", async () => {
+    const { vi } = await import("vitest");
+    const { navKindFor } = await import("../nav-direction");
+    const dataset: Record<string, string> = {};
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", { documentElement: { dataset } });
+    vi.stubGlobal("navigator", {});
+    try {
+      expect(navKindFor("/app")).toBe("none"); // the first screen
+      expect(navKindFor("/training")).toBe("push");
+      dataset.navBack = "1";
+      expect(navKindFor("/app")).toBe("back"); // a tab root, played as Back because of the mark
+      expect(dataset.navBack).toBeUndefined(); // read once
+      expect(navKindFor("/micros")).toBe("push");
+      expect(navKindFor("/app")).toBe("tab"); // no mark: a link to a tab is a tab change, as before
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
