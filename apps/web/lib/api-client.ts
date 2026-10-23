@@ -7,6 +7,7 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
+import { OWN_FOOD_UNDO_MS } from "./own-foods";
 import { CATALOG_FOODS, addCatalogFood, catalogChanged, catalogFoodById, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./catalog";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
@@ -514,6 +515,8 @@ export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWr
 /** The Ngày ăn mẫu writes waiting to be sent: template id to "put" or "delete" (the newest). Kept over a list read from the server. */
 export const pendingTemplateOps = (prefix = "template:"): Map<string, "put" | "delete"> =>
   new Map(outboxItems().flatMap((item): Array<[string, "put" | "delete"]> => (item.kind === "template" && item.entity?.startsWith(prefix) ? [[item.entity.slice(prefix.length), item.method === "DELETE" ? "delete" : "put"]] : [])));
+/** The own foods whose delete waits in the outbox: a catalogue read from the server or the device's copy must leave them out. */
+export const pendingFoodDeleteIds = (): Set<string> => engine?.pendingFoodDeleteIds() ?? new Set<string>();
 /** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
 export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
 
@@ -1025,6 +1028,24 @@ export const apiClient = {
   async deleteDayTemplate(id: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
     return withEngine((e) => e.sideWrite({ kind: "template", entity: `template:${id}`, method: "DELETE", path: `/day-templates/${id}`, payload: {} }));
+  },
+
+  /**
+   * Xoá món: DELETE /foods/custom/{id} through the outbox, held OWN_FOOD_UNDO_MS so Hoàn tác can take it back. The hold is in the
+   * outbox item, not a timer: a reload or a closed app still sends it afterwards. Outside live mode there is no server food.
+   */
+  async deleteOwnFood(id: string): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    // The device's copy of the catalogue forgets it now; the outbox hides it from a load that runs before the DELETE is sent
+    void catalogCache().then((c) => c.removeFromCatalogCache(currentAccountId(), id));
+    return withEngine((e) => e.sideWrite({ kind: "food", entity: `food:${id}`, method: "DELETE", path: `/foods/custom/${id}`, payload: {}, holdMs: OWN_FOOD_UNDO_MS }));
+  },
+
+  /** Hoàn tác of Xoá món: true when the delete had not left the device and is now gone from the outbox. */
+  async undoOwnFoodDelete(id: string, food?: FoodItem): Promise<boolean> {
+    if (!isLiveMode() || !isUuid(id)) return true;
+    if (food) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), food));
+    return withEngine((e) => e.cancelSideWrite(`food:${id}`));
   },
 
   /** Bữa ăn của tôi on the server (GET /saved-meals), or null when it could not be read (or outside live mode). */

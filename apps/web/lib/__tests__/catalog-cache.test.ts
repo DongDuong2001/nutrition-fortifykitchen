@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CATALOG_FRESH_MS, CATALOG_MAX_AGE_MS, catalogCacheKey, catalogCacheState, withCatalogFood } from "../catalog-cache";
+import { CATALOG_FRESH_MS, CATALOG_MAX_AGE_MS, catalogCacheKey, catalogCacheState, withCatalogFood, withoutCatalogFood } from "../catalog-cache";
 import type { FoodItem } from "../mock/foods";
 
 // cc-50: the catalogue is kept on the device per account (custom foods are per user) and refreshed in the background.
@@ -41,5 +41,19 @@ describe("withCatalogFood (review 07:00: a food just made is in the device's cop
   it("a food with the same id is replaced, not doubled", () => {
     const next = withCatalogFood({ at: 1, foods: [food("a", "Cũ"), food("b", "Phở")] }, food("a", "Mới"));
     expect(next.foods.map((f) => f.nameVi)).toEqual(["Mới", "Phở"]);
+  });
+});
+
+describe("withoutCatalogFood (Xoá món: a deleted food is not in the device's copy either)", () => {
+  const food = (id: string) => ({ id, nameVi: id }) as FoodItem;
+  it("drops the food and keeps the copy's age and the order of the others", () => {
+    const saved = { at: 1234, foods: [food("a"), food("mine"), food("b")] };
+    const next = withoutCatalogFood(saved, "mine");
+    expect(next.at).toBe(1234);
+    expect(next.foods.map((f) => f.id)).toEqual(["a", "b"]);
+  });
+  it("a food that is not there leaves the copy as it was", () => {
+    const saved = { at: 1, foods: [food("a")] };
+    expect(withoutCatalogFood(saved, "zzz")).toEqual(saved);
   });
 });

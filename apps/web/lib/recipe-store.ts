@@ -1,4 +1,4 @@
-import { CATALOG_FOODS, catalogChanged, catalogFoodById, setHiddenFoodIds } from "./catalog";
+import { CATALOG_FOODS, catalogChanged, catalogFoodById, putBackCatalogFood, removeCatalogFood, setHiddenFoodIds, type FoodItem } from "./catalog";
 import { accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { apiClient, isLiveMode, repointOutboxFood, syncOfflineOutbox } from "./api-client";
 import { currentAccountId } from "./auth-actions";
@@ -153,5 +153,38 @@ export async function uploadPendingRecipes(account: string): Promise<void> {
   for (const recipe of readRecipes(account)) {
     if (currentAccountId() !== account) return;
     if (!recipe.serverFoodId) await uploadRecipe(recipe.id, account);
+  }
+}
+
+/** What Hoàn tác of a deleted dish needs: the dish, and the server foods (hidden duplicates of it) that were taken out with it. */
+export interface DeletedRecipe {
+  recipe: Recipe;
+  serverFoods: FoodItem[];
+}
+
+/**
+ * Xoá món on a dish made from ingredients: gone from this device and the lists at once. In live mode its server foods (this version
+ * and the earlier ones, hidden behind the dish) are deleted through the outbox after the undo window; past entries keep their own
+ * numbers. Null when the dish is not stored (or the device would not save the list): nothing changed.
+ */
+export function deleteRecipe(id: string): DeletedRecipe | null {
+  const list = readRecipes();
+  const recipe = list.find((r) => r.id === id);
+  if (!recipe || !writeRecipes(list.filter((r) => r.id !== id))) return null;
+  const serverIds = [recipe.serverFoodId, ...(recipe.pastServerFoodIds ?? [])].filter((x): x is string => !!x && isUuid(x));
+  // Out of the catalogue before the hidden set forgets them, or they would list as a food of their own until the delete is sent
+  const serverFoods = serverIds.flatMap((sid) => removeCatalogFood(sid) ?? []);
+  syncRecipeFoods(readRecipes());
+  if (syncAccount()) for (const sid of serverIds) void apiClient.deleteOwnFood(sid);
+  return { recipe, serverFoods };
+}
+
+/** Hoàn tác of deleteRecipe: the dish is stored again, its server foods are back in the catalogue and their deletes are taken out of the outbox. */
+export async function restoreRecipe({ recipe, serverFoods }: DeletedRecipe): Promise<void> {
+  writeRecipes(upsertRecipe(readRecipes(), recipe));
+  for (const food of serverFoods) putBackCatalogFood(food);
+  syncRecipeFoods(readRecipes());
+  if (syncAccount()) {
+    for (const sid of [recipe.serverFoodId, ...(recipe.pastServerFoodIds ?? [])]) if (sid && isUuid(sid)) await apiClient.undoOwnFoodDelete(sid);
   }
 }

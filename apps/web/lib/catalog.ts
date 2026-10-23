@@ -195,11 +195,31 @@ export function addCatalogFood(food: FoodItem): void {
   catalogChanged();
 }
 
+/** Own foods deleted on this device (Xoá món): a catalogue load that still lists one, while its delete waits to be sent, leaves it out. */
+const deletedFoodIds = new Set<string>();
+
+/** Xoá món: takes the food out of the catalogue at once and keeps it out of later loads. Returns it for Hoàn tác (undefined: not there). */
+export function removeCatalogFood(id: string): FoodItem | undefined {
+  // Remembered even when it is not in the catalogue yet: a load still to come must leave it out too
+  deletedFoodIds.add(id);
+  const at = CATALOG_FOODS.findIndex((f) => f.id === id);
+  if (at < 0) return undefined;
+  const [food] = CATALOG_FOODS.splice(at, 1);
+  catalogChanged();
+  return food;
+}
+
+/** Hoàn tác of Xoá món: the same food is in the catalogue again and later loads keep it. */
+export function putBackCatalogFood(food: FoodItem): void {
+  deletedFoodIds.delete(food.id);
+  addCatalogFood(food);
+}
+
 /** Merges foods from the database into the catalogue: a food with the same id is replaced, every other food stays. */
 export function setCatalogFoods(foods: FoodItem[]): void {
   if (!foods || foods.length === 0) return;
   const byId = new Map(CATALOG_FOODS.map((f) => [f.id, f]));
-  for (const f of foods) byId.set(f.id, weighedFruit(f));
+  for (const f of foods) if (!deletedFoodIds.has(f.id)) byId.set(f.id, weighedFruit(f));
   CATALOG_FOODS.length = 0;
   CATALOG_FOODS.push(...byId.values());
   catalogChanged();
