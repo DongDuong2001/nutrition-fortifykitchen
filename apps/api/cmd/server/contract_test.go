@@ -68,6 +68,7 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 		{"GET", "/api/v1/recents"},
 		{"GET", "/api/v1/saved-meals"},
 		{"POST", "/api/v1/saved-meals"},
+		{"PUT", "/api/v1/saved-meals/11111111-1111-1111-1111-111111111111"},
 		{"DELETE", "/api/v1/saved-meals/11111111-1111-1111-1111-111111111111"},
 
 		// Protected Day templates (Ngày ăn mẫu)
