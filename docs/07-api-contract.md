@@ -105,7 +105,7 @@ Updates profile settings.
   - `period_mode`: Boolean. Effective only when `sex === "female"`. If `sex === "male"`, backend normalizes to `false`.
   - `training_minutes_default`: Integer between `0` and `120` (presets: `0`, `45`, `60`, `90`, `120`).
   - `display_name`: Optional string.
-  - `levelSeen`: Optional. A whole number from `0` up to the user's stored `level` (at most `5`). Left out: unchanged. Outside 0–5, not a whole number, or `null`: `400`, `error.fields.levelSeen`. Above the user's `level` (a user with no profile row yet is at Level 0): `400`, `error.fields.levelSeen`.
+  - `levelSeen`: Optional. A whole number from `0` to `5`. Left out: unchanged. Outside 0–5, not a whole number, or `null`: `400`, `error.fields.levelSeen`. Above the stored `level` is saved as the level (a user with no profile row yet is at Level 0, so 0), and the rest of the save is applied: a profile write queued offline before the coach lowered the Level still goes through.
   - `level`: **Never accepted.** A request that sends the key (any value, `null` included) is refused with `400 VALIDATION_FAILED`, `error.fields.level = "level is set by your coach"`, and nothing of that save is applied. The web never sends it.
   - Every other field behaves as before: a save without `levelSeen` keeps `level` and `levelSeen` as stored.
 

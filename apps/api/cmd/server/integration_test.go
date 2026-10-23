@@ -313,7 +313,7 @@ func TestCreateEntriesBatch_RollbackOnBadFoodID(t *testing.T) {
 }
 
 // The user's Level (migration 000021): a new row starts at 0/0, an admin's UPDATE is what GET /me shows, the user's own
-// save moves levelSeen up to that Level and never level.
+// save moves levelSeen (stored at most as that Level) and never level.
 func TestProfileLevel(t *testing.T) {
 	c, pool, user := setup(t)
 	ctx := context.Background()
@@ -335,11 +335,26 @@ func TestProfileLevel(t *testing.T) {
 	if _, err := pool.Exec(ctx, `UPDATE nutrition.profiles SET level = 3 WHERE user_id = $1`, user); err != nil {
 		t.Fatal(err)
 	}
-	c.must(http.StatusBadRequest, "PUT", "/api/v1/me/profile", with("levelSeen", 4))
 	c.must(http.StatusBadRequest, "PUT", "/api/v1/me/profile", with("level", 5))
+	c.must(http.StatusBadRequest, "PUT", "/api/v1/me/profile", with("levelSeen", 6))
 	saved := m(c.must(http.StatusOK, "PUT", "/api/v1/me/profile", with("levelSeen", 3)))
 	if saved["level"] != float64(3) || saved["levelSeen"] != float64(3) {
 		t.Fatalf("after levelSeen 3: got level %v / levelSeen %v", saved["level"], saved["levelSeen"])
+	}
+
+	// The coach lowers the Level while a write with levelSeen 3 waits offline: it is stored as the new level, and the
+	// rest of that save (the weight) goes through
+	if _, err := pool.Exec(ctx, `UPDATE nutrition.profiles SET level = 1 WHERE user_id = $1`, user); err != nil {
+		t.Fatal(err)
+	}
+	late := with("levelSeen", 3)
+	late["weight_kg"] = 66
+	saved = m(c.must(http.StatusOK, "PUT", "/api/v1/me/profile", late))
+	if saved["level"] != float64(1) || saved["levelSeen"] != float64(1) || saved["weight_kg"] != float64(66) {
+		t.Fatalf("late levelSeen 3 at level 1: got level %v / levelSeen %v / weight %v", saved["level"], saved["levelSeen"], saved["weight_kg"])
+	}
+	if _, err := pool.Exec(ctx, `UPDATE nutrition.profiles SET level = 3, level_seen = 3 WHERE user_id = $1`, user); err != nil {
+		t.Fatal(err)
 	}
 
 	// A save without levelSeen keeps both

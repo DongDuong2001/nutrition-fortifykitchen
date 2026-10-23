@@ -2,6 +2,8 @@
 
 Commands only: nobody has run them. Staging (Supabase project `hitmicro-staging`) first, then production.
 
+**Order: 000021 on staging and prod first (the current API ignores the new columns), then merge #88, then deploy. Never deploy main with #88 before 000021 is on that database.**
+
 > This file is planned in two PRs. Job C of `prompts/day-api-1023.md` (branch `fix/documents-hardening`, 000017–000019 and the deploy) was not on `origin` when this was written, so this PR (`feat/profile-level`) creates the file with the 000021 part and the order. Whichever PR merges second keeps both parts.
 
 ## How migrations are applied in this repo
@@ -28,13 +30,16 @@ psql17() { docker run --rm -i --network host -e DATABASE_URL postgres:17-alpine 
 
 Run them in number order. 000021 touches only two new columns of `nutrition.profiles`, so it does not depend on 000017–000020; the numbers 000019 and 000020 were left free for the other jobs of 23/10.
 
-**Migration before the API.** The API of this PR reads `level` and `level_seen` in `GET /me`: deployed before 000021, it answers 500 for every signed-in user. So: 000021 on the database, then `deploy/deploy.sh`. The web is safe either way (it reads the fields when they are there).
+**Migration before the API.** The API of this PR reads `level` and `level_seen` in `GET /me`: deployed before 000021, it answers 500 for every signed-in user. The API running now never reads the new columns, so 000021 goes on first while #88 is still open; the files come from the PR branch (`git show`, nothing checked out). The web is safe either way (it reads the fields when they are there).
 
 ## 000021 on staging (`hitmicro-staging`, from your Mac with Docker)
 
 ```bash
-cd ~/Documents/HITMicro/nutrition-fortifykitchen && git fetch origin && git checkout main && git pull --ff-only   # once feat/profile-level is merged
-ls migrations/000021_profile_level.up.sql migrations/000021_profile_level.down.sql
+cd ~/Documents/HITMicro/nutrition-fortifykitchen && git fetch origin
+mkdir -p ~/migrations-1023 && for f in up down; do
+  git show origin/feat/profile-level:migrations/000021_profile_level.$f.sql > ~/migrations-1023/000021_profile_level.$f.sql   # origin/main once #88 is merged
+done
+M=~/migrations-1023 && ls -l $M
 read -rs DATABASE_URL && export DATABASE_URL       # paste the hitmicro-staging session pooler URI, Enter
 mkdir -p ~/backups
 # 1. Backup: the whole nutrition schema
@@ -44,16 +49,16 @@ ls -lh ~/backups | tail -1                                   # not empty
 # 2. Already there? (0 = not applied yet; 2 = applied, stop here)
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"
 # 3. Dry run, rolled back: must end without ERROR
-( echo 'BEGIN;'; cat migrations/000021_profile_level.up.sql; echo 'ROLLBACK;' ) | psql17 -q
+( echo 'BEGIN;'; cat $M/000021_profile_level.up.sql; echo 'ROLLBACK;' ) | psql17 -q
 # 4. For real
-( echo 'BEGIN;'; cat migrations/000021_profile_level.up.sql; echo 'COMMIT;' ) | psql17 -q
+( echo 'BEGIN;'; cat $M/000021_profile_level.up.sql; echo 'COMMIT;' ) | psql17 -q
 # 5. Checks
 psql17 -c '\d nutrition.profiles'
 psql17 -c "SELECT level, level_seen, count(*) FROM nutrition.profiles GROUP BY 1, 2"
 unset DATABASE_URL
 ```
 
-Step 5: `\d` lists `level | smallint | not null | 0` and `level_seen | smallint | not null | 0`, and under "Check constraints" `profiles_level_check CHECK (level >= 0 AND level <= 5)` and `profiles_level_seen_check CHECK (level_seen >= 0 AND level_seen <= 5)`. The count is one row, `0 | 0 | <every profile>`. Then deploy the API of this PR to staging and check: `GET /api/v1/me` has `"level":0,"levelSeen":0`; a profile save from Hồ sơ still saves.
+Step 5: `\d` lists `level | smallint | not null | 0` and `level_seen | smallint | not null | 0`, and under "Check constraints" `profiles_level_check CHECK (level >= 0 AND level <= 5)` and `profiles_level_seen_check CHECK (level_seen >= 0 AND level_seen <= 5)`. The count is one row, `0 | 0 | <every profile>`. The live app keeps working as before (the running API does not read the columns).
 
 (Both `ADD COLUMN ... DEFAULT 0` are quick on Postgres 11+: the default is stored once, no table rewrite. Up and down are idempotent: run twice, they skip what is there.)
 
@@ -64,9 +69,11 @@ Only after staging is checked.
 ```bash
 ssh deploy@14.225.210.185
 cd /var/www/nutrition-meals
-git fetch origin && git checkout main && git pull --ff-only
-ls migrations/000021_profile_level.up.sql
-git rev-parse --short HEAD                                   # note it: the API to go back to is the one running now
+git fetch origin
+mkdir -p ~/migrations-1023 && for f in up down; do
+  git show origin/feat/profile-level:migrations/000021_profile_level.$f.sql > ~/migrations-1023/000021_profile_level.$f.sql   # origin/main once #88 is merged
+done
+M=~/migrations-1023 && ls -l $M
 psql17() { docker run --rm -i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 "$@"' psql17 "$@"; }
 export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
 mkdir -p ~/backups
@@ -77,21 +84,30 @@ ls -lh ~/backups | tail -1
 # 2. Already there?
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"
 # 3. Dry run (ROLLBACK), read the output
-( echo 'BEGIN;'; cat migrations/000021_profile_level.up.sql; echo 'ROLLBACK;' ) | psql17 -q
+( echo 'BEGIN;'; cat $M/000021_profile_level.up.sql; echo 'ROLLBACK;' ) | psql17 -q
 # 4. For real (COMMIT)
-( echo 'BEGIN;'; cat migrations/000021_profile_level.up.sql; echo 'COMMIT;' ) | psql17 -q
+( echo 'BEGIN;'; cat $M/000021_profile_level.up.sql; echo 'COMMIT;' ) | psql17 -q
 # 5. Same checks as staging step 5
 psql17 -c '\d nutrition.profiles'
-# 6. Then the API that reads the columns
-deploy/deploy.sh
 unset DATABASE_URL
 ```
 
-After the deploy: `curl -s https://api.lehongkhanh.vn/healthz`, sign in on the live app, Hôm nay loads (a 500 on `/me` means the API went out before the migration), a profile save from Hồ sơ saves.
+## Then merge #88 and deploy
+
+Only when step 5 passed on **both** databases. Merge #88, then on the VPS:
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+git rev-parse --short HEAD                                   # note it: the API to go back to (rollback below)
+deploy/deploy.sh                                             # latest main, with #88
+```
+
+After the deploy: `curl -s https://api.lehongkhanh.vn/healthz`, sign in on the live app, Hôm nay loads (a 500 on `/me` means this database has no 000021), `GET /api/v1/me` has `"level":0,"levelSeen":0` for a user nobody has set, a profile save from Hồ sơ still saves.
 
 ## Setting one user's Level by email (until the coach screens exist)
 
-`nutrition.profiles.user_id` is `auth.users.id` (migration 000002: `user_id UUID PRIMARY KEY REFERENCES auth.users(id)`), and the email lives in `auth.users.email`. The user must have finished setup (a profile row); otherwise the UPDATE says `UPDATE 0` and nothing changes. On production, run it on the VPS after the `ssh`, `cd`, `psql17` and `export DATABASE_URL` lines above; on staging, from your Mac after `read -rs DATABASE_URL && export DATABASE_URL`.
+`nutrition.profiles.user_id` is `auth.users.id` (migration 000002: `user_id UUID PRIMARY KEY REFERENCES auth.users(id)`), and the email lives in `auth.users.email`. The user must have finished setup (a profile row); otherwise the UPDATE says `UPDATE 0` and nothing changes. On production, run it on the VPS after the `ssh`, `cd`, `psql17` and `export DATABASE_URL` lines above (it works as soon as 000021 is on the database, before #88 is deployed); on staging, from your Mac after `read -rs DATABASE_URL && export DATABASE_URL`.
 
 ```bash
 # Set: change the email and the Level (0–5). level_seen comes down with a lower Level, so a later raise celebrates again.
@@ -116,15 +132,15 @@ SELECT u.email, p.level, p.level_seen, p.updated_at
 SQL
 ```
 
-The UPDATE must print one row with the new `level`; `UPDATE 0` means no profile for that email (wrong address, or setup not finished): nothing was changed. A Level above 5 stops with `violates check constraint "profiles_level_check"`. `updated_at` moves on its own (trigger `trg_profiles_touch_updated_at`), so the user's devices take the new Level on their next profile read. The API never lets the user change `level`; they only move `level_seen` up to it when the celebration closes.
+The UPDATE must print one row with the new `level`; `UPDATE 0` means no profile for that email (wrong address, or setup not finished): nothing was changed. A Level above 5 stops with `violates check constraint "profiles_level_check"`. `updated_at` moves on its own (trigger `trg_profiles_touch_updated_at`), so the user's devices take the new Level on their next profile read. The API never lets the user change `level`; their own save only moves `level_seen` (stored at most as `level`) when the celebration closes.
 
 ## Rollback
 
 Down migration first only after the API that does not read the columns is back, or `GET /me` answers 500:
 
 ```bash
-deploy/deploy.sh <the short sha noted before step 1>       # production, on the VPS
-( echo 'BEGIN;'; cat migrations/000021_profile_level.down.sql; echo 'COMMIT;' ) | psql17 -q
+deploy/deploy.sh <the short sha noted before deploy.sh>       # production, on the VPS
+( echo 'BEGIN;'; cat ~/migrations-1023/000021_profile_level.down.sql; echo 'COMMIT;' ) | psql17 -q
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"   # 0
 ```
 

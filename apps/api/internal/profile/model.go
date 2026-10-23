@@ -69,7 +69,7 @@ type UpsertProfileRequest struct {
 	CustomEnergyKcal Nullable `json:"customEnergyKcal"`
 	CustomTargets    Nullable `json:"customTargets"`
 
-	// LevelSeen may be sent (0 up to the stored level). Level is only here so a request that sends it is refused.
+	// LevelSeen may be sent (0–5, stored at most as the user's level). Level is only here so a request that sends it is refused.
 	LevelSeen Nullable `json:"levelSeen"`
 	Level     Nullable `json:"level"`
 }

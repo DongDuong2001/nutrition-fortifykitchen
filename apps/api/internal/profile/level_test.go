@@ -14,7 +14,7 @@ import (
 )
 
 // The user's Level (migration 000021): set by an admin or a coach in the database, never by the user. The user's own
-// save may only move levelSeen, from 0 up to their level.
+// save may only move levelSeen; a value above their level is stored as the level.
 
 // A stored profile at the given Level, as the database would have it after an admin set it.
 func seedLevel(repo *mockRepository, level, seen int) uuid.UUID {
@@ -88,14 +88,22 @@ func TestLevel_LevelSeenUpdate(t *testing.T) {
 		}
 	})
 
-	t.Run("above the user's level is 400 and nothing is saved", func(t *testing.T) {
+	t.Run("above the user's level is saved as the level, with the rest of the save", func(t *testing.T) {
+		// A profile write queued offline still carries levelSeen 3 after the coach lowered the Level to 2
 		id := seedLevel(repo, 2, 1)
-		rec := callAs(h.UpdateProfile, id, http.MethodPut, profileBody(`"levelSeen":3`))
-		if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), `"levelSeen"`) {
-			t.Fatalf("want 400 on levelSeen, got %d %s", rec.Code, rec.Body.String())
+		rec := callAs(h.UpdateProfile, id, http.MethodPut, profileBody(`"display_name":"Lan","levelSeen":3`))
+		if rec.Code != http.StatusOK {
+			t.Fatalf("want 200, got %d %s", rec.Code, rec.Body.String())
 		}
-		if p := repo.profiles[id]; p.LevelSeen != 1 || p.WeightKg != 65 {
-			t.Fatalf("a refused save changed the row: levelSeen %d, weight %v", p.LevelSeen, p.WeightKg)
+		p := repo.profiles[id]
+		if p.LevelSeen != 2 || p.Level != 2 {
+			t.Fatalf("want level 2 / levelSeen 2 (clamped), got %d / %d", p.Level, p.LevelSeen)
+		}
+		if p.WeightKg != 66 || p.DisplayName == nil || *p.DisplayName != "Lan" {
+			t.Fatalf("the rest of the save was not applied: weight %v, name %v", p.WeightKg, p.DisplayName)
+		}
+		if data := dataOf(t, rec); data["levelSeen"] != float64(2) {
+			t.Fatalf("response levelSeen %v, want 2", data["levelSeen"])
 		}
 	})
 
@@ -112,15 +120,14 @@ func TestLevel_LevelSeenUpdate(t *testing.T) {
 		}
 	})
 
-	t.Run("a user with no profile row yet has level 0: levelSeen 0 is fine, 1 is 400", func(t *testing.T) {
+	t.Run("a user with no profile row yet is at Level 0: levelSeen 1 is saved as 0", func(t *testing.T) {
 		id := uuid.New()
 		rec := callAs(h.UpdateProfile, id, http.MethodPut, profileBody(`"levelSeen":1`))
-		if rec.Code != http.StatusBadRequest {
-			t.Fatalf("new user levelSeen 1: want 400, got %d %s", rec.Code, rec.Body.String())
-		}
-		rec = callAs(h.UpdateProfile, id, http.MethodPut, profileBody(`"levelSeen":0`))
 		if rec.Code != http.StatusOK {
-			t.Fatalf("new user levelSeen 0: %d %s", rec.Code, rec.Body.String())
+			t.Fatalf("new user levelSeen 1: want 200, got %d %s", rec.Code, rec.Body.String())
+		}
+		if p := repo.profiles[id]; p.Level != 0 || p.LevelSeen != 0 {
+			t.Fatalf("new user: want 0 / 0, got %d / %d", p.Level, p.LevelSeen)
 		}
 	})
 }

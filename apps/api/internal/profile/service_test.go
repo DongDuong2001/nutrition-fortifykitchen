@@ -28,13 +28,14 @@ func (m *mockRepository) GetProfile(ctx context.Context, userID uuid.UUID) (*pro
 	return p, nil
 }
 
-// Like the SQL: level is never written by a save, level_seen only when the save sets it (new rows start at 0).
+// Like the SQL: level is never written by a save; level_seen only when the save sets it, at most the stored level (new
+// rows start at 0 / 0).
 func (m *mockRepository) UpsertProfile(ctx context.Context, p *profile.Profile) error {
 	if stored, ok := m.profiles[p.UserID]; ok {
 		p.Level, p.LevelSeen = stored.Level, stored.LevelSeen
 	}
 	if p.SetLevelSeen != nil {
-		p.LevelSeen = *p.SetLevelSeen
+		p.LevelSeen = min(*p.SetLevelSeen, p.Level)
 	}
 	m.profiles[p.UserID] = p
 	return nil

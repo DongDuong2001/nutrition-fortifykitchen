@@ -77,7 +77,7 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 			near_period, language, display_name, training_prefs, updated_at,
 			macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets, level_seen
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now(),
-			$11::text, $13::jsonb, $15::jsonb, $17::int, $19::jsonb, COALESCE($21::smallint, 0))
+			$11::text, $13::jsonb, $15::jsonb, $17::int, $19::jsonb, 0)
 		ON CONFLICT (user_id) DO UPDATE SET
 			sex = EXCLUDED.sex,
 			birth_year = EXCLUDED.birth_year,
@@ -94,8 +94,10 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 			macro_fixed = CASE WHEN $16::bool THEN EXCLUDED.macro_fixed ELSE nutrition.profiles.macro_fixed END,
 			custom_energy_kcal = CASE WHEN $18::bool THEN EXCLUDED.custom_energy_kcal ELSE nutrition.profiles.custom_energy_kcal END,
 			custom_targets = CASE WHEN $20::bool THEN EXCLUDED.custom_targets ELSE nutrition.profiles.custom_targets END,
-			-- level is never written by a save; level_seen only when the save sends it (nil keeps it)
-			level_seen = COALESCE($21::smallint, nutrition.profiles.level_seen),
+			-- level is never written by a save. level_seen only when the save sends it (NULL keeps it), at most the stored
+			-- level: a write queued before the coach lowered the Level still saves the rest. A new row is at Level 0, so 0.
+			level_seen = CASE WHEN $21::smallint IS NULL THEN nutrition.profiles.level_seen
+			                  ELSE LEAST($21::smallint, nutrition.profiles.level) END,
 			updated_at = now()
 	`
 	st := p.Settings

@@ -587,7 +587,7 @@ function profileBody(profile: SetupProfile, targets?: TargetSettings, levelSeen?
   return {
     // Only when they changed: a save from another screen leaves the server's as they are
     ...(targets ? targetSettingsBody(targets) : {}),
-    // Only when given (0 up to the server's level, or the API answers 400). The level itself is never sent: a coach sets it
+    // Only when given (0–5; above the server's level it is stored as the level). The level itself is never sent: a coach sets it
     ...(levelSeen !== undefined ? { levelSeen } : {}),
     sex: profile.sex,
     birth_year: profile.birthYear,
