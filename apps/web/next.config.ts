@@ -74,7 +74,12 @@ const nextConfig: NextConfig = {
   },
   // DEMO_BUILD=1 at build time keeps ?demo, ?as and ?level working in a production build (gates and probes only)
   // NEXT_PUBLIC_APP_VERSION: sw.js VERSION, one source for the app version (client error reports, cc-50)
-  env: { NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "", NEXT_PUBLIC_APP_VERSION: APP_VERSION },
+  // DARK_MODE=1 at build time turns the dark mode flag on (lib/theme.ts), baked into the browser and the server code alike
+  env: {
+    NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "",
+    NEXT_PUBLIC_APP_VERSION: APP_VERSION,
+    NEXT_PUBLIC_DARK_MODE: process.env.DARK_MODE === "1" ? "1" : "",
+  },
   webpack(config, { webpack }) {
     if (process.env.NEXT_PUBLIC_API_MODE === "live") {
       config.plugins.push(

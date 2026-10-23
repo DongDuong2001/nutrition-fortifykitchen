@@ -1,5 +1,6 @@
 "use client";
 
+import { THEME_CHOICES, darkModeEnabled, loadThemeChoice } from "@/lib/theme";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { InstallRow } from "@/components/pwa/install-row";
@@ -357,6 +358,11 @@ export function AppCard() {
     startTour();
     router.push(HOME_ROUTE);
   };
+  // Giao diện (job 14): only while the dark mode flag is on (lib/theme.ts), read after mount like the rest
+  const [appearance, setAppearance] = useState<string | null>(null);
+  useEffect(() => {
+    if (darkModeEnabled()) setAppearance(THEME_CHOICES.find((c) => c.id === loadThemeChoice())?.label ?? null);
+  }, []);
   useEffect(() => {
     const saved = loadSettings();
     setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
@@ -417,6 +423,7 @@ export function AppCard() {
         </div>
       )}
       <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
+      {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label="Giao diện" value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
       <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
       <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />

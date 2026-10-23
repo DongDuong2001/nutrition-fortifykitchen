@@ -64,6 +64,13 @@ export const SETTINGS_ICONS = {
       <path d="M3 12h18M12 3c2.6 2.7 3.9 5.7 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.7-3.9-9s1.3-6.3 3.9-9z" />
     </>
   ),
+  // Giao diện (dark mode, behind its flag): a circle, its right half filled
+  theme: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+    </>
+  ),
   bell: (
     <>
       <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
