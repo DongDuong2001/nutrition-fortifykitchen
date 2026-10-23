@@ -189,7 +189,7 @@ describe("raw and cooked twins are one row (cc-67)", () => {
     // Meat, fish, seafood, vegetables, dry beans: Sống
     expect(twinGroupOf(find(catalogue, "Thịt bò nạc (nấu chín)"))?.start.nameVi).toBe("Thịt bò nạc");
     expect(twinGroupOf(find(catalogue, "Thịt cừu nạc (nấu chín)"))?.start.nameVi).toBe("Thịt cừu nạc (sống)");
-    expect(twinGroupOf(find(catalogue, "Cá lóc (nấu chín)"))?.start.nameVi).toBe("Cá lóc (cá quả, sống)");
+    expect(twinGroupOf(find(catalogue, "Cá chép (nấu chín)"))?.start.nameVi).toBe("Cá chép (sống)");
     expect(twinGroupOf(find(catalogue, "Hàu (hấp)"))?.start.nameVi).toBe("Hàu (sống)");
     expect(twinGroupOf(find(catalogue, "Bắp cải (luộc)"))?.start.nameVi).toBe("Bắp cải (sống)");
     expect(twinGroupOf(find(catalogue, "Đậu đỏ (luộc)"))?.start.nameVi).toBe("Đậu đỏ (hạt khô)");
@@ -271,9 +271,9 @@ describe("search returns one row per food (cc-67)", () => {
     expect(list.some((n) => /nấu chín|\(sống\)/.test(n))).toBe(false);
   });
 
-  it("'cá lóc' lists one Cá lóc", () => {
-    expect(shown("cá lóc")).toEqual(["Cá lóc"]);
-    expect(shown("ca loc")).toEqual(["Cá lóc"]);
+  it("'cá chép' lists one Cá chép", () => {
+    expect(shown("cá chép")).toEqual(["Cá chép"]);
+    expect(shown("ca chep")).toEqual(["Cá chép"]);
   });
 
   it("finds a food by the name of its other row", () => {

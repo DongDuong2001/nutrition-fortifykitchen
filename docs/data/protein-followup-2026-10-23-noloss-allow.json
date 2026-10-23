@@ -1,31 +1,31 @@
 {
  "vn_nin|NIN 7018": {
-  "b12": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "b12": "accepted by Hao 23/10: the USDA row was the wrong food (US pork belly, 53 g fat)",
   "carbs": "zero in the old USDA row; NIN prints no value",
-  "cholesterol": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "cholesterol": "accepted by Hao 23/10: the USDA row was the wrong food (US pork belly, 53 g fat)",
   "fiber": "zero in the old USDA row; NIN prints no value",
   "sugars": "zero in the old USDA row; NIN prints no value",
-  "vitamin_e": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "vitamin_e": "accepted by Hao 23/10: the USDA row was the wrong food (US pork belly, 53 g fat)",
   "vitamin_k": "zero in the old USDA row; NIN prints no value"
  },
  "vn_nin|NIN 8020": {
-  "b12": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "b12": "accepted by Hao 23/10: the USDA row was the wrong food (mackerel, not scad)",
   "carbs": "zero in the old USDA row; NIN prints no value",
-  "cholesterol": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "cholesterol": "accepted by Hao 23/10: the USDA row was the wrong food (mackerel, not scad)",
   "fiber": "zero in the old USDA row; NIN prints no value",
   "sugars": "zero in the old USDA row; NIN prints no value",
-  "vitamin_c": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
-  "vitamin_d": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so"
+  "vitamin_c": "accepted by Hao 23/10: the USDA row was the wrong food (mackerel, not scad)",
+  "vitamin_d": "accepted by Hao 23/10: the USDA row was the wrong food (mackerel, not scad)"
  },
  "vn_nin|NIN 7032": {
-  "b12": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "b12": "accepted by Hao 23/10: the USDA row was the wrong food",
   "carbs": "zero in the old USDA row; NIN prints no value",
-  "cholesterol": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "cholesterol": "accepted by Hao 23/10: the USDA row was the wrong food",
   "fiber": "zero in the old USDA row; NIN prints no value",
   "sugars": "zero in the old USDA row; NIN prints no value",
-  "trans_fat": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
-  "vitamin_d": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
-  "vitamin_e": "PENDING Hao sign-off: the real value is lost with the source move he decided (23/10); not approved until he says so",
+  "trans_fat": "accepted by Hao 23/10: the USDA row was the wrong food",
+  "vitamin_d": "accepted by Hao 23/10: the USDA row was the wrong food",
+  "vitamin_e": "accepted by Hao 23/10: the USDA row was the wrong food",
   "vitamin_k": "zero in the old USDA row; NIN prints no value"
  }
 }

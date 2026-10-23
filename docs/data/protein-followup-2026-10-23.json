@@ -151,67 +151,6 @@
  },
  {
   "source": "usda_sr_legacy",
-  "source_id": "FDC 173680:ca-loc-song",
-  "name": "Fish, pike, northern, raw",
-  "name_vi": "Cá lóc (cá quả, sống)",
-  "category": "dam",
-  "brand": null,
-  "tip_vi": null,
-  "nutrients": {
-   "b1": 0.058,
-   "b12": 2,
-   "b2": 0.063,
-   "b3": 2.3,
-   "b5": 0.75,
-   "b6": 0.117,
-   "calcium": 57,
-   "carbs": 0,
-   "cholesterol": 39,
-   "copper": 0.051,
-   "energy": 88,
-   "fat": 0.7,
-   "fiber": 0,
-   "folate": 15,
-   "iron": 0.55,
-   "magnesium": 31,
-   "manganese": 0.24,
-   "monounsaturated_fat": 0.157,
-   "phosphorus": 220,
-   "polyunsaturated_fat": 0.202,
-   "potassium": 259,
-   "protein": 19.3,
-   "saturated_fat": 0.118,
-   "selenium": 12.6,
-   "sodium": 39,
-   "sugars": 0,
-   "vitamin_a": 21,
-   "vitamin_c": 3.8,
-   "vitamin_d": 2.5,
-   "vitamin_e": 0.2,
-   "vitamin_k": 0.1,
-   "water": 78.9,
-   "zinc": 0.67
-  },
-  "portions": [
-   {
-    "label_vi": "100 g",
-    "grams": 100,
-    "sort": 0
-   },
-   {
-    "label_vi": "1 khúc cá lóc",
-    "grams": 150,
-    "sort": 1
-   },
-   {
-    "label_vi": "1 lạng (100 g)",
-    "grams": 100,
-    "sort": 2
-   }
-  ]
- },
- {
-  "source": "usda_sr_legacy",
   "source_id": "FDC 171778",
   "name": "Beef, composite of trimmed retail cuts, separable lean only, trimmed to 1/8\" fat, select, cooked",
   "name_vi": "Thịt bò nạc (nấu chín)",

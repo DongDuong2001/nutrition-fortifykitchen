@@ -191,8 +191,8 @@
    "name_vi": "Thịt ba chỉ heo (luộc)"
   },
   "method": "luộc",
-  "yield": 118,
-  "yield_source": "protein balance from NIN's own rows: 100 x protein raw 16.5 / protein cooked 13.98 (NIN 7018 vs NIN 7018002); replaces 74 (USDA cooking-yield table of another cut). Hao 23/10"
+  "yield": 74,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: nearest tabulated fatty fresh-pork cut for boiled belly. A protein balance is not usable here: the raw USDA belly (518 kcal) and the NIN boiled row (220 kcal) are different fat levels, it would keep only 28 % of the energy. Low confidence Since 23/10 the raw side is NIN 7018; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
@@ -206,8 +206,8 @@
    "name_vi": "Thịt ba chỉ heo (nướng)"
   },
   "method": "nướng",
-  "yield": 80,
-  "yield_source": "protein balance from NIN's own rows: 100 x protein raw 16.5 / protein cooked 20.5 (NIN 7018 vs NIN 7086); replaces 76 (USDA cooking-yield table of another cut). Hao 23/10"
+  "yield": 76,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10940 \"Pork, fresh, spareribs, separable lean and fat\", baked or roasted, n=1: nearest tabulated fatty fresh-pork cut for roast belly. A protein balance is not usable here (different fat level of the two rows, 36 % of the energy kept). Low confidence Since 23/10 the raw side is NIN 7018; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
@@ -221,8 +221,8 @@
    "name_vi": "Thịt chân giò heo (luộc)"
   },
   "method": "luộc",
-  "yield": 100,
-  "yield_source": "protein balance from NIN's own rows: 100 x protein raw 15.7 / protein cooked 15.7 (NIN 7032 vs NIN 7032002); replaces 74 (USDA cooking-yield table of another cut). Hao 23/10"
+  "yield": 74,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: the nearest tabulated cut for a boiled chân giò (the raw USDA shank row and the NIN boiled row are not the same cut, so a protein balance would give 127) Since 23/10 the raw side is NIN 7032; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
@@ -583,21 +583,6 @@
   "method": "nướng",
   "yield": 78,
   "yield_source": "USDA SR Legacy household measures: cooked fillet 155 g / raw fillet 198 g (FDC 173692, FDC 173691)"
- },
- {
-  "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 173680:ca-loc-song",
-   "name_vi": "Cá lóc (cá quả, sống)"
-  },
-  "cooked": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 175127",
-   "name_vi": "Cá lóc (nấu chín)"
-  },
-  "method": "nướng",
-  "yield": 78,
-  "yield_source": "protein balance: 100 x protein raw 19.3 / protein cooked 24.69 (FDC 173680 vs FDC 175127, northern pike raw and cooked); replaces 74 (NIN 8022 vs FDC 175127). Hao 23/10"
  },
  {
   "raw": {
