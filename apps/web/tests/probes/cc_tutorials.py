@@ -44,10 +44,10 @@ OLD_TIPS = [
 ]
 # share-spotlight: the share tip shows again after it was seen (until Để sau twice) and may follow Có gì mới; a returning user has shared once
 # meal-focus (22c) and hero-macro (23a, overnight 22→23/10) are the last tips of Hôm nay; seen here, so a reload after Có gì mới stays quiet
-RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
+RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold", "food-swipe"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
 # The newest 8 of the joined tour on Hôm nay: 22a's seven that are on Hôm nay: V3's meal +, Ngày tập pill and Khám phá tab, feat/ngay-mau's two
 # (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has food) and custom-food-nutrients' + Thêm vi chất khác
-# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's two (hero-hold: Giữ để xem món nào góp vào; own-food-menu: Sửa hoặc xóa món của bạn, the Khám phá tab); 22a gives up its last one (Chia sẻ ngày ăn).
+# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's three (hero-hold: Giữ để xem món nào góp vào; own-food-menu: Sửa hoặc xóa món của bạn, the Khám phá tab; food-swipe: Vuốt món để xoá hoặc mở tuỳ chọn); 22a gives up its last one (Chia sẻ ngày ăn).
 # 21c's Minh Hào step (the oldest) is cut by the cap
 STEPS = [
     ("Thêm vào từng bữa", ["meal-add", "nav-add"]),
@@ -55,9 +55,9 @@ STEPS = [
     ("Nhóm món có màu", ["nav-explore"]),
     ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]),
     ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]),
-    ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]),
     ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]),
     ("Sửa hoặc xóa món của bạn", ["nav-explore"]),
+    ("Vuốt món để xoá hoặc mở tuỳ chọn", ["home-food-list", "meal-pill"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
@@ -224,7 +224,7 @@ def skipped(browser):
     check(ring_holds(pg, ["day-menu", "home-hero"]) is not None, "gone mid-step: the ring is on the day's ⋯")
     shot(pg, "skipped")
     # With the ⋯, the hero, the template pill, the meal headers, the + of the bar, the share button and the macros gone too, the last steps have no target: the tour ends
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-menu\"], [data-tour=\"home-hero\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"add-nutrient\"], [data-tour=\"nav-add\"], [data-tour=\"home-share\"], [data-tour=\"hero-macro\"]').forEach(el => el.removeAttribute('data-tour'))")
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-menu\"], [data-tour=\"home-hero\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"add-nutrient\"], [data-tour=\"nav-add\"], [data-tour=\"home-share\"], [data-tour=\"hero-macro\"], [data-tour=\"home-food-list\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name=re.compile("^(Tiếp|Xong)$")).click()
     for _ in range(40):
         pg.wait_for_timeout(500)
@@ -323,7 +323,7 @@ def portion_tips(browser):
 
 
 def drag(browser):
-    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
+    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold", "food-swipe", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
     go(pg, "/app", 1500)
     check(card(pg).count() == 0, "drag: no tip on Hôm nay before a sheet opens")
     pg.get_by_role("button", name="Tùy chọn ngày").first.tap()

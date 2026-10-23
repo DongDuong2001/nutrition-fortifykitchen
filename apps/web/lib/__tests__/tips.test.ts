@@ -12,7 +12,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu", "food-swipe",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -119,7 +119,10 @@ describe("pickTip: pull to refresh (cc-51)", () => {
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day"] }))).toBe("meal-focus");
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus"] }))).toBe("hero-macro");
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro"] }))).toBe("hero-hold");
-    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe(null);
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe("food-swipe");
+    // Job I: the swipe tip is for a finger only, and the first swipe is what ends it
+    expect(ids(ctx({ touch: false, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe(null);
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold", "food-swipe"] }))).toBe(null);
   });
 });
 

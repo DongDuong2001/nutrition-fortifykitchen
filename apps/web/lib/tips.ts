@@ -366,6 +366,15 @@ export const TIPS: readonly Tip[] = [
     used: ["own-food-menu"],
     when: (c) => c.pathname === "/explore/cua_toi",
   },
+  // Job I (feat/food-swipe): a swipe on a food of today, which nothing on the row says; only where a finger swipes. Marked used by the first swipe.
+  {
+    id: "food-swipe",
+    target: "home-food-list",
+    title: "Vuốt món để xoá hoặc mở tuỳ chọn",
+    body: "Vuốt trái để xoá, vuốt phải để mở tuỳ chọn. Xoá nhầm thì bấm Hoàn tác.",
+    used: ["food-swipe"],
+    when: (c) => today(c) && c.touch === true,
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */

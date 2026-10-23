@@ -551,3 +551,8 @@
 - [ ] (Hao) Sửa món on a refused PUT (405, 404, 500 alike) says "Chưa sửa được món. Thử lại sau nhé." with no status code. Deploy the API with #96 with or before the web with #97, or Sửa món says this until it is.
 ## polish_1020 node budget (fix/probe-polish-1020, 24/10/2026)
 - [ ] (Hao) The add sheet is about 11 % bigger than when check 3 was written (598 nodes on 20/10, 665 at lunch today, 35 rows against 34). The budget is now 680 at a pinned 12:30. If the sheet should stay near 600, the per-category trim or the shortlists need another pass; that is an app change, not this probe fix.
+## Swipe a food on Hôm nay (feat/food-swipe, 24/10/2026)
+- [ ] (Hao) "Nhân đôi" is not in the ⋯ menu: no duplicate action exists in the app (the add sheet's Gần đây adds the same food again). If you want it, it is one more row that calls the same add with the entry's food and portion.
+- [ ] (Hao) "The ⋯ menu is also reachable from the edit screen": the edit screen (/entry/<id>) already has Xóa and the meal switch, so no second menu was added there. Say if you want the ⋯ itself in its header.
+- [ ] (Hao) The brief writes "Xoá"; the toast of the diary's own delete still says "Đã xóa 1 món" (one toast for the whole app), so a swipe delete reads like every other delete. One spelling pass can change both.
+- [ ] (Hao) The buttons are 56 px wide (≥ 44 px) because the food list card is 178 px wide at 390; 25 % and 60 % are of that width (44 px and 107 px).
