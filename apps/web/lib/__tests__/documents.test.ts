@@ -1,5 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { DocumentsError, checkAccessCode, createAccessCode, isDocumentName, listAccessCodes, normalizeCode, readDocument, revokeAccessCode, saveDocument } from "../documents";
+import {
+  DocumentsError,
+  checkAccessCode,
+  createAccessCode,
+  isDocumentName,
+  listAccessCodes,
+  normalizeCode,
+  openDocument,
+  readDocument,
+  revokeAccessCode,
+  saveDocument,
+} from "../documents";
 
 describe("isDocumentName", () => {
   it("takes plain file names", () => {
@@ -17,7 +28,7 @@ describe("normalizeCode", () => {
   });
 });
 
-// Mock mode (the test setup has no NEXT_PUBLIC_API_MODE=live): documents and codes in localStorage
+// Mock mode (the test setup has no NEXT_PUBLIC_API_MODE=live): documents and codes in localStorage, under the server's rules
 describe("mock documents and access codes", () => {
   const store = new Map<string, string>();
   beforeEach(() => {
@@ -39,29 +50,35 @@ describe("mock documents and access codes", () => {
     expect((await listAccessCodes("admin")).map((c) => c.id)).toEqual([made.id]);
   });
 
-  it("a coach's code unlocks writes in any case; a wrong or revoked one does not", async () => {
+  it("only a coach or an admin writes and reads without a code", async () => {
+    expect(await status(saveDocument("rules.md", "# Quy tắc", "user"))).toBe(403);
+    expect(await status(saveDocument("../x", "x", "coach"))).toBe(400);
+    await saveDocument("rules.md", "# Quy tắc", "coach");
+    expect((await readDocument("rules.md", "coach")).content).toBe("# Quy tắc");
+    expect(await status(readDocument("rules.md", "user"))).toBe(403);
+  });
+
+  it("a learner opens a document with a coach's code in any case; a wrong or revoked code opens nothing", async () => {
+    await saveDocument("rules.md", "# Quy tắc", "coach");
     const { id, code } = await createAccessCode("coach");
     expect(await status(checkAccessCode(code.toLowerCase()))).toBe(200);
-    expect(await status(saveDocument("rules.md", "# Quy tắc", "WRONGCODE2"))).toBe(403);
-    expect(await status(saveDocument("../x", "x", code))).toBe(400);
-    await saveDocument("rules.md", "# Quy tắc", code);
-    expect((await readDocument("rules.md")).content).toBe("# Quy tắc");
+    expect(await openDocument("rules.md", code.toLowerCase())).toBe("# Quy tắc");
+    expect(await status(openDocument("rules.md", "WRONGCODE2"))).toBe(403);
+    expect(await status(openDocument("none.md", code))).toBe(404);
     await revokeAccessCode(id);
-    expect(await status(checkAccessCode(code))).toBe(403);
+    expect(await status(openDocument("rules.md", code))).toBe(403);
     expect(await listAccessCodes("coach")).toEqual([]);
-    expect(await status(readDocument("other.md"))).toBe(404);
   });
 
   it("an edit saved over a version someone else replaced is refused (409); an upload replaces", async () => {
-    const { code } = await createAccessCode("coach");
-    await saveDocument("rules.md", "v1", code);
-    const loaded = await readDocument("rules.md");
+    await saveDocument("rules.md", "v1", "coach");
+    const loaded = await readDocument("rules.md", "coach");
     await new Promise((r) => setTimeout(r, 2));
-    await saveDocument("rules.md", "v2 by someone else", code);
-    expect(await status(saveDocument("rules.md", "my edit", code, loaded.updatedAt))).toBe(409);
-    expect((await readDocument("rules.md")).content).toBe("v2 by someone else");
-    const fresh = await readDocument("rules.md");
-    await saveDocument("rules.md", "my edit", code, fresh.updatedAt);
-    expect((await readDocument("rules.md")).content).toBe("my edit");
+    await saveDocument("rules.md", "v2 by someone else", "admin");
+    expect(await status(saveDocument("rules.md", "my edit", "coach", loaded.updatedAt))).toBe(409);
+    expect((await readDocument("rules.md", "coach")).content).toBe("v2 by someone else");
+    const fresh = await readDocument("rules.md", "coach");
+    await saveDocument("rules.md", "my edit", "coach", fresh.updatedAt);
+    expect((await readDocument("rules.md", "coach")).content).toBe("my edit");
   });
 });
