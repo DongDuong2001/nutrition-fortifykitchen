@@ -659,6 +659,7 @@ Guessing a code is bounded by the per-user write limit (60 a minute); a 50-bit c
 
 ### 2.14. Courses (Khoá học, migration 000022)
 Tài liệu as courses: **Khoá → Phần → Bài**. A lesson is a PDF (its pages are images the coach's browser made; the PDF itself is never stored or sent) or markdown text. This replaces §2.13 for the app (the old tables and routes stay until the web stops using them).
+- **Envelope:** as the rest of the API, every JSON success is `{"data": …}` (a list is `{"data": {"items": […]}}`) and every error is `{"error": {"code", "message", "fields"?}}`; a page image is the raw WebP bytes. The shapes below are the `data`.
 - **Who may open a course** (the coach picks per course): `open` (every signed-in user); `code` (one of that course's own live codes, 10 symbols, only the SHA-256 is stored, 30 days, revocable; a code opens every lesson of that course only); `level` (`profiles.level` ≥ `minLevel`, 1 to 5). A coach or an admin (`profiles.role`) sees everything. **The library (`GET /courses`) never needs access; opening does.** A user who opened a code course stays unlocked while that code is live (not revoked, not lapsed): `course_unlocks` joins the code on every check.
 - A lock answers `403 {"error":{"code":"COURSE_LOCKED","fields":{"lock":"code"|"level","minLevel":"3"}}}` (`minLevel` only for a level lock); a wrong, lapsed, revoked or another course's code answers `403 BAD_CODE`. An unknown course, lesson or page, a lesson asked through another course's path, and an id that is not a UUID are all `404`.
 
