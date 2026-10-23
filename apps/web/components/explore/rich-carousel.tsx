@@ -29,7 +29,7 @@ export function RichCarousel() {
               style={coloured ? { background: nutrientDot(id) } : undefined}
               className={`m-hover flex h-full min-h-[112px] flex-col justify-between gap-3 rounded-card p-4 text-on-accent no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${coloured ? "" : "bg-ink"}`}
             >
-              <span className={`font-display font-black italic leading-none tracking-[-0.01em] ${name.length > 10 ? "text-xl" : name.length > 8 ? "text-title-sm" : "text-title"}`}>Giàu {name}</span>
+              <span className={`font-display font-black italic leading-none tracking-[-0.01em] ${name.length >= 10 ? "text-xl" : name.length > 8 ? "text-title-sm" : "text-title"}`}>Giàu {name}</span>
               <span className="text-cap font-semibold">Xem món</span>
             </Link>
           </li>
