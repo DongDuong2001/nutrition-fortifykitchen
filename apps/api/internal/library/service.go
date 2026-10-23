@@ -11,6 +11,8 @@ import (
 var (
 	ErrSavedMealNotFound     = errors.New("saved meal not found")
 	ErrSavedMealNameRequired = errors.New("saved meal name is required")
+	// ErrSavedMealIDConflict: the id is another user's saved meal.
+	ErrSavedMealIDConflict = errors.New("saved meal id belongs to another user")
 )
 
 type Service interface {
@@ -24,6 +26,8 @@ type Service interface {
 	GetSavedMeals(ctx context.Context, userID uuid.UUID) ([]SavedMeal, error)
 	GetSavedMealByID(ctx context.Context, userID uuid.UUID, mealID uuid.UUID) (*SavedMeal, error)
 	CreateSavedMeal(ctx context.Context, userID uuid.UUID, req CreateSavedMealRequest) (*SavedMeal, error)
+	// PutSavedMeal creates or replaces the saved meal with this id: the same result when sent again.
+	PutSavedMeal(ctx context.Context, userID uuid.UUID, mealID uuid.UUID, req CreateSavedMealRequest) (*SavedMeal, error)
 	DeleteSavedMeal(ctx context.Context, userID uuid.UUID, mealID uuid.UUID) error
 	AddFromSaved(ctx context.Context, userID uuid.UUID, targetDate string, mealID uuid.UUID, mealSlot string) ([]diary.DiaryEntryItem, error)
 }
@@ -76,6 +80,10 @@ func (s *libraryServiceImpl) GetSavedMealByID(ctx context.Context, userID uuid.U
 }
 
 func (s *libraryServiceImpl) CreateSavedMeal(ctx context.Context, userID uuid.UUID, req CreateSavedMealRequest) (*SavedMeal, error) {
+	return s.PutSavedMeal(ctx, userID, uuid.Nil, req)
+}
+
+func (s *libraryServiceImpl) PutSavedMeal(ctx context.Context, userID uuid.UUID, mealID uuid.UUID, req CreateSavedMealRequest) (*SavedMeal, error) {
 	if req.Name == "" {
 		return nil, ErrSavedMealNameRequired
 	}
@@ -88,6 +96,7 @@ func (s *libraryServiceImpl) CreateSavedMeal(ctx context.Context, userID uuid.UU
 		}
 	}
 	meal := &SavedMeal{
+		ID:    mealID,
 		Name:  req.Name,
 		Items: req.Items,
 	}
