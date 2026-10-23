@@ -141,7 +141,7 @@ export function DocumentsScreen() {
       <AppHeader variant="sub" title="Tài liệu" backHref="/settings" layout="wide" alignGroup="documents-header" />
 
       <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8 lg:pb-12 lg:pt-5">
-        <div className="flex flex-col gap-2" data-align-group="documents-row">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
             {code ? (
               <>
