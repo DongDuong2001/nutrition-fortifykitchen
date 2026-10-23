@@ -4,7 +4,7 @@
  * for the tab in sessionStorage and sends in the x-access-code header. Pure helpers and the fetch calls of the screen.
  */
 
-export const DOCUMENTS_API = "/api/documents";
+const DOCUMENTS_API = "/api/documents";
 export const ACCESS_CODE_HEADER = "x-access-code";
 export const MAX_DOCUMENT_BYTES = 1_000_000;
 
@@ -18,7 +18,6 @@ export interface DocumentMeta {
   name: string;
   /** ISO time of the last write, when the store knows it */
   updatedAt: string | null;
-  size: number | null;
 }
 
 const CODE_KEY = "h1t_documents_code";
