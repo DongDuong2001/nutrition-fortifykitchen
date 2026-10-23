@@ -7,11 +7,11 @@ import localFont from "next/font/local";
 // @font-face rules at the top of globals.css, with Google's numbers. SIL Open Font License 1.1 (README.md here).
 // next/font only reads literal options, so the ranges are written out in each call.
 
+// Manrope is one variable file per subset: registered as its whole 200–800 range (reviewer, 03:05), so the 800 of Hôm nay's
+// lacking nutrient names (C3) is drawn as 800, not synthesised from 700; 400, 600 and 700 render as before.
 export const manrope = localFont({
   src: [
-    { path: "./manrope-latin.woff2", weight: "400", style: "normal" },
-    { path: "./manrope-latin.woff2", weight: "600", style: "normal" },
-    { path: "./manrope-latin.woff2", weight: "700", style: "normal" },
+    { path: "./manrope-latin.woff2", weight: "200 800", style: "normal" },
   ],
   declarations: [
     { prop: "font-family", value: "Manrope" },
@@ -29,9 +29,7 @@ export const manrope = localFont({
 
 export const manropeVi = localFont({
   src: [
-    { path: "./manrope-vietnamese.woff2", weight: "400", style: "normal" },
-    { path: "./manrope-vietnamese.woff2", weight: "600", style: "normal" },
-    { path: "./manrope-vietnamese.woff2", weight: "700", style: "normal" },
+    { path: "./manrope-vietnamese.woff2", weight: "200 800", style: "normal" },
   ],
   declarations: [
     { prop: "font-family", value: "Manrope" },
