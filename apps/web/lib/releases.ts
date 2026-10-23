@@ -69,6 +69,8 @@ export const RELEASES: readonly Release[] = [
       { icon: "bars", title: "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen (hoặc dòng Chất xơ) là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
       // feat/my-foods-crud (Job C, overnight 23→24/10)
       { icon: "meal", title: "Sửa và xóa Món ăn của tôi", body: "Món bạn tự tạo giờ sửa được số liệu và xóa được. Xóa nhầm thì bấm Hoàn tác trong 8 giây, nhật ký đã ghi vẫn giữ số cũ." },
+      // fix/share-meal-cobalt (24/10): a look, no control to teach (no tour step, no tip)
+      { icon: "share", title: "Ảnh chia sẻ: tên bữa màu xanh như Hôm nay", body: "Tên các bữa trong ảnh chia sẻ giờ cũng màu xanh, giống ở màn Hôm nay." },
     ],
     tour: [
       { target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." },
