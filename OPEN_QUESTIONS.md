@@ -514,3 +514,12 @@
 ## The V3 stack merged (22/10/2026, main 4b3b60f, not deployed)
 - [ ] (Hao) Deploy main 4b3b60f (VERSION 2026-10-22.1, release 2026-10-22a). Every open line above from #44–#51 still stands; they were not decided by the merge.
 - [ ] (Dong) CI "Web image serves the link page at /" failed once on #47's merge commit: `next/font/google` threw inside the Docker build (`Cannot read properties of null (reading '1')` in the Google font loader), with no font change; a re-run of that job passed. The build fetches Google Fonts at image build time, so a bad response from Google fails the image. Self-hosting the three fonts (next/font/local) would take the network out of the build.
+
+## Overnight 22→23/10, session B (23/10/2026)
+- [ ] (Dong) Custom training minutes: the API accepts training_minutes 0 or the presets; allow 0 or 30–480 in 30-minute steps (diary and profile). Until then the app keeps a custom value on the device and sends the nearest accepted one (feat/training-custom-minutes).
+- [ ] (Hao) Desktop audit proposals (docs/audit/desktop-2026-10-23.md): centring at 1920, a two-column food page, the Giàu rows, the Có gì mới column, the 720 px left-pinned lists, a direct delete on Hôm nay, the tour's step 2 wording on desktop. Mock up first; none is in the parity PR.
+- [ ] (Open) WebKit: focus returns to <body> after the Ngày ăn mẫu food and delete dialogs close (Chromium returns it to the opener). Needs its own repro.
+- [ ] (Hao) Dark mode (docs/plans/dark-mode.md): theme on the device only or also the account; share image always light or following the app; whether the V3 dark artboards' flat rows ship; the 51 proposed dark values (icon-tile stops first); landing and link pages dark or light.
+- [ ] (Hao, Dong) English (docs/plans/english.md): glossary sign-off; Đạm / Tinh bột / Chất béo in English or kept; serving_label and default names stored locale-independent first (Dong); an account `language` field (Dong); English food names later (name_en or a translation table, Dong).
+- [ ] (Hao) Job 9: B6 tops with Red Bull (fortified) and folate / K with matcha per 100 g in the new Giàu lists; keep, or leave fortified drinks out of Giàu.
+
