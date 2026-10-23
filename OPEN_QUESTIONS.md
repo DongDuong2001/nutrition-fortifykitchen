@@ -554,5 +554,5 @@
 ## Swipe a food on Hôm nay (feat/food-swipe, 24/10/2026)
 - [ ] (Hao) "Nhân đôi" is not in the ⋯ menu: no duplicate action exists in the app (the add sheet's Gần đây adds the same food again). If you want it, it is one more row that calls the same add with the entry's food and portion.
 - [ ] (Hao) "The ⋯ menu is also reachable from the edit screen": the edit screen (/entry/<id>) already has Xóa and the meal switch, so no second menu was added there. Say if you want the ⋯ itself in its header.
-- [ ] (Hao) The brief writes "Xoá"; the toast of the diary's own delete still says "Đã xóa 1 món" (one toast for the whole app), so a swipe delete reads like every other delete. One spelling pass can change both.
+- [ ] (Hao) The brief writes "Xoá" and "Tuỳ chọn"; docs/voice-audit.md and the cc2_18 probe require "Xóa" and "Tùy" (the app's spelling, and the diary's own delete toast "Đã xóa 1 món" that a swipe delete shows). This job follows the repo's rule.
 - [ ] (Hao) The buttons are 56 px wide (≥ 44 px) because the food list card is 178 px wide at 390; 25 % and 60 % are of that width (44 px and 107 px).

@@ -28,7 +28,7 @@ type RowEvent = ReactPointerEvent<HTMLElement>;
 
 /**
  * The swipe of one food row (Job I). The row follows the finger through its transform (written to the element, no render per move);
- * the buttons behind it (Xoá on the right, ⋯ on the left) grow with the offset. A swipe never takes a touch that is a scroll (see
+ * the buttons behind it (Xóa on the right, ⋯ on the left) grow with the offset. A swipe never takes a touch that is a scroll (see
  * lib/row-swipe), never starts after a hold lifted the row (cc-70), and a tap on an open row closes it. Reduced motion: the row does
  * not slide, the buttons fade in.
  */

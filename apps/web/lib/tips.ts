@@ -370,8 +370,8 @@ export const TIPS: readonly Tip[] = [
   {
     id: "food-swipe",
     target: "home-food-list",
-    title: "Vuốt món để xoá hoặc mở tuỳ chọn",
-    body: "Vuốt trái để xoá, vuốt phải để mở tuỳ chọn. Xoá nhầm thì bấm Hoàn tác.",
+    title: "Vuốt món để xóa hoặc mở tùy chọn",
+    body: "Vuốt trái để xóa, vuốt phải để mở tùy chọn. Xóa nhầm thì bấm Hoàn tác.",
     used: ["food-swipe"],
     when: (c) => today(c) && c.touch === true,
   },

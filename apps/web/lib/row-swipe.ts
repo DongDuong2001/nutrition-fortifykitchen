@@ -1,5 +1,5 @@
 /**
- * Job I: swipe a food row on Hôm nay (today only, touch only). Left reveals Xoá, right reveals ⋯. Pure: `createRowSwipe` is the
+ * Job I: swipe a food row on Hôm nay (today only, touch only). Left reveals Xóa, right reveals ⋯. Pure: `createRowSwipe` is the
  * gesture (tested without a DOM), `offsetFor` and `endOf` its two rules. lib/use-row-swipe ties it to a row.
  */
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRowSwipe, endOf, offsetFor, SWIPE_ACTION_PX, SWIPE_LOCK_PX } from "../row-swipe";
 
-// Job I: swipe a food row on Hôm nay. Left = Xoá, right = ⋯. The row is 178 px wide at 390.
+// Job I: swipe a food row on Hôm nay. Left = Xóa, right = ⋯. The row is 178 px wide at 390.
 const W = 178;
 
 describe("createRowSwipe: direction lock", () => {

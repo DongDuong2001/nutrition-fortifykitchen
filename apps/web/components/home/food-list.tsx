@@ -51,7 +51,7 @@ function FoodRow({
   motionClass?: string;
   /** cc-70: hold, then drag to another meal (touch and pen). Off: the long press alone. */
   touchDrag?: { enabled: boolean; onTarget: (slot: HomeMeal["slot"] | null) => void; onDrop: (slot: HomeMeal["slot"]) => void };
-  /** Job I: swipe left = Xoá, swipe right = ⋯ menu (today's rows, touch only). Absent: no swipe. */
+  /** Job I: swipe left = Xóa, swipe right = ⋯ menu (today's rows, touch only). Absent: no swipe. */
   swipe?: { onDelete: () => void; onMenu: () => void };
 }) {
   const router = useRouter();
@@ -207,14 +207,14 @@ function FoodRow({
   );
   if (!swipeable) return row;
   return (
-    // Job I: the buttons wait behind the row; swiping it left shows Xoá, right shows ⋯. Both stay in the accessibility tree
-    // (aria labels "Xoá <món>" and "Tuỳ chọn cho <món>"), so VoiceOver has the two actions on the row.
+    // Job I: the buttons wait behind the row; swiping it left shows Xóa, right shows ⋯. Both stay in the accessibility tree
+    // (aria labels "Xóa <món>" and "Tùy chọn cho <món>"), so VoiceOver has the two actions on the row.
     <div data-swipe-wrap={entry.id} className="relative overflow-x-clip">
       <button
         ref={sw.menuRef}
         type="button"
         tabIndex={sw.rest === "right" ? 0 : -1}
-        aria-label={`Tuỳ chọn cho ${entry.name}`}
+        aria-label={`Tùy chọn cho ${entry.name}`}
         aria-haspopup="dialog"
         onClick={sw.onButtonMenu}
         style={{ width: SWIPE_ACTION_PX }}
@@ -230,7 +230,7 @@ function FoodRow({
         ref={sw.trashRef}
         type="button"
         tabIndex={sw.rest === "left" ? 0 : -1}
-        aria-label={`Xoá ${entry.name}`}
+        aria-label={`Xóa ${entry.name}`}
         onClick={sw.onButtonDelete}
         style={{ width: SWIPE_ACTION_PX }}
         className="pointer-events-none absolute inset-y-0 right-0 flex cursor-pointer items-center justify-center border-0 bg-destructive p-0 text-on-accent opacity-0"

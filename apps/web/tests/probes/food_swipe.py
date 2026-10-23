@@ -1,7 +1,7 @@
-"""Job I (feat/food-swipe, 24/10): swipe a food on Hôm nay: left = Xoá, right = the ⋯ menu. 390 touch (CDP touch events), demo build.
+"""Job I (feat/food-swipe, 24/10): swipe a food on Hôm nay: left = Xóa, right = the ⋯ menu. 390 touch (CDP touch events), demo build.
 
 Short left swipe rests open with the red button -> tap it -> deleted -> Hoàn tác restores; a long left swipe deletes on release; a right
-swipe opens the ⋯ menu (Sửa, Chuyển sang bữa…, Xoá) and Chuyển sang bữa moves the food; vertical scroll still scrolls and does not move the
+swipe opens the ⋯ menu (Sửa, Chuyển sang bữa…, Xóa) and Chuyển sang bữa moves the food; vertical scroll still scrolls and does not move the
 row; one row open at a time; a tap elsewhere closes it; a past day has no swipe; reduced motion shows the buttons without a slide.
 Screenshots: .screenshots/food-swipe/*.png (390×844).
 Run with: ALIGN_BASE_URL=http://localhost:3115 npm run probe -- tests/probes/food_swipe.py
@@ -68,11 +68,11 @@ def shift(loc):
 
 def wrap_buttons(pg, entry_id):
     w = pg.locator(f"[data-swipe-wrap='{entry_id}']")
-    return w.locator("button").nth(0), w.locator("button").nth(1)  # ⋯ (left), Xoá (right)
+    return w.locator("button").nth(0), w.locator("button").nth(1)  # ⋯ (left), Xóa (right)
 
 
 def toast(pg):
-    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã xóa|Đã xoá"))
+    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã xóa|Đã xóa"))
     return re.sub(r"\s+", " ", t.first.inner_text()) if t.count() else ""
 
 
@@ -92,15 +92,15 @@ def run(browser):
     more, trash = wrap_buttons(pg, eid)
     tb = trash.bounding_box()
     check(-width * 0.6 < off <= -40, f"390: a short left swipe rests open ({off:.0f} px of a {width:.0f} px row)")
-    check(trash.evaluate("(el) => getComputedStyle(el).opacity") == "1" and tb and tb["width"] >= 44 and tb["height"] >= 44, f"390: the red Xoá button shows, ≥ 44 px ({tb and (round(tb['width']), round(tb['height']))})")
-    check(trash.get_attribute("aria-label") == f"Xoá {first_name.split(' ')[0]}" or (trash.get_attribute("aria-label") or "").startswith("Xoá "), f"390: its label for screen readers ({trash.get_attribute('aria-label')!r})")
+    check(trash.evaluate("(el) => getComputedStyle(el).opacity") == "1" and tb and tb["width"] >= 44 and tb["height"] >= 44, f"390: the red Xóa button shows, ≥ 44 px ({tb and (round(tb['width']), round(tb['height']))})")
+    check(trash.get_attribute("aria-label") == f"Xóa {first_name.split(' ')[0]}" or (trash.get_attribute("aria-label") or "").startswith("Xóa "), f"390: its label for screen readers ({trash.get_attribute('aria-label')!r})")
     pg.screenshot(path=str(SHOTS / "390-1-open-left.png"))
     check(len(names(pg)) == len(all_before), "390: nothing is deleted by an open row")
     # tap it: deleted
     tbb = trash.bounding_box()
     pg.touchscreen.tap(tbb["x"] + tbb["width"] / 2, tbb["y"] + tbb["height"] / 2)
     pg.wait_for_timeout(900)
-    check(len(names(pg)) == len(all_before) - 1 and eid not in [r.get_attribute("data-entry-id") for r in rows(pg).all()], "390: a tap on Xoá deletes the food")
+    check(len(names(pg)) == len(all_before) - 1 and eid not in [r.get_attribute("data-entry-id") for r in rows(pg).all()], "390: a tap on Xóa deletes the food")
     check(bool(toast(pg)), f"390: one toast ({toast(pg)!r})")
     pg.screenshot(path=str(SHOTS / "390-2-deleted-toast.png"))
     pg.locator("[role=status]").get_by_role("button", name="Hoàn tác").click()
@@ -129,7 +129,7 @@ def run(browser):
     pg.wait_for_timeout(700)
     dialog = pg.locator("[role=dialog]").filter(visible=True).first
     dtext = re.sub(r"\s+", " ", dialog.inner_text())
-    check("Sửa" in dtext and "Chuyển sang bữa" in dtext and "Xoá" in dtext, f"390: the ⋯ menu has Sửa, Chuyển sang bữa…, Xoá ({dtext[:80]!r})")
+    check("Sửa" in dtext and "Chuyển sang bữa" in dtext and "Xóa" in dtext, f"390: the ⋯ menu has Sửa, Chuyển sang bữa…, Xóa ({dtext[:80]!r})")
     pg.screenshot(path=str(SHOTS / "390-4-menu.png"))
     # Chuyển sang bữa… -> the meal picker -> Bữa tối
     dialog.get_by_role("button", name=re.compile("Chuyển sang bữa")).click()
@@ -194,7 +194,7 @@ def run(browser):
     eid = first.get_attribute("data-entry-id")
     swipe(pg, cdp, first, -70)
     more, trash = wrap_buttons(pg, eid)
-    check(trash.evaluate("(el) => getComputedStyle(el).opacity") == "1", "390 reduced motion: the Xoá button shows")
+    check(trash.evaluate("(el) => getComputedStyle(el).opacity") == "1", "390 reduced motion: the Xóa button shows")
     check(first.evaluate("(el) => getComputedStyle(el).transitionDuration") in ("0s", ""), "390 reduced motion: the row does not slide (no transition)")
     ctx.close()
 

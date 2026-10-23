@@ -11,7 +11,7 @@ import type { MealTargetSheet as MealTargetSheetType } from "./select-mode";
 
 /**
  * Job I: the ⋯ of a food row on Hôm nay (a swipe to the right, or a tap on the ⋯ it shows): the actions a food already has. Sửa opens
- * the edit screen, Chuyển sang bữa… is the same move the hold-and-drag makes (the meal picker of Chọn nhiều món), Xoá is the delete
+ * the edit screen, Chuyển sang bữa… is the same move the hold-and-drag makes (the meal picker of Chọn nhiều món), Xóa is the delete
  * of the left swipe (no confirm: its toast has Hoàn tác). The text stays while the sheet closes.
  */
 export function FoodMenuSheet({
@@ -66,7 +66,7 @@ export function FoodMenuSheet({
               if (target) onDelete(target);
             }}
           >
-            Xoá
+            Xóa
           </PillButton>
         </div>
       </Sheet>

@@ -1,5 +1,5 @@
 /**
- * Job I: which food row rests open (Xoá or ⋯ showing) — one at a time. Opening a row closes the one before; every row listens.
+ * Job I: which food row rests open (Xóa or ⋯ showing) — one at a time. Opening a row closes the one before; every row listens.
  * `swipedAway` remembers a row that was swiped off to the left and deleted, so the row that plays its exit (components/home/row-motion)
  * starts from the left edge instead of jumping back.
  */
