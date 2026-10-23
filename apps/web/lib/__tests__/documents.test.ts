@@ -45,10 +45,23 @@ describe("mock documents and access codes", () => {
     expect(await status(saveDocument("rules.md", "# Quy tắc", "WRONGCODE2"))).toBe(403);
     expect(await status(saveDocument("../x", "x", code))).toBe(400);
     await saveDocument("rules.md", "# Quy tắc", code);
-    expect(await readDocument("rules.md")).toBe("# Quy tắc");
+    expect((await readDocument("rules.md")).content).toBe("# Quy tắc");
     await revokeAccessCode(id);
     expect(await status(checkAccessCode(code))).toBe(403);
     expect(await listAccessCodes("coach")).toEqual([]);
     expect(await status(readDocument("other.md"))).toBe(404);
+  });
+
+  it("an edit saved over a version someone else replaced is refused (409); an upload replaces", async () => {
+    const { code } = await createAccessCode("coach");
+    await saveDocument("rules.md", "v1", code);
+    const loaded = await readDocument("rules.md");
+    await new Promise((r) => setTimeout(r, 2));
+    await saveDocument("rules.md", "v2 by someone else", code);
+    expect(await status(saveDocument("rules.md", "my edit", code, loaded.updatedAt))).toBe(409);
+    expect((await readDocument("rules.md")).content).toBe("v2 by someone else");
+    const fresh = await readDocument("rules.md");
+    await saveDocument("rules.md", "my edit", code, fresh.updatedAt);
+    expect((await readDocument("rules.md")).content).toBe("my edit");
   });
 });
