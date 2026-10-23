@@ -29,6 +29,8 @@ export function globToRegExp(glob) {
   return new RegExp(`^${re}$`);
 }
 
+const slashes = (p) => p.replace(/\\/g, "/");
+
 /** Files changed against origin/main (committed on this branch, staged, unstaged and untracked), relative to apps/web. */
 export function changedFiles(base = "origin/main") {
   const git = (...args) => execFileSync("git", args, { cwd: WEB, encoding: "utf8" });
@@ -36,9 +38,10 @@ export function changedFiles(base = "origin/main") {
   const mergeBase = git("merge-base", base, "HEAD").trim();
   const names = [
     ...git("diff", "--name-only", mergeBase).split("\n"),
-    ...git("ls-files", "--others", "--exclude-standard").split("\n").map((f) => relative(top, join(WEB, f))),
+    ...git("ls-files", "--others", "--exclude-standard").split("\n").map((f) => slashes(relative(top, join(WEB, f)))),
   ];
-  const webPrefix = relative(top, WEB) + "/";
+  // git writes forward slashes on every OS; path.relative writes backslashes on Windows, where the prefix then matched nothing
+  const webPrefix = slashes(relative(top, WEB)) + "/";
   return [...new Set(names.filter((f) => f.startsWith(webPrefix)).map((f) => f.slice(webPrefix.length)))].filter((f) =>
     existsSync(join(WEB, f)),
   );
