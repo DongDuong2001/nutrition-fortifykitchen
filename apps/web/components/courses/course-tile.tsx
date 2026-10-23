@@ -28,7 +28,8 @@ export function stateOf(c: CourseSummary): "code" | "level" | "done" | "learning
 
 const STATE_WORDS = { code: "Cần mã", level: "Mở ở", done: "Xong", learning: "Đang học", open: "Đã mở" } as const;
 
-const PILL = "inline-flex h-7 items-center gap-1 self-start whitespace-nowrap rounded-full bg-ink/20 px-2.5 text-cap font-semibold text-on-accent";
+// min-h, not h: at 200 % text the badge wraps under the word inside the tile instead of running out of it
+const PILL = "inline-flex min-h-7 max-w-full flex-wrap items-center gap-x-1 self-start rounded-full bg-ink/20 px-2.5 py-0.5 text-cap font-semibold text-on-accent";
 
 /** `simple`: an open course says only "Đã mở" (the Khám phá carousel), not how far the user is. */
 export function StatePill({ course, simple = false, className = "" }: { course: CourseSummary; simple?: boolean; className?: string }) {
@@ -37,7 +38,7 @@ export function StatePill({ course, simple = false, className = "" }: { course: 
   return (
     <span className={`${PILL} ${className}`}>
       {shown === "code" || shown === "level" ? <LockGlyph /> : !simple && <CheckGlyph size={14} />}
-      {STATE_WORDS[shown]}
+      <span className="whitespace-nowrap">{STATE_WORDS[shown]}</span>
       {/* The badge is the Level tag at pill size (13 px text, 20 px high), as the design board */}
       {shown === "level" && <LevelBadge level={toLevel(course.minLevel)} className="px-1.5! py-0.5! text-cap!" />}
     </span>
