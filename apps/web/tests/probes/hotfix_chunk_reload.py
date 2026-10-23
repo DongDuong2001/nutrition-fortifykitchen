@@ -10,6 +10,8 @@ Works on the demo build (gate:fast) and a live build alike; service workers are 
   D  something typed in a form (Tự nhập, the name field): the failure does not reload; a toast "Có bản cập nhật" with Tải lại offers
      it; a tap while the field is still in hand waits ("bạn xong việc đang làm là tải lại") and does not reload
   E  a failing script that is not a build file (/_next/static/ only counts) and a failing API fetch do nothing
+  F  a second failure inside 60 s that is only a rejection (a background import such as lib/vitals): the toast "Có bản cập nhật", not
+     the error screen, and no reload; a failed build <script> in the same state still gets the error screen
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/hotfix_chunk_reload.py
 Pick parts with HCR_ONLY=A,B
 """
@@ -196,6 +198,29 @@ with sync_playwright() as p:
         t.pg.wait_for_timeout(2000)
         check(len(t.navs) == 1 and t.stamp() is None, f"E: no reload for a script outside /_next/static/, a failed fetch or a bare 'Failed to fetch' ({len(t.navs)} navigation)")
         check(t.pg.get_by_text("Có bản cập nhật", exact=False).count() == 0, "E: no toast, no error screen")
+        t.ctx.close()
+
+    if part("F"):
+        print("-- F: a bare rejection on a second failure offers the update, it does not take the app away")
+        t = Page(browser)
+        t.pg.goto(BASE + "/app", wait_until="domcontentloaded")
+        t.app_ready()
+        t.pg.evaluate("(k) => sessionStorage.setItem(k, String(Date.now()))", KEY)
+        t.pg.evaluate("() => { Promise.reject(Object.assign(new Error('Loading chunk 9 failed.'), { name: 'ChunkLoadError' })); }")
+        t.pg.get_by_text("Có bản cập nhật", exact=True).wait_for(state="visible", timeout=8000)
+        t.pg.wait_for_timeout(1500)
+        check(t.error_screen().count() == 0, "F: no error screen")
+        check(len(t.navs) == 1, f"F: no reload ({len(t.navs)} navigation)")
+        check(t.pg.locator("nav:visible").count() > 0, "F: the app is still there")
+        t.shot("F-toast")
+        t.ctx.close()
+        t = Page(browser)
+        t.pg.goto(BASE + "/app", wait_until="domcontentloaded")
+        t.app_ready()
+        t.pg.evaluate("(k) => sessionStorage.setItem(k, String(Date.now()))", KEY)
+        t.pg.evaluate("() => { const s = document.createElement('script'); s.src = '/_next/static/chunks/gone-hcr-f.js'; document.body.appendChild(s); }")
+        t.error_screen().wait_for(state="visible", timeout=8000)
+        check(len(t.navs) == 1, "F: a failed build <script> in the same state gets the error screen, and no reload")
         t.ctx.close()
 
     browser.close()
