@@ -22,6 +22,7 @@ import { getTrainingDurations, TRAINING_SIZE_NAME, type TrainingSize } from "@/l
 import { readPrefs, writePrefs } from "@/lib/training-prefs";
 import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
+import { feedbackSeen, openFeedback, subscribeFeedback } from "@/lib/feedback";
 
 const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "male", label: "Nam" },
@@ -373,11 +374,42 @@ export function AppCard() {
       )}
       <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
       <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
-      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" data-align-group="profile-row" />
       <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />
       <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" data-align-group="profile-row" />
       <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" data-align-group="profile-row" />
+    </Card>
+  );
+}
+
+/**
+ * HỖ TRỢ (feedback-mailto, board 1): Góp ý & hỗ trợ (the type sheet, with "Mới" until it has been opened once) and
+ * Nguồn dữ liệu, moved here from Ứng dụng.
+ */
+export function SupportCard() {
+  // Read after mount, so the first paint never shows a badge it will take away
+  const [isNew, setIsNew] = useState(false);
+  useEffect(() => {
+    setIsNew(!feedbackSeen());
+    return subscribeFeedback(() => setIsNew(!feedbackSeen()));
+  }, []);
+  return (
+    <Card as="section" aria-label="Hỗ trợ" className="flex flex-col gap-1">
+      <SectionHeader>Hỗ trợ</SectionHeader>
+      <SettingsRow
+        dense
+        tone="body"
+        glyph={SETTINGS_ICONS.chat}
+        label="Góp ý & hỗ trợ"
+        hint="Báo lỗi, sai số liệu, yêu cầu thêm món"
+        onClick={() => openFeedback({ screen: "Cài đặt" })}
+        divider={false}
+        minHeight="16"
+        data-align-group="profile-row"
+      >
+        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>}
+      </SettingsRow>
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
     </Card>
   );
 }

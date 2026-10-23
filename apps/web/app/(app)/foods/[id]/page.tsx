@@ -18,6 +18,8 @@ import { brandToShow, foodSourceLabel } from "@/lib/food-meta";
 import { isManualFood, isProxy } from "@/lib/food-source";
 import { markUsed } from "@/lib/onboarding-store";
 import { SourceSheet } from "@/components/foods/source-sheet";
+import { openFeedback } from "@/lib/feedback";
+import { isOwnFood } from "@/lib/food-categories";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ComparePicker } from "@/components/foods/compare-picker";
 import { PillButton } from "@/components/ui/pill-button";
@@ -311,6 +313,28 @@ function FoodDetailInner() {
 
         <GoodSources rows={goodSources} />
         {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={portionAmountText(selectedServingLabel) ?? unitAmountText(food, selectedServingLabel, parsedGrams) ?? `${formatAmount(parsedGrams, "g")} g`} />}
+
+        {/* feedback-mailto board 4: the end of the nutrition, where the numbers come from and a way to say one is wrong (not on
+            the person's own foods: their numbers are theirs) */}
+        {!isOwnFood(food) && (
+        <div data-align-group="food-detail" className="flex min-h-11 flex-wrap items-center justify-between gap-x-2 border-t border-divider pt-2">
+          <span className="min-w-0 break-words text-cap text-secondary">
+            Nguồn: {foodSourceLabel(food.source)}
+            {food.sourceRef ? ` ${food.sourceRef.id}` : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() => openFeedback({ type: "data", screen: "Món ăn", food: { name: food.nameVi, id: food.id } })}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border-0 bg-transparent px-0 text-sm font-bold text-cobalt hover:underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+            </svg>
+            Báo sai số liệu
+          </button>
+        </div>
+        )}
       </main>
 
       <SourceSheet food={food} open={sourceOpen} onClose={() => setSourceOpen(false)} />

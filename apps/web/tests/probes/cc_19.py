@@ -179,13 +179,13 @@ def check_settings_row_and_sources(browser):
         go(pg, "/settings")
         pg.wait_for_selector('section[aria-label="Ứng dụng"]', timeout=10000)
         pg.screenshot(path=os.path.join(SHOTS, f"cc-19-settings-{label}.png"), full_page=True)
-        rows = pg.locator('section[aria-label="Ứng dụng"] a')
+        # feedback-mailto (Hao 22/10): Nguồn dữ liệu moved from Ứng dụng into the new Hỗ trợ card, after Góp ý & hỗ trợ
+        rows = pg.locator('section[aria-label="Hỗ trợ"] a, section[aria-label="Hỗ trợ"] button')
         names = [rows.nth(i).inner_text().split("\n")[0].strip() for i in range(rows.count())]
-        check("Nguồn dữ liệu" in names, f"{label} /settings: Ứng dụng card has a Nguồn dữ liệu row ({names})")
+        check("Nguồn dữ liệu" in names, f"{label} /settings: Hỗ trợ card has a Nguồn dữ liệu row ({names})")
         if "Nguồn dữ liệu" in names:
             i = names.index("Nguồn dữ liệu")
-            check(0 < i < len(names) - 1 and names[i - 1] == "Nhắc nhở" and names[i + 1] == "Thêm vào màn hình chính",
-                  f"{label} /settings: the row sits between Nhắc nhở and Thêm vào màn hình chính")
+            check(i > 0 and names[i - 1] == "Góp ý & hỗ trợ", f"{label} /settings: the row sits after Góp ý & hỗ trợ ({names})")
             check(rows.nth(i).get_attribute("href") == "/settings/data-sources", f"{label} /settings: the row links to /settings/data-sources")
             min_target(rows.nth(i), f"{label} /settings: Nguồn dữ liệu row")
 

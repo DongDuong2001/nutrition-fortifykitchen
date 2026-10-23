@@ -135,28 +135,29 @@ describe("unseenReleases (what Có gì mới lists)", () => {
   const ids = (seen: string | null) => unseenReleases(seen).map((r) => r.id);
 
   it("every release newer than the last one seen, newest first", () => {
-    expect(ids("2026-10-18b")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(ids("2026-10-17")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
+    expect(ids("2026-10-18b")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids("2026-10-17")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
   });
 
   it("seen 18c: 21b, 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d; … seen 20a: 21b, 21a and 20b; seen 20b: 21b and 21a; seen 21a: only 21b; seen 21c: 22c, 22b and 22a; seen 22a: 22c and 22b; seen 22b: only 22c; seen the newest: nothing", () => {
-    expect(ids("2026-10-18c")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
-    expect(ids("2026-10-18e")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
-    expect(ids("2026-10-18f")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
-    expect(ids("2026-10-19a")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
-    expect(ids("2026-10-19b")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
-    expect(ids("2026-10-20a")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
-    expect(ids("2026-10-20b")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a"]);
-    expect(ids("2026-10-21a")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b"]);
-    expect(ids("2026-10-21b")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c"]);
-    expect(ids("2026-10-21c")).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a"]);
-    expect(ids("2026-10-22a")).toEqual(["2026-10-22c", "2026-10-22b"]);
-    expect(ids("2026-10-22b")).toEqual(["2026-10-22c"]);
-    expect(ids("2026-10-22c")).toEqual([]);
+    expect(ids("2026-10-18c")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d"]);
+    expect(ids("2026-10-18e")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f"]);
+    expect(ids("2026-10-18f")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a"]);
+    expect(ids("2026-10-19a")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b"]);
+    expect(ids("2026-10-19b")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a"]);
+    expect(ids("2026-10-20a")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b"]);
+    expect(ids("2026-10-20b")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a"]);
+    expect(ids("2026-10-21a")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b"]);
+    expect(ids("2026-10-21b")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c"]);
+    expect(ids("2026-10-21c")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a"]);
+    expect(ids("2026-10-22a")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b"]);
+    expect(ids("2026-10-22b")).toEqual(["2026-10-23a", "2026-10-22c"]);
+    expect(ids("2026-10-22c")).toEqual(["2026-10-23a"]);
+    expect(ids("2026-10-23a")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-22c"]);
+    expect(ids(null)).toEqual(["2026-10-23a"]);
   });
 
   it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
@@ -174,8 +175,17 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-22c, overnight 22→23/10) has the units and counts items; no tour (no new control)", () => {
+  it("the newest release (2026-10-23a, the night of 22→23/10, shared by its PRs) says what is new in plain words; no tour", () => {
     const r = latestRelease();
+    expect(r?.id).toBe("2026-10-23a");
+    expect(r?.date).toBe("23/10");
+    expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
+    expect(r?.tour).toBeUndefined();
+    for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
+  });
+
+  it("2026-10-22c (overnight 22→23/10) has the units and counts items; no tour (no new control)", () => {
+    const r = RELEASES.find((x) => x.id === "2026-10-22c");
     expect(r?.id).toBe("2026-10-22c");
     expect(r?.date).toBe("22/10");
     expect(r?.items.map((i) => i.title)).toEqual(["Món ghi theo gam", "Tổng quan đếm vi chất như Hôm nay", "Số trung bình ghi rõ"]);
@@ -356,7 +366,7 @@ describe("joinedTour (what Thử ngay runs)", () => {
 
   it("seen 18b, on Hôm nay: the steps on the page, so the cap keeps the newest 8 of those", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
-    expect(ids).toEqual(["2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
     // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place: 22a's 7 and 21c's first on the page
     expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([T21C[0], ...T22A.filter((t) => t !== "So sánh món")]);
   });

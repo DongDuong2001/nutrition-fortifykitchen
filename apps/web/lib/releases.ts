@@ -31,6 +31,19 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // overnight 22→23/10 (session B): one entry for the night's PRs, each adds its item (the entry is shared: whichever merges second keeps
+  // both). feedback-mailto: Góp ý & hỗ trợ in Cài đặt, no tour (Hao: "No tour step").
+  {
+    id: "2026-10-23a",
+    date: "23/10",
+    items: [
+      {
+        icon: "home",
+        title: "Góp ý & báo lỗi ngay trong app",
+        body: "Cài đặt có mục Góp ý & hỗ trợ. Báo lỗi, báo sai số liệu hay yêu cầu thêm món, app soạn sẵn email cho bạn.",
+      },
+    ],
+  },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
   // to this same entry, whichever merges second keeps both. No tour: no new control, and the one new hint, Xem riêng một bữa, is a tip
   // (lib/tips meal-focus) where Hôm nay's footnote used to say it.
