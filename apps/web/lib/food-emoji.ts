@@ -48,12 +48,14 @@ const NO_EMOJI_FRUITS = [
 ];
 
 export const EMOJI_RULES: readonly Rule[] = [
-  // Anywhere: "Ruột chanh dây" is not a lemon whatever its category
-  { words: NO_EMOJI_FRUITS, emoji: null },
-  // Names that hold another rule's word but are not that food ("Đậu bắp" is okra, not corn; "Đậu gà" is chickpeas)
-  { words: ["đậu phụ", "đậu hũ", "hạt nêm", "nước mắm", "bơ bò", "bơ lạt", "bơ thực vật", "đậu bắp", "hoa chuối", "bắp chuối", "dưa lê", "đậu gà", "bánh tráng"], emoji: null },
-  { words: ["gạo"], emoji: "🍚" },
-  { words: ["nấm đùi gà"], emoji: "🍄" },
+  // Names that hold another rule's word but are not that food ("Đậu bắp" is okra, not corn; "Đậu gà" is chickpeas; "Vú sữa" is not
+  // milk; "Mâm xôi" is a raspberry)
+  { words: ["đậu phụ", "đậu hũ", "hạt nêm", "bơ bò", "bơ lạt", "bơ thực vật", "đậu bắp", "hoa chuối", "bắp chuối", "dưa lê", "đậu gà", "bánh tráng", "vú sữa", "diếp cá", "sừng bò", "mâm xôi"], emoji: null },
+  // Only as the seasoning: "Cánh gà chiên nước mắm" is chicken
+  { words: ["nước mắm"], emoji: null, only: ["gia_vi"] },
+  // Only as the grain: "Tép (tép gạo)" is shrimp
+  { words: ["gạo"], emoji: "🍚", only: ["tinh_bot"] },
+  { words: ["nấm đùi gà", "nấm bào ngư"], emoji: "🍄" },
   { words: ["cải bó xôi"], emoji: "🥬" },
   { words: ["cơm dừa"], emoji: "🥥" },
   { words: ["trai sông", "trai"], emoji: "🦪", only: ["dam", "mon_viet"] },
@@ -101,7 +103,9 @@ export const EMOJI_RULES: readonly Rule[] = [
   { words: ["tỏi"], emoji: "🧄" },
   { words: ["hành"], emoji: "🧅" },
   { words: ["rau", "cải"], emoji: "🥬" },
-  // Fruit
+  // Fruit. First the ones with no emoji, so "Ruột chanh dây" is never a lemon; after the dishes and proteins, so "Cá saba Na Uy" is a
+  // fish, "Ốc xào me" a shellfish and "Sữa chua lựu" a yogurt
+  { words: NO_EMOJI_FRUITS, emoji: null },
   { words: ["chuối"], emoji: "🍌" },
   { words: ["táo"], emoji: "🍎" },
   { words: ["cam", "quýt"], emoji: "🍊" },
@@ -120,8 +124,8 @@ export const EMOJI_RULES: readonly Rule[] = [
   { words: ["kiwi"], emoji: "🥝" },
   // Nuts, grains, sweets, seasoning
   { words: ["đậu phộng", "lạc"], emoji: "🥜" },
-  { words: ["hạt", "hạnh nhân", "óc chó", "mè", "vừng"], emoji: "🌰" },
   { words: ["yến mạch", "oat", "oats"], emoji: "🥣" },
+  { words: ["hạt", "hạnh nhân", "óc chó", "mè", "vừng"], emoji: "🌰" },
   { words: ["kẹo", "socola", "sô cô la", "chocolate"], emoji: "🍫" },
   { words: ["kem"], emoji: "🍦", only: ["an_vat"] },
   { words: ["mật ong", "mật mía"], emoji: "🍯" },

@@ -91,7 +91,7 @@ describe("foodEmoji: name rules", () => {
   });
 
   it("the 21 fruits with no emoji keep their category's, never a wrong one (chanh dây is not 🍋, vú sữa is not 🥛)", () => {
-    for (const name of ["Chanh dây", "Vú sữa", "Táo ta", "Dưa gang", "Mãng cầu", "Bưởi", "Thanh long", "Sầu riêng", "Mít", "Chôm chôm", "Măng cụt", "Ổi", "Vải", "Đu đủ", "Khế", "Hồng xiêm", "Me", "Cóc", "Mận", "Lựu"]) {
+    for (const name of ["Chanh dây", "Vú sữa", "Táo ta", "Dưa gang", "Mãng cầu", "Bưởi", "Thanh long", "Sầu riêng", "Mít", "Chôm chôm", "Măng cụt", "Ổi", "Vải", "Đu đủ", "Khế", "Hồng xiêm", "Me", "Cóc", "Mận", "Lựu", "Na", "Nhãn"]) {
       expect(foodEmojiWithSource(food(name, "trai_cay"))).toEqual({ emoji: CATEGORY_EMOJI.trai_cay, source: "category" });
     }
   });
@@ -107,6 +107,17 @@ describe("foodEmoji: name rules", () => {
     expect(foodEmoji(food("Cải bó xôi", "rau"))).toBe("🥬");
     expect(foodEmoji(food("Cơm dừa", "beo"))).toBe("🥥");
     expect(foodEmoji(food("Ruột chanh dây", "gia_vi"))).toBe(CATEGORY_EMOJI.gia_vi);
+    expect(foodEmoji(food("Cá saba Na Uy", "dam"))).toBe("🐟");
+    expect(foodEmoji(food("Ốc xào me", "mon_viet"))).toBe("🦪");
+    expect(foodEmoji(food("Cánh gà chiên nước mắm", "mon_viet"))).toBe("🍗");
+    expect(foodEmoji(food("Nước mắm", "gia_vi"))).toBe(CATEGORY_EMOJI.gia_vi);
+    expect(foodEmoji(food("Tép (tép gạo)", "dam"))).toBe("🦐");
+    expect(foodEmoji(food("Sữa chua lựu", "sua"))).toBe("🥣");
+    expect(foodEmoji(food("Nấm bào ngư", "rau"))).toBe("🍄");
+    expect(foodEmoji(food("Diếp cá (rau giấp cá)", "rau"))).toBe(CATEGORY_EMOJI.rau);
+    expect(foodEmoji(food("Bánh sừng bò (croissant bơ)", "an_vat"))).toBe(CATEGORY_EMOJI.an_vat);
+    expect(foodEmoji(food("Mâm xôi", "trai_cay"))).toBe(CATEGORY_EMOJI.trai_cay);
+    expect(foodEmoji(food("Yến mạch cắt hạt steel-cut", "tinh_bot"))).toBe("🥣");
     expect(foodEmoji(food("Bánh tráng nướng", "an_vat"))).toBe(CATEGORY_EMOJI.an_vat);
     expect(foodEmoji(food("Nước ép thơm", "do_uong"))).toBe("🍍");
   });

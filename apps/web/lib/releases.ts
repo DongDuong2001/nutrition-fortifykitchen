@@ -50,7 +50,7 @@ export const RELEASES: readonly Release[] = [
         body: "Ở Khám phá › Ngày ăn mẫu, chạm Tạo ngày ăn mẫu rồi thêm món vào từng bữa. Không cần ghi vào nhật ký trước.",
       },
       { icon: "bars", title: "Kcal từ đạm, tinh bột, béo", body: "Chạm Tinh bột, Đạm hoặc Chất béo ở thẻ đen để xem số kcal từ nó và phần của nó trong tổng kcal. Chạm lần nữa để quay lại." },
-      { icon: "select", title: "Món ăn có biểu tượng cho dễ tìm", body: "Mỗi món trong danh sách thêm món, ở Khám phá và trang món có biểu tượng riêng, nhìn là nhận ra ngay." },
+      { icon: "select", title: "Món ăn có biểu tượng cho dễ tìm", body: "Mỗi món trong danh sách thêm món, ở Khám phá và trang món có biểu tượng, nhìn là nhận ra ngay." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
