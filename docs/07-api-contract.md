@@ -566,6 +566,13 @@ Allows users to create and store custom foods with nutritional values.
   - Creates 2 default servings: the user's portion (`150 g`) and standard `100 g`.
 - **Response `201 Created`**: Returns the saved `FoodItem` object.
 
+### 2.11b. Saved meals ("Bữa ăn của tôi")
+A named set of foods with portions, logged in one tap. The web keeps each meal under an id it makes (a uuid) and sends every change through its outbox, so a save sent twice is one meal.
+- **Used by screens**: Khám phá › Bữa ăn của tôi, "Lưu bữa này" on Hôm nay.
+- `GET /api/v1/saved-meals` → `200 {"items":[{"id","name","items":[{"food_id","portion_label","grams","sort"}],"created_at","updated_at"}]}`.
+- `PUT /api/v1/saved-meals/{id}` with `{"name":"Bữa sáng","items":[{"food_id":"<uuid>","portion_label":"1 tô","grams":300,"sort":0}]}` → `200` and the meal. Creates the meal, or replaces its name and items when it exists (a rename is a PUT). `400` for a bad id or a blank name, `409 ID_CONFLICT` when the id is another user's meal. Foods must be in the server's catalogue: a meal with a food made only on the device stays on the device.
+- `POST /api/v1/saved-meals` (the server picks the id) and `DELETE /api/v1/saved-meals/{id}` (`404` when it is gone, which the web counts as done) are unchanged.
+
 ---
 
 ### 2.12. Trends
@@ -611,6 +618,25 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
   ]
 }
 ```
+
+### 2.13. Documents (Tài liệu) and access codes
+The coach's documents and rules: markdown text by file name (migration 000017, `apps/api/internal/documents`). A coach or an admin writes them and reads them directly. Every signed-in user sees the list; a learner opens a document with an access code the coach made. A code is 10 symbols from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, compared in any case with spaces and dashes ignored. It works for 30 days unless its coach revokes it, and only its SHA-256 is stored.
+- **Used by screens**: `/documents` (Cài đặt › Hỗ trợ › Tài liệu).
+- **Names**: `^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,99}$`, no `..`. Content at most 1 000 000 bytes.
+
+| Method and path | Who | Body | Success | Refusals |
+|---|---|---|---|---|
+| `GET /api/v1/documents` | signed in | | `200 {"items":[{"name":"rules.md","updatedAt":"…"}]}` by name | |
+| `POST /api/v1/documents/{name}/open` | signed in, with a code | `{"code":"ABCDEFGH23"}` | `200 {"name","updatedAt","content"}`, `Cache-Control: no-store` | `400` bad name, `403 FORBIDDEN` wrong, expired or revoked code, `404` none |
+| `GET /api/v1/documents/{name}` | coach, admin | | `200 {"name","updatedAt","content"}` | `400`, `403` other roles, `404` |
+| `PUT /api/v1/documents/{name}` | coach, admin | `{"content":"…","baseUpdatedAt":"…"}`; an edit sends the `updatedAt` it loaded, a new document or an upload leaves it out | `200 {"name","updatedAt"}` | `400` bad name, `403` other roles, `404` an edit of a document that is gone, `409 CONFLICT` someone saved since the edit loaded it, `413` too large |
+| `POST /api/v1/document-codes/check` | signed in | `{"code":"…"}` | `200 {"valid":true}` | `403 FORBIDDEN` |
+| `POST /api/v1/document-codes` | coach, admin | `{}` | `201 {"id","createdAt","expiresAt","code"}`, the only time the code is sent | `403` other roles |
+| `GET /api/v1/document-codes` | coach, admin | | `200 {"items":[{"id","createdAt","expiresAt"}]}`, the caller's live codes, newest first | `403` other roles |
+| `DELETE /api/v1/document-codes/{id}` | coach, admin | | `200 {"success":true}`, again when sent again | `400` bad id, `403` other roles |
+
+The code travels in the request body, never the URL, so it stays out of server logs. The web shows a learner's document in a protected reader (no selecting, copying, saving or printing, blurred when the app is left, the reader's account watermarked across it); a browser cannot stop the phone's own screenshot.
+Guessing a code is bounded by the per-user write limit (60 a minute); a 50-bit code is out of reach at that rate.
 
 
 ---

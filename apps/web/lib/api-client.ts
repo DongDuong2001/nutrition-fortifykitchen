@@ -15,6 +15,7 @@ import type { OutboxItem } from "./outbox";
 import { readStoredProfile, TARGET_SETTING_KEYS, type Profile, type TargetSettings } from "./profile";
 import { parseCustomTargets } from "./custom-targets";
 import type { DayTemplate } from "./day-templates";
+import type { SavedMeal } from "./saved-meals";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
@@ -509,8 +510,8 @@ export const writesInFlight = (): number => engine?.writesInFlight() ?? 0;
 /** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
 export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWrite(entity) ?? false;
 /** The Ngày ăn mẫu writes waiting to be sent: template id to "put" or "delete" (the newest). Kept over a list read from the server. */
-export const pendingTemplateOps = (): Map<string, "put" | "delete"> =>
-  new Map(outboxItems().flatMap((item): Array<[string, "put" | "delete"]> => (item.kind === "template" && item.entity ? [[item.entity.slice("template:".length), item.method === "DELETE" ? "delete" : "put"]] : [])));
+export const pendingTemplateOps = (prefix = "template:"): Map<string, "put" | "delete"> =>
+  new Map(outboxItems().flatMap((item): Array<[string, "put" | "delete"]> => (item.kind === "template" && item.entity?.startsWith(prefix) ? [[item.entity.slice(prefix.length), item.method === "DELETE" ? "delete" : "put"]] : [])));
 /** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
 export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
 
@@ -938,6 +939,23 @@ export const apiClient = {
   },
 
   /** Ngày ăn mẫu as the server has them (GET /day-templates, newest first). Null in live mode when they could not be read. */
+  /** The weigh-ins between two days (YYYY-MM-DD), oldest first; null when they could not be read (or outside live mode). */
+  async getWeightLog(from: string, to: string): Promise<{ date: string; kg: number }[] | null> {
+    if (!isLiveMode()) return null;
+    try {
+      const res = await apiFetch(`/me/weight?from=${from}&to=${to}`, { signal: diaryTimeout() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const rows: unknown = json.data ?? json;
+      if (!Array.isArray(rows)) return null;
+      return rows
+        .map((r: { log_date?: unknown; weight_kg?: unknown }) => ({ date: String(r.log_date ?? "").slice(0, 10), kg: Number(r.weight_kg) }))
+        .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && Number.isFinite(p.kg) && p.kg > 0);
+    } catch {
+      return null;
+    }
+  },
+
   async getDayTemplates(): Promise<unknown[] | null> {
     if (!isLiveMode()) return null;
     try {
@@ -964,6 +982,42 @@ export const apiClient = {
   async deleteDayTemplate(id: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
     return withEngine((e) => e.sideWrite({ kind: "template", entity: `template:${id}`, method: "DELETE", path: `/day-templates/${id}`, payload: {} }));
+  },
+
+  /** Bữa ăn của tôi on the server (GET /saved-meals), or null when it could not be read (or outside live mode). */
+  async getSavedMeals(): Promise<SavedMeal[] | null> {
+    if (!isLiveMode()) return null;
+    try {
+      const res = await apiFetch(`/saved-meals`, { signal: diaryTimeout() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const items = (json.data ?? json)?.items;
+      if (!Array.isArray(items)) return null;
+      return items.map((m: { id: string; name: string; created_at: string; items?: { food_id: string; portion_label?: string; grams: number }[] }) => ({
+        id: m.id,
+        name: m.name,
+        createdAt: m.created_at,
+        items: (m.items ?? []).map((i) => ({ foodId: i.food_id, servingLabel: i.portion_label ?? "", grams: Number(i.grams) })),
+      }));
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * A saved meal made or renamed: through the outbox, PUT by its id (the same result when sent again). A meal with a food the server
+   * has no row for (made on this device, a recipe) stays on this device: the server keeps only foods of its catalogue.
+   */
+  async queueSavedMeal(meal: SavedMeal): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(meal.id) || !meal.items.every((i) => isUuid(i.foodId))) return { state: "local" };
+    const items = meal.items.map((i, sort) => ({ food_id: i.foodId, portion_label: i.servingLabel, grams: i.grams, sort }));
+    return withEngine((e) => e.sideWrite({ kind: "template", entity: `meal:${meal.id}`, method: "PUT", path: `/saved-meals/${meal.id}`, payload: { name: meal.name, items } }));
+  },
+
+  /** A saved meal deleted: through the outbox, after any save of it that still waits. A 404 (never reached the server) counts as done. */
+  async deleteSavedMeal(id: string): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({ kind: "template", entity: `meal:${id}`, method: "DELETE", path: `/saved-meals/${id}`, payload: {} }));
   },
 
   /** Saves the profile (setup). Live mode throws when the API cannot be reached or says no: the person sees it and tries again. */

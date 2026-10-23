@@ -16,7 +16,8 @@ export interface FoodEmptyStateProps {
   getMeta: (food: FoodItem) => string;
   onPickSimilar: (food: FoodItem) => void;
   onClearFilter: () => void;
-  newFoodHref: string;
+  /** Null in the + sheet's template mode: a food made there would be logged to the diary, not to the template */
+  newFoodHref: string | null;
   /** Yêu cầu thêm món: the Góp ý sheet with the search words (feedback-mailto board 4) */
   onRequestFood?: (query: string) => void;
 }
@@ -57,9 +58,11 @@ export function FoodEmptyState({
         title={drink ? "Chưa có đồ uống nào" : `Chưa có món nào trong ${categoryLabel(filter)}`}
         actions={
           <>
-            <div className="w-full">
-              <CreateFoodButton href={newFoodHref} helper={null} />
-            </div>
+            {newFoodHref && (
+              <div className="w-full">
+                <CreateFoodButton href={newFoodHref} helper={null} />
+              </div>
+            )}
             {clearFilterButton}
           </>
         }
@@ -81,12 +84,15 @@ export function FoodEmptyState({
       actions={
         <>
           {filter !== "all" && clearFilterButton}
-          {/* feedback-mailto board 4: two equal buttons, enter it yourself now or ask for it to be added */}
-          <div className="mt-2 grid w-full grid-cols-2 gap-2">
+          {/* feedback-mailto board 4: two equal buttons, enter it yourself now or ask for it to be added; template mode has no
+              Tự nhập (a food made there would go to the diary), so Yêu cầu thêm món takes the row */}
+          <div className={`mt-2 grid w-full gap-2 ${newFoodHref ? "grid-cols-2" : "grid-cols-1"}`}>
             {/* md pills grow with the text (lg is a fixed 52 px): at 360 px and 150 % text the labels take two lines */}
-            <PillButton variant="primary" size="md" fullWidth href={newFoodHref} className="min-h-12 text-callout">
-              Tự nhập
-            </PillButton>
+            {newFoodHref && (
+              <PillButton variant="primary" size="md" fullWidth href={newFoodHref} className="min-h-12 text-callout">
+                Tự nhập
+              </PillButton>
+            )}
             <PillButton variant="secondary" size="md" fullWidth type="button" onClick={() => onRequestFood?.(query.trim())} aria-haspopup="dialog" className="min-h-12 text-callout">
               Yêu cầu thêm món
             </PillButton>

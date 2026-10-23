@@ -1,0 +1,171 @@
+[
+ {
+  "source": "literature",
+  "source_id": "STFCJ 5th rev. ed. 2005, Beverages, matcha (MEXT item 16_16035_6)",
+  "name": "Matcha (powdered green tea)",
+  "name_vi": "Matcha",
+  "category": "do_uong",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.8,
+   "b12": 0,
+   "b2": 1.35,
+   "b3": 4,
+   "b5": 3.7,
+   "b6": 0.96,
+   "caffeine": 3200,
+   "calcium": 420,
+   "carbs": 38.5,
+   "cholesterol": 0,
+   "copper": 0.8,
+   "energy": 324,
+   "fat": 5.3,
+   "fiber": 38.5,
+   "folate": 1200,
+   "iron": 17,
+   "magnesium": 230,
+   "monounsaturated_fat": 0.34,
+   "phosphorus": 350,
+   "polyunsaturated_fat": 2.18,
+   "potassium": 2700,
+   "protein": 30.6,
+   "saturated_fat": 0.68,
+   "sodium": 6,
+   "vitamin_a": 2400,
+   "vitamin_c": 60,
+   "vitamin_d": 0,
+   "vitamin_e": 28.1,
+   "vitamin_k": 2900,
+   "water": 5,
+   "zinc": 6.3
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng cà phê",
+    "grams": 2,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "literature",
+  "source_id": "STFCJ 5th rev. ed. 2005, Beverages, matcha (MEXT item 16_16035_6):matcha-satoen-bot",
+  "name": "Matcha (powdered green tea) [Matcha Satoen]",
+  "name_vi": "Matcha Satoen",
+  "category": "do_uong",
+  "brand": "Satoen",
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.8,
+   "b12": 0,
+   "b2": 1.35,
+   "b3": 4,
+   "b5": 3.7,
+   "b6": 0.96,
+   "caffeine": 3200,
+   "calcium": 420,
+   "carbs": 38.5,
+   "cholesterol": 0,
+   "copper": 0.8,
+   "energy": 324,
+   "fat": 5.3,
+   "fiber": 38.5,
+   "folate": 1200,
+   "iron": 17,
+   "magnesium": 230,
+   "monounsaturated_fat": 0.34,
+   "phosphorus": 350,
+   "polyunsaturated_fat": 2.18,
+   "potassium": 2700,
+   "protein": 30.6,
+   "saturated_fat": 0.68,
+   "sodium": 6,
+   "vitamin_a": 2400,
+   "vitamin_c": 60,
+   "vitamin_d": 0,
+   "vitamin_e": 28.1,
+   "vitamin_k": 2900,
+   "water": 5,
+   "zinc": 6.3
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng cà phê",
+    "grams": 2,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 170569",
+  "name": "Nuts, brazilnuts, dried, unblanched",
+  "name_vi": "Hạt Brazil",
+  "category": "beo",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.617,
+   "b12": 0,
+   "b2": 0.035,
+   "b3": 0.295,
+   "b5": 0.184,
+   "b6": 0.101,
+   "calcium": 160,
+   "carbs": 11.74,
+   "cholesterol": 0,
+   "copper": 1.743,
+   "energy": 659,
+   "fat": 67.1,
+   "fiber": 7.5,
+   "folate": 22,
+   "iron": 2.43,
+   "magnesium": 376,
+   "manganese": 1.223,
+   "monounsaturated_fat": 23.879,
+   "phosphorus": 725,
+   "polyunsaturated_fat": 24.399,
+   "potassium": 659,
+   "protein": 14.32,
+   "saturated_fat": 16.134,
+   "selenium": 1917,
+   "sodium": 3,
+   "sugars": 2.33,
+   "vitamin_a": 0,
+   "vitamin_c": 0.7,
+   "vitamin_d": 0,
+   "vitamin_e": 5.65,
+   "vitamin_k": 0,
+   "water": 3.42,
+   "zinc": 4.06
+  },
+  "portions": [
+   {
+    "label_vi": "1 hạt",
+    "grams": 5,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 nắm",
+    "grams": 28,
+    "sort": 2
+   }
+  ]
+ }
+]

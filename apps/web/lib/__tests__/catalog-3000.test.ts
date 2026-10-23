@@ -124,6 +124,7 @@ describe("a 3,000-food catalogue over 60 pages", () => {
     const perQuery = (performance.now() - started) / queries.length;
     console.info(`search over ${foods.length} foods: ${perQuery.toFixed(2)} ms per query`);
     expect(searchFoods(foods, "pho bo")[0]?.nameVi).toMatch(/^Phở bò/);
-    expect(perQuery).toBeLessThan(16);
+    // 16 ms is one frame on a laptop; a shared CI runner is slower and noisier (17.4 ms on 7112a91, with search untouched)
+    expect(perQuery).toBeLessThan(process.env.CI ? 50 : 16);
   });
 });

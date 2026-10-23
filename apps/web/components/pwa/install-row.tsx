@@ -5,12 +5,14 @@ import { InstallSheet, type InstallSheetResult } from "@/components/pwa/install-
 import { SettingsRow } from "@/components/settings/settings-row";
 import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { markInstallDone, readStandalone } from "@/lib/install-browser";
+import { useT } from "@/lib/i18n";
 
 /**
  * Cài đặt › Ứng dụng › "Cài ứng dụng lên điện thoại": opens the install sheet any time. Hidden where the app is
  * already installed. Closing it here never snoozes the pop-up on Hôm nay; only "Tôi đã cài xong" is remembered.
  */
 export function InstallRow({ alignGroup }: { alignGroup: string }) {
+  const t = useT();
   // Read after mount, so the server and first paint agree
   const [standalone, setStandalone] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
@@ -25,7 +27,7 @@ export function InstallRow({ alignGroup }: { alignGroup: string }) {
 
   return (
     <>
-      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Cài ứng dụng lên điện thoại" onClick={() => setOpen(true)} data-align-group={alignGroup} />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label={t("settings.app.install")} onClick={() => setOpen(true)} data-align-group={alignGroup} />
       <InstallSheet open={open} onClose={close} />
     </>
   );

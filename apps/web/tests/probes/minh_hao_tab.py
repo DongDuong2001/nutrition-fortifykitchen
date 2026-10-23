@@ -208,7 +208,7 @@ def part_c(browser, w, size):
     link.focus()
     order = []
     for _ in range(1 + cards.count()):
-        order.append(pg.evaluate("document.activeElement && (document.activeElement.querySelector('span') || document.activeElement).textContent.trim()"))
+        order.append(pg.evaluate("document.activeElement && ([...document.activeElement.querySelectorAll('span:not([aria-hidden=true])')].find((s) => s.textContent.trim()) || document.activeElement).textContent.trim()"))
         pg.keyboard.press("Tab")
     check(order == ["Xem tất cả", *list(seen)], f"C {w}: Tab order ({order})")
 

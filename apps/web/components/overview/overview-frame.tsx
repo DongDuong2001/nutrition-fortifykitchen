@@ -1,8 +1,10 @@
 "use client";
 
-import React, { Suspense, createContext, startTransition, useContext, useEffect, useMemo, useOptimistic } from "react";
+import React, { Suspense, createContext, startTransition, useContext, useEffect, useMemo, useOptimistic, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { Period } from "@/lib/period";
+import type { Period, WeightPoint } from "@/lib/period";
+import { apiClient } from "@/lib/api-client";
+import { shiftIsoDate } from "@/lib/day-history";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
 import { Segmented } from "@/components/ui/segmented";
@@ -171,6 +173,9 @@ export function overviewTabOf(pathname: string): OverviewTab {
   return TABS.find((t) => t.id !== "summary" && (pathname === t.href || pathname.startsWith(t.href + "/")))?.id ?? "summary";
 }
 
+// shortcut: one year of weigh-ins is read once per visit; read per period if someone steps back further than that
+const WEIGHT_LOG_DAYS = 365;
+
 function FrameInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const current = overviewTabOf(usePathname() ?? "");
@@ -181,11 +186,25 @@ function FrameInner({ children }: { children: React.ReactNode }) {
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
   const query = periodQuery(length, offset);
 
+  // Live: the weigh-ins come from the server (GET /me/weight), so Cơ thể shows them on every device; until they land (and
+  // outside live mode) buildOverview uses its own log
+  const [weightLog, setWeightLog] = useState<WeightPoint[] | undefined>(undefined);
+  useEffect(() => {
+    if (!todayIso) return;
+    let live = true;
+    void apiClient.getWeightLog(shiftIsoDate(todayIso, -WEIGHT_LOG_DAYS), todayIso).then((log) => {
+      if (live && log) setWeightLog(log);
+    });
+    return () => {
+      live = false;
+    };
+  }, [todayIso]);
+
   // dayArchive: days read from the server (S5) change what the period's totals are made of
   const overview = useMemo(
-    () => (todayIso ? buildOverview({ todayIso, today: data, targets, length, offset }) : null),
+    () => (todayIso ? buildOverview({ todayIso, today: data, targets, length, offset, weightLog }) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [todayIso, data, targets, length, offset, dayArchive]
+    [todayIso, data, targets, length, offset, dayArchive, weightLog]
   );
   // The days of the period are read from the server (and cached on this device) when the period is shown
   useEffect(() => {

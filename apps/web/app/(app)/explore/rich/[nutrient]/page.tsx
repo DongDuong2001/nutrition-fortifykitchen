@@ -14,7 +14,8 @@ import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { nutrientDot, nutrientFill } from "@/lib/nutrient-colors";
 import { formatAmount } from "@/lib/format";
-import { isRichNutrientId, richInFoods, richName, type RichBasis, type RichKind } from "@/lib/rich-in";
+import { isRichNutrientId, richInFoods, richName, richUpperLimitLine, type RichBasis, type RichKind } from "@/lib/rich-in";
+import { ageOf, upperLimits } from "@/lib/rda";
 import { defaultPortionOf } from "@/lib/portion";
 import { useBack } from "@/hooks/use-back";
 import { dedupeTwins, rowName } from "@/lib/food-rows";
@@ -32,7 +33,7 @@ function AccentBar({ color }: { color: string }) {
 export default function RichInPage() {
   const params = useParams<{ nutrient: string }>();
   const goBack = useBack();
-  const { targets } = useDiary();
+  const { targets, profile } = useDiary();
   const [basis, setBasis] = useState<RichBasis>("per100");
   const router = useRouter();
   const pathname = usePathname();
@@ -51,6 +52,8 @@ export default function RichInPage() {
   // "Giàu …" tile answers with the header and the chips at once, and the rows follow
   const listed = useDeferredValue(true, false);
   const rows = useMemo(() => (valid && listed ? dedupeTwins(richInFoods(foods, id, shownBasis, min, kind), (r) => r.food) : []), [valid, listed, id, shownBasis, min, kind, foods]);
+  // A3 (23/10): a row whose one portion is above this nutrient's UL says so (selenium in Brazil nuts)
+  const ul = useMemo(() => (valid ? upperLimits(ageOf(profile.birthYear))[id] : undefined), [valid, id, profile.birthYear]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition);
@@ -117,6 +120,7 @@ export default function RichInPage() {
                     withBorderTop={i > 0}
                     valueColor={nutrientDot(id)}
                     category={row.food.category}
+                    note={richUpperLimitLine(row.food, id, ul)}
                   />
                 );
               })

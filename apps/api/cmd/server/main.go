@@ -21,6 +21,7 @@ import (
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/csrf"
 	"nutrition-api/internal/daytemplates"
+	"nutrition-api/internal/documents"
 	"nutrition-api/internal/diary"
 	"nutrition-api/internal/library"
 	"nutrition-api/internal/logger"
@@ -132,6 +133,8 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	dayTemplatesHandler := daytemplates.NewHandler(daytemplates.NewService(daytemplates.NewRepository(pool)))
 
+	documentsHandler := documents.NewHandler(documents.NewService(documents.NewRepository(pool)))
+
 	coachingRepo := coaching.NewRepository(pool)
 	coachingService := coaching.NewService(coachingRepo)
 	coachingHandler := coaching.NewHandler(coachingService)
@@ -199,6 +202,16 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	// API v1 Routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// Anti-caching headers for API responses to prevent CDNs and intermediary proxies
+		// from caching sensitive user profiles, diaries or personalized food queries.
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate")
+				w.Header().Set("Pragma", "no-cache")
+				next.ServeHTTP(w, r)
+			})
+		})
+
 		// Writes must come from an allowed origin and carry JSON (the CORS handler above answers preflights first).
 		// The two webhooks are server to server: no browser Origin, they verify their own signature.
 		r.Use(csrf.Middleware(csrf.Options{
@@ -274,6 +287,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			r.Route("/saved-meals", func(r chi.Router) {
 				r.Get("/", libraryHandler.GetSavedMeals)
 				r.Post("/", libraryHandler.CreateSavedMeal)
+				r.Put("/{id}", libraryHandler.PutSavedMeal)
 				r.Delete("/{id}", libraryHandler.DeleteSavedMeal)
 			})
 
@@ -285,6 +299,19 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 				r.Get("/", dayTemplatesHandler.List)
 				r.Put("/{id}", dayTemplatesHandler.Put)
 				r.Delete("/{id}", dayTemplatesHandler.Delete)
+			})
+
+			// Tài liệu (migration 000017): a coach or an admin writes and reads; a learner sees the list and opens a document with a code
+			r.Get("/documents", documentsHandler.List)
+			r.Post("/documents/{name}/open", documentsHandler.Open)
+			r.Post("/document-codes/check", documentsHandler.CheckCode)
+			r.Group(func(r chi.Router) {
+				r.Use(authMiddleware.RequireRole("coach", "admin"))
+				r.Get("/documents/{name}", documentsHandler.Get)
+				r.Put("/documents/{name}", documentsHandler.Put)
+				r.Get("/document-codes", documentsHandler.ListCodes)
+				r.Post("/document-codes", documentsHandler.CreateCode)
+				r.Delete("/document-codes/{id}", documentsHandler.RevokeCode)
 			})
 
 			// Coaching routes (Level 4 application & status)

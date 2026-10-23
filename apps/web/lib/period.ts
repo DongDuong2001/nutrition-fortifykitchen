@@ -123,7 +123,8 @@ export function periodTargetDays(
   };
 }
 
-const KCAL_PER_GRAM = { protein: 4, carbs: 4, fat: 9 } as const;
+/** kcal per gram of đạm, tinh bột and béo (also the hero's macro kcal, lib/macro-kcal) */
+export const KCAL_PER_GRAM = { protein: 4, carbs: 4, fat: 9 } as const;
 
 /**
  * Share of energy from đạm, tinh bột and béo, in whole percents that add up to 100 (largest remainder).

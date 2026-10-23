@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 // Picks the probes that cover a change, for gate:fast.
 // Each probe in tests/probes/ has a "# PROBE_COVERS: <glob> <glob> …" line (paths relative to apps/web). A changed file
@@ -29,6 +29,8 @@ export function globToRegExp(glob) {
   return new RegExp(`^${re}$`);
 }
 
+const slashes = (p) => p.replace(/\\/g, "/");
+
 /** Files changed against origin/main (committed on this branch, staged, unstaged and untracked), relative to apps/web. */
 export function changedFiles(base = "origin/main") {
   const git = (...args) => execFileSync("git", args, { cwd: WEB, encoding: "utf8" });
@@ -36,9 +38,10 @@ export function changedFiles(base = "origin/main") {
   const mergeBase = git("merge-base", base, "HEAD").trim();
   const names = [
     ...git("diff", "--name-only", mergeBase).split("\n"),
-    ...git("ls-files", "--others", "--exclude-standard").split("\n").map((f) => relative(top, join(WEB, f))),
+    ...git("ls-files", "--others", "--exclude-standard").split("\n").map((f) => slashes(relative(top, join(WEB, f)))),
   ];
-  const webPrefix = relative(top, WEB) + "/";
+  // git writes forward slashes on every OS; path.relative writes backslashes on Windows, where the prefix then matched nothing
+  const webPrefix = slashes(relative(top, WEB)) + "/";
   return [...new Set(names.filter((f) => f.startsWith(webPrefix)).map((f) => f.slice(webPrefix.length)))].filter((f) =>
     existsSync(join(WEB, f)),
   );
@@ -125,7 +128,8 @@ export function selectProbes(changed) {
   return picked.sort((a, b) => Number(b.direct) - Number(a.direct) || (a.globs?.length ?? 99) - (b.globs?.length ?? 99) || a.name.localeCompare(b.name));
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL: on Windows argv[1] is D:\…, and the module's url is file:///D:/…
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   // `node scripts/probe-covers.mjs [file …]` prints what gate:fast would pick (default: the files changed vs origin/main)
   const changed = process.argv.length > 2 ? process.argv.slice(2) : changedFiles();
   const missing = probeCovers().filter((p) => !p.globs);

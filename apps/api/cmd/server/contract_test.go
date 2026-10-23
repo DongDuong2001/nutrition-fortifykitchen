@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"nutrition-api/internal/config"
@@ -68,12 +69,21 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 		{"GET", "/api/v1/recents"},
 		{"GET", "/api/v1/saved-meals"},
 		{"POST", "/api/v1/saved-meals"},
+		{"PUT", "/api/v1/saved-meals/11111111-1111-1111-1111-111111111111"},
 		{"DELETE", "/api/v1/saved-meals/11111111-1111-1111-1111-111111111111"},
 
 		// Protected Day templates (Ngày ăn mẫu)
 		{"GET", "/api/v1/day-templates"},
 		{"PUT", "/api/v1/day-templates/11111111-1111-1111-1111-111111111111"},
 		{"DELETE", "/api/v1/day-templates/11111111-1111-1111-1111-111111111111"},
+		{"GET", "/api/v1/documents"},
+		{"GET", "/api/v1/documents/rules.md"},
+		{"PUT", "/api/v1/documents/rules.md"},
+		{"POST", "/api/v1/documents/rules.md/open"},
+		{"POST", "/api/v1/document-codes/check"},
+		{"GET", "/api/v1/document-codes"},
+		{"POST", "/api/v1/document-codes"},
+		{"DELETE", "/api/v1/document-codes/11111111-1111-1111-1111-111111111111"},
 		// Protected Trends
 		{"GET", "/api/v1/trends"},
 
@@ -103,6 +113,14 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 			}
 			if rec.Code == http.StatusMethodNotAllowed {
 				t.Errorf("method %s not allowed on %s (got 405)", rt.method, rt.path)
+			}
+
+			if strings.HasPrefix(rt.path, "/api/v1") {
+				cc := rec.Header().Get("Cache-Control")
+				expected := "private, no-cache, no-store, max-age=0, must-revalidate"
+				if cc != expected {
+					t.Errorf("route %s %s Cache-Control = %q; want %q", rt.method, rt.path, cc, expected)
+				}
 			}
 		})
 	}

@@ -57,7 +57,7 @@ export function MinhHaoCarousel() {
       }
     >
       {rows.slice(0, SHOWN).map((food) => (
-        <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} {...minhHaoMeta(food)} tag={<SourceTag food={food} />} />
+        <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} {...minhHaoMeta(food)} tag={<SourceTag food={food} />} food={food} />
       ))}
     </Carousel>
   );
