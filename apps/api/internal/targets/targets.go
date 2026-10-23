@@ -243,3 +243,10 @@ func CalculateTargets(profile UserProfileForTargets) CompleteTargets {
 		Selenium:   rda("selenium", profile.Sex, profile.Age),
 	}
 }
+
+// ValidTrainingMinutes is the training time a day or a profile default may hold: 0 (rest), the 45-minute preset, or a multiple of
+// 30 from 30 to 480 (Tùy chỉnh). Every value the presets give (0, 45, 60, 90, 120, 240) passes; the database checks the same rule
+// (migration 000018).
+func ValidTrainingMinutes(m int) bool {
+	return m == 45 || (m >= 0 && m <= 480 && m%30 == 0)
+}
