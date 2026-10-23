@@ -151,13 +151,13 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(ids("2026-10-21b")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c"]);
     expect(ids("2026-10-21c")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a"]);
     expect(ids("2026-10-22a")).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b"]);
-    expect(ids("2026-10-22b")).toEqual(["2026-10-22c"]);
+    expect(ids("2026-10-22b")).toEqual(["2026-10-23a", "2026-10-22c"]);
     expect(ids("2026-10-22c")).toEqual(["2026-10-23a"]);
     expect(ids("2026-10-23a")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-22c"]);
+    expect(ids(null)).toEqual(["2026-10-23a"]);
   });
 
   it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
