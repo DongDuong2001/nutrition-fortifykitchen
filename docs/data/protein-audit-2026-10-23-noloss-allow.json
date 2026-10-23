@@ -1,0 +1,19 @@
+{
+ "vn_nin|NIN 3025002": {
+  "b12": "zero in the old USDA row (a plant food); NIN prints no value for it. Kept by Hao.",
+  "cholesterol": "zero in the old USDA row (a plant food); NIN prints no value for it. Kept by Hao.",
+  "trans_fat": "zero in the old USDA row (a plant food); NIN prints no value for it. Kept by Hao.",
+  "vitamin_d": "zero in the old USDA row (a plant food); NIN prints no value for it. Kept by Hao."
+ },
+ "vn_nin|NIN 8037": {
+  "b1": "zero in the old PhilFCT record; NIN prints no value",
+  "cholesterol": "belongs to the PhilFCT record whose macros are shown wrong (2.3x NIN kcal); keeping it would mix two sources. Kept by Hao.",
+  "fiber": "zero in the old PhilFCT record; NIN prints no value",
+  "monounsaturated_fat": "belongs to the PhilFCT record whose macros are shown wrong (2.3x NIN kcal); keeping it would mix two sources. Kept by Hao.",
+  "polyunsaturated_fat": "belongs to the PhilFCT record whose macros are shown wrong (2.3x NIN kcal); keeping it would mix two sources. Kept by Hao.",
+  "saturated_fat": "belongs to the PhilFCT record whose macros are shown wrong (2.3x NIN kcal); keeping it would mix two sources. Kept by Hao.",
+  "sugars": "zero in the old PhilFCT record; NIN prints no value",
+  "vitamin_a": "belongs to the PhilFCT record whose macros are shown wrong (2.3x NIN kcal); keeping it would mix two sources. Kept by Hao.",
+  "vitamin_c": "zero in the old PhilFCT record; NIN prints no value"
+ }
+}
