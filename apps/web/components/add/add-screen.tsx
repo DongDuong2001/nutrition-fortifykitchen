@@ -121,7 +121,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const templateName = templateTarget ? templateTarget.name.trim() || NEW_TEMPLATE_NAME : "";
   const toDraft = (slot: MealSlot, items: DayTemplateItem[]): boolean => {
     if (!templateTarget || !addToDraft(templateTarget.id, slot, items)) return false;
-    notify(`Đã thêm ${items.length} món vào ${templateName} · ${getMealSlotNameVi(slot)}`);
+    // The meal only: the editor of that Ngày ăn mẫu is where the add lands, and with its name the line ran past 390 px (review 12:40)
+    notify(`Đã thêm ${items.length} món vào ${getMealSlotNameVi(slot)}`);
     return true;
   };
   const addFoodEntry: typeof diary.addFoodEntry = templateTarget

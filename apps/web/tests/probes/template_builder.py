@@ -99,6 +99,10 @@ def run(browser):
     pg.wait_for_url(re.compile(r"/explore/ngay-mau/"), timeout=8000)
     pg.wait_for_timeout(800)
     check(pg.locator("section[aria-label='Bữa trưa'] button[aria-haspopup=dialog]").count() == 2, "the Khay added two foods to Bữa trưa")
+    # review 12:40: the toast names the meal only and fits the screen (it ran past 390 px with the template's name in it)
+    toast = pg.locator("[role=status]", has_text="Đã thêm").first
+    fit = toast.evaluate("(e) => { const r = e.getBoundingClientRect(); return { text: e.innerText.trim(), right: r.right, vw: innerWidth, over: [...e.querySelectorAll('*')].some((c) => c.scrollWidth > c.clientWidth + 1) } }") if toast.count() else None
+    check(fit is not None and fit["text"].startswith("Đã thêm 2 món vào Bữa trưa") and fit["right"] <= fit["vw"] and not fit["over"], f"the toast says Đã thêm 2 món vào Bữa trưa and fits ({fit})")
     check(diary_count(pg) == logged, f"still nothing in the diary ({diary_count(pg)} = {logged})")
     check(diary_count(pg) == logged, f"nothing went into the diary ({diary_count(pg)} = {logged})")
     total_before = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
