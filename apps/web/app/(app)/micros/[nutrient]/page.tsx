@@ -200,7 +200,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
           <h2 id="nutrient-sources-title" className="m-0 text-base font-bold">
             {isPast ? "Đã có từ món ăn của ngày này" : "Đã có từ món ăn hôm nay"}
           </h2>
-          <ContributingFoods sources={sources} unit={def.unit} isToday={!isPast} />
+          <ContributingFoods sources={sources} unit={def.unit} total={row.consumed} isToday={!isPast} />
         </Card>
       </main>
     </AppShell>
