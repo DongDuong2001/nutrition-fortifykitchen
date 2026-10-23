@@ -47,7 +47,7 @@ export const RELEASES: readonly Release[] = [
       {
         icon: "home",
         title: "Tài liệu của app ngay trong Cài đặt",
-        body: "Cài đặt › Tài liệu liệt kê các quy tắc và tài liệu của app. HLV tạo mã truy cập cho bạn, nhập mã là sửa hay tải lên tệp mới ngay tại đó.",
+        body: "Cài đặt › Tài liệu có các hướng dẫn và quy tắc HLV viết cho bạn. HLV gửi mã truy cập, nhập mã là đọc được ngay trong app.",
       },
       { icon: "home", title: "Dễ dùng hơn trên máy tính", body: "Rê chuột lên món là thấy sáng lên, các hàng Khám phá có nút xem tiếp, nút Thêm luôn hiện trong hộp thêm món, Esc thoát chọn nhiều món và thanh bên luôn ở yên khi cuộn." },
       {
