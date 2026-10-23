@@ -1709,5 +1709,109 @@
     "sort": 1
    }
   ]
+ },
+ {
+  "source": "vn_table",
+  "source_id": "food-bun-cha",
+  "name": "Vermicelli noodles with grilled pork",
+  "name_vi": "Bún chả Hà Nội",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "calcium": 91.1,
+   "carbs": 17.9,
+   "energy": 136,
+   "fat": 4.4,
+   "fiber": 0.6,
+   "iron": 0.99,
+   "phosphorus": 33.3,
+   "protein": 6.1,
+   "water": 70.6,
+   "zinc": 0.77
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần",
+    "grams": 350,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_fct",
+  "source_id": "food-bun-cha",
+  "name": "Vermicelli noodles with grilled pork",
+  "name_vi": "Bún chả Hà Nội",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": "Thịt nướng than hoa thơm lừng ăn kèm bún tươi và nước chấm đu đủ.",
+  "nutrients": {
+   "calcium": 91.1,
+   "carbs": 17.9,
+   "energy": 136,
+   "fat": 4.4,
+   "fiber": 0.6,
+   "iron": 0.99,
+   "phosphorus": 33.3,
+   "protein": 6.1,
+   "water": 70.6,
+   "zinc": 0.77
+  },
+  "portions": [
+   {
+    "label_vi": "1 suất vừa (450 g)",
+    "grams": 450,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_fct",
+  "source_id": "food-pho-ga",
+  "name": "Rice noodle with chicken",
+  "name_vi": "Phở gà",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": "Thịt gà ta ít béo, nước dùng thanh đạm thơm mùi gừng và hoa hồi.",
+  "nutrients": {
+   "calcium": 95.7,
+   "carbs": 12.3,
+   "energy": 73,
+   "fat": 1,
+   "fiber": 0.6,
+   "iron": 0.65,
+   "phosphorus": 25.2,
+   "protein": 3.8,
+   "water": 81.9,
+   "zinc": 0.38
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô vừa (500 g)",
+    "grams": 500,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 tô lớn (650 g)",
+    "grams": 650,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
  }
 ]
