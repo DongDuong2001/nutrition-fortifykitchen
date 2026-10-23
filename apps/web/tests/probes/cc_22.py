@@ -88,7 +88,7 @@ def run(browser, size, tag):
         # V3-SPEC §3.1: row 1 the wordmark and the share button, row 2 the date stepper and "Ngày tập"; 4 px above, 4 px below
         h = pg.evaluate("document.querySelector('header').getBoundingClientRect().height")
         check(abs(h - 96) <= 1, f"{tag} header is two 44 px rows ({h})")
-    foods = pg.locator("button[aria-pressed][aria-label*=', ']")
+    foods = pg.locator("button[aria-pressed][aria-label*=', ']:not([data-hero-macro])")
     n = foods.count()
     check(n >= 7, f"{tag} foods listed: {n}")
     if phone:
@@ -152,7 +152,7 @@ def run(browser, size, tag):
     # past day
     ctx, pg = page(browser, size)
     go(pg, f"/app?date={PAST}")
-    foods = pg.locator("button[aria-pressed][aria-label*=', ']")
+    foods = pg.locator("button[aria-pressed][aria-label*=', ']:not([data-hero-macro])")
     check(foods.count() >= 1, f"{tag} past day lists foods ({foods.count()})")
     foods.first.click()
     pg.wait_for_timeout(200)
@@ -194,7 +194,7 @@ def run(browser, size, tag):
     # many foods: sticky headers, only the list scrolls
     ctx, pg = page(browser, size, extra=22)
     go(pg, "/app")
-    check(pg.locator("button[aria-pressed][aria-label*=', ']").count() >= 29, f"{tag} 22 seeded foods plus the sample day")
+    check(pg.locator("button[aria-pressed][aria-label*=', ']:not([data-hero-macro])").count() >= 29, f"{tag} 22 seeded foods plus the sample day")
     if phone:
         # V3: the page scrolls and the cards do not; a long day makes the page longer
         scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")

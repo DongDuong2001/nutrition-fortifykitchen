@@ -23,7 +23,7 @@ TOUCH = {"has_touch": True, "is_mobile": True}
 RECORD = "window.__vib = []; const v = navigator.vibrate ? navigator.vibrate.bind(navigator) : null; if (v) navigator.vibrate = (p) => { window.__vib.push(p); return true; };"
 NO_VIBRATE = "delete Navigator.prototype.vibrate; delete navigator.vibrate; window.__vib = [];"
 # Tips on, every tip but Rung khi chạm seen, so Cài đặt shows that one when the phone can vibrate
-TIPS = ["unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "meal-focus", "past-day", "multi-select", "add-tray",
+TIPS = ["unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "meal-focus", "hero-macro", "past-day", "multi-select", "add-tray",
         "add-shortlists", "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard"]
 TIPS_ON = (
     "try { localStorage.removeItem('h1t_onboarding_off'); if (localStorage.getItem('h1t_settings_v1_demo') === null) "

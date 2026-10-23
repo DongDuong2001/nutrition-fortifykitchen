@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { THEME_CHOICES, darkModeEnabled, loadThemeChoice } from "@/lib/theme";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { InstallRow } from "@/components/pwa/install-row";
 import { Card } from "@/components/ui/card";
@@ -102,10 +103,24 @@ function ChoiceGroup({
 
 // Same rule as setup: a year from 1900 to this year. An invalid year keeps its error on screen.
 // It saves on blur or Enter, so typing "2" on the way to "2003" does not show an error.
-// The row shows the year; tapping it turns into the field.
+// The row shows the year; tapping it turns into the field. Desktop parity (23/10): the field opens with the year selected (typing
+// replaces it), Esc puts the year back and closes it, and closing returns the focus to the row.
+/** Desktop parity (23/10): the keyboard extras of the year field (select on focus, focus back to the row) are for a mouse and
+    keyboard from 1024 px; a phone keeps its own caret and Go key */
+const finePointerDesktop = () => window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+
 function BirthYearField() {
   const { profile, updateProfile } = useDiary();
   const [editing, setEditing] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const refocus = useRef(false);
+  const cancelled = useRef(false);
+  useEffect(() => {
+    if (!editing && refocus.current) {
+      refocus.current = false;
+      rowRef.current?.querySelector<HTMLElement>("button")?.focus();
+    }
+  }, [editing]);
   const [typed, setTyped] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
   const shown = typed ?? String(profile.birthYear);
@@ -122,27 +137,48 @@ function BirthYearField() {
   }
 
   function save() {
+    // The field unmounting after Esc blurs it: that blur must not save what Esc dropped
+    if (cancelled.current) {
+      cancelled.current = false;
+      return;
+    }
     const message = birthYearError(shown);
     setError(message);
     const birthYear = parseBirthYear(shown);
-    if (message || birthYear === null) return;
+    if (message || birthYear === null) {
+      refocus.current = false;
+      return;
+    }
     if (birthYear !== profile.birthYear) updateProfile({ birthYear });
     setTyped(null);
     setEditing(false);
   }
 
+  function cancel() {
+    cancelled.current = true;
+    refocus.current = finePointerDesktop();
+    setTyped(null);
+    setError(undefined);
+    setEditing(false);
+  }
+
   if (!editing) {
     return (
+      <div ref={rowRef}>
       <SettingsRow
         tone="profile"
         glyph={SETTINGS_ICONS.calendar}
         label="Năm sinh"
         hint="Dùng để chọn mức khuyến nghị theo tuổi."
         value={String(profile.birthYear)}
-        onClick={() => setEditing(true)}
+        onClick={() => {
+          cancelled.current = false;
+          setEditing(true);
+        }}
         minHeight="16"
         data-align-group="profile-row"
       />
+      </div>
     );
   }
 
@@ -157,9 +193,18 @@ function BirthYearField() {
           autoFocus
           value={shown}
           onChange={(e) => change(e.target.value)}
+          onFocus={(e) => {
+            if (finePointerDesktop()) e.currentTarget.select();
+          }}
           onBlur={save}
           onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Enter") {
+              refocus.current = finePointerDesktop();
+              e.currentTarget.blur();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancel();
+            }
           }}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "profile-birth-year-error" : undefined}
@@ -313,6 +358,11 @@ export function AppCard() {
     startTour();
     router.push(HOME_ROUTE);
   };
+  // Giao diện (job 14): only while the dark mode flag is on (lib/theme.ts), read after mount like the rest
+  const [appearance, setAppearance] = useState<string | null>(null);
+  useEffect(() => {
+    if (darkModeEnabled()) setAppearance(THEME_CHOICES.find((c) => c.id === loadThemeChoice())?.label ?? null);
+  }, []);
   useEffect(() => {
     const saved = loadSettings();
     setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
@@ -373,6 +423,7 @@ export function AppCard() {
         </div>
       )}
       <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
+      {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label="Giao diện" value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
       <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
       <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />

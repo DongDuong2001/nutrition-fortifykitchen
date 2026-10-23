@@ -82,6 +82,7 @@ import { formatDayLabel } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
+import type { HeroMacro } from "@/lib/macro-kcal";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
@@ -446,6 +447,14 @@ function HomeContent() {
     markShareNudgeDay(todayIso);
     notify(SHARE_NUDGE_TEXT, "share");
   }, [nudgePending, toast, pathname, isPast, todayIso, notify]);
+  // feat/hero-macro-kcal: a macro tapped on the hero shows its kcal; a change of day or of the selected meal clears it
+  const [heroMacro, setHeroMacro] = useState<HeroMacro | null>(null);
+  const heroMacroKey = `${viewIso} ${JSON.stringify(mode)}`;
+  const [heroMacroFor, setHeroMacroFor] = useState(heroMacroKey);
+  if (heroMacroFor !== heroMacroKey) {
+    setHeroMacroFor(heroMacroKey);
+    setHeroMacro(null);
+  }
   const macroTargets = useMemo(
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
@@ -488,6 +497,25 @@ function HomeContent() {
   useEffect(() => {
     if (!selecting) emitSignal("select-off");
   }, [selecting]);
+  // Desktop parity (23/10): Esc is Hủy while no sheet or tour step is up, and when select mode ends (Hủy, Xóa, a copy) focus goes back
+  // to ⋯ instead of the page body; on a phone neither applies (no keyboard, no focus ring)
+  const wasSelecting = useRef(false);
+  useEffect(() => {
+    if (wasSelecting.current && !selecting && window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
+      const active = document.activeElement;
+      // The copy and move sheets close inert, so the button that closed them still holds focus there
+      if (!active || active === document.body || active.closest("[inert]")) document.getElementById("home-day-menu")?.focus();
+    }
+    wasSelecting.current = selecting;
+    if (!selecting || targetSheet !== null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector('[role="dialog"][aria-modal="true"], [data-onboarding-overlay]')) return;
+      setSelecting(false);
+      setSelectedIds(new Set());
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selecting, targetSheet]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {
@@ -803,7 +831,12 @@ function HomeContent() {
             finished={isPast}
             selected={selected}
             kcalNote={unknownKcalNote(modeEntries(mode, entries))}
-            countKey={`${viewIso} ${JSON.stringify(mode)}`}
+            countKey={heroMacroKey}
+            macro={heroMacro}
+            onMacro={(m) => {
+              if (m) markUsed("hero-macro");  // the tip of the same name
+              setHeroMacro(m);
+            }}
           />
           {coach && !selecting && (
             <div className="mt-2 flex min-h-11 flex-none items-center justify-end px-3 lg:px-0">

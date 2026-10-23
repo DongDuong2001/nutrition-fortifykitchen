@@ -118,6 +118,33 @@ export function removeDayTemplate(list: DayTemplate[], id: string): DayTemplate[
   return list.filter((t) => t.id !== id);
 }
 
+/** The name of a day built from scratch (Khám phá › Ngày ăn mẫu › + Tạo ngày ăn mẫu) until the person names it. */
+export const NEW_TEMPLATE_NAME = "Ngày ăn mẫu mới";
+
+/** How many foods the meals hold. */
+export const templateItemCount = (meals: readonly DayTemplateMeal[]): number => meals.reduce((n, m) => n + m.items.length, 0);
+
+/** The meals with `items` added at the end of `slot` (the meal is made when it had no food), in Hôm nay's order. */
+export function addTemplateItems(meals: readonly DayTemplateMeal[], slot: MealSlot, items: readonly DayTemplateItem[]): DayTemplateMeal[] {
+  if (items.length === 0) return [...meals];
+  const has = meals.some((m) => m.slot === slot);
+  const next = has ? meals.map((m) => (m.slot === slot ? { ...m, items: [...m.items, ...items] } : m)) : [...meals, { slot, items: [...items] }];
+  return TEMPLATE_SLOT_ORDER.flatMap((s) => next.filter((m) => m.slot === s));
+}
+
+/** The meals with one food's portion changed (grams and the label it shows). A portion of 0 g or less changes nothing. */
+export function setTemplateItemPortion(
+  meals: readonly DayTemplateMeal[],
+  slot: MealSlot,
+  index: number,
+  portion: { grams: number; servingLabel: string }
+): DayTemplateMeal[] {
+  if (!(portion.grams > 0)) return [...meals];
+  return meals.map((m) =>
+    m.slot === slot ? { ...m, items: m.items.map((it, i) => (i === index ? { ...it, grams: portion.grams, servingLabel: portion.servingLabel } : it)) } : m
+  );
+}
+
 /** The meals without one food (by its place in the meal); a meal left with no food goes too. */
 export function removeTemplateItem(meals: DayTemplateMeal[], slot: MealSlot, index: number): DayTemplateMeal[] {
   return withoutEmptyMeals(meals.map((m) => (m.slot === slot ? { ...m, items: m.items.filter((_, i) => i !== index) } : m)));
