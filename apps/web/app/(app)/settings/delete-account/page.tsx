@@ -9,6 +9,10 @@ import { Presence } from "@/components/ui/presence";
 import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
 import { SectionTitle } from "@/components/ui/section-title";
+import { apiFetch } from "@/lib/api-client";
+import { isLiveMode } from "@/lib/api-mode";
+import { wipeAccount } from "@/lib/account-wipe";
+import { currentAccountId, setAuthNotice, signOut } from "@/lib/auth-actions";
 
 const LOST_ITEMS = [
   "Nhật ký bữa ăn và ngày tập",
@@ -22,6 +26,7 @@ export default function DeleteAccountPage() {
   const router = useRouter();
   const [confirmationText, setConfirmationText] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const isConfirmed =
     confirmationText.trim().toUpperCase() === "XOÁ" ||
@@ -29,12 +34,25 @@ export default function DeleteAccountPage() {
     // the word the screen asks for ("Xóa") reads XÓA in capitals
     confirmationText.trim().toUpperCase() === "XÓA";
 
-  const handleDelete = () => {
-    if (!isConfirmed) return;
-    setToastMessage("Bản thử chưa hỗ trợ xóa tài khoản. Dữ liệu hiện chỉ lưu trên thiết bị của bạn.");
-    setTimeout(() => {
-      router.push("/settings");
-    }, 1200);
+  // Live: the server deletes the account and everything under it (DELETE /me, auth.users cascades), then this device forgets
+  // it and signs out. A refused or failed request deletes nothing and says so; the account stays as it was.
+  const handleDelete = async () => {
+    if (!isConfirmed || deleting) return;
+    setDeleting(true);
+    const account = currentAccountId();
+    try {
+      if (isLiveMode()) {
+        const res = await apiFetch("/me", { method: "DELETE" });
+        if (!res.ok) throw new Error(`DELETE /me ${res.status}`);
+      }
+      if (account) await wipeAccount(account, { dropPending: true });
+      setAuthNotice("Đã xóa tài khoản và toàn bộ dữ liệu của bạn.");
+      await signOut();
+      router.replace("/signin");
+    } catch {
+      setDeleting(false);
+      setToastMessage("Chưa xóa được tài khoản. Kiểm tra mạng rồi thử lại.");
+    }
   };
 
   const handleExportCsv = () => {
