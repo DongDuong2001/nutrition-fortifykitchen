@@ -8,6 +8,8 @@ import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
 import { Expand } from "@/components/ui/expand";
 import { HERO_MACRO_LABEL, macroKcal, toggleMacro, type HeroMacro } from "@/lib/macro-kcal";
+import { useHold } from "@/lib/use-hold";
+import { haptic } from "@/lib/haptics";
 
 // The 32 px pill sits inside a 44 px hit area: the row is 32 px high, so the negative margin takes the extra 12 px back
 const PILL = "m-on-ink-press -my-1.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-on-dark no-underline hover:text-sky";
@@ -49,6 +51,7 @@ export function HomeHero({
   countKey,
   macro = null,
   onMacro,
+  onSources,
 }: {
   label: string;
   pills: HeroPill[];
@@ -68,7 +71,13 @@ export function HomeHero({
   macro?: HeroMacro | null;
   /** A tap on a macro (picks it, or null to clear). Without it (the share image) the macros are plain text. */
   onMacro?: (macro: HeroMacro | null) => void;
+  /** Job A: hold a macro (or right-click it), or "Món nào?" while one is picked, opens the foods behind it. Without it (a past day, the share image) there is no hold. */
+  onSources?: (macro: HeroMacro) => void;
 }) {
+  const hold = useHold<HeroMacro>((m) => {
+    haptic("longPress");
+    onSources?.(m);
+  });
   const kcalKnown = pctOf(values.kcal, kcalTarget.min);
   // cc-51, cc-64 (R1): the big kcal and its percent count to a new value in 300 ms after an add or a delete, written to
   // their text nodes (no React render per frame); the first value, "—", a new day and a new selection show at once
@@ -105,6 +114,17 @@ export function HomeHero({
             {shownLabel}
           </h2>
           <div className="flex shrink-0 items-center gap-2">
+            {/* Job A: the visible way to the hold's sheet, beside the label so the card does not grow when a macro is picked */}
+            {picked && onSources && (
+              <button
+                type="button"
+                onClick={() => onSources(picked)}
+                aria-haspopup="dialog"
+                className="m-on-ink-press -my-1.5 inline-flex min-h-11 shrink-0 cursor-pointer items-center border-0 bg-transparent px-1 text-cap font-bold text-sky"
+              >
+                Món nào? ›
+              </button>
+            )}
             {pills.map((p) =>
               p.href ? (
                 <Link key={p.key} id={p.id} href={p.href} aria-label={p.ariaLabel} data-tour={p.tour} className={PILL}>
@@ -153,7 +173,11 @@ export function HomeHero({
                       "aria-label": `${m.label} ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, "g")} g`}, ${kcal === null ? "chưa rõ" : kcalValue(kcal)} kcal`,
                       "data-hero-macro": m.key,
                       "data-tour": m.key === "protein" ? "hero-macro" : undefined,
-                      onClick: () => onMacro?.(toggleMacro(picked, m.key)),
+                      onClick: () => {
+                        // The click that ends a hold only opens the sheet, it does not toggle the kcal view
+                        if (!hold.heldClick()) onMacro?.(toggleMacro(picked, m.key));
+                      },
+                      ...(onSources ? hold.bind(m.key) : {}),
                     }
                   : {})}
                 className={`flex min-w-0 flex-col gap-1 ${

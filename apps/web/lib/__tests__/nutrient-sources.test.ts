@@ -263,3 +263,35 @@ describe("the sources and the day total read the same entries (sample edits and 
     }
   );
 });
+
+// Job A (hero hold): the foods behind Tinh bột, Đạm, Chất béo and Chất xơ, in grams
+describe("macro sources", () => {
+  const macro = (id: string, name: string, over: Partial<AddedDiaryEntry>): AddedDiaryEntry => ({
+    id, foodId: `food-${id}`, foodName: name, grams: 100, displayQty: "100 g", mealSlot: "lunch",
+    calories: 100, protein: 0, carbs: 0, fat: 0, fiber: 0, nutrients: {}, addedAt: "2026-10-10T05:00:00.000Z", ...over,
+  });
+
+  it("lists the foods that add to a macro, largest first, in grams", () => {
+    const rows = [macro("a", "Ức gà", { protein: 31, nutrients: { protein: 31 } }), macro("b", "Trứng", { protein: 12.6, nutrients: { protein: 12.6 } })];
+    expect(nutrientSourcesIn(rows, {}, "protein", []).map((s) => [s.id, s.amount])).toEqual([["a", 31], ["b", 12.6]]);
+  });
+
+  it("leaves out a food with no value for it (null or 0), never a 0 row", () => {
+    const rows = [macro("a", "Nước", { protein: null, nutrients: {} }), macro("b", "Dầu ăn", { protein: 0, fat: 14, nutrients: { protein: 0, fat: 14 } })];
+    expect(nutrientSourcesIn(rows, {}, "protein", [])).toEqual([]);
+    expect(nutrientSourcesIn(rows, {}, "fat", []).map((s) => s.id)).toEqual(["b"]);
+  });
+
+  it("a quick kcal entry (macros typed, no nutrient record) is a source, so the rows add up to the hero", () => {
+    const quick = macro("q", "Bữa ngoài", { kind: "quick", protein: 18, carbs: 40, fat: 9, fiber: 3, nutrients: {} });
+    const rows = [quick, macro("a", "Ức gà", { protein: 31, nutrients: { protein: 31 } })];
+    for (const [key, total] of [["protein", 49], ["carbs", 40], ["fat", 9], ["fiber", 3]] as const) {
+      expect(sourcesAgree(nutrientSourcesIn(rows, {}, key, []), total), key).toBe(true);
+    }
+  });
+
+  it("reads a sample item through its edits, unrounded like the other nutrients", () => {
+    const [source] = nutrientSourcesIn([], { "item-1": { grams: 100 } }, "carbs", [oatsItem]);
+    expect(source.amount).toBeCloseTo(oats.nutrients.carbs ?? 0, 5);
+  });
+});
