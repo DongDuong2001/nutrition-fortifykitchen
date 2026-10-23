@@ -523,3 +523,7 @@
 - [ ] (Hao, Dong) English (docs/plans/english.md): glossary sign-off; Đạm / Tinh bột / Chất béo in English or kept; serving_label and default names stored locale-independent first (Dong); an account `language` field (Dong); English food names later (name_en or a translation table, Dong).
 - [ ] (Hao) Job 9: B6 tops with Red Bull (fortified) and folate / K with matcha per 100 g in the new Giàu lists; keep, or leave fortified drinks out of Giàu.
 
+
+## feat/documents (23/10/2026)
+- [ ] (Hao) Tài liệu was asked for as a tab on the main navigation. IA-v2 fixes the phone bar at 5 slots (4 tabs and +) and ui-ux-pro-max §9 says bottom nav ≤ 5, so it ships as a pushed screen of Cài đặt (Hỗ trợ › Tài liệu, /documents). A fifth tab would need an IA-v2 revision: NAV_TABS, a nav icon, the 6-column bar, nav.test.ts.
+- [ ] (Dong) Tài liệu reads and writes a private Supabase Storage bucket named "documents" from the Next server (SUPABASE_SERVICE_ROLE_KEY, ACCESS_CODE in the root .env.local), not through the Go API. Create the bucket once; reading is open to anyone who knows the URL (/api/documents), only writes need the code. Text files only (markdown), 1 MB each. The 2026-10-23a entry keeps no tour (its test pins that); add one there if wanted.
