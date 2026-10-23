@@ -580,10 +580,15 @@ function targetSettingsBody(targets: TargetSettings): Record<string, unknown> {
   return Object.fromEntries(TARGET_SETTING_KEYS.map((key) => [key, targets[key] ?? null]));
 }
 
-function profileBody(profile: SetupProfile, targets?: TargetSettings): Record<string, unknown> {
+/** The keys of a waiting profile write that a newer one keeps when it does not send them itself. */
+const CARRIED_PROFILE_KEYS = [...TARGET_SETTING_KEYS, "levelSeen"] as const;
+
+function profileBody(profile: SetupProfile, targets?: TargetSettings, levelSeen?: number): Record<string, unknown> {
   return {
     // Only when they changed: a save from another screen leaves the server's as they are
     ...(targets ? targetSettingsBody(targets) : {}),
+    // Only when given (0 up to the server's level, or the API answers 400). The level itself is never sent: a coach sets it
+    ...(levelSeen !== undefined ? { levelSeen } : {}),
     sex: profile.sex,
     birth_year: profile.birthYear,
     weight_kg: profile.weightKg,
@@ -927,14 +932,15 @@ export const apiClient = {
   /**
    * A profile change from Hồ sơ, a name edit or the target settings (`targets`, when they changed): through the outbox (S6), the
    * newest one wins. The target settings of a write still waiting are carried into the new one, so a later name change does not
-   * drop a split that has not been sent yet. Setup uses saveSetup.
+   * drop a split that has not been sent yet. `levelSeen` (the Level the user was last shown) is sent only when given, and
+   * carried the same way. Setup uses saveSetup.
    */
-  async queueProfile(profile: SetupProfile, targets?: TargetSettings): Promise<WriteResult> {
+  async queueProfile(profile: SetupProfile, targets?: TargetSettings, levelSeen?: number): Promise<WriteResult> {
     if (!isLiveMode()) return { state: "saved" };
     return withEngine((e) => {
       const waiting = e.outboxItems().find((item) => item.entity === "profile");
-      const carried = waiting ? Object.fromEntries(TARGET_SETTING_KEYS.filter((key) => key in waiting.payload).map((key) => [key, waiting.payload[key]])) : {};
-      return e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: { ...carried, ...profileBody(profile, targets) } });
+      const carried = waiting ? Object.fromEntries(CARRIED_PROFILE_KEYS.filter((key) => key in waiting.payload).map((key) => [key, waiting.payload[key]])) : {};
+      return e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: { ...carried, ...profileBody(profile, targets, levelSeen) } });
     });
   },
 
