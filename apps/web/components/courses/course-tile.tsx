@@ -5,7 +5,7 @@ import Link from "next/link";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { toLevel } from "@/lib/coaching-link";
 import { dayMonth, progressText, segmentsOn, tileBackground, type CourseSummary } from "@/lib/course-logic";
-import { LockGlyph, OpenGlyph } from "@/components/courses/course-glyphs";
+import { CheckGlyph, LockGlyph } from "@/components/courses/course-glyphs";
 
 /** UI-RULES §6: 10 slanted segments (skewX −14°, 4 px apart), white filled and white 30 % empty, on a coloured tile. */
 export function ProgressSegments({ done, total }: { done: number; total: number }) {
@@ -36,7 +36,7 @@ export function StatePill({ course, simple = false, className = "" }: { course: 
   const shown = simple && state !== "code" && state !== "level" ? "open" : state;
   return (
     <span className={`${PILL} ${className}`}>
-      {shown === "code" || shown === "level" ? <LockGlyph /> : <OpenGlyph />}
+      {shown === "code" || shown === "level" ? <LockGlyph /> : !simple && <CheckGlyph size={14} />}
       {STATE_WORDS[shown]}
       {/* The badge is the Level tag at pill size (13 px text, 20 px high), as the design board */}
       {shown === "level" && <LevelBadge level={toLevel(course.minLevel)} className="px-1.5! py-0.5! text-cap!" />}

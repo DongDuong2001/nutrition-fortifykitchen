@@ -141,7 +141,7 @@ function CoachCourse({ course, api, reload }: { course: CourseDetail; api: Cours
   };
   return (
     <AppShell>
-      <AppHeader variant="sub" layout="wide" title={course.title} subtitle={[`${course.lessonCount} bài`, course.subtitle].filter(Boolean).join(" · ")} onBack={goBack} lead={<AccentBar tone={course.tone} />} />
+      <AppHeader variant="sub" layout="wide" title={course.title} onBack={goBack} />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
         <div className="flex gap-2">
           <PillButton size="md" onClick={() => setAdding({ partId: null })} disabled={course.parts.length === 0} data-tour="course-add-lesson">

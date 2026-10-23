@@ -107,6 +107,7 @@ def learner_flow(browser, w, h, touch):
     pg.wait_for_timeout(700)
     dlg = pg.get_by_role("dialog")
     check(dlg.count() == 1 and "Nhập môn HIT1SET" in dlg.inner_text(), f"{tag}: the code sheet shows the course")
+    shot(pg, f"{tag}-3-code-sheet.png")
     pg.locator("#course-code").fill("AAAAAAAAAA")
     pg.get_by_role("button", name="Mở khóa").click()
     pg.wait_for_timeout(600)
@@ -227,17 +228,23 @@ def coach_flow(browser, w, h):
     shot(pg, f"{tag}-c3-add-lesson.png")
     go_btn = pg.get_by_role("button", name="Thêm vào khóa")
     go_btn.click()
-    seen = set()
-    for _ in range(40):
-        label = (pg.locator("[data-tour=course-add-lesson-go]").inner_text() or "").strip()
-        seen.add(label)
-        if "Đang chuyển trang" in label:
-            shot(pg, f"{tag}-c4-converting.png") if "c4" not in str(seen) and len(seen) == 1 else None
+    seen = []
+    shot_taken = False
+    for _ in range(200):
+        label = (pg.locator("[data-tour=course-add-lesson-go]").inner_text() or "").strip() if pg.locator("[data-tour=course-add-lesson-go]").count() else ""
+        if label and (not seen or seen[-1] != label):
+            seen.append(label)
+        if "Đang chuyển trang" in label and not shot_taken:
+            shot(pg, f"{tag}-c4-converting.png")
+            shot_taken = True
+            check(pg.locator("[data-tour=course-add-lesson-go]").get_attribute("aria-disabled") == "true", f"{tag}: the button is aria-disabled while it works (not tappable twice)")
         if pg.get_by_role("dialog").count() == 0:
             break
-        pg.wait_for_timeout(150)
+        pg.wait_for_timeout(40)
     pg.wait_for_timeout(900)
-    check(any("Đang chuyển trang" in s for s in seen) or True, f"{tag}: the button shows 'Đang chuyển trang n/3…' while it works ({sorted(seen)})")
+    # The three pages convert in well under a second on a fast machine: the label may flash past; when it is seen it is "n/3"
+    seen_progress = [s for s in seen if "Đang chuyển trang" in s]
+    check(all(re.fullmatch(r"Đang chuyển trang [1-3]/3…", s) for s in seen_progress), f"{tag}: the button says 'Đang chuyển trang n/3…' while it works ({seen})")
     check(pg.get_by_role("dialog").count() == 0 and "Bài PDF ba trang" in text(pg), f"{tag}: the lesson is added")
     check("PDF · 3 trang" in text(pg), f"{tag}: with 3 pages")
     # a written lesson
