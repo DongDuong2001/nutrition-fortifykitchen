@@ -337,6 +337,58 @@
   ]
  },
  {
+  "source": "recipe_calc",
+  "source_id": "recipe:meatcool-thit-heo-xay-it-mo",
+  "name": "Minced pork, extra lean, MeatCool (assumed 90 % lean + 10 % fat)",
+  "name_vi": "Thịt heo xay đặc biệt ít mỡ MeatCool",
+  "category": "dam",
+  "brand": "MeatCool",
+  "tip_vi": "Thịt sống. Số tính theo giả định 90 % nạc + 10 % mỡ heo vì hãng không công bố bảng dinh dưỡng.",
+  "nutrients": {
+   "energy": 201.8,
+   "water": 66.6,
+   "carbs": 0,
+   "fiber": 0,
+   "sugars": 0.0,
+   "fat": 13.2,
+   "monounsaturated_fat": 6.05,
+   "polyunsaturated_fat": 1.5,
+   "saturated_fat": 4.68,
+   "trans_fat": 0.0216,
+   "cholesterol": 63.3,
+   "protein": 19.4,
+   "b1": 0.586,
+   "b2": 0.234,
+   "b3": 5.11,
+   "b5": 0.854,
+   "b6": 0.584,
+   "folate": 1.9,
+   "b12": 0.594,
+   "vitamin_a": 1.4,
+   "vitamin_c": 0.19,
+   "vitamin_d": 0.76,
+   "vitamin_e": 0.153,
+   "vitamin_k": 0.0,
+   "calcium": 11.9,
+   "copper": 0.0693,
+   "iron": 0.756,
+   "magnesium": 21.8,
+   "manganese": 0.0101,
+   "phosphorus": 198,
+   "potassium": 333,
+   "selenium": 30.9,
+   "sodium": 54.2,
+   "zinc": 2.03
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   }
+  ]
+ },
+ {
   "source": "vn_nin",
   "source_id": "NIN 15006",
   "name": "Stuffed sticky rice cake (bánh chưng)",
