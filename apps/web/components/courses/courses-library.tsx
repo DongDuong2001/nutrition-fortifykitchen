@@ -142,7 +142,7 @@ export function CoursesLibrary() {
           {list === null && !error ? (
             <div aria-busy="true" aria-live="polite" className="flex flex-col gap-3">
               <div className="min-h-[152px] animate-pulse rounded-card bg-divider motion-reduce:animate-none" />
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-3 lg:grid-cols-4">
                 {[0, 1].map((i) => (
                   <div key={i} className="min-h-[152px] animate-pulse rounded-card bg-divider motion-reduce:animate-none" />
                 ))}
@@ -171,7 +171,7 @@ export function CoursesLibrary() {
                 <CourseTile course={newest} size="wide" isNew={isNew(newest)} onLocked={onLocked} />
               </div>
               {others.length > 0 && (
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-3 lg:grid-cols-4">
                   {others.map((c) => (
                     <CourseTile key={c.id} course={c} onLocked={onLocked} />
                   ))}
