@@ -16,6 +16,7 @@ import { isDemo, setDemoActive } from "./demo";
 import {
   ADDED_ENTRIES_KEY,
   DAY_ARCHIVE_KEY,
+  SAVED_MEALS_SYNCED_KEY,
   RECENT_FOODS_KEY,
   SAMPLE_EDITS_KEY,
   dropLegacyKeys,
@@ -38,6 +39,7 @@ import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
 import {
   apiClient,
+  pendingTemplateOps,
   getPendingOfflineEntryIds,
   hasPendingWrite,
   callEngine,
@@ -72,13 +74,14 @@ import {
   renameSavedMeal as renameSavedMealIn,
   savedMealEntries,
   savedMealSkipped,
+  savedMealWrites,
   writeSavedMeals,
   type SavedMeal,
 } from "./saved-meals";
 import { quickDetail, quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import { syncDayTemplates } from "./day-template-store";
-import { savableFood } from "./day-templates";
+import { mergeDayTemplates, savableFood, withUuidIds } from "./day-templates";
 import {
   SAMPLE_PROFILE,
   applyProfileTargets,
@@ -543,6 +546,9 @@ const SESSION_REFRESH_MS = 10 * 60 * 1000;
 const REFRESH_STALE_MS = 45 * 1000;
 
 /** What addEntry sends for an entry of the diary. */
+/** Bữa ăn của tôi sync with the server for a signed-in account in live mode (never the demo), like Ngày ăn mẫu. */
+const savedMealsSyncing = (): boolean => isLiveMode() && !isDemo() && currentAccountId() !== null;
+
 function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof apiClient.addEntry>[0] {
   return entry.kind === "quick"
     ? { id: entry.id, kind: "quick", calories: entry.calories ?? undefined, mealSlot: entry.mealSlot, date, label: entry.foodName }
@@ -583,6 +589,31 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
+  // The list the server was last told about (or read from): a change is sent as the difference to it
+  const sentSavedMeals = useRef<SavedMeal[] | null>(null);
+  // This device's list (old "sm-…" ids made uuids), then the server's merged in (the Ngày ăn mẫu rules, lib/day-templates mergeDayTemplates);
+  // the first sync of a device uploads what it saved before
+  const loadSavedMeals = useCallback((own: KeyValueStore | null) => {
+    const local = withUuidIds(readSavedMeals(own), generateUuid);
+    sentSavedMeals.current = null;
+    setSavedMeals(local);
+    if (!savedMealsSyncing()) return;
+    void apiClient.getSavedMeals().then((server) => {
+      if (!server) return;
+      const firstSync = own?.getItem(SAVED_MEALS_SYNCED_KEY) !== "1";
+      setSavedMeals((current) => {
+        const { list, upload } = mergeDayTemplates(server, current, pendingTemplateOps("meal:"), firstSync);
+        sentSavedMeals.current = list;
+        upload.forEach((m) => void apiClient.queueSavedMeal(m));
+        return list;
+      });
+      try {
+        own?.setItem(SAVED_MEALS_SYNCED_KEY, "1");
+      } catch {
+        // Storage blocked: the next load uploads again, which the server takes as the same saves
+      }
+    });
+  }, []);
   // Today's date, read after mount so the server and first client render agree
   const [todayIso, setTodayIso] = useState<string | null>(null);
   // Earlier days the user logged, filed by date (lib/day-archive); read by dayEntries for the history and Tổng quan
@@ -765,7 +796,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setArchive(filed.archive);
     setRecentFoods(recents);
     setFavouriteIds(readFavouriteIds(own));
-    setSavedMeals(readSavedMeals(own));
+    loadSavedMeals(own);
     // This account's recipes (cc-27b) become foods of the catalogue, so search and entries find them
     syncRecipeFoods();
 
@@ -992,10 +1023,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     writeFavouriteIds(favouriteIds, ownStorage());
   }, [favouriteIds, hydrated, ownStorage]);
 
-  // Persist saved meals only after hydrated
+  // Persist saved meals only after hydrated; for a signed-in live account every change also goes to the server, through the outbox
   useEffect(() => {
     if (!hydrated) return;
     writeSavedMeals(savedMeals, ownStorage());
+    const before = sentSavedMeals.current;
+    sentSavedMeals.current = savedMeals;
+    if (!before || !savedMealsSyncing()) return;
+    const writes = savedMealWrites(before, savedMeals);
+    writes.put.forEach((m) => void apiClient.queueSavedMeal(m));
+    writes.remove.forEach((id) => void apiClient.deleteSavedMeal(id));
   }, [savedMeals, hydrated, ownStorage]);
 
   // Everything the diary keeps in localStorage is written at once, in the effect that follows the change (cc-68, S3: a crash in
@@ -1470,7 +1507,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     (slot: MealSlot, iso: string, name: string) => {
       const items = mealFoods(slot, iso);
       const meal = buildSavedMeal({
-        id: `sm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        // A uuid: the id the server keeps it under (PUT /saved-meals/{id}), so a save sent twice is one meal
+        id: generateUuid(),
         name,
         fallbackName: defaultMealName(slot, iso),
         items,

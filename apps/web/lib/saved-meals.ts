@@ -53,6 +53,16 @@ export function removeSavedMeal(list: SavedMeal[], id: string): SavedMeal[] {
   return list.filter((m) => m.id !== id);
 }
 
+/** What the server must hear after a change of the list: the meals that are new or changed, and the ids that went. */
+export function savedMealWrites(prev: readonly SavedMeal[], next: readonly SavedMeal[]): { put: SavedMeal[]; remove: string[] } {
+  const before = new Map(prev.map((m) => [m.id, JSON.stringify(m)]));
+  const after = new Set(next.map((m) => m.id));
+  return {
+    put: next.filter((m) => before.get(m.id) !== JSON.stringify(m)),
+    remove: prev.filter((m) => !after.has(m.id)).map((m) => m.id),
+  };
+}
+
 function isItem(value: unknown): value is SavedMealItem {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;

@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -243,14 +244,25 @@ func (r *pgxLibraryRepo) CreateSavedMeal(ctx context.Context, userID uuid.UUID, 
 	}
 	defer tx.Rollback(ctx)
 
-	meal.ID = uuid.New()
+	// The id is the caller's when it gives one (PUT /saved-meals/{id}, sent again offline): saving it again replaces the meal
+	if meal.ID == uuid.Nil {
+		meal.ID = uuid.New()
+	}
 	query := `
 		INSERT INTO nutrition.saved_meals (id, user_id, name, created_at, updated_at)
 		VALUES ($1, $2, $3, now(), now())
+		ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, updated_at = now()
+		WHERE nutrition.saved_meals.user_id = EXCLUDED.user_id
 		RETURNING created_at, updated_at
 	`
 	err = tx.QueryRow(ctx, query, meal.ID, userID, meal.Name).Scan(&meal.CreatedAt, &meal.UpdatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrSavedMealIDConflict
+	}
 	if err != nil {
+		return nil, err
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM nutrition.saved_meal_items WHERE saved_meal_id = $1`, meal.ID); err != nil {
 		return nil, err
 	}
 

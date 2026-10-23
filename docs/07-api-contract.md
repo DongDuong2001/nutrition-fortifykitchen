@@ -566,6 +566,13 @@ Allows users to create and store custom foods with nutritional values.
   - Creates 2 default servings: the user's portion (`150 g`) and standard `100 g`.
 - **Response `201 Created`**: Returns the saved `FoodItem` object.
 
+### 2.11b. Saved meals ("Bữa ăn của tôi")
+A named set of foods with portions, logged in one tap. The web keeps each meal under an id it makes (a uuid) and sends every change through its outbox, so a save sent twice is one meal.
+- **Used by screens**: Khám phá › Bữa ăn của tôi, "Lưu bữa này" on Hôm nay.
+- `GET /api/v1/saved-meals` → `200 {"items":[{"id","name","items":[{"food_id","portion_label","grams","sort"}],"created_at","updated_at"}]}`.
+- `PUT /api/v1/saved-meals/{id}` with `{"name":"Bữa sáng","items":[{"food_id":"<uuid>","portion_label":"1 tô","grams":300,"sort":0}]}` → `200` and the meal. Creates the meal, or replaces its name and items when it exists (a rename is a PUT). `400` for a bad id or a blank name, `409 ID_CONFLICT` when the id is another user's meal. Foods must be in the server's catalogue: a meal with a food made only on the device stays on the device.
+- `POST /api/v1/saved-meals` (the server picks the id) and `DELETE /api/v1/saved-meals/{id}` (`404` when it is gone, which the web counts as done) are unchanged.
+
 ---
 
 ### 2.12. Trends
