@@ -22,7 +22,8 @@ OUT_DIR = HERE / "out"
 WIDTHS = [(390, 844), (1280, 800)]
 NOT_FOUND_ROUTE = "/this-page-does-not-exist"
 # Routes with no header by design (decided 12/10; "/" is the coach link page since cc-45). Only the header check is relaxed; all others stay strict.
-NO_HEADER_ROUTES = {"/", "/signin", "/signin/check-email", "/signin/expired", "/signin/forgot", "/reset-password", "/signup", NOT_FOUND_ROUTE, "/login", "/landing"}
+NO_HEADER_ROUTES = {"/", "/signin", "/signin/check-email", "/signin/expired", "/signin/forgot", "/reset-password", "/signup", NOT_FOUND_ROUTE, "/login", "/landing", "/settings/appearance"}
+# /settings/appearance (Giao diện, job 14) is the 404 page while the dark mode flag is off; tests/probes/dark_foundation.py covers it with the flag on
 # /login is a sign-in screen (Dong's file, no AppHeader), the same kind as /signin; only the header rule is relaxed (cc2-07).
 # /add is a bottom sheet on phones, so it has no header below the desktop width
 NO_HEADER_BELOW_DESKTOP = {"/add"}
