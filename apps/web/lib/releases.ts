@@ -43,6 +43,12 @@ export const RELEASES: readonly Release[] = [
         body: "Cài đặt có mục Góp ý & hỗ trợ. Báo lỗi, báo sai số liệu hay yêu cầu thêm món, app soạn sẵn email cho bạn.",
       },
       { icon: "home", title: "Hôm nay dễ đọc hơn", body: "Số to hơn, chữ đậm hơn. Chất xơ có dòng riêng ở đầu cột vi chất, ngay dưới số vi chất đạt." },
+      // feat/documents: Tài liệu in Cài đặt › Hỗ trợ. No tour, as this entry has none (its controls are text buttons, data-tour documents-edit and documents-upload are there for one)
+      {
+        icon: "home",
+        title: "Tài liệu của app ngay trong Cài đặt",
+        body: "Cài đặt › Tài liệu có các hướng dẫn và quy tắc HLV viết cho bạn. HLV gửi mã truy cập, nhập mã là đọc được ngay trong app.",
+      },
       { icon: "home", title: "Dễ dùng hơn trên máy tính", body: "Rê chuột lên món là thấy sáng lên, các hàng Khám phá có nút xem tiếp, nút Thêm luôn hiện trong hộp thêm món, Esc thoát chọn nhiều món và thanh bên luôn ở yên khi cuộn." },
       {
         icon: "meal",

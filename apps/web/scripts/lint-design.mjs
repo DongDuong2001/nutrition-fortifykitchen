@@ -40,7 +40,8 @@ const hit = (rule, file, text, index, snippet) => {
 
 for (const root of ROOTS) {
   for (const full of files(join(WEB, root))) {
-    const file = relative(WEB, full);
+    // Forward slashes on every OS, so ALLOW_HEX and the report read the same on Windows
+    const file = relative(WEB, full).replace(/\\/g, "/");
     const raw = readFileSync(full, "utf8");
     const text = withoutComments(raw);
     rawLines = raw.split("\n");

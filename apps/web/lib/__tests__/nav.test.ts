@@ -32,6 +32,7 @@ describe("lib/nav tabs", () => {
     expect(tabForPath("/settings/profile")).toBe("settings");
     expect(tabForPath("/settings/profile/weight")).toBe("settings");
     expect(tabForPath("/settings/language")).toBe("settings");
+    expect(tabForPath("/documents")).toBe("settings");
   });
 
   it("keeps the day log and the add sheet under Hôm nay, since Nhật ký is no longer a tab", () => {
@@ -72,6 +73,7 @@ describe("lib/nav, Dong's screens (cc-24)", () => {
     expect(backFallback("/explore/coaches")).toBe("/explore");
     expect(backFallback("/explore/leaderboard")).toBe("/explore");
     expect(backFallback("/privacy")).toBe("/settings");
+    expect(backFallback("/documents")).toBe("/settings");
     expect(backFallback("/terms")).toBe("/settings");
   });
 });

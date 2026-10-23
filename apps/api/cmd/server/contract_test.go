@@ -76,6 +76,14 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 		{"GET", "/api/v1/day-templates"},
 		{"PUT", "/api/v1/day-templates/11111111-1111-1111-1111-111111111111"},
 		{"DELETE", "/api/v1/day-templates/11111111-1111-1111-1111-111111111111"},
+		{"GET", "/api/v1/documents"},
+		{"GET", "/api/v1/documents/rules.md"},
+		{"PUT", "/api/v1/documents/rules.md"},
+		{"POST", "/api/v1/documents/rules.md/open"},
+		{"POST", "/api/v1/document-codes/check"},
+		{"GET", "/api/v1/document-codes"},
+		{"POST", "/api/v1/document-codes"},
+		{"DELETE", "/api/v1/document-codes/11111111-1111-1111-1111-111111111111"},
 		// Protected Trends
 		{"GET", "/api/v1/trends"},
 

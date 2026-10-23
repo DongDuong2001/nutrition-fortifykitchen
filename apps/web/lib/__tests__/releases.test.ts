@@ -186,6 +186,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Dễ dùng hơn trên máy tính");
     expect(r?.items.map((i) => i.title)).toContain("Hôm nay dễ đọc hơn");
     expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
+    expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
     expect(r?.tour).toBeUndefined();
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });

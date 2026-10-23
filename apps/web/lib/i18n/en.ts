@@ -42,6 +42,8 @@ export const en: Record<MessageKey, Message> = {
   "settings.support": "Support",
   "settings.support.feedback": "Feedback & support",
   "settings.support.feedback.hint": "Report a bug or a wrong number, or ask for a food",
+  "settings.support.documents": "Documents",
+  "settings.support.documents.hint": "The app's rules and documents",
   "settings.app.addToHome": "Add to Home Screen",
   "settings.app.install": "Install the app on your phone",
   "settings.app.terms": "Terms of service",
