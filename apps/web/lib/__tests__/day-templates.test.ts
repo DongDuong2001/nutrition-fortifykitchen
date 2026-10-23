@@ -17,6 +17,8 @@ import {
   mealNamesLine,
   mealsKcalLine,
   templateSavedMessage,
+  templateSaveSummary,
+  savableFood,
   yesterdayCopyMessage,
   isPillHidden,
   parseDayTemplates,
@@ -301,6 +303,34 @@ describe("the words of the cards and toasts", () => {
 
   it("the save toast names the template, its foods and its kcal", () => {
     expect(templateSavedMessage("Ngày tập", 6, 936)).toBe("Đã lưu Ngày tập · 6 món · 936 kcal");
+  });
+
+  it("the save toast leaves the kcal out while it is not known (the catalogue has not come yet)", () => {
+    expect(templateSavedMessage("Ngày tập", 2, null)).toBe("Đã lưu Ngày tập · 2 món");
+  });
+});
+
+describe("saving a day or a meal on a device whose catalogue has not come (overnight 22→23/10, PR 2)", () => {
+  const serverFood = "00000000-0000-4000-8000-000000000001";
+  const meals = [{ slot: "breakfast" as const, items: [oats, { foodId: serverFood, servingLabel: "100 g", grams: 100 }] }];
+
+  it("a food the server has is kept even when this device's catalogue does not have it yet", () => {
+    expect(savableFood(serverFood, () => undefined)).toBe(true);
+  });
+
+  it("a food only this device knows (a one-off dish, not a uuid) is kept only when the catalogue has it", () => {
+    expect(savableFood("dish-edit-pho-1", () => undefined)).toBe(false);
+    expect(savableFood("food-yen-mach", (id) => MOCK_FOODS.find((f) => f.id === id))).toBe(true);
+    expect(savableFood("", () => undefined)).toBe(false);
+  });
+
+  it("the save sheet counts every saved food; the kcal waits for the catalogue (null until every food is in it)", () => {
+    expect(templateSaveSummary(meals, MOCK_FOODS)).toEqual({ itemCount: 2, kcal: null });
+    const withServer = [...MOCK_FOODS, { ...MOCK_FOODS.find((f) => f.id === "food-yen-mach")!, id: serverFood }];
+    const both = templateSaveSummary(meals, withServer);
+    expect(both.itemCount).toBe(2);
+    expect(both.kcal).toBe(templateTotals({ id: "", name: "", tag: "khac", meals, createdAt: "" }, withServer).kcal);
+    expect(templateSaveSummary([], MOCK_FOODS)).toEqual({ itemCount: 0, kcal: 0 });
   });
 
   it("the Hôm qua copy toast is the one the copy sheet has always said", () => {

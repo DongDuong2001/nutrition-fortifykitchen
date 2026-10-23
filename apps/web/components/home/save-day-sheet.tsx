@@ -1,19 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { Segmented } from "@/components/ui/segmented";
 import { PillButton } from "@/components/ui/pill-button";
 import { SettingsTile } from "@/components/ui/settings-tile";
 import { TagDot } from "@/components/templates/template-parts";
 import { TemplateGlyphShapes } from "@/components/templates/template-glyph";
-import { DAY_TEMPLATE_TAGS, type DayTemplateTag } from "@/lib/day-templates";
+import { DAY_TEMPLATE_TAGS, templateSaveSummary, type DayTemplateMeal, type DayTemplateTag } from "@/lib/day-templates";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
+import { CATALOG_FOODS } from "@/lib/catalog";
+import { kcalLabel } from "@/lib/kcal";
 
 export interface SaveDaySheetProps {
   open: boolean;
   onClose: () => void;
-  /** "6 món · 936 kcal": what the day holds. */
-  summary: string;
+  /** What the day holds, as it is saved: the summary reads "6 món · 936 kcal" from it. */
+  meals: DayTemplateMeal[];
   /** "Sáng · Trưa · Trước tập": the meals that have food. */
   mealsText: string;
   /** The name field's start: "Ngày tập" on a training day, otherwise empty. */
@@ -32,8 +35,13 @@ export function SaveDaySheet({ open, onClose, ...body }: SaveDaySheetProps) {
 }
 
 // Mounted only while the sheet is open, so every opening starts from the day's own name and tag
-function SaveBody({ summary, mealsText, defaultName, defaultTag, onSave, onClose }: Omit<SaveDaySheetProps, "open">) {
+function SaveBody({ meals, mealsText, defaultName, defaultTag, onSave, onClose }: Omit<SaveDaySheetProps, "open">) {
   const [name, setName] = useState(defaultName);
+  // The kcal come from the catalogue: while the sheet is open it is asked for (a device that did not log the day may not
+  // have it yet) and the summary reads again when it comes. The count never waits for it.
+  const { version } = useCatalogFoods();
+  const totals = useMemo(() => templateSaveSummary(meals, CATALOG_FOODS), [meals, version]);
+  const summary = `${totals.itemCount} món${totals.kcal === null ? "" : ` · ${kcalLabel(totals.kcal)}`}`;
   const [tag, setTag] = useState<DayTemplateTag>(defaultTag);
   return (
     <form
