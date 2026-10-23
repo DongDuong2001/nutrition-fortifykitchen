@@ -938,6 +938,23 @@ export const apiClient = {
   },
 
   /** Ngày ăn mẫu as the server has them (GET /day-templates, newest first). Null in live mode when they could not be read. */
+  /** The weigh-ins between two days (YYYY-MM-DD), oldest first; null when they could not be read (or outside live mode). */
+  async getWeightLog(from: string, to: string): Promise<{ date: string; kg: number }[] | null> {
+    if (!isLiveMode()) return null;
+    try {
+      const res = await apiFetch(`/me/weight?from=${from}&to=${to}`, { signal: diaryTimeout() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const rows: unknown = json.data ?? json;
+      if (!Array.isArray(rows)) return null;
+      return rows
+        .map((r: { log_date?: unknown; weight_kg?: unknown }) => ({ date: String(r.log_date ?? "").slice(0, 10), kg: Number(r.weight_kg) }))
+        .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && Number.isFinite(p.kg) && p.kg > 0);
+    } catch {
+      return null;
+    }
+  },
+
   async getDayTemplates(): Promise<unknown[] | null> {
     if (!isLiveMode()) return null;
     try {
