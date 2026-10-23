@@ -161,7 +161,7 @@ export function ExploreSections() {
       {recents.length > 0 ? (
         <Carousel title="Gần đây">
           {recents.map(({ food, grams, label }) => (
-            <FoodCardLink key={`${food.id}|${label}`} href={`/foods/${food.id}`} name={rowName(food)} meta={label} kcal={foodRowKcal(food, grams)} />
+            <FoodCardLink key={`${food.id}|${label}`} href={`/foods/${food.id}`} name={rowName(food)} meta={label} kcal={foodRowKcal(food, grams)} food={food} />
           ))}
         </Carousel>
       ) : (
@@ -174,7 +174,7 @@ export function ExploreSections() {
       {favourites.length > 0 && (
         <Carousel title="Yêu thích">
           {favourites.slice(0, SHOWN).map((food) => (
-            <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} meta={foodRowMeta(food)} />
+            <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} meta={foodRowMeta(food)} food={food} />
           ))}
         </Carousel>
       )}

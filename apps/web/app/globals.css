@@ -21,9 +21,6 @@
 /* cc-66 (S16): see-through surfaces become solid when the system asks for less transparency */
 @custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
 
-/* V3-SPEC §4 Liquid Glass, for the navigation layer only (tab bar, sheet header, toast, Back and trailing circles), never
-   content. Solid card colour under reduced transparency; solid with the card-border edge under more contrast. Never
-   animate backdrop-filter (D-MAT-05). */
 /* C3: a small pill on the header (Chia sẻ): lighter glass, a hairline and a soft shadow, the same fallbacks as glass */
 @utility glass-light {
   background-color: var(--color-glass-light);
@@ -43,6 +40,14 @@
   }
 }
 
+/* Food icons are the phone's own emoji (lib/food-emoji): its colour emoji font first, whatever the text font */
+@utility font-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+/* V3-SPEC §4 Liquid Glass, for the navigation layer only (tab bar, sheet header, toast, Back and trailing circles), never
+   content. Solid card colour under reduced transparency; solid with the card-border edge under more contrast. Never
+   animate backdrop-filter (D-MAT-05). */
 @utility glass {
   background-color: var(--color-glass);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
