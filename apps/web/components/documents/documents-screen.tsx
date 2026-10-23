@@ -39,10 +39,18 @@ const ALERT = "m-0 text-xs font-semibold text-destructive-text";
 const updatedText = (iso: string | null) =>
   iso ? `Cập nhật ${new Date(iso).toLocaleDateString("vi-VN")}` : undefined;
 
+/** `record` without `key`. */
+const omit = <T,>(record: Record<string, T>, key: string): Record<string, T> => {
+  const { [key]: _gone, ...rest } = record;
+  return rest;
+};
+
 interface OpenDocument {
   name: string;
   /** null while it loads */
   text: string | null;
+  /** The version the text was read at */
+  updatedAt?: string;
   error?: string;
 }
 
@@ -60,7 +68,8 @@ export function DocumentsScreen() {
   const [code, setCode] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [open, setOpen] = useState<OpenDocument | null>(null);
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  // Unsaved edits by document, with the version they started from (a save sends it back; lib/documents saveDocument)
+  const [drafts, setDrafts] = useState<Record<string, { text: string; base: string }>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -94,8 +103,10 @@ export function DocumentsScreen() {
     setSaveError(null);
     setOpen({ name, text: null });
     try {
-      const text = await readDocument(name);
-      setOpen((current) => (current?.name === name ? { name, text } : current));
+      const doc = await readDocument(name);
+      // A draft made on an older version would cover the newer text: it is dropped (a 409 asked to copy the edits out first)
+      setDrafts((current) => (current[name] && current[name].base !== doc.updatedAt ? omit(current, name) : current));
+      setOpen((current) => (current?.name === name ? { name, text: doc.content, updatedAt: doc.updatedAt } : current));
     } catch (error) {
       setOpen((current) =>
         current?.name === name
@@ -109,16 +120,12 @@ export function DocumentsScreen() {
     e.preventDefault();
     if (!open || open.text === null || !code) return;
     const { name } = open;
-    const text = drafts[name] ?? open.text;
+    const text = drafts[name]?.text ?? open.text;
     setSaving(true);
     setSaveError(null);
     try {
-      await saveDocument(name, text, code);
-      setDrafts((current) => {
-        const next = { ...current };
-        delete next[name];
-        return next;
-      });
+      await saveDocument(name, text, code, open.updatedAt);
+      setDrafts((current) => omit(current, name));
       setOpen(null);
       notify(`Đã lưu ${name}`);
       void load();
@@ -141,7 +148,7 @@ export function DocumentsScreen() {
     try {
       await saveDocument(file.name, await file.text(), code);
       // The upload replaces the document: a draft kept for the old text would cover it in the editor
-      setDrafts(({ [file.name]: _replaced, ...rest }) => rest);
+      setDrafts((current) => omit(current, file.name));
       notify(`Đã tải lên ${file.name}`);
       void load();
     } catch (error) {
@@ -150,7 +157,7 @@ export function DocumentsScreen() {
   };
 
   const draft =
-    open?.text !== null && open ? (drafts[open.name] ?? open.text) : "";
+    open?.text !== null && open ? (drafts[open.name]?.text ?? open.text) : "";
   const changed = open?.text !== null && open !== null && draft !== open.text;
 
   return (
@@ -325,7 +332,7 @@ export function DocumentsScreen() {
                 onChange={(e) =>
                   setDrafts((current) => ({
                     ...current,
-                    [open.name]: e.target.value,
+                    [open.name]: { text: e.target.value, base: open.updatedAt ?? "" },
                   }))
                 }
                 spellCheck={false}
