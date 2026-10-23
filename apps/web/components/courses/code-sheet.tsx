@@ -5,7 +5,7 @@ import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { dayMonth, tileBackground, type CourseDetail, type CourseSummary } from "@/lib/course-logic";
-import { CoursesError, coursesErrorText, type CoursesApi } from "@/lib/courses";
+import { coursesErrorText, type CoursesApi } from "@/lib/courses";
 
 const FIELD = "w-full rounded-xl border-0 bg-surface text-base text-text outline-none focus:shadow-[inset_0_0_0_2px_var(--color-cobalt)]";
 
@@ -51,7 +51,7 @@ function CodeForm({ course, api, onOpened }: { course: CourseSummary; api: Cours
     try {
       onOpened(await api.open(course.id, value.trim()));
     } catch (err) {
-      setError(err instanceof CoursesError || err instanceof Error ? coursesErrorText(err) : "Không mở được. Thử lại sau.");
+      setError(coursesErrorText(err));
     } finally {
       setChecking(false);
     }

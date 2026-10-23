@@ -276,7 +276,7 @@ function PartForm({ onAdd }: { onAdd: (title: string) => Promise<void> }) {
 }
 
 /** A course the user cannot open: the code sheet for a code course, a word about the Level for a Level course. */
-function LockedCourse({ id, lock }: { id: string; lock: NonNullable<CoursesError["lock"]> }) {
+function LockedCourse({ id, lock, onUnlocked }: { id: string; lock: NonNullable<CoursesError["lock"]>; onUnlocked: () => void }) {
   const goBack = useBack();
   const { api } = useCoursesApi();
   const [summary, setSummary] = useState<CourseSummary | null>(null);
@@ -322,7 +322,7 @@ function LockedCourse({ id, lock }: { id: string; lock: NonNullable<CoursesError
         onOpened={() => {
           setAsking(null);
           notify("Đã mở khóa");
-          window.location.reload();
+          onUnlocked();
         }}
       />
     </AppShell>
@@ -338,7 +338,7 @@ export function CourseScreen({ id }: { id: string }) {
     if (course) rememberCourse(course.id);
   }, [course]);
 
-  if (error instanceof CoursesError && error.kind === "locked" && error.lock) return <LockedCourse id={id} lock={error.lock} />;
+  if (error instanceof CoursesError && error.kind === "locked" && error.lock) return <LockedCourse id={id} lock={error.lock} onUnlocked={reload} />;
   if (course) return canManage ? <CoachCourse course={course} api={api} reload={reload} /> : <LearnerCourse course={course} />;
   return (
     <AppShell>

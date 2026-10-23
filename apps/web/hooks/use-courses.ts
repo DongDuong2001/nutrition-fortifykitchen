@@ -17,7 +17,6 @@ export interface Loaded<T> {
   /** The refusal, when the load failed (a 403 `locked` says why a course is shut). */
   error: CoursesError | Error | null;
   reload: () => void;
-  set: (next: T) => void;
 }
 
 /** Runs `load` when the viewer is known and whenever `reload` is called; keeps what it had while it reloads. */
@@ -50,7 +49,7 @@ function useLoaded<T>(load: ((api: CoursesApi) => Promise<T>) | null, key: strin
   const reload = useCallback(() => setTick((n) => n + 1), []);
   // The reader saves the place as it closes, which can be after this screen read the course: ask again when a save lands
   useEffect(() => (watchProgress ? onProgressSaved(reload) : undefined), [watchProgress, reload]);
-  return { data, error, reload, set: setData };
+  return { data, error, reload };
 }
 
 /** Every course with its lock and my progress (null while loading). */

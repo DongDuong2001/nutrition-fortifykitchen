@@ -10,13 +10,6 @@ export const LockGlyph = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
-export const OpenGlyph = ({ size = 14 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
-    <rect x="5" y="11" width="14" height="9" rx="2" />
-    <path d="M8 11V8a4 4 0 0 1 7.5-2" />
-  </svg>
-);
-
 export const CheckGlyph = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" {...base} strokeWidth={2.6}>
     <path d="m5 12.5 4.5 4.5L19 7.5" />

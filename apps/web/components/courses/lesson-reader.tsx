@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PillButton } from "@/components/ui/pill-button";
 import { useBack } from "@/hooks/use-back";
 import { useCourse, useCoursesApi } from "@/hooks/use-courses";
-import { completesAt, nextLesson, pairBackground, partToneIndex, type CourseDetail, type LessonView } from "@/lib/course-logic";
+import { nextLesson, pairBackground, partToneIndex, type CourseDetail, type LessonView } from "@/lib/course-logic";
 import { CoursesError, type CoursesApi } from "@/lib/courses";
 import { rememberCourse } from "@/lib/course-recent";
 import { parseMarkdown, type Span } from "@/lib/mini-markdown";
