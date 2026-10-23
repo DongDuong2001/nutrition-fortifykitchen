@@ -193,6 +193,65 @@ describe("reload once in 60 s", () => {
   });
 });
 
+// A bare rejection (a background import such as lib/vitals) is not worth taking the whole app away: on a second failure it offers the
+// update (the toast). A <script> of the build that failed, or an error React caught (the error screen's own check), is the app itself.
+describe("a second failure inside 60 s: who gets the error screen", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-23T10:00:00Z"));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it("a bare rejection gives the toast, not the error screen, and does not reload", () => {
+    const t = setup({ stored: Date.now() - 5_000 });
+    t.fire("unhandledrejection", rejection(named("ChunkLoadError", "Loading chunk 77 failed.")));
+    expect(t.reload).not.toHaveBeenCalled();
+    expect(t.win.h1tChunkState).toBe("toast");
+    expect(t.dispatched).toEqual(["h1t:chunk"]);
+  });
+
+  it("each browser's dynamic-import message is a bare rejection too", () => {
+    for (const [, reason] of CHUNK_ERRORS) {
+      const t = setup({ stored: Date.now() - 5_000 });
+      t.fire("unhandledrejection", rejection(reason));
+      expect(t.win.h1tChunkState).toBe("toast");
+    }
+  });
+
+  it("with no sessionStorage a bare rejection gives the toast as well", () => {
+    const t = setup({ storage: "throws" });
+    t.fire("unhandledrejection", rejection(named("ChunkLoadError", "x")));
+    expect(t.reload).not.toHaveBeenCalled();
+    expect(t.win.h1tChunkState).toBe("toast");
+  });
+
+  it("a failed <script> of the build still gives the error screen", () => {
+    const t = setup({ stored: Date.now() - 5_000 });
+    t.fire("error", scriptError(chunkScript));
+    expect(t.win.h1tChunkState).toBe("error");
+  });
+
+  it("an error React caught still answers error to the error screens", () => {
+    const t = setup({ stored: Date.now() - 5_000 });
+    expect((t.win.h1tChunk as (e: unknown) => string)(named("ChunkLoadError", "x"))).toBe("error");
+  });
+
+  it("the first failure by a bare rejection still reloads once", () => {
+    const t = setup();
+    t.fire("unhandledrejection", rejection(named("ChunkLoadError", "x")));
+    expect(t.reload).toHaveBeenCalledTimes(1);
+    expect(t.win.h1tChunkState).toBe("reload");
+  });
+
+  it("a script error and the rejection of one failure stay one outcome, whichever the order", () => {
+    const a = setup({ stored: Date.now() - 5_000 });
+    a.fire("error", scriptError(chunkScript));
+    a.fire("unhandledrejection", rejection(named("ChunkLoadError", "x")));
+    expect(a.win.h1tChunkState).toBe("error");
+    expect(a.dispatched).toEqual(["h1t:chunk"]);
+  });
+});
+
 describe("never over unsaved work", () => {
   beforeEach(() => {
     vi.useFakeTimers();
