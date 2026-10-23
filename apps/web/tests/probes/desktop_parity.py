@@ -315,6 +315,19 @@ def part_hi(b):
         pg.wait_for_timeout(600)
         o1 = card.evaluate("(e) => getComputedStyle(e, '::after').opacity")
         check(float(o1) > 0, f"i: hovering a card link: ::after opacity {o0} -> {o1} (> 0)")
+    # i: a pressed .m-tint row keeps its full press tint under the hover rule
+    row = pg.locator(".m-tint").filter(visible=True).first
+    check(row.count() > 0, "i: a .m-tint row is on /explore")
+    if row.count():
+        row.scroll_into_view_if_needed()
+        row.hover()
+        pg.wait_for_timeout(600)
+        h = row.evaluate("(e) => getComputedStyle(e, '::after').opacity")
+        pg.mouse.down()
+        pg.wait_for_timeout(400)
+        p = row.evaluate("(e) => getComputedStyle(e, '::after').opacity")
+        pg.mouse.up()
+        check(float(h) > 0 and float(p) == 1, f"i: a .m-tint row: hover {h}, pressed {p} (1)")
     ctx.close()
     # h at 390: not visible
     ctx, pg = new_page(b, {"width": 390, "height": 844})
