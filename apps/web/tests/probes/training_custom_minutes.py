@@ -60,7 +60,8 @@ with sync_playwright() as p:
     check(pick(pg, "5") == "30", "5 is clamped to 30")
     pick(pg, "150")
     check(chip.inner_text().strip() == "150 phút" and chip.get_attribute("aria-pressed") == "true", f"the chip reads 150 phút and stays picked ({chip.inner_text()!r})")
-    salts = pg.locator("text=/Muối · phút/").count()
+    # the visible checklist only: the page also keeps a hidden (aria-hidden) copy of the phases
+    salts = pg.locator("text=/Muối · phút/").filter(visible=True).count()
     check(salts == 7, f"150 minutes: 7 salt doses ({salts})")
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(1200)
