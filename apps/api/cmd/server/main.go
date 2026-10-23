@@ -301,13 +301,14 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 				r.Delete("/{id}", dayTemplatesHandler.Delete)
 			})
 
-			// Tài liệu (migration 000017): everyone signed in reads; a write needs an access code a coach made
+			// Tài liệu (migration 000017): a coach or an admin writes and reads; a learner sees the list and opens a document with a code
 			r.Get("/documents", documentsHandler.List)
-			r.Get("/documents/{name}", documentsHandler.Get)
-			r.Put("/documents/{name}", documentsHandler.Put)
+			r.Post("/documents/{name}/open", documentsHandler.Open)
 			r.Post("/document-codes/check", documentsHandler.CheckCode)
 			r.Group(func(r chi.Router) {
 				r.Use(authMiddleware.RequireRole("coach", "admin"))
+				r.Get("/documents/{name}", documentsHandler.Get)
+				r.Put("/documents/{name}", documentsHandler.Put)
 				r.Get("/document-codes", documentsHandler.ListCodes)
 				r.Post("/document-codes", documentsHandler.CreateCode)
 				r.Delete("/document-codes/{id}", documentsHandler.RevokeCode)
