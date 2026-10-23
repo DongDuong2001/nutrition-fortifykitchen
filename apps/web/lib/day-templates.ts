@@ -337,12 +337,12 @@ export function templateWrites(prev: readonly DayTemplate[], next: readonly DayT
 }
 
 /** Ids the server can take: a template saved before they were uuids ("dt-…") gets a new one. The same list when none had to change. */
-export function withUuidIds(list: DayTemplate[], newId: () => string): DayTemplate[] {
+export function withUuidIds<T extends { id: string }>(list: T[], newId: () => string): T[] {
   return list.some((t) => !isUuid(t.id)) ? list.map((t) => (isUuid(t.id) ? t : { ...t, id: newId() })) : list;
 }
 
 // By time, not by text: the server may write the same moment with another offset or more digits
-const newestFirst = (a: DayTemplate, b: DayTemplate): number => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0);
+const newestFirst = (a: { createdAt: string }, b: { createdAt: string }): number => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0);
 
 /**
  * The server's list against this device's. The server's is the truth, except for a template with a write still waiting (`pending`:
@@ -350,12 +350,12 @@ const newestFirst = (a: DayTemplate, b: DayTemplate): number => (Date.parse(b.cr
  * before the list followed the account: it is kept and sent (`upload`). After that, one the server no longer has was deleted on
  * another device and goes. Newest first.
  */
-export function mergeDayTemplates(
-  server: readonly DayTemplate[],
-  local: readonly DayTemplate[],
+export function mergeDayTemplates<T extends { id: string; createdAt: string }>(
+  server: readonly T[],
+  local: readonly T[],
   pending: ReadonlyMap<string, "put" | "delete">,
   firstSync: boolean
-): { list: DayTemplate[]; upload: DayTemplate[] } {
+): { list: T[]; upload: T[] } {
   const localById = new Map(local.map((t) => [t.id, t]));
   const onServer = new Set(server.map((t) => t.id));
   const kept = server.flatMap((t) => {
