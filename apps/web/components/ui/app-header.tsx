@@ -75,7 +75,8 @@ function WordmarkRow({ after, children }: { after?: React.ReactNode; children: R
   return (
     <div className="flex items-center gap-2">
       {children}
-      {after}
+      {/* From 1024 px the 44 px control must not make the title's row taller (the title keeps its top on every screen) */}
+      <span className="flex items-center lg:h-0">{after}</span>
     </div>
   );
 }

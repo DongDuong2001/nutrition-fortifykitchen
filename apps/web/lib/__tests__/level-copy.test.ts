@@ -25,7 +25,8 @@ describe("level copy", () => {
 
   it("the calm card for a lower Level, with or without a coach object", () => {
     expect(noticeText("HLV Khánh", { kind: "lowered", from: 2, to: 1 })).toBe("HLV Khánh đã đổi Level của bạn thành 1");
-    expect(noticeText(null, { kind: "lowered", from: 3, to: 1 })).toBe("HLV đã đổi Level của bạn thành 1");
+    // Q9 (b): today the Level is set by SQL, not by a coach, so none is named
+    expect(noticeText(null, { kind: "lowered", from: 3, to: 1 })).toBe("Level của bạn đã đổi thành 1");
   });
 
   it("the explainer's lines", () => {

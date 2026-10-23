@@ -139,6 +139,14 @@ describe("LevelBadge frame, mini, outline and shine", () => {
     expect(html({ level: 2 })).not.toMatch(/(font-size|padding|width|height):[^;"]*\dpx/);
   });
 
+  it("its box covers the slant: the row pads the tag's overhang, the frame insets by its own (same air round the tag)", () => {
+    // skewX(−14°) pushes each side out by height × tan 14° / 2: 1.52em → 0.19em for the tag, 2.12em → 0.26em for the frame
+    expect(html({ level: 2 })).toContain("padding:0 0.19em");
+    expect(html({ level: 2, size: "mini" })).toContain("padding:0 0.19em");
+    expect(html({ level: 4 })).toContain("padding:0.3em 0.68em");
+    expect(html({ level: 4 })).toMatch(/data-level-frame[^>]*class="[^"]*inset-x-\[0\.26em\]/);
+  });
+
   it("reads as one image: Level n", () => {
     expect(html({ level: 4 })).toMatch(/role="img" aria-label="Level 4"/);
   });

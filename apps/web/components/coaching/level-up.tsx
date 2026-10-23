@@ -102,7 +102,10 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   const anchorRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const landRef = useRef<HTMLSpanElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const explainRef = useRef(false);
+  // ✕ takes the focus when it opens; its ring shows only once a key is pressed (keyboard focus), not on a phone that opened it
+  const [mountFocus, setMountFocus] = useState(true);
 
   const clear = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -110,10 +113,10 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   };
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
-  // The clock: haptics, the count, the card. A polite announcement, and the focus in the dialog (no ring drawn on a button)
+  // The clock: haptics, the count, the card. A polite announcement, and the focus on ✕
   useEffect(() => {
     later(() => setSaid(levelUpAnnouncement(step, coachName)), 150);
-    columnRef.current?.focus({ preventScroll: true });
+    closeRef.current?.focus({ preventScroll: true });
     if (reduced) return clear;
     for (const ms of CROSS_FADES) later(() => haptic("tick"), ms);
     later(() => haptic("levelUp"), H - 100);
@@ -190,6 +193,7 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   // Esc closes; Tab stays on the two buttons (a modal moment: the page under it is not reachable)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      setMountFocus(false);
       if (e.key === "Escape") land(false);
       if (e.key !== "Tab") return;
       const buttons = Array.from(columnRef.current?.querySelectorAll("button") ?? []);
@@ -220,7 +224,7 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
         {said}
       </p>
 
-      <div ref={columnRef} role="dialog" aria-modal="true" aria-labelledby="level-up-title" tabIndex={-1} className={`${s.column} outline-none`}>
+      <div ref={columnRef} role="dialog" aria-modal="true" aria-labelledby="level-up-title" className={s.column}>
         {intro && (
           <>
             <div aria-hidden="true" className={s.vig} />
@@ -383,11 +387,15 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
             <span aria-hidden="true" className={s.btnShine} />
           </button>
         </div>
+        {/* DESIGN.md D-SHT-05: Close on the leading side */}
         <button
+          ref={closeRef}
           type="button"
           aria-label="Đóng"
+          data-mount-focus={mountFocus || undefined}
+          onBlur={() => setMountFocus(false)}
           onClick={() => land(false)}
-          className={`${s.d4} ${leaving ? s.gone : ""} absolute right-2 top-[calc(8px+env(safe-area-inset-top))] inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark`}
+          className={`${s.d4} ${leaving ? s.gone : ""} absolute left-2 top-[calc(8px+env(safe-area-inset-top))] data-mount-focus:outline-none inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark`}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" />

@@ -21,9 +21,9 @@ export function levelSourceText(level: Level): string {
   return `Level ${level} · do HLV đặt`;
 }
 
-/** The calm one-time card for a lower Level (a higher one is the celebration). Without a coach object (live mode): "HLV". */
+/** The calm one-time card for a lower Level (a higher one is the celebration). Without a coach object (live mode) no coach is named. */
 export function noticeText(coachName: string | null, notice: LevelNotice): string {
-  return `${coachName ?? "HLV"} đã đổi Level của bạn thành ${notice.to}`;
+  return coachName ? `${coachName} đã đổi Level của bạn thành ${notice.to}` : `Level của bạn đã đổi thành ${notice.to}`;
 }
 
 /** One line per Level for the explainer: how many micros Hôm nay lists, and the extras from Level 3. */

@@ -97,12 +97,14 @@ export function LevelBadge({
       className={`relative inline-flex shrink-0 flex-col items-center font-display leading-none ${className}`}
       style={{ fontSize: FONT_SIZE[size] }}
     >
-      <span className="relative inline-flex items-center" style={framed ? { padding: "0.3em 0.42em" } : undefined}>
+      {/* The box covers what is painted: skewX(−14°) pushes each side out by height × tan 14° / 2 (0.19em for the tag, 0.26em for the
+          frame), so the row pads it and the frame keeps its 0.42em of air round the tag inside a 0.26em inset */}
+      <span className="relative inline-flex items-center" style={{ padding: framed ? "0.3em 0.68em" : "0 0.19em" }}>
         {framed && (
           <span
             aria-hidden="true"
             data-level-frame
-            className="absolute inset-0 -skew-x-[14deg] rounded-[0.48em]"
+            className="absolute inset-x-[0.26em] inset-y-0 -skew-x-[14deg] rounded-[0.48em]"
             style={{
               border: `0.07em solid ${v("gold")}`,
               backgroundColor: alpha("gold", 10),
