@@ -13,8 +13,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// Tài liệu (migration 000017): the app's documents and rules, markdown text by file name. Every signed-in user reads them;
-// a write needs an access code that a coach (or an admin) made with POST /document-codes. A code is 10 symbols from a
+// Tài liệu (migration 000017): the coach's documents and rules, markdown text by file name. A coach or an admin writes them and
+// reads them directly; every signed-in user sees the list, and a learner opens a document with an access code a coach made
+// (POST /document-codes). A code is 10 symbols from a
 // 32-symbol alphabet (50 bits, the coach join code's format); only its SHA-256 is stored, and it lapses after CodeTTL.
 // Guessing one is bounded by the per-user write limit (60 a minute): 2^49 tries on average is out of reach.
 
@@ -79,7 +80,6 @@ type Document struct {
 
 type PutRequest struct {
 	Content string `json:"content"`
-	Code    string `json:"code"`
 	// BaseUpdatedAt is the updatedAt the editor loaded. Set, the write only lands on that version (else ErrChanged);
 	// left out, it creates or replaces (an upload).
 	BaseUpdatedAt *time.Time `json:"baseUpdatedAt"`
