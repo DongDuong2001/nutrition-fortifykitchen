@@ -25,11 +25,11 @@ const memory = new Map<string, { text: string; updatedAt: string }>();
 
 export async function listDocuments(): Promise<DocumentMeta[]> {
   const store = bucket();
-  if (!store) return [...memory].map(([name, d]) => ({ name, updatedAt: d.updatedAt, size: new TextEncoder().encode(d.text).length }));
+  if (!store) return [...memory].map(([name, d]) => ({ name, updatedAt: d.updatedAt }));
   const { data, error } = await store.list("", { limit: 1000, sortBy: { column: "name", order: "asc" } });
   if (error) throw error;
   // A folder or Supabase's placeholder object is not a document
-  return data.filter((f) => isDocumentName(f.name)).map((f) => ({ name: f.name, updatedAt: f.updated_at ?? null, size: typeof f.metadata?.size === "number" ? f.metadata.size : null }));
+  return data.filter((f) => isDocumentName(f.name)).map((f) => ({ name: f.name, updatedAt: f.updated_at ?? null }));
 }
 
 /** The document's text, or null when there is none by that name. */
