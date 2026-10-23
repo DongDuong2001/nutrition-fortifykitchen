@@ -2,7 +2,7 @@
 
 Commands only: nobody has run them on staging or production. Staging (Supabase project `hitmicro-staging`) first, then production.
 
-Rehearsed 23/10 on a local Postgres 17 in Docker (every migration in order, then this sheet's staging block, the set/read-back SQL, the rollback and the restore, copied as written with only `DATABASE_URL` different): all ran; the restore line was the one fix. Results in #88.
+Rehearsed twice on 23/10 on a local Postgres 17 in Docker (every migration in order, then this sheet's blocks copied as written, only `DATABASE_URL` different). The second run covered the rollback below: down file first, a backup kept with owners and grants, the dependency check stopping on a trigger on `auth.users`, a role's grant surviving the restore and the fallback. Results in #88.
 
 **Order: 000021 on staging and prod first (the current API ignores the new columns), then merge #88, then deploy. Never deploy main with #88 before 000021 is on that database.**
 
@@ -166,6 +166,11 @@ Only if the down file is not enough. Everything written after the backup is lost
 B=$(ls -t ~/backups/prod-before-000021-*.dump | head -1)     # staging: ~/backups/staging-before-000021-*.dump
 B=${B%.dump}; ls -l $B.dump $B.dp.txt $B.ddp.txt $B.grants.sql
 printf 'Restore from %s.dump ? Type yes: ' "$B"; read -r ok
+```
+
+Answer the question, then paste the rest (pasted together, `read` would take the next pasted line as the answer):
+
+```bash
 # R2. Nothing outside nutrition may depend on it (DROP SCHEMA nutrition CASCADE would drop or break it). Any line: STOP and tell Hao
 deps=$(psql17 -At -F ' | ' < ~/migrations-1023/nutrition-dependents.sql) && checked=yes || checked=no
 if [ "$checked" = yes ] && [ -z "$deps" ]; then echo "R2 ok: nothing outside nutrition depends on it"; else echo "STOP, tell Hao (check ran: $checked):"; echo "$deps"; fi
