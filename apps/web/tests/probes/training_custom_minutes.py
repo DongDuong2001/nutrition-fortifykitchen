@@ -8,6 +8,7 @@ Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/tra
 # PROBE_COVERS: app/(app)/(dashboard)/training/** components/training/** components/settings/profile-cards.tsx lib/training.ts lib/training-limits.ts
 import json
 import os
+from pathlib import Path
 import re
 import sys
 
@@ -19,6 +20,9 @@ SETTINGS = json.dumps({"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "d
 GROUP = '[role=group][aria-label="Thời gian tập"]:visible'
 problems = []
 
+
+SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
+SHOTS.mkdir(exist_ok=True)
 
 def check(cond, msg):
     print(("[PASS] " if cond else "[FAIL] ") + msg)
@@ -49,6 +53,8 @@ with sync_playwright() as p:
     chip = pg.locator(GROUP).locator("button[aria-haspopup=dialog]")
     check(chip.count() == 1 and "Tùy chỉnh" in chip.inner_text(), "a Tùy chỉnh chip after 120 phút")
     chip.click()
+    pg.wait_for_timeout(400)
+    pg.screenshot(path=str(SHOTS / "training-custom-picker-390.png"))
     for name in ("Bớt 30 phút", "Thêm 30 phút"):
         b = pg.get_by_role("button", name=name).bounding_box()
         check(b is not None and b["width"] >= 44 and b["height"] >= 44, f"{name} is 44 px ({b})")
@@ -63,6 +69,12 @@ with sync_playwright() as p:
     # the visible checklist only: the page also keeps a hidden (aria-hidden) copy of the phases
     salts = pg.locator("text=/Muối · phút/").filter(visible=True).count()
     check(salts == 7, f"150 minutes: 7 salt doses ({salts})")
+    pg.screenshot(path=str(SHOTS / "training-custom-150-390.png"), full_page=True)
+    pg.set_viewport_size({"width": 1440, "height": 900})
+    pg.wait_for_timeout(500)
+    pg.screenshot(path=str(SHOTS / "training-custom-150-1440.png"), full_page=True)
+    pg.set_viewport_size({"width": 390, "height": 844})
+    pg.wait_for_timeout(300)
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(1200)
     check(pg.locator(GROUP).locator("button[aria-haspopup=dialog]").inner_text().strip() == "150 phút", "a reload keeps 150 phút")
