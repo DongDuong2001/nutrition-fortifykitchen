@@ -410,6 +410,7 @@ export function SupportCard() {
         {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>}
       </SettingsRow>
       <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.document} label="Tài liệu" hint="Quy tắc và tài liệu của app" href="/documents" minHeight="14" data-align-group="profile-row" />
     </Card>
   );
 }
