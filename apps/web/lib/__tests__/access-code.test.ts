@@ -18,7 +18,8 @@ describe("codeMatches", () => {
 
 describe("checkAccess", () => {
   it("is unset without ACCESS_CODE, wrong for another code and ok for the code, from the header or given", () => {
-    expect(checkAccess(request("10.0.0.1", "x"), undefined, undefined)).toBe("unset");
+    // "" rather than undefined: undefined takes the default, ACCESS_CODE of the environment the tests run in
+    expect(checkAccess(request("10.0.0.1", "x"), undefined, "")).toBe("unset");
     expect(checkAccess(request("10.0.0.1", "x"), undefined, "ok-code")).toBe("wrong");
     expect(checkAccess(request("10.0.0.1", "ok-code"), undefined, "ok-code")).toBe("ok");
     expect(checkAccess(request("10.0.0.1"), "ok-code", "ok-code")).toBe("ok");
