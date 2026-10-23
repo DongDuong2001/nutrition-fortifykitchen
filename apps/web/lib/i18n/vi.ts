@@ -43,6 +43,10 @@ export const vi = {
   "settings.app.reminders.on": "Đã bật",
   "settings.app.reminders.off": "Đã tắt",
   "settings.app.dataSources": "Nguồn dữ liệu",
+  // Hỗ trợ card (feedback-mailto, #62): Góp ý & hỗ trợ, then Nguồn dữ liệu (settings.app.dataSources)
+  "settings.support": "Hỗ trợ",
+  "settings.support.feedback": "Góp ý & hỗ trợ",
+  "settings.support.feedback.hint": "Báo lỗi, sai số liệu, yêu cầu thêm món",
   "settings.app.addToHome": "Thêm vào màn hình chính",
   "settings.app.install": "Cài ứng dụng lên điện thoại",
   "settings.app.terms": "Điều khoản dịch vụ",

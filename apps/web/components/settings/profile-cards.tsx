@@ -440,6 +440,7 @@ export function AppCard() {
  * Nguồn dữ liệu, moved here from Ứng dụng.
  */
 export function SupportCard() {
+  const t = useT();
   // Read after mount, so the first paint never shows a badge it will take away
   const [isNew, setIsNew] = useState(false);
   useEffect(() => {
@@ -447,22 +448,22 @@ export function SupportCard() {
     return subscribeFeedback(() => setIsNew(!feedbackSeen()));
   }, []);
   return (
-    <Card as="section" aria-label="Hỗ trợ" className="flex flex-col gap-1">
-      <SectionHeader>Hỗ trợ</SectionHeader>
+    <Card as="section" aria-label={t("settings.support")} className="flex flex-col gap-1">
+      <SectionHeader>{t("settings.support")}</SectionHeader>
       <SettingsRow
         dense
         tone="body"
         glyph={SETTINGS_ICONS.chat}
-        label="Góp ý & hỗ trợ"
-        hint="Báo lỗi, sai số liệu, yêu cầu thêm món"
+        label={t("settings.support.feedback")}
+        hint={t("settings.support.feedback.hint")}
         onClick={() => openFeedback({ screen: "Cài đặt" })}
         divider={false}
         minHeight="16"
         data-align-group="profile-row"
       >
-        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>}
+        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">{t("settings.app.new")}</span>}
       </SettingsRow>
-      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label={t("settings.app.dataSources")} href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
     </Card>
   );
 }
