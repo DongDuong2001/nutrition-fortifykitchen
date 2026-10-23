@@ -103,7 +103,8 @@ export default function LeaderboardPage() {
           </SectionTitle>
           <Card className="flex items-center justify-between gap-3">
             <p className="m-0 min-w-0 text-callout leading-snug text-text">
-              {coach ? `${coach.name} · ${levelSourceText(level)}` : "Chưa có huấn luyện viên"}
+              {/* Live mode has the Level from the profile but no coach object yet */}
+              {coach ? `${coach.name} · ${levelSourceText(level)}` : level > 0 ? levelSourceText(level) : "Chưa có huấn luyện viên"}
             </p>
             <LevelBadge level={level} />
           </Card>

@@ -1713,7 +1713,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       writeStoredProfile(next);
       if (live) {
         // S6: through the outbox (an offline change is sent later, the newest wins), not fire-and-forget
-        track("side", apiClient.queueProfile(setupFieldsOf(next), targetsChanged ? targetSettingsOf(next) : undefined));
+        // levelSeen only when this change is "seen at this Level" (use-coaching seeLevel); the Level itself is never sent
+        track("side", apiClient.queueProfile(setupFieldsOf(next), targetsChanged ? targetSettingsOf(next) : undefined, patch.serverLevel?.levelSeen));
         // S14: the day of the weight is worked out now, not the date the screen last showed
         if (patch.weightKg !== undefined) track("side", apiClient.queueWeight(getTodayIsoVN(), patch.weightKg));
       }

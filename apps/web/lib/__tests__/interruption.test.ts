@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   claimFollowWhatsNew,
   claimInterruption,
+  claimLevelUp,
   interruptionBlockedByUi,
   mayFollowWhatsNew,
   interruptionShown,
@@ -33,6 +34,41 @@ describe("the tip that follows Có gì mới (share-spotlight)", () => {
     resetInterruptions();
     expect(claimInterruption("tip")).toBe(true);
     expect(claimFollowWhatsNew()).toBe(false);
+  });
+});
+
+describe("the Level-up celebration (feat/level-ui)", () => {
+  it("plays when nothing has opened yet, and holds the install pop-up and the tips back while it is due", () => {
+    setInterruptionDue("level-up", true);
+    expect(mayInterrupt("install")).toBe(false);
+    expect(mayInterrupt("tip")).toBe(false);
+    expect(claimLevelUp()).toBe(true);
+    expect(interruptionShown()).toBe("level-up");
+    expect(claimInterruption("install")).toBe(false);
+  });
+
+  it("waits while Có gì mới is due: Có gì mới comes first", () => {
+    setInterruptionDue("whats-new", true);
+    setInterruptionDue("level-up", true);
+    expect(mayInterrupt("whats-new")).toBe(true);
+    expect(claimLevelUp()).toBe(false);
+  });
+
+  it("plays right after Có gì mới, in the place of the tip that follows it", () => {
+    expect(claimInterruption("whats-new")).toBe(true);
+    setInterruptionDue("level-up", true);
+    expect(mayFollowWhatsNew()).toBe(false);
+    expect(claimLevelUp()).toBe(true);
+    expect(claimLevelUp()).toBe(false);
+    expect(claimFollowWhatsNew()).toBe(false);
+  });
+
+  it("not after the install pop-up or a tip (it plays at the next app open)", () => {
+    expect(claimInterruption("install")).toBe(true);
+    expect(claimLevelUp()).toBe(false);
+    resetInterruptions();
+    expect(claimInterruption("tip")).toBe(true);
+    expect(claimLevelUp()).toBe(false);
   });
 });
 

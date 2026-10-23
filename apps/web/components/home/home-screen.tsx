@@ -62,8 +62,10 @@ import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { LevelNoticeCard } from "@/components/coaching/level-notice-card";
+import { LevelUpHost } from "@/components/coaching/level-up-host";
+import { LevelBadge } from "@/components/profile/level-badge";
 import { Expand } from "@/components/ui/expand";
-import { ZERO_HINT_TEXT, levelLabel, noticeText } from "@/lib/level-copy";
+import { ZERO_HINT_TEXT, noticeText, type LevelStep } from "@/lib/level-copy";
 import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
 import {
   chosenEntries,
@@ -281,8 +283,12 @@ function HomeContent() {
   const saveName = useSaveDisplayName();
 
   // The Level decides which nutrients the column lists (lib/level-nutrients)
-  const { level, coach, notice, showHint, dismissNotice, dismissHint } = useCoaching();
+  const { level, coach, notice, levelUp, available, showHint, seeLevel, dismissHint } = useCoaching();
   const [explainerOpen, setExplainerOpen] = useState(false);
+  // The celebration playing (the header keeps the old Level until its badge lands), then the header's land pulse (once per app open)
+  const [levelUpPlaying, setLevelUpPlaying] = useState<LevelStep | null>(null);
+  const [levelLanded, setLevelLanded] = useState(false);
+  const headerLevel = levelUpPlaying ? levelUpPlaying.from : level;
   const groups = useMemo(() => columnGroups(level), [level]);
   const countedIds = useMemo(() => countedForLevel(level), [level]);
 
@@ -758,6 +764,31 @@ function HomeContent() {
           onNext={isPast ? () => goToDay(shiftIsoDate(viewIso, 1)) : undefined}
           canGoNext={isPast}
           onDateTap={() => setIsCalendarOpen(true)}
+          wordmarkAfter={
+            // Main.dc.html: the mini badge right after the logo (tap: Level là gì?). At Level 0, "+ HLV" while the join screen exists (mock mode)
+            available && headerLevel === 0 ? (
+              <Link
+                href="/settings/coach"
+                aria-label="Nhập mã huấn luyện viên"
+                data-header-level
+                className="inline-flex min-h-11 flex-none items-center no-underline"
+              >
+                <span className="inline-flex h-7 items-center whitespace-nowrap rounded-full bg-card px-2.5 text-cap font-bold leading-none text-cobalt shadow-chip">+ HLV</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                data-header-level
+                onClick={() => setExplainerOpen(true)}
+                onPointerDown={() => void loadSheets()}
+                aria-haspopup="dialog"
+                aria-label={`Level ${headerLevel}${coach ? `, ${coach.name}` : ""}. Xem Level`}
+                className={`relative inline-flex min-h-11 min-w-11 flex-none cursor-pointer items-center justify-center border-0 bg-transparent px-0.5 pb-0.5 ${levelLanded ? "m-level-land" : ""}`}
+              >
+                <LevelBadge level={headerLevel} />
+              </button>
+            )
+          }
           alignGroup="home-page"
           alignMode="page"
           subtitle={desktopSubtitle}
@@ -800,14 +831,9 @@ function HomeContent() {
           </p>
         )}
         {/* cc-64 (A3): a notice opens and closes with Expand instead of pushing the page in one frame */}
-        <Expand open={!selecting && !!coach && !!notice} wrapClassName="flex-none">
-          {coach && notice && (
-            <LevelNoticeCard
-              text={noticeText(coach.name, notice)}
-              action={notice.kind === "raised" ? { label: "Xem", onClick: () => setExplainerOpen(true) } : undefined}
-              onClose={dismissNotice}
-            />
-          )}
+        {/* A lower Level: the calm card (a higher one is the celebration, LevelUpHost) */}
+        <Expand open={!selecting && !!notice} wrapClassName="flex-none">
+          {notice && <LevelNoticeCard text={noticeText(coach?.name ?? null, notice)} onClose={seeLevel} />}
         </Expand>
         <Expand open={!selecting && !coach && showHint} wrapClassName="flex-none">
           <LevelNoticeCard text={ZERO_HINT_TEXT} action={{ label: "Nhập mã", href: "/settings/coach" }} onClose={dismissHint} />
@@ -838,22 +864,9 @@ function HomeContent() {
               setHeroMacro(m);
             }}
           />
-          {coach && !selecting && (
-            <div className="mt-2 flex min-h-11 flex-none items-center justify-end px-3 lg:px-0">
-              <button
-                type="button"
-                onClick={() => setExplainerOpen(true)}
-                aria-haspopup="dialog"
-                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-cap font-bold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
-              >
-                <span>{levelLabel(level, coach.name)}</span>
-                <span aria-hidden="true">›</span>
-              </button>
-            </div>
-          )}
           <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 ${
               selecting ? "mt-2" : "mx-3 mt-2 items-start gap-2 pb-4"
-            } lg:mx-0 lg:items-stretch lg:gap-4 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "lg:mt-4"}`}>
+            } lg:mx-0 lg:items-stretch lg:gap-4 lg:pb-8 lg:mt-4`}>
             {!heavyReady && <HomeBodySkeleton />}
             {heavyReady && (
               <FoodList
@@ -950,6 +963,18 @@ function HomeContent() {
       <InstallPromptHost busy={installBusy} />
       <WhatsNewDue />
       <WhatsNewHost busy={installBusy} />
+      <LevelUpHost
+        step={levelUp}
+        coachName={coach?.name ?? null}
+        busy={selecting || sheetOpen}
+        onStart={setLevelUpPlaying}
+        onClose={(explain) => {
+          seeLevel();
+          setLevelUpPlaying(null);
+          setLevelLanded(true);
+          if (explain) setExplainerOpen(true);
+        }}
+      />
       {sheets && explainerMounted && <sheets.LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
       {sheets && dayMenuMounted && (
         <sheets.DayMenuSheet

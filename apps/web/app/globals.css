@@ -835,6 +835,40 @@
   }
 }
 
+/* The Level badge in Hôm nay's header when the celebration's badge lands back in it (Main.dc.html lvLand, lvPulse): it takes the hit,
+   then a ring goes out from it twice. The ring is a ::after that scales and fades, so only transform and opacity move */
+.m-level-land {
+  animation: m-level-land 450ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.m-level-land::after {
+  content: "";
+  position: absolute;
+  inset: 4px 0;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px var(--color-cobalt);
+  opacity: 0;
+  pointer-events: none;
+  animation: m-level-ring 900ms var(--ease-out) 100ms 2 backwards;
+}
+@keyframes m-level-land {
+  0% {
+    transform: scale(1.25);
+  }
+  60% {
+    transform: scale(0.92);
+  }
+}
+@keyframes m-level-ring {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
 /* Sheets (components/ui/sheet.tsx and the /add panel) slide up from their own height; the scrim fades with them */
 .m-sheet {
   transition:
@@ -1306,6 +1340,10 @@ button.m-drag-lift[data-touch-drag="dragging"] {
 
 /* Reduced motion: nothing moves; what fades does it in 120 ms at most */
 @media (prefers-reduced-motion: reduce) {
+  .m-level-land,
+  .m-level-land::after {
+    animation: none;
+  }
   .m-sheet,
   .m-scrim,
   .m-pop,

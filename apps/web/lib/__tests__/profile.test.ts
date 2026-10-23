@@ -323,3 +323,21 @@ describe("mapApiProfileToProfile: the target settings of GET /me", () => {
     expect(mapApiProfileToProfile({ ...base, macroMode: "high" }).macroMode).toBeUndefined();
   });
 });
+
+describe("the API's Level (GET /me level, levelSeen)", () => {
+  const base = { sex: "male", birth_year: 2000, weight_kg: 70, goal: "maintain" };
+
+  it("reads them into serverLevel, with no coach object needed", () => {
+    expect(mapApiProfileToProfile({ ...base, level: 3, levelSeen: 1 }).serverLevel).toEqual({ level: 3, levelSeen: 1 });
+  });
+
+  it("an API without them leaves serverLevel unset (today's behaviour: Level 0 in live mode)", () => {
+    expect(mapApiProfileToProfile(base).serverLevel).toBeUndefined();
+  });
+
+  it("the stored profile keeps it, so a start offline shows the same Level", () => {
+    const stored = { ...SAMPLE_PROFILE, serverLevel: { level: 4, levelSeen: 4 } };
+    expect(parseStoredProfile(JSON.stringify(stored), YEAR)?.serverLevel).toEqual({ level: 4, levelSeen: 4 });
+    expect(parseStoredProfile(JSON.stringify(SAMPLE_PROFILE), YEAR)?.serverLevel).toBeUndefined();
+  });
+});
