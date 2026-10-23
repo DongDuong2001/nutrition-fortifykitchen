@@ -50,6 +50,7 @@ export const RELEASES: readonly Release[] = [
         body: "Cài đặt › Tài liệu có các hướng dẫn và quy tắc HLV viết cho bạn. HLV gửi mã truy cập, nhập mã là đọc được ngay trong app.",
       },
       { icon: "home", title: "Dễ dùng hơn trên máy tính", body: "Rê chuột lên món là thấy sáng lên, các hàng Khám phá có nút xem tiếp, nút Thêm luôn hiện trong hộp thêm món, Esc thoát chọn nhiều món và thanh bên luôn ở yên khi cuộn." },
+      { icon: "target", title: "Tự chọn thời gian tập", body: "Ngày tập có thêm nút Tùy chỉnh để chọn từ 30 đến 480 phút. Muối, tinh bột nhanh và natri tính theo số phút bạn chọn." },
       {
         icon: "meal",
         title: "Tự tạo ngày ăn mẫu",

@@ -17,7 +17,7 @@ import (
 var (
 	ErrEntryNotFound          = errors.New("diary entry not found")
 	ErrRestoreWindowExpired   = errors.New("restore window expired (must be within 10 seconds)")
-	ErrInvalidTrainingMinutes = errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
+	ErrInvalidTrainingMinutes = errors.New("training_minutes must be 0, 45, or a multiple of 30 from 30 to 480")
 	ErrFoodIDRequired         = errors.New("food_id is required for food entry")
 	ErrIDConflict             = errors.New("entry id conflict")
 	ErrInvalidDateRange       = errors.New("fromDate must be before or equal to toDate")
@@ -605,7 +605,7 @@ func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, da
 	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return nil, err
 	}
-	if minutes != 0 && minutes != 45 && minutes != 60 && minutes != 90 && minutes != 120 && minutes != 240 {
+	if !targets.ValidTrainingMinutes(minutes) {
 		return nil, ErrInvalidTrainingMinutes
 	}
 	err := s.repo.UpsertDayTraining(ctx, userID, date, minutes)

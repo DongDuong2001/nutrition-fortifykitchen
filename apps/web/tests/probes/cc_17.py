@@ -1,7 +1,7 @@
 """cc-17: Ngày tập ticks per day, one even duration row, and the /micros phone header folding on scroll.
 
 Training: ticks survive a reload on today; a past day is read-only and shows its saved ticks; a day with no record
-shows no checklist; the five duration chips sit on one row of equal columns with no wrapped label.
+shows no checklist; the six duration chips (five presets and Tùy chỉnh) sit on one row of equal columns with no wrapped label.
 Micros (390 only): the header is under a third of the screen at rest, folds to one line once the list scrolls past
 it, and the list does not move on screen when it folds. Desktop 1280 has no fold.
 Screenshots: .screenshots/cc-17-{training,micros}-{top,scrolled}-{390,1280}.png
@@ -132,14 +132,14 @@ def check_training(browser, size_name, size):
     check(carb.is_checked(), f"{label}: the tick survives a reload")
     check(not carb.is_disabled(), f"{label}: today's tick stays editable after reload")
 
-    # Chips (V3 segmented control): one row of five equal columns on the phone and on desktop, no wrapped label, every target 44 px
+    # Chips (V3 segmented control): one row of six equal columns (five presets and Tùy chỉnh, feat/training-custom-minutes) on the phone and on desktop, no wrapped label, every target 44 px
     chips = [c for c in chip_report(pg) if c["visible"]]
-    check(len(chips) == 5, f"{label}: five duration chips ({len(chips)})")
+    check(len(chips) == 6, f"{label}: six duration chips, Tùy chỉnh last ({len(chips)})")
     if chips:
         tops = [c["top"] for c in chips]
-        check(len(set(tops)) == 1, f"{label}: the five chips share one row (tops {tops})")
+        check(len(set(tops)) == 1, f"{label}: the six chips share one row (tops {tops})")
         widths = [c["width"] for c in chips]
-        check(max(widths) - min(widths) <= 1.0, f"{label}: the five chips are equal width ({widths})")
+        check(max(widths) - min(widths) <= 1.0, f"{label}: the six chips are equal width ({widths})")
         check(all(c["lines"] == 1 for c in chips), f"{label}: no chip label wraps ({[c['label'] + ':' + str(c['lines']) for c in chips]})")
         check(all(c["overflow"] <= 0 for c in chips), f"{label}: no chip label overflows")
         check(all(c["height"] >= 44 for c in chips), f"{label}: every chip is at least 44 px tall")

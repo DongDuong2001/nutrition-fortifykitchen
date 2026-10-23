@@ -179,6 +179,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-23a");
     expect(r?.date).toBe("23/10");
+    expect(r?.items.map((i) => i.title)).toContain("Tự chọn thời gian tập");
     expect(r?.items.map((i) => i.title)).toContain("Thêm danh sách Giàu …");
     expect(r?.items.map((i) => i.title)).toContain("Món ăn có biểu tượng cho dễ tìm");
     expect(r?.items.map((i) => i.title)).toContain("Kcal từ đạm, tinh bột, béo");

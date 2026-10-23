@@ -107,7 +107,8 @@ export const SAMPLE_PROFILE: Profile = {
 
 const SEXES: readonly string[] = ["male", "female"];
 const GOALS: readonly string[] = ["build", "maintain", "cut", "deep_cut"];
-const MAX_TRAINING_MINUTES = 240;
+// Tùy chỉnh goes up to 480 minutes (lib/training CUSTOM_MINUTES_MAX)
+const MAX_TRAINING_MINUTES = 480;
 
 export function normaliseProfile(profile: Profile): Profile {
   return { ...profile, periodMode: profile.sex === "female" && profile.periodMode };

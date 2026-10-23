@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
 import { calculateSaltTarget, getTrainingPhases, type TrainingCheckItem, type TrainingPhase, type TrainingSize } from "@/lib/training";
+import { TrainingMinutesPicker } from "@/components/training/minutes-picker";
 import {
   type DayChecklist,
   effectiveTicked,
@@ -225,6 +226,11 @@ function TrainingContent() {
       apiClient.setTraining(todayIso, minutes).catch(() => {});
     }
   };
+  const [customOpen, setCustomOpen] = useState(false);
+  const openCustom = () => {
+    markUsed("training-minutes");
+    if (!isPast) setCustomOpen(true);
+  };
 
   const saltTarget = useMemo(
     () => calculateSaltTarget(trainingMinutes, size),
@@ -271,7 +277,7 @@ function TrainingContent() {
         actions={
           <div className="hidden items-center gap-3 lg:flex">
             {!isPast && prefs && <TrainingSizeChip size={size} onClick={openSizeFromChip} className="shrink-0" />}
-            <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
+            <DurationSelector value={activeDuration} onChange={handleSelectDuration} onCustom={openCustom} variant="desktop" disabled={isPast} />
           </div>
         }
       />
@@ -284,7 +290,7 @@ function TrainingContent() {
         className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 lg:hidden"
       >
         <div className="flex flex-col gap-4 pb-1">
-          <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="mobile" disabled={isPast} />
+          <DurationSelector value={activeDuration} onChange={handleSelectDuration} onCustom={openCustom} variant="mobile" disabled={isPast} />
           {isPast ? (
             <p className="m-0 rounded-card bg-ink p-4 text-cap leading-snug text-muted-on-dark">
               Muối: —<br />
@@ -377,6 +383,15 @@ function TrainingContent() {
       <TrainingSizeSheet open={sizeOpen} value={size} onChoose={chooseSize} onClose={() => setSizeOpen(false)} />
       <TrainingLogSheet item={logItem} foods={foods} onClose={() => setLogItem(null)} onLogged={handleLogged} />
       <OwnItemSheet target={ownTarget} onClose={() => setOwnTarget(null)} onAdd={addOwn} />
+      <TrainingMinutesPicker
+        open={customOpen}
+        initial={trainingMinutes > 0 ? trainingMinutes : 150}
+        onClose={() => setCustomOpen(false)}
+        onPick={(minutes) => {
+          setCustomOpen(false);
+          handleSelectDuration(String(minutes), minutes);
+        }}
+      />
     </AppShell>
   );
 }

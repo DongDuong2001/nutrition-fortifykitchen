@@ -253,3 +253,16 @@ func TestRangesAndPeriodIron(t *testing.T) {
 		t.Errorf("a man ignores the period: %+v", man.Iron)
 	}
 }
+
+func TestValidTrainingMinutes(t *testing.T) {
+	for _, m := range []int{0, 30, 45, 60, 90, 120, 150, 210, 240, 450, 480} {
+		if !ValidTrainingMinutes(m) {
+			t.Errorf("%d should be valid", m)
+		}
+	}
+	for _, m := range []int{-30, 15, 40, 50, 75, 100, 135, 481, 510, 600} {
+		if ValidTrainingMinutes(m) {
+			t.Errorf("%d should be refused", m)
+		}
+	}
+}

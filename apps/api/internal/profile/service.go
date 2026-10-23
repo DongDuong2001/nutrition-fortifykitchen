@@ -16,7 +16,7 @@ var (
 	ErrInvalidWeight          = errors.New("invalid weight: must be between 25 and 300 kg")
 	ErrInvalidBirthYear       = errors.New("invalid birth year: must be between 1920 and 2015")
 	ErrInvalidDisplayName     = errors.New("display_name must not exceed 40 characters")
-	ErrInvalidTrainingMinutes = errors.New("training_minutes_default must be one of: 0, 45, 60, 90, 120, 240")
+	ErrInvalidTrainingMinutes = errors.New("training_minutes_default must be 0, 45, or a multiple of 30 from 30 to 480")
 )
 
 type DefaultService struct {
@@ -69,7 +69,7 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 	trainingMinutes := 60
 	if req.TrainingMinutesDefault != nil {
 		m := *req.TrainingMinutesDefault
-		if m != 0 && m != 45 && m != 60 && m != 90 && m != 120 && m != 240 {
+		if !targets.ValidTrainingMinutes(m) {
 			return nil, ErrInvalidTrainingMinutes
 		}
 		trainingMinutes = m
