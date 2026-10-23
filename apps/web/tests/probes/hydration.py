@@ -1,4 +1,4 @@
-# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/micros/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/whats-new/** app/install/** app/landing/** app/page.tsx app/paywall/**
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/explore/documents/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/micros/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/whats-new/** app/install/** app/landing/** app/page.tsx app/paywall/**
 # PROBE_TAGS: smoke
 import os
 import sys
@@ -32,6 +32,7 @@ def main():
         paths = [
             "/", "/app", "/explore", "/settings", "/micros", "/trends", "/trends/micros", "/trends/body", "/add", "/entry/item-1", "/training", "/settings/profile", "/settings/profile/weight",
             "/settings/language", "/settings/whats-new", "/settings/notifications", "/settings/delete-account",
+            "/explore/documents", "/explore/documents/c-an-quanh", "/explore/documents/c-an-quanh/l-aq-3",  # feat/courses-web: library, course, a written lesson
             "/install", "/paywall", "/this-page-does-not-exist",  # last one: the 404 page
         ]
         for vp, path in [(v, p) for v in viewports for p in paths]:

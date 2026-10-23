@@ -265,6 +265,18 @@ def coach_flow(browser, w, h):
     pg.wait_for_timeout(900)
     titles = [re.sub(r"\s+", " ", r.inner_text()) for r in pg.locator("li[data-align-group=coach-lessons]").all()]
     check("Bài viết hai" in titles[0] and "Bài PDF ba trang" in titles[1], f"{tag}: Lên trên reorders the lessons ({titles})")
+    # a second part, moved above the first
+    pg.get_by_role("button", name="Thêm phần").click()
+    pg.wait_for_timeout(600)
+    pg.locator("#course-part-name").fill("Phần B")
+    pg.get_by_role("button", name="Thêm phần").last.click()
+    pg.wait_for_timeout(800)
+    pg.get_by_role("button", name="Tùy chọn cho Phần B").click()
+    pg.wait_for_timeout(600)
+    pg.get_by_role("button", name="Lên trên").click()
+    pg.wait_for_timeout(900)
+    heads = [h.strip() for h in pg.locator("main h2").all_inner_texts() if h.strip().upper().startswith("PHẦN")]
+    check([h.upper() for h in heads] == ["PHẦN B", "PHẦN A"], f"{tag}: Lên trên reorders the parts ({heads})")
     # a code
     pg.get_by_role("button", name="Tạo mã mới").click()
     pg.wait_for_timeout(700)

@@ -65,6 +65,9 @@ DONG_SCREEN_CHECKS = [
     ("/admin/review?as=admin", "admin-card", 1),
     # cc-28d: the coach's client rows (four mock clients)
     ("/coach?as=coach", "client-row", 3),
+    # feat/courses-web: a course's lesson rows (two parts of two lessons: one pair in each Card) and the coach's rows with their ⋯
+    ("/explore/documents/c-an-quanh?as=user0", "lessons", 2),  # as=user0: an earlier check in this run leaves the admin persona in the profile
+    ("/explore/documents/c-an-quanh?as=coach", "coach-lessons", 2),
 ]
 
 # cc-23: compare foods, 3 columns. Each column's header and its value cells share left and right edges.

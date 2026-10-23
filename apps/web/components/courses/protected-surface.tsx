@@ -65,7 +65,7 @@ export function Watermark() {
   return (
     <div aria-hidden="true" data-watermark className="pointer-events-none absolute -inset-8 flex -rotate-[20deg] flex-col justify-around overflow-hidden text-cap font-semibold text-text opacity-[0.09]">
       {[0, 1, 2, 3].map((i) => (
-        <span key={i} className="whitespace-nowrap">
+        <span key={i} className="w-max whitespace-nowrap">
           {`${mark}   ${mark}   ${mark}`}
         </span>
       ))}
