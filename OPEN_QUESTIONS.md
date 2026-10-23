@@ -549,3 +549,5 @@
 ## Sửa món review fixes (feat/my-foods-crud, 24/10/2026)
 - [ ] (Dong) apps/api/internal/nutrition/service.go `round()` keeps every per-100 g value to 2 decimals, so a micro under 0,005 per 100 g (manganese 0,004) is saved as 0 whatever the web sends; Sửa món now sends an untouched field at full precision, so only this rounding is left. #96 is not changed here. If no answer: as is (values this small are rare on a label).
 - [ ] (Hao) Sửa món on a refused PUT (405, 404, 500 alike) says "Chưa sửa được món. Thử lại sau nhé." with no status code. Deploy the API with #96 with or before the web with #97, or Sửa món says this until it is.
+## polish_1020 node budget (fix/probe-polish-1020, 24/10/2026)
+- [ ] (Hao) The add sheet is about 11 % bigger than when check 3 was written (598 nodes on 20/10, 665 at lunch today, 35 rows against 34). The budget is now 680 at a pinned 12:30. If the sheet should stay near 600, the per-category trim or the shortlists need another pass; that is an app change, not this probe fix.
