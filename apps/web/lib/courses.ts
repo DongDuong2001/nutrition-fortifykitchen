@@ -32,7 +32,10 @@ async function fail(res: Response): Promise<never> {
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await apiFetch(`/courses${path}`, init);
   if (!res.ok) return fail(res);
-  return res.status === 204 ? (undefined as T) : res.json();
+  if (res.status === 204) return undefined as T;
+  // Every route answers {data: …} (apps/api pkg/response); an older or raw body is taken as it is, as the other clients do
+  const body = await res.json();
+  return (body?.data ?? body) as T;
 }
 
 const send = (method: string, body?: unknown): RequestInit => ({ method, body: body === undefined ? undefined : JSON.stringify(body) });
