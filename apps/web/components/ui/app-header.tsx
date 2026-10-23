@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { formatDayLabel } from "@/lib/format";
 import { HOME_ROUTE } from "@/lib/home-route";
+import { STATUS_BAR, watchScrolled } from "@/lib/status-bar";
 import { StepBars } from "@/components/ui/step-bars";
 import { SyncStatus } from "@/components/sync/sync-status";
 
@@ -97,8 +98,8 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
  * The one header of H1T MICRO (V3-SPEC §3.1–3.3; the brief's ScreenHeader). No ink slab: it sits on the grey page.
  * - Tab roots (variant "tab"): a 34 px Saira italic large title, controls under it (search, sub-tabs, period).
  * - Push screens ("sub"): one row with the 44 px glass Back circle, the 28 px title 12 px after it (24 px when it is
- *   long, two lines at most), then the trailing actions; the subtitle sits under the title, aligned to it. A 24 px
- *   fade from the page colour sits at the top, under the floating circles.
+ *   long, two lines at most), then the trailing actions; the subtitle sits under the title, aligned to it.
+ * - Every phone header carries the status-bar scrim (glass-scrim): the safe area's height of glass, then a short fade, shown once the page has scrolled.
  * - Hôm nay ("daily"): the wordmark, the date stepper and the actions.
  * Desktop (>= 1024 px): the same row on the page (Saira 32), ink only in the summary card. One DOM, one h1.
  */
@@ -134,6 +135,11 @@ export function AppHeader({
   alignMode = "left",
   className = "",
 }: AppHeaderProps) {
+  // The status-bar scrim shows once the page has scrolled (lib/status-bar: one IntersectionObserver on the sentinel at the top)
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
+  useEffect(() => (sentinelRef.current && scrimRef.current ? watchScrolled(sentinelRef.current, scrimRef.current) : undefined), []);
+
   const [clientNow, setClientNow] = useState<Date | null>(null);
   // Read again when the date shown changes, so a day that rolls over at midnight is labelled against the new now
   useEffect(() => {
@@ -190,7 +196,15 @@ export function AppHeader({
     <header
       className={`relative w-full flex-none select-none bg-page text-text ${variant === "tab" || variant === "daily" ? "max-lg:bg-transparent" : ""} ${className}`}
     >
-      {back && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-sticky h-6 bg-linear-to-b from-page to-transparent lg:hidden" />}
+      {/* The status-bar scrim, on every phone header (tabs and push screens): content that scrolls under the clock of the installed app fades into the tab bar's glass */}
+      <div aria-hidden="true" data-status-sentinel className="pointer-events-none absolute inset-x-0 top-0 h-px lg:hidden" ref={sentinelRef} />
+      <div
+        aria-hidden="true"
+        data-status-scrim
+        data-tint={STATUS_BAR === "translucent" ? "dark" : undefined}
+        ref={scrimRef}
+        className="glass-scrim pointer-events-none fixed inset-x-0 top-0 z-sticky lg:hidden"
+      />
       <div
         className={`flex w-full flex-col gap-3 ${phonePad} box-border ${column} ${deskPad}`}
       >

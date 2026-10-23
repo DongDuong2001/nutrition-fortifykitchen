@@ -84,6 +84,49 @@
     box-shadow: 0 0 0 1px var(--color-card-border), 0 10px 28px rgb(0 0 0 / 0.16);
   }
 }
+/* The status-bar scrim (components/ui/app-header, phones): fixed under the status bar of the installed app, as tall as the safe area plus a
+   12 px fade into the page, in the tab bar's glass. Off at rest (the page and its wash show through) and on once the page has scrolled
+   and content can be under the bar: lib/status-bar marks it data-scrolled from one IntersectionObserver, and the opacity fades in with
+   --m-switch-in (reduced motion: on/off). data-tint="dark" is the dark glass for iOS's white clock (lib/status-bar, "translucent").
+   With no safe area (a browser tab, a phone without a notch, iOS's "default" bar) it is 0 px high and nothing shows. No shadow, and the
+   blur itself is never animated (D-MAT-05). Same fallbacks as glass-tab, and it keeps its fade. */
+@utility glass-scrim {
+  --scrim-inset: env(safe-area-inset-top);
+  --scrim-fade: min(12px, calc(var(--scrim-inset) * 100));
+  height: calc(var(--scrim-inset) + var(--scrim-fade));
+  background-color: var(--color-glass-tab);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - var(--scrim-fade)), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--scrim-fade)), transparent);
+  opacity: 0;
+  transition: opacity var(--m-switch-in) var(--ease-out);
+  &[data-scrolled] {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-contrast: more) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  &[data-tint="dark"] {
+    background-color: var(--color-glass-tab-dark);
+    @media (prefers-reduced-transparency: reduce) {
+      background-color: var(--color-ink);
+    }
+    @media (prefers-contrast: more) {
+      background-color: var(--color-ink);
+    }
+  }
+}
 /* The wash of a tab root (components/ui/tab-wash): the tab's colour at its peak alpha at the top, 0.4 of it at 55 %, none at 100 %.
    Phone only; the component hides it from lg. */
 .tab-wash {

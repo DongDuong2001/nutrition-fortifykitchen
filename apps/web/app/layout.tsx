@@ -13,6 +13,7 @@ import { CHUNK_RELOAD_SCRIPT } from "@/lib/chunk-reload-script";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 import { THEME_SCRIPT } from "@/lib/theme";
 import { ThemeSync } from "@/components/theme-sync";
+import { STATUS_BAR, statusBarStyleOf } from "@/lib/status-bar";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://h1tmicro.vn"),
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  appleWebApp: { capable: true, title: "H1T MICRO", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "H1T MICRO", statusBarStyle: statusBarStyleOf(STATUS_BAR) },
   // Next emits only the unprefixed mobile-web-app-capable; older iOS reads the prefixed name.
   other: { "apple-mobile-web-app-capable": "yes" },
 };
