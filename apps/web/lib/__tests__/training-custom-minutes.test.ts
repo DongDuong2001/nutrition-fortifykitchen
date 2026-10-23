@@ -7,11 +7,9 @@ import {
   getTrainingDurations,
   getTrainingPhases,
   isPresetMinutes,
-  serverAcceptsTrainingMinutes,
 } from "../training";
 import { calculateFastCarbsTarget, calculateSodiumTarget } from "../targets";
 import { mergeServerProfile, setupFieldsOf, SAMPLE_PROFILE } from "../profile";
-import { nearestServerTrainingMinutes } from "../training-limits";
 
 // The coach's rules (HANDOFF.md, lib/targets): salt 4–6 g + 1–1,5 g per 20 min, a salt dose every 20 min, fast carbs 30–45 g per hour
 const saltDoses = (minutes: number) =>
@@ -70,25 +68,15 @@ describe("the picker's minutes", () => {
   });
 });
 
-describe("a value the API does not take yet (needs Dong: 0 or 30–480 in 30-minute steps)", () => {
-  it("only 0, 45, 60, 90, 120 and 240 are sent", () => {
-    expect([0, 45, 60, 90, 120, 240].every(serverAcceptsTrainingMinutes)).toBe(true);
-    expect([30, 150, 210, 480].some(serverAcceptsTrainingMinutes)).toBe(false);
+describe("a Tùy chỉnh time reaches the server as it is (the API takes 0, 45 or 30–480 in 30-minute steps, migration 000018)", () => {
+  it("the profile save sends the custom default itself", () => {
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }).trainingMinutesDefault).toBe(150);
+    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 480 }).trainingMinutesDefault).toBe(480);
   });
 
-  it("the profile save sends the nearest value the API takes (leaving it out would reset the server to 60)", () => {
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }).trainingMinutesDefault).toBe(120);
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 30 }).trainingMinutesDefault).toBe(45);
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 210 }).trainingMinutesDefault).toBe(240);
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 480 }).trainingMinutesDefault).toBe(240);
-    expect(setupFieldsOf({ ...SAMPLE_PROFILE, trainingMinutesDefault: 90 }).trainingMinutesDefault).toBe(90);
-    expect(nearestServerTrainingMinutes(180)).toBe(120);
-  });
-
-  it("a reload keeps the device's custom default while the server holds its nearest value, and takes a real change from another device", () => {
-    const local = { ...SAMPLE_PROFILE, trainingMinutesDefault: 150 };
-    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 120 }, local).profile.trainingMinutesDefault).toBe(150);
-    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 60 }, local).profile.trainingMinutesDefault).toBe(60);
-    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 90 }, { ...SAMPLE_PROFILE, trainingMinutesDefault: 45 }).profile.trainingMinutesDefault).toBe(90);
+  it("the server's default wins on a reload, a custom one too", () => {
+    const local = { ...SAMPLE_PROFILE, trainingMinutesDefault: 90 };
+    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }, local).profile.trainingMinutesDefault).toBe(150);
+    expect(mergeServerProfile({ ...SAMPLE_PROFILE, trainingMinutesDefault: 60 }, { ...SAMPLE_PROFILE, trainingMinutesDefault: 150 }).profile.trainingMinutesDefault).toBe(60);
   });
 });
