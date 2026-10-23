@@ -19,7 +19,7 @@ describe("foodEmoji: name rules", () => {
     ["Bánh mì thịt", "mon_viet", "🥖"],
     ["Trứng gà luộc", "dam", "🥚"],
     ["Hột vịt lộn", "dam", "🥚"],
-    ["Ức gà (chín)", "dam", "🍗"],
+    ["Ức gà (chín)", "dam", "🐔"],
     ["Thịt bò thăn", "dam", "🥩"],
     ["Thịt ba chỉ", "dam", "🥓"],
     ["Thịt heo nạc", "dam", "🥩"],
@@ -79,6 +79,40 @@ describe("foodEmoji: name rules", () => {
     ["Dầu ô liu", "beo", "🫒"],
   ] as const)("%s (%s) → %s", (name, category, emoji) => {
     expect(foodEmojiWithSource(food(name, category))).toEqual({ emoji, source: "rule" });
+  });
+
+  // Hao 23/10 (11:00 review): chicken by cut, pork by cut
+  it("ức gà is the bird 🐔, not a leg: ức, phi lê, lườn, gà xé, thịt gà and a chicken with no cut named", () => {
+    for (const name of ["Ức gà", "Ức gà phi lê", "Ức gà luộc", "Ức gà nướng", "Lườn gà", "Gà xé phay", "Gà luộc xé", "Thịt gà", "Gà kho gừng", "Gà ta (luộc)", "Gan gà (sống)", "Da gà (nướng)"]) {
+      expect(foodEmoji(food(name, "dam")), name).toBe("🐔");
+    }
+  });
+
+  it("đùi gà is the leg 🍗: đùi, má đùi, cánh, chân, gà rán, gà nướng and a whole bird on the bone", () => {
+    for (const name of ["Đùi gà bỏ da", "Má đùi gà có da (nướng)", "Cánh gà (nướng)", "Chân gà (luộc)", "Gà rán", "Gà nướng", "Gà nguyên con có da (sống)"]) {
+      expect(foodEmoji(food(name, "dam")), name).toBe("🍗");
+    }
+    expect(foodEmoji(food("Cánh gà chiên nước mắm", "mon_viet"))).toBe("🍗");
+    expect(foodEmoji(food("Nấm đùi gà", "rau"))).toBe("🍄");
+  });
+
+  it("ba chỉ is the only 🥓: ba chỉ, ba rọi, thịt xông khói, bacon", () => {
+    for (const name of ["Ba chỉ heo (sống)", "Thịt ba rọi kho tiêu", "Thịt xông khói", "Bacon"]) expect(foodEmoji(food(name, "dam")), name).toBe("🥓");
+    expect(foodEmoji(food("Ba chỉ bò (sống)", "dam"))).toBe("🥩");
+  });
+
+  it("thăn heo and other boneless pork are 🥩: nạc, thăn, xay, thịt heo, giò lụa", () => {
+    for (const name of ["Thịt heo nạc (thăn)", "Nạc vai heo (sống)", "Thịt heo xay (sống)", "Thịt heo rang cháy cạnh", "Giò lụa (chả lụa)"]) {
+      expect(foodEmoji(food(name, "dam")), name).toBe("🥩");
+    }
+  });
+
+  it("sườn and chân giò, pork on the bone, are 🍖; beef stays 🥩", () => {
+    for (const name of ["Sườn non heo (hầm)", "Chân giò heo (sống)", "Thịt chân giò heo (luộc)", "Sườn ram mặn", "Sườn xào chua ngọt"]) {
+      expect(foodEmoji(food(name, "dam")), name).toBe("🍖");
+    }
+    expect(foodEmoji(food("Sườn bò (hầm)", "dam"))).toBe("🥩");
+    expect(foodEmoji(food("Cơm tấm sườn", "mon_viet"))).toBe("🍚");
   });
 
   it("whole words with their marks: cá is not cà, cua is not của, trà is not trái, bò is not bơ", () => {
@@ -150,7 +184,7 @@ describe("foodEmoji: category fallbacks", () => {
 
   it("Đồ ăn của Minh Hào is 🍱 unless a name rule matches", () => {
     expect(foodEmoji(food("Granola Minh Hào", "tinh_bot", { source: "fortify_kitchen" as FoodItem["source"] }))).toBe(MINH_HAO_EMOJI);
-    expect(foodEmoji(food("Ức gà nướng", "dam", { source: "fortify_kitchen" as FoodItem["source"] }))).toBe("🍗");
+    expect(foodEmoji(food("Ức gà nướng", "dam", { source: "fortify_kitchen" as FoodItem["source"] }))).toBe("🐔");
   });
 });
 

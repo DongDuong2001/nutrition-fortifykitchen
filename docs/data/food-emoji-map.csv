@@ -7,8 +7,8 @@ a26731bf-4d86-44dd-bd9d-32c1c41405be,Mật mía Golden Barrel (blackstrap),an_va
 6598c0aa-06bb-42e3-a00d-37a248a6360a,Mật mía Rabbit,an_vat,🍯,rule
 c7059b5e-9cac-4c2f-804c-0c3a326e6e58,Mật ong,an_vat,🍯,rule
 c32eb98e-a2e7-41cc-92fb-47961c5d57bc,Bơ đậu phộng nguyên chất,beo,🥜,rule
-9abec26d-398c-43d1-ace9-63c584b91515,Da gà (nướng),beo,🍗,rule
-78457962-5155-4ac2-a070-03b500e00f99,Da gà (sống),beo,🍗,rule
+9abec26d-398c-43d1-ace9-63c584b91515,Da gà (nướng),beo,🐔,rule
+78457962-5155-4ac2-a070-03b500e00f99,Da gà (sống),beo,🐔,rule
 ea8c0eb8-4dda-4cd5-b9b5-5d6bbf43665b,Dầu ăn (dầu nành),beo,🫒,rule
 ea7b3b00-8338-464a-b620-03c4984ac3e2,Dầu olive,beo,🫒,rule
 ad568dae-792c-43ce-8a94-cfba191d2c2b,Dầu olive Pendleton,beo,🫒,rule
@@ -548,7 +548,7 @@ e2938328-7962-43fd-a9ea-440bf5f6827c,Cánh gà (nướng),dam,🍗,rule
 b5d44a63-0af9-4356-9d90-23665212c291,Cật heo (nấu chín),dam,🥩,rule
 1bd282d5-db21-4917-999a-813a6b8b8c6f,Cật heo (sống),dam,🥩,rule
 036d7fbd-04fa-4f84-85c2-731fb1316334,Chân gà (luộc),dam,🍗,rule
-c6950aa7-e519-417a-a4f7-b68957960a83,Chân giò heo (sống),dam,🥩,rule
+c6950aa7-e519-417a-a4f7-b68957960a83,Chân giò heo (sống),dam,🍖,rule
 a7d08fa9-ca73-47fe-9e54-0a605365cf99,Chim cút (nấu chín),dam,🍗,category
 6f69e620-a9e5-49aa-877f-b620ef96f732,Chim cút (sống),dam,🍗,category
 652b14f3-47af-4e42-94bc-4474f5db4c4d,Cua biển (hấp),dam,🦀,rule
@@ -583,18 +583,18 @@ bcd82617-fd12-4c4b-8c4e-bc64c9019281,Đậu trắng (hạt khô),dam,🌰,rule
 5b3491e1-4d19-47c7-bb5b-06fdd72c2877,Ếch (thịt đùi),dam,🥩,rule
 1b76b639-e93a-4971-b040-53b909853336,Gà nguyên con có da (nướng),dam,🍗,rule
 0656fbaa-6eb0-4460-a41d-8d70293c3762,Gà nguyên con có da (sống),dam,🍗,rule
-599f86df-3ad7-4ca6-9335-ea96e55c1251,Gà ta (luộc),dam,🍗,rule
-c9c2e282-58c3-4718-9047-9c3455609f5e,Gà ta (sống),dam,🍗,rule
+599f86df-3ad7-4ca6-9335-ea96e55c1251,Gà ta (luộc),dam,🐔,rule
+c9c2e282-58c3-4718-9047-9c3455609f5e,Gà ta (sống),dam,🐔,rule
 c21404ba-de89-4355-ab6d-a3d9954e5d79,Gan bò (nấu chín),dam,🥩,rule
 28431e98-ac43-4223-bbdb-6db8a8bfd9e9,Gan bò (sống),dam,🥩,rule
-fdd32845-7235-44ad-98e6-9ac2c091f8aa,Gan gà (nấu chín),dam,🍗,rule
-8c393043-1a54-4fe8-9d7a-e5c0b09b1335,Gan gà (sống),dam,🍗,rule
+fdd32845-7235-44ad-98e6-9ac2c091f8aa,Gan gà (nấu chín),dam,🐔,rule
+8c393043-1a54-4fe8-9d7a-e5c0b09b1335,Gan gà (sống),dam,🐔,rule
 76562ed9-d54a-49eb-b89b-f6d7a8ddb006,Gan heo (nấu chín),dam,🥩,rule
 10d3953e-f3c4-43cc-9753-b6a40eb070cb,Gan heo (sống),dam,🥩,rule
 2d3b8fde-cecc-4dff-bffb-351f74c47813,Ghẹ,dam,🦀,rule
 e961579d-c75e-4b03-9fd0-9cd7e904d920,Ghẹ (hấp),dam,🦀,rule
 a89b26ea-1fb0-4e0f-8562-d43457e7f0f2,Ghẹ (sống),dam,🦀,rule
-bb5c14d2-28a8-4940-8bb4-0a2c9ebc95bc,Giò lụa (chả lụa),dam,🍗,category
+bb5c14d2-28a8-4940-8bb4-0a2c9ebc95bc,Giò lụa (chả lụa),dam,🥩,rule
 6c8a4ebe-8535-4a11-b6fc-70862a3d1e02,Hải sâm,dam,🍗,category
 31021c7a-d75d-467a-90e3-7d7615802960,Hàu (hấp),dam,🦪,rule
 907fc149-7acd-462d-9b06-d274d9c515e5,Hàu (sống),dam,🦪,rule
@@ -608,8 +608,8 @@ f5feb98b-c84b-490c-ab35-dc9edde6f98b,Lươn,dam,🍗,category
 c846a634-8a3c-4e74-83d8-56dac35d33dc,Lươn (nướng),dam,🍗,category
 58c5d289-25cd-4be9-a5ba-c13f2143a67b,Má đùi gà có da (nướng),dam,🍗,rule
 05ae5529-f3e8-4ddd-9013-12b01e29f0ed,Má đùi gà có da (sống),dam,🍗,rule
-a949808e-abb2-4adc-97f6-d9bd7b0f2912,Mề gà (luộc),dam,🍗,rule
-3468d5f0-ada9-4a2d-8e63-0155865d560c,Mề gà (sống),dam,🍗,rule
+a949808e-abb2-4adc-97f6-d9bd7b0f2912,Mề gà (luộc),dam,🐔,rule
+3468d5f0-ada9-4a2d-8e63-0155865d560c,Mề gà (sống),dam,🐔,rule
 73d31a34-47ec-4f39-81b4-b309ca613227,Miso,dam,🍗,category
 6028095b-11f8-40e8-9dd5-2b87bda06c1e,Mực,dam,🦑,rule
 5fdfed8e-8305-43c9-8eb1-5ad3771bdb62,Mực khô,dam,🦑,rule
@@ -639,8 +639,8 @@ e9b27ffc-7ab3-4392-b526-87199a940a42,Sò lông (hấp),dam,🦪,rule
 d8fe7fae-27da-4ea1-ab55-d86eab96acb5,Sò lông (sống),dam,🦪,rule
 bf29cf1e-c291-44ec-a794-079b444748d9,Sườn bò (hầm),dam,🥩,rule
 31bf039b-d4ba-4eb6-884a-62cc42de9ebf,Sườn bò (sống),dam,🥩,rule
-f3589aab-86ef-4e8a-a6d2-2928dc015094,Sườn non heo (hầm),dam,🥩,rule
-cd142e49-82ee-4caf-ab2f-b5785cf174e1,Sườn non heo (sống),dam,🥩,rule
+f3589aab-86ef-4e8a-a6d2-2928dc015094,Sườn non heo (hầm),dam,🍖,rule
+cd142e49-82ee-4caf-ab2f-b5785cf174e1,Sườn non heo (sống),dam,🍖,rule
 4a89f1f1-a52e-42b5-af81-b75c4de84fef,Tàu hủ chiên nồi chiên không dầu,dam,🍗,category
 03bcdfd2-fc3a-4bd4-a31a-3df56e772639,Tàu hủ trắng cứng (hấp/luộc),dam,🍗,category
 2c4faf5b-1545-4145-ad80-6f98ef987d9a,Tempeh,dam,🍗,category
@@ -656,7 +656,7 @@ b1cb7f07-0c3b-440c-a453-4147e5471e35,Thịt bò nạc,dam,🥩,rule
 2608bff4-919a-4219-bc72-97ae1ee62616,Thịt bò thăn (sống),dam,🥩,rule
 51573942-8d05-4520-ba58-31728c7c00a5,Thịt bò xay (nấu chín),dam,🥩,rule
 e8f11c2a-289d-4590-b979-b0af8bb37465,Thịt bò xay (sống),dam,🥩,rule
-c8758e33-c7c6-44f9-bbac-6a325f6a9e41,Thịt chân giò heo (luộc),dam,🥩,rule
+c8758e33-c7c6-44f9-bbac-6a325f6a9e41,Thịt chân giò heo (luộc),dam,🍖,rule
 08f5cb4b-58b0-430d-9549-0126ac7bd575,Thịt cua,dam,🦀,rule
 f8d0ab97-7a71-47a2-88bb-b98f512623d7,Thịt dê (nướng),dam,🥩,rule
 f3973d66-a0ba-4cff-a07a-3b984b2038f2,Thịt dê (sống),dam,🥩,rule
@@ -670,8 +670,8 @@ d0427d35-573a-4050-a039-7ad11aaa1a04,Thịt vịt bỏ da (sống),dam,🥩,rule
 0ae57ff0-6e63-42f9-99e9-6829c12753f2,Tiết heo (luộc),dam,🥩,rule
 9b52d79e-2867-4144-9da0-c06c4f51467d,Tim bò (hầm),dam,🥩,rule
 6e406d98-7f19-4f2c-bc97-75c57bb05601,Tim bò (sống),dam,🥩,rule
-04296f7f-0cf5-4c47-a86e-8d2d7c5d7595,Tim gà (luộc),dam,🍗,rule
-6019bf63-bd58-46f4-8c02-3bdc5c21cdd9,Tim gà (sống),dam,🍗,rule
+04296f7f-0cf5-4c47-a86e-8d2d7c5d7595,Tim gà (luộc),dam,🐔,rule
+6019bf63-bd58-46f4-8c02-3bdc5c21cdd9,Tim gà (sống),dam,🐔,rule
 7c5186a2-11fe-4486-9e93-25c5e13a74df,Tim heo (hầm),dam,🥩,rule
 d5be8d10-e766-46e9-915b-93b45d65416c,Tim heo (sống),dam,🥩,rule
 1c6a0a1a-7561-4521-a110-e5f3343a338d,Tôm,dam,🦐,rule
@@ -692,10 +692,10 @@ bb73d6b8-a9c6-4e09-a2a1-9d5a1212129e,Trứng gà luộc,dam,🥚,rule
 3d5fdfa2-0173-4b9b-b434-fb72abbe8169,Trứng gà ốp la,dam,🥚,rule
 23e2a636-2bb2-444f-bdb7-1da8e8e476ae,Trứng vịt,dam,🥚,rule
 32c16160-e36d-4181-b5a9-32fbd9d829f2,Tu hài,dam,🦪,rule
-74e55541-42a9-43e7-a8eb-2a4c0b092dc4,Ức gà,dam,🍗,rule
-adf03da6-b370-42b6-b5f2-93a6d87f9382,Ức gà luộc,dam,🍗,rule
-f91a9807-eb3f-4cef-8e64-7df4cbe6f5fc,Ức gà nướng,dam,🍗,rule
-b6c88da5-5f97-43a1-8b90-4f3d9325affb,Ức gà phi lê,dam,🍗,rule
+74e55541-42a9-43e7-a8eb-2a4c0b092dc4,Ức gà,dam,🐔,rule
+adf03da6-b370-42b6-b5f2-93a6d87f9382,Ức gà luộc,dam,🐔,rule
+f91a9807-eb3f-4cef-8e64-7df4cbe6f5fc,Ức gà nướng,dam,🐔,rule
+b6c88da5-5f97-43a1-8b90-4f3d9325affb,Ức gà phi lê,dam,🐔,rule
 16de23b5-5575-4025-b680-d87eec022bac,Vẹm (hấp),dam,🦪,rule
 8d25fdcc-529d-4eee-8b31-c7a6215190a7,Vẹm (sống),dam,🦪,rule
 4893a311-a2c0-41c4-b811-9430e1b60275,Americano,do_uong,☕,rule
@@ -810,9 +810,9 @@ b03caa3d-9c4d-4140-88d4-d289f63c5887,Cao lầu,mon_viet,🍜,category
 6a09108e-4e52-41cb-8c1c-6d1c9102aad5,Chả giò (nem rán),mon_viet,🍜,category
 6f7d3cfa-45b3-4d0a-b552-0b9a3b325d64,Chả ram Quảng Bình nhà làm (chiên dầu),mon_viet,🍜,category
 633eec23-adeb-4616-9722-dad74cef8a6b,Chả ram Quảng Bình nhà làm (chiên không dầu),mon_viet,🍜,category
-cedec025-f31a-45f9-8fba-769430e7fdb2,Cháo gà,mon_viet,🍗,rule
+cedec025-f31a-45f9-8fba-769430e7fdb2,Cháo gà,mon_viet,🐔,rule
 5a86bf05-3d89-4637-acaf-323407829fd3,Cháo lòng,mon_viet,🍜,category
-8045d5c9-5d5a-4b3c-840c-ee0411a2018b,Cháo sườn,mon_viet,🍜,category
+8045d5c9-5d5a-4b3c-840c-ee0411a2018b,Cháo sườn,mon_viet,🍖,rule
 72b006e4-f214-477f-80a5-4f47053b26f2,Cơm chiên Dương Châu,mon_viet,🍚,rule
 547d0465-ecdd-4ace-85fe-d0c71e76f3c2,Cơm gà,mon_viet,🍚,rule
 71fad802-2359-4489-a82a-587db51bef81,Cơm gà xối mỡ,mon_viet,🍚,rule
@@ -822,8 +822,8 @@ d102e60f-9b8a-494a-9b4b-a5144e1547bf,Cơm phần thịt kho trứng + rau luộc
 72b29cb8-39df-46b6-ae10-af31c7bf43e7,Cơm rang (cơm chiên trứng),mon_viet,🍚,rule
 53daed04-f4eb-4eee-b04c-4436e3073d89,Cơm tấm sườn,mon_viet,🍚,rule
 be2798b7-001b-4f1c-b5b9-85a943d40cfe,Đậu hũ sốt cà chua,mon_viet,🍜,category
-871db11d-f376-49cd-acda-cbcfe915b98d,Gà kho gừng,mon_viet,🍗,rule
-6e37255e-b581-42b7-9cae-5b8d2f7332a6,Gà kho sả ớt,mon_viet,🍗,rule
+871db11d-f376-49cd-acda-cbcfe915b98d,Gà kho gừng,mon_viet,🐔,rule
+6e37255e-b581-42b7-9cae-5b8d2f7332a6,Gà kho sả ớt,mon_viet,🐔,rule
 87b25e44-a460-4973-9833-14e4134674a1,Gỏi cuốn,mon_viet,🍜,category
 c0796975-ffce-4a57-b3df-d716a4bc1c8d,Hột vịt lộn,mon_viet,🥚,rule
 0e3e0afc-b88a-4633-aca9-d6ce086b75ed,Hủ tiếu Nam Vang,mon_viet,🍜,rule
@@ -841,8 +841,8 @@ b4b52838-895c-4875-b5e2-0762be89f40f,Phở bò,mon_viet,🍜,rule
 c27615c1-71be-47c3-a96a-9206b8aa2536,Phở gà,mon_viet,🍜,rule
 429c6b9e-228f-430a-a6b8-d69416611f81,Rau muống xào tỏi,mon_viet,🧄,rule
 7416e7cb-c591-4703-97d6-06e9e7d3b320,Sốt cà chua nướng Minh Hào,mon_viet,🍅,rule
-e850b3ab-a419-4a5d-b9ef-10cd3af2ff14,Sườn ram mặn,mon_viet,🍜,category
-27ddea3d-0d68-48a1-879d-b8e2a2c25d71,Sườn xào chua ngọt,mon_viet,🍜,category
+e850b3ab-a419-4a5d-b9ef-10cd3af2ff14,Sườn ram mặn,mon_viet,🍖,rule
+27ddea3d-0d68-48a1-879d-b8e2a2c25d71,Sườn xào chua ngọt,mon_viet,🍖,rule
 ff836380-dd10-4120-803d-01c9d0a62ea6,Thăn bò nấu chậm Minh Hào,mon_viet,🥩,rule
 c06ce73a-afff-45c1-8f03-4f20085f6989,Thịt ba rọi kho tiêu,mon_viet,🥓,rule
 f9b3359b-2f65-42ea-becf-178cfe005b50,Thịt heo rang cháy cạnh,mon_viet,🥩,rule
@@ -851,7 +851,7 @@ ac1ba51c-0c0f-4ae8-b2ce-a35591f164c7,Tôm rim thịt,mon_viet,🦐,rule
 40945aed-dc37-4fa2-821e-64e7fb91308b,Tôm sú nấu chậm Minh Hào,mon_viet,🦐,rule
 91dbfed8-f7e7-469e-82af-6f76e5ad6aa1,Tôm thẻ nấu chậm Minh Hào,mon_viet,🦐,rule
 b58c8168-b3c7-4038-b95a-2ff2eacdb64d,Trứng chiên thịt băm,mon_viet,🥚,rule
-a7c738f7-164c-4b07-9254-8042fc01778b,Ức gà nấu chậm Minh Hào,mon_viet,🍗,rule
+a7c738f7-164c-4b07-9254-8042fc01778b,Ức gà nấu chậm Minh Hào,mon_viet,🐔,rule
 751c85dd-4a3a-4237-a571-ce2ce4a0b586,Vịt kho sả gừng,mon_viet,🍜,category
 c926f094-1c43-4a93-822e-58ac24732425,Xôi gà (xôi mặn),mon_viet,🍚,rule
 74362941-93e3-478f-830b-5751f84618fa,Xôi xéo,mon_viet,🍚,rule

@@ -76,10 +76,15 @@ export const EMOJI_RULES: readonly Rule[] = [
   { words: ["phô mai", "cheese"], emoji: "🧀" },
   { words: ["sữa"], emoji: "🥛" },
   { words: ["trứng", "hột vịt"], emoji: "🥚" },
-  // Proteins
-  { words: ["gà"], emoji: "🍗" },
+  // Proteins. Chicken by cut (Hao 23/10): the bird for the boneless cuts and a chicken with no cut named, the leg for the
+  // cuts on the bone. TODO(Hao): custom 3D chicken icons will replace 🐔 and 🍗 (OPEN_QUESTIONS, food emoji)
+  { words: ["ức gà", "lườn gà", "gà phi lê", "phi lê gà", "gà xé", "gà luộc xé", "thịt gà", "da gà"], emoji: "🐔" },
+  { words: ["đùi gà", "má đùi", "cánh gà", "chân gà", "gà rán", "gà nướng", "gà nguyên con"], emoji: "🍗" },
+  { words: ["gà"], emoji: "🐔" },
   { words: ["bò"], emoji: "🥩" },
+  // Pork by cut (Hao 23/10): bacon only for the belly, the bone for ribs and hock, the rest is meat (the last rule below)
   { words: ["ba chỉ", "ba rọi", "xông khói", "bacon"], emoji: "🥓" },
+  { words: ["sườn", "chân giò"], emoji: "🍖" },
   { words: ["tôm"], emoji: "🦐" },
   { words: ["cua", "ghẹ"], emoji: "🦀" },
   { words: ["mực"], emoji: "🦑" },
@@ -88,7 +93,7 @@ export const EMOJI_RULES: readonly Rule[] = [
   { words: ["sò", "ốc", "nghêu", "hàu", "hến", "vẹm", "tu hài", "bào ngư"], emoji: "🦪" },
   { words: ["cá"], emoji: "🐟" },
   // Last of the proteins: "Tôm rim thịt" is shrimp
-  { words: ["heo", "lợn", "thịt"], emoji: "🥩" },
+  { words: ["heo", "lợn", "thịt", "giò lụa", "chả lụa"], emoji: "🥩" },
   // Vegetables
   { words: ["khoai lang"], emoji: "🍠" },
   { words: ["khoai tây"], emoji: "🥔" },
