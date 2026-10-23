@@ -47,7 +47,7 @@ OLD_TIPS = [
 RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
 # The newest 8 of the joined tour on Hôm nay: 22a's seven that are on Hôm nay: V3's meal +, Ngày tập pill and Khám phá tab, feat/ngay-mau's two
 # (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has food) and custom-food-nutrients' + Thêm vi chất khác
-# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's one (hero-hold: Giữ để xem món nào góp vào).
+# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's two (hero-hold: Giữ để xem món nào góp vào; own-food-menu: Sửa hoặc xoá món của bạn, the Khám phá tab); 22a gives up its last one (Chia sẻ ngày ăn).
 # 21c's Minh Hào step (the oldest) is cut by the cap
 STEPS = [
     ("Thêm vào từng bữa", ["meal-add", "nav-add"]),
@@ -56,8 +56,8 @@ STEPS = [
     ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]),
     ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]),
     ("Nhập đủ vi chất", ["add-nutrient", "nav-add"]),
-    ("Chia sẻ ngày ăn", ["home-share"]),
     ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]),
+    ("Sửa hoặc xoá món của bạn", ["nav-explore"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [

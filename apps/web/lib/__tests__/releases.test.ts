@@ -6,7 +6,7 @@ const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
 
 // 2026-10-23a's tour (the night of 23→24/10): each PR of the night that adds a step appends its title here
-const T23A = ["Giữ để xem món nào góp vào"];
+const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xoá món của bạn"];
 
 describe("RELEASES", () => {
   it("is newest first with unique ids", () => {
@@ -193,6 +193,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
     expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
     expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
+    expect(r?.items.map((i) => i.title)).toContain("Sửa và xoá Món ăn của tôi");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 
@@ -381,14 +382,14 @@ describe("joinedTour (what Thử ngay runs)", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
     expect(ids).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
     // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place: 22a's 7 and 21c's first on the page
-    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T22A.filter((t) => t !== "So sánh món"), ...T23A]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T22A.filter((t) => t !== "So sánh món").slice(0, MAX_TOUR_STEPS - T23A.length), ...T23A]);
   });
 
   it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
     expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-23a", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
-    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 33 }, (_, i) => i));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 34 }, (_, i) => i));
     expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A, ...T23A]);
   });
 
