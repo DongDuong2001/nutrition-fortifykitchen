@@ -99,7 +99,9 @@ export function DiaryToast() {
             }
             actionHref={toast.kind === "saved" ? "/explore" : undefined}
             onAction={
-              toast.kind === "deleted"
+              toast.kind === "foodDeleted"
+                ? toast.undoFood
+                : toast.kind === "deleted"
                 ? undoLastDelete
                 : toast.kind === "undoable"
                   ? undoCopy

@@ -15,17 +15,19 @@ export interface FoodRowLinkProps {
   category?: string;
   /** Third line, the calm upper-limit line of Đủ 22 vi chất ("Vượt mức an toàn (400 µg)"), on a Giàu … row (A3, 23/10) */
   note?: string | null;
+  /** A control beside the row, outside its link (the ⋯ of Món ăn của tôi): the row then is a flex of the link and this. */
+  trailing?: React.ReactNode;
 }
 
 /** One food in a Khám phá list: name and meta on the left, a figure and a chevron on the right. Min 48 px. */
-export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop = true, category, note }: FoodRowLinkProps) {
-  return (
+export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop = true, category, note, trailing }: FoodRowLinkProps) {
+  const link = (
     <Link
       href={href}
       data-food-row
       data-category={category}
-      className={`flex min-h-14 items-center gap-3 py-2 text-text no-underline m-tint transition-press ${
-        withBorderTop ? "border-t border-divider" : ""
+      className={`flex min-h-14 items-center gap-3 py-2 text-text no-underline m-tint transition-press ${trailing ? "min-w-0 flex-1" : ""} ${
+        withBorderTop && !trailing ? "border-t border-divider" : ""
       }`}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-1">
@@ -46,5 +48,12 @@ export function FoodRowLink({ href, name, meta, value, valueColor, withBorderTop
         <path d="M9 6l6 6-6 6" />
       </svg>
     </Link>
+  );
+  if (!trailing) return link;
+  return (
+    <div className={`flex items-center gap-1 ${withBorderTop ? "border-t border-divider" : ""}`}>
+      {link}
+      {trailing}
+    </div>
   );
 }
