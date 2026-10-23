@@ -8,7 +8,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
-import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
+import { AppHeader, CalendarGlyph } from "@/components/ui/app-header";
 import { TabWash } from "@/components/ui/tab-wash";
 import { IconShare } from "@/components/ui/icons";
 import { setHomeDay } from "@/lib/home-scroll";
@@ -95,10 +95,12 @@ let lastWellFed: { iso: string; value: boolean } | null = null;
 /** The picker's first card: Chép hôm qua (Chép hôm kia on yesterday). */
 const YESTERDAY_OPTION = "yesterday";
 
-/** share-spotlight (Hao 22/10): the share button is a 44 px glass pill, the cobalt glyph and "Chia sẻ" (people missed the bare icon) */
-const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt")
-  .replace("h-11 w-11", "min-h-11 gap-2 whitespace-nowrap")
-  .replace("p-0", "py-0 pl-3 pr-4 text-callout font-bold");
+/** share-spotlight (Hao 22/10): the share button says Chia sẻ (people missed the bare icon). C3: the visible pill is 34 px (light glass,
+ *  14 px semibold, a 17 px glyph, 10 px before it and 12 px after the word) inside a transparent 44 px tap area, so it sits lighter
+ *  next to the wordmark; the button (and its spotlight target) is the 44 px area. The pill is in rem (2.125) so it grows with the text */
+const SHARE_BUTTON =
+  "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-0 bg-transparent p-0 text-cobalt cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
+const SHARE_PILL = "inline-flex h-[2.125rem] items-center gap-1.5 rounded-full pl-2.5 pr-3 text-sm font-semibold glass-light lg:bg-card lg:shadow-ring";
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
@@ -745,8 +747,10 @@ function HomeContent() {
               aria-describedby={nothingLogged ? "share-reason" : undefined}
               className={`${SHARE_BUTTON} disabled:cursor-default disabled:opacity-50`}
             >
-              <IconShare />
-              <span aria-hidden="true">Chia sẻ</span>
+              <span className={SHARE_PILL}>
+                <IconShare size={17} />
+                <span aria-hidden="true">Chia sẻ</span>
+              </span>
             </button>
             </div>
           }
@@ -868,6 +872,7 @@ function HomeContent() {
                 extras={extras}
                 groups={groups}
                 summary={levelCounts}
+                fiberTarget={macroTargets.fiber}
                 targets={nutrientTargets}
                 selected={selected}
                 microsHref={`/micros?date=${viewIso}`}
@@ -882,8 +887,8 @@ function HomeContent() {
       {sheets && sourcesMounted && (
         <sheets.NutrientSourcesSheet
           nutrient={sourcesOf}
-          value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
-          target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+          value={sourcesOf === "fiber" ? shown.fiber : sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+          target={sourcesOf === "fiber" ? macroTargets.fiber : sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
           onClose={() => setSourcesOf(null)}
         />
       )}

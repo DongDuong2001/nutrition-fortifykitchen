@@ -9,7 +9,7 @@ At 360 px, at 360 with the root font at 150 % and at 390:
 - Picking Vitamin C closes the sheet, adds the field under the main block and focuses it; Vitamin C is then gone from the sheet. Three
   fields added; the × of one takes it off and gives it back to the sheet.
 At 390 on an empty day: a food with fibre 4 g, sugar 9 g, Vitamin C 40 mg and Magnesium 60 mg (per 100 g serving) is saved and logged;
-the food page shows Vitamin C 40 mg and Magnesium 60 mg; Hôm nay counts them (Chất xơ 4 g in the hero, the Vitamin C and Magnesium rows
+the food page shows Vitamin C 40 mg and Magnesium 60 mg; Hôm nay counts them (Chất xơ 4 g in its row (C3), the Vitamin C and Magnesium rows
 of the nutrient column). Chất xơ and Đường are reported for the food page, which has no row for either (OPEN_QUESTIONS).
 Below 18 rem of card (360 px at 150 % text) the fields stack in one column; the column count is reported.
 Shots: .screenshots/custom-food-nutrients/<form|sheet|added3>-<360|360-text150|390>.png.
@@ -207,8 +207,10 @@ def save_case(browser):
     pg.wait_for_url("**/app", timeout=15000)
     pg.wait_for_timeout(800)
     check("Bánh probe nhãn" in pg.inner_text("body"), f"{tag}: the food is on Hôm nay")
-    hero = pg.locator("[data-tour=home-hero]").inner_text()
-    check(re.search(r"Chất xơ\s*4", hero) is not None, f"{tag}: Hôm nay's hero counts 4 g of fibre ({hero[-80:]!r})")
+    # C3 (homnay-c2.md items 1-2): Chất xơ left the hero for its own row at the top of the nutrient column
+    fiber = pg.locator("[data-nutrient-row=fiber]").first
+    label = fiber.get_attribute("aria-label") if fiber.count() else ""
+    check(label.startswith("Chất xơ, 4 g"), f"{tag}: Hôm nay's Chất xơ row counts 4 g of fibre ({label!r})")
     for name, amount in [("Vitamin C", "40 mg"), ("Magnesium", "60 mg")]:
         row = pg.locator(f"[aria-label^='{name}, ']").first
         label = row.get_attribute("aria-label") if row.count() else ""

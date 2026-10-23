@@ -24,16 +24,16 @@ export interface HeroPill {
   tour?: string;
 }
 
-const MACROS: { key: "carbs" | "protein" | "fat" | "fiber"; label: string }[] = [
+// Hôm nay readability (C3, Hao 22/10): three macros; Chất xơ has its own row at the top of the nutrient column
+const MACROS: { key: "carbs" | "protein" | "fat"; label: string }[] = [
   { key: "carbs", label: "Tinh bột" },
   { key: "protein", label: "Đạm" },
   { key: "fat", label: "Chất béo" },
-  { key: "fiber", label: "Chất xơ" },
 ];
 
 /**
  * The ink card of the home screen: what the day (or one food, or one meal) holds against the day's target.
- * Row 1: the mode label and the pills; row 2: kcal, the target range and the percent; the kcal bar; four macros.
+ * Row 1: the mode label and the pills; row 2: kcal (40 px), the target range and the percent; the kcal bar; three macros (C3).
  */
 export function HomeHero({
   label,
@@ -106,11 +106,11 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span ref={kcalRef} className="font-display text-display font-black italic leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
-          <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
+          <span ref={kcalRef} className="font-display text-[2.5rem] font-black italic leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
+          <span className={`text-sm text-on-dark/80 ${share ? "whitespace-nowrap" : ""}`}>
             / {formatRange(kcalTarget.min, kcalTarget.max)} kcal
           </span>
-          <span ref={pctRef} className="ml-1 font-display text-display font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
+          <span ref={pctRef} className="ml-1 font-display text-[2.5rem] font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
@@ -118,7 +118,7 @@ export function HomeHero({
           <LevelBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-[10px]" />
         </div>
 
-        <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2">
+        <div data-align-group="home-hero" className="mt-1 grid grid-cols-3 gap-3">
           {MACROS.map((m) => {
             const value = values[m.key];
             const target = macroTargets[m.key];
@@ -126,17 +126,17 @@ export function HomeHero({
             return (
               <div key={m.key} className="flex min-w-0 flex-col gap-1">
                 <span className="text-xs font-bold leading-tight">{m.label}</span>
-                {/* Amount/target and percent on one line, 8 px apart, 12 and 15 px (cc-44). Macro numbers in Saira Condensed (V3
-                    keeps it for tight numbers) and no spaces around "/": "118/104 g 113%" fits the 77 px column at 390 */}
+                {/* Amount/target and percent on one line, 8 px apart, 13 px at 80 % white and 16 px (C3). Macro numbers in Saira Condensed
+                    (V3 keeps it for tight numbers) and no spaces around "/": "154/143 g 108%" fits the 106 px column at 390 */}
                 {/* Share image: in a wider face the percent goes under the amount instead of into the next column */}
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  <span className="whitespace-nowrap font-condensed text-xs font-extrabold leading-none text-muted-on-dark tabular-nums">
+                  <span className="whitespace-nowrap font-condensed text-cap font-extrabold leading-none text-on-dark/80 tabular-nums">
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
                   {/* The percent takes its level's colour (V3-SPEC §1); unknown stays white */}
                   <span
-                    className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none tabular-nums"
+                    className="shrink-0 whitespace-nowrap font-condensed text-base font-extrabold leading-none tabular-nums"
                     style={pct === null ? undefined : { color: getLevelColor(getLevel(pct)) }}
                   >
                     {pctLabel(value, target)}

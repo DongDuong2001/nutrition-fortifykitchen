@@ -113,8 +113,9 @@ def button_case(browser, tag, size, big):
     ctx, pg, errors = page(browser, size, tips=False)
     home(pg, big)
     btn = pg.locator("[data-tour=home-share]:visible").first
+    # C3 (homnay-c2.md item 4b): the glyph and the word sit in a pill span inside the button; the lines are the word's own span
     info = btn.evaluate(
-        """b => { const r = b.getBoundingClientRect(), t = [...b.querySelectorAll('span')].find((s) => s.textContent.trim()); const q = document.createRange(); q.selectNodeContents(t);
+        """b => { const r = b.getBoundingClientRect(), t = [...b.querySelectorAll('span')].find((s) => s.textContent.trim() && !s.querySelector('span')); const q = document.createRange(); q.selectNodeContents(t);
                  const lines = new Set([...q.getClientRects()].map((x) => Math.round(x.top))).size;
                  return { h: r.height, w: r.width, text: t.textContent, lines, cut: b.scrollWidth > b.clientWidth + 1, svg: !!b.querySelector('svg'), right: r.right, vw: innerWidth }; }"""
     )

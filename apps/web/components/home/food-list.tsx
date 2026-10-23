@@ -183,7 +183,7 @@ function FoodRow({
         {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
         {detail && <span className={`basis-full text-micro leading-tight lg:text-cap ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
-      <span className={`${AMOUNT_GUARD} font-condensed text-callout font-extrabold tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
+      <span className={`${AMOUNT_GUARD} font-condensed text-body-lg font-extrabold tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -398,8 +398,9 @@ export function FoodList({
                 className="hit-44 relative flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-text"
               >
                 <span aria-hidden="true" className={`h-2 w-2 flex-none rounded-full ${MEAL_DOT[meal.slot]}`} />
-                <span className="whitespace-nowrap font-display text-callout font-extrabold uppercase leading-[1.1] tracking-[0.01em]">{meal.label}</span>
-                <span className={`ml-0.5 font-condensed text-cap font-extrabold leading-none tabular-nums text-secondary ${isDropTarget ? "whitespace-normal" : "whitespace-nowrap"}`}>
+                {/* C3: the name is cobalt (it can be tapped), the dot keeps the meal's colour, the kcal 15 px ink at 75 % */}
+                <span className="whitespace-nowrap font-display text-callout font-extrabold uppercase leading-[1.1] tracking-[0.01em] text-cobalt">{meal.label}</span>
+                <span className={`ml-0.5 font-condensed text-callout font-extrabold leading-none tabular-nums text-text/75 ${isDropTarget ? "whitespace-normal" : "whitespace-nowrap"}`}>
                   {isDropTarget ? "Thả vào đây để chuyển" : meal.entries.length > 0 ? kcalValue(meal.kcal) : ""}
                 </span>
               </button>

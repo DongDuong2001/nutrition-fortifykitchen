@@ -180,7 +180,7 @@ def shoot(browser, route, path, w, empty=False):
 
 
 def share(browser, named, engine="chromium", variant="normal"):
-    """The share image of the sample day at Level 2 ("6/14 đạt"; Lưu ảnh, no file sharing): saved PNG, 1080 wide, about 1234 CSS px high."""
+    """The share image of the sample day at Level 2 ("6/14 đạt"; Lưu ảnh, no file sharing): saved PNG, 1080 wide, about 1563 CSS px high (C3)."""
     tag = "-".join(["named" if named else "unnamed"] + ([engine] if engine != "chromium" else []) + ([variant] if variant != "normal" else []))
     ctx = browser.new_context(viewport=SIZES["390"], accept_downloads=True, **(MOBILE if variant != "normal" else {}))
     if variant == "boost":
@@ -226,9 +226,11 @@ def share(browser, named, engine="chromium", variant="normal"):
     )
     css_h = round(h * 390 / 1080)
     check(w == 1080, f"share {tag}: 1080 wide ({w})")
-    # V3ShareB: the sample day at Level 2 (6/14 đạt, 7 foods) is 1234 CSS px high (44 px rows); WebKit's text metrics differ by a pixel or two
+    # V3ShareB: the sample day at Level 2 (6/14 đạt, 7 foods) was 1234 CSS px high (44 px rows). C3 (homnay-c2.md item 2), as the page:
+    # each micro row has its amount under the name (62 px rows, were 44), plus the Chất xơ row (76 px) and the 40 px x/N đạt: 1563.
+    # WebKit's text metrics differ by a pixel or two
     if variant == "normal":
-        check(abs(css_h - 1234) <= 4, f"share {tag}: about 1234 CSS px high ({css_h}, PNG {h})")
+        check(abs(css_h - 1563) <= 4, f"share {tag}: about 1563 CSS px high ({css_h}, PNG {h})")
     svgs = pg.evaluate("window.__shareSvgs")
     ctx.close()
     if check(bool(svgs), f"share {tag}: the SVG of the image was grabbed"):
