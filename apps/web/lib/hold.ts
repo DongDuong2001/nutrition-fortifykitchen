@@ -55,7 +55,7 @@ export const CLICK_GUARD_MS = 400;
 
 /**
  * A hold opens a sheet under the finger, and when the finger lifts the browser may still send a click: the sheet's scrim would
- * take it as "close". From the hold until the finger lifts (plus CLICK_GUARD_MS) the next click anywhere is swallowed. Not armed
+ * take it as "close". From the hold until the finger lifts (plus CLICK_GUARD_MS) the next click anywhere is swallowed; a new pointerdown ends the guard at once. Not armed
  * for a right-click, which has no click after it. The cap is only for a pointer that never reports its end.
  */
 export function guardNextClick(doc: Pick<Document, "addEventListener" | "removeEventListener">): void {
@@ -75,9 +75,12 @@ export function guardNextClick(doc: Pick<Document, "addEventListener" | "removeE
     doc.removeEventListener("click", swallow, true);
     doc.removeEventListener("pointerup", lifted, true);
     doc.removeEventListener("pointercancel", lifted, true);
+    doc.removeEventListener("pointerdown", release, true);
   };
   doc.addEventListener("click", swallow, true);
   doc.addEventListener("pointerup", lifted, true);
   doc.addEventListener("pointercancel", lifted, true);
+  // A new press is a new tap: a guard still armed (the lift never reported) must not eat it
+  doc.addEventListener("pointerdown", release, true);
   cap = setTimeout(release, 10_000);
 }

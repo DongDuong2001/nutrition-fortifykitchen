@@ -123,6 +123,25 @@ describe("guardNextClick", () => {
     expect(doc.listeners.has("pointerup")).toBe(false);
   });
 
+  it("a new press ends the guard, so a stray guard never eats a real tap (reviewer 24/10)", () => {
+    const doc = fakeDoc();
+    guardNextClick(doc);
+    doc.dispatch("pointerdown");
+    expect(doc.listeners.has("click")).toBe(false);
+    expect(doc.listeners.has("pointerdown")).toBe(false);
+    const click = doc.dispatch("click");
+    expect(click.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("the click that ends the hold comes with no new press, so it is still swallowed", () => {
+    const doc = fakeDoc();
+    guardNextClick(doc);
+    vi.advanceTimersByTime(600);
+    doc.dispatch("pointerup");
+    expect(doc.dispatch("click").preventDefault).toHaveBeenCalled();
+    expect(doc.listeners.has("pointerdown")).toBe(false);
+  });
+
   it("keeps guarding while the finger is still down", () => {
     const doc = fakeDoc();
     guardNextClick(doc);
