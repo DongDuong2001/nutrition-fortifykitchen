@@ -635,6 +635,17 @@
     opacity: 1;
     transition-duration: var(--m-tint-in);
   }
+  /* Desktop parity (23/10): with a mouse on a desktop width, a tinted row or card shows half its press tint on hover, so
+     what can be clicked says so before the click; a pressed row keeps its full press tint (the press rule above is weaker
+     than this one). .m-hover gives the same to a card link that presses by scaling (its ::after is the a.flex one above).
+     Phones and touch never match: no change there. */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .m-tint:hover:not(:disabled, [aria-disabled="true"], :active, [data-pressed])::after,
+    .m-hover:hover::after {
+      opacity: 0.5;
+      transition-duration: var(--m-tint-in);
+    }
+  }
   /* A full-width pill is a main action (Lưu, Thêm vào ..., Lưu & chọn tiếp): it scales, no tint */
   button.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
   a.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),

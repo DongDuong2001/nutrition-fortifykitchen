@@ -488,6 +488,25 @@ function HomeContent() {
   useEffect(() => {
     if (!selecting) emitSignal("select-off");
   }, [selecting]);
+  // Desktop parity (23/10): Esc is Hủy while no sheet or tour step is up, and when select mode ends (Hủy, Xóa, a copy) focus goes back
+  // to ⋯ instead of the page body; on a phone neither applies (no keyboard, no focus ring)
+  const wasSelecting = useRef(false);
+  useEffect(() => {
+    if (wasSelecting.current && !selecting && window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
+      const active = document.activeElement;
+      // The copy and move sheets close inert, so the button that closed them still holds focus there
+      if (!active || active === document.body || active.closest("[inert]")) document.getElementById("home-day-menu")?.focus();
+    }
+    wasSelecting.current = selecting;
+    if (!selecting || targetSheet !== null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector('[role="dialog"][aria-modal="true"], [data-onboarding-overlay]')) return;
+      setSelecting(false);
+      setSelectedIds(new Set());
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selecting, targetSheet]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {
