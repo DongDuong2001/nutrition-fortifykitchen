@@ -59,4 +59,14 @@ func TestUserRateLimiter_LimitWrites(t *testing.T) {
 	if wOther.Code != http.StatusOK {
 		t.Fatalf("expected POST from different IP to pass with 200, got %d", wOther.Code)
 	}
+
+	// Request with CF-Connecting-IP takes precedence over X-Real-IP when behind CDN
+	reqPostCF := httptest.NewRequest(http.MethodPost, "/test", nil)
+	reqPostCF.Header.Set("CF-Connecting-IP", "9.9.9.9")
+	reqPostCF.Header.Set("X-Real-IP", "1.2.3.4") // proxy IP that was already rate-limited
+	wCF := httptest.NewRecorder()
+	handler.ServeHTTP(wCF, reqPostCF)
+	if wCF.Code != http.StatusOK {
+		t.Fatalf("expected POST with CF-Connecting-IP to pass with 200 despite proxy IP, got %d", wCF.Code)
+	}
 }
