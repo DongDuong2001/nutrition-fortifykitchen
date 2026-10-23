@@ -1,10 +1,17 @@
 import type { MouseEvent } from "react";
 import { homeDay } from "@/lib/home-scroll";
 
-/** Remembers which control opened /add, so focus can return to it. Storage may be blocked. */
+/** fix/compare-back: the + sheet as So sánh left it, for the Back from the comparison (components/add/add-screen). */
+export const ADD_RETURN_KEY = "h1t_add_return_v1";
+
+/**
+ * Remembers which control opened /add, so focus can return to it. Storage may be blocked. A + tapped anywhere (the nav's on the
+ * comparison page too) starts a new add: the So sánh return note goes.
+ */
 export function rememberAddOpener(id: string) {
   if (typeof window === "undefined") return;
   try {
+    sessionStorage.removeItem(ADD_RETURN_KEY);
     sessionStorage.setItem("last_add_opener_id", id);
   } catch {
     // Storage unavailable: focus falls back to the default opener.

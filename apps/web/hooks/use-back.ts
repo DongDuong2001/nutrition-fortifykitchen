@@ -20,6 +20,11 @@ export function previousInAppPath(): string | null {
   return history.length > 1 ? history[history.length - 2] : null;
 }
 
+/** The newest path of the in-app history. Read while a new screen renders, it is the page the person came from. */
+export function lastInAppPath(): string | null {
+  return history[history.length - 1] ?? null;
+}
+
 /**
  * Back for pushed screens: the previous in-app page when there is one, otherwise the owning tab
  * (backFallback), so a direct link or a reload never leaves the app.
