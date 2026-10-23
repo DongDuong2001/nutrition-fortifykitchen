@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { englishOn, formatNumberIn, translate } from "@/lib/i18n";
+import { englishOn, translate } from "@/lib/i18n";
 import { vi } from "@/lib/i18n/vi";
 import { en } from "@/lib/i18n/en";
 
 /**
- * Vietnamese must not move: every vi value, character for character, as it stood in the components before they read
- * from t() (settings-home-screen.tsx at 3f4e1cd; profile-cards.tsx AppCard, pwa/install-row.tsx and
- * sign-out-confirm.tsx at 72a9385, the branch's base). {x} is a template slot where the component had an
- * expression.
+ * Vietnamese must not move: every vi value of the proof area, character for character, as it stands in the components
+ * on main 650687b before they read from t() (settings-home-screen.tsx, profile-cards.tsx AppCard, pwa/install-row.tsx,
+ * sign-out-confirm.tsx, and the Hỗ trợ card from #62). {x} is a template slot where the component had an expression.
+ * Keys added for later areas are not pinned here.
  */
 const ORIGINAL_VI: Record<string, string> = {
   "settings.title": "Cài đặt",
@@ -80,13 +80,16 @@ describe("i18n foundation", () => {
     expect(englishOn(true, false, null)).toBe(true);
   });
 
-  it("numbers follow the locale: 1.234,5 in vi, 1,234.5 in en", () => {
-    expect(formatNumberIn("vi", 1234.5)).toBe("1.234,5");
-    expect(formatNumberIn("en", 1234.5)).toBe("1,234.5");
+  it("every en form keeps the vi message's {slots}", () => {
+    const slots = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+    for (const [key, message] of Object.entries(en)) {
+      const want = slots(vi[key as keyof typeof vi] as string);
+      for (const form of typeof message === "string" ? [message] : Object.values(message)) expect(slots(form), key).toEqual(want);
+    }
   });
 
   it("every vi value is the Vietnamese the components showed before t(), and vi uses no plural forms", () => {
-    expect(vi).toEqual(ORIGINAL_VI);
+    for (const [key, text] of Object.entries(ORIGINAL_VI)) expect(vi[key as keyof typeof vi], key).toBe(text);
     for (const message of Object.values(vi)) expect(typeof message).toBe("string");
   });
 

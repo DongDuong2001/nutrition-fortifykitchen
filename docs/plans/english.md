@@ -133,8 +133,8 @@ Glossary to fix first (with Hao and the coach):
 
 - **`lib/i18n/`:** `vi.ts` (the source, typed), `en.ts` (must have every key), `index.ts`:
   - `translate`, `useT`, `currentLocale`, `formatNumberIn`
-  - the flag: `NEXT_PUBLIC_ENGLISH=1` at build time, or `h1t_english_preview=1` in a demo build only
-- **Proof area:** the Cài đặt tab with English: the screen, its cards and the sign-out sheet (46 keys). Still Vietnamese with the flag on, because the strings come from other modules:
+  - the flag: `ENGLISH=1` at build time (baked into `NEXT_PUBLIC_ENGLISH` by next.config.ts; pass it as a build arg in the Dockerfile and deploy/docker-compose.prod.yml), or `h1t_english_preview=1` in a demo build only
+- **Proof area:** the Cài đặt tab with English: the screen, its cards and the sign-out sheet and the Hỗ trợ card (49 keys). Still Vietnamese with the flag on, because the strings come from other modules:
   - the profile card's name and summary (`profile-summary`)
   - the sign-out sheet's sync failure reason (`lib/sign-out-flow.ts`) and the account error lines (`account-screen.tsx`)
   - the Giao diện values (`lib/theme.ts`, behind the dark flag)
@@ -153,4 +153,4 @@ Glossary to fix first (with Hao and the coach):
 6. The account `language` field (Dong).
 7. Pre-paint locale.
 8. Probes in both languages.
-9. Turn the flag on.
+9. Turn the flag on. Accounts and devices that picked English on the Ngôn ngữ page while it did nothing would switch unasked: on launch, store the choice under a new key, so everyone starts in Vietnamese and picks English again.

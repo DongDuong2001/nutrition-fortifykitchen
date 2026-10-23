@@ -8,7 +8,7 @@ import { en } from "./en";
  * messages are typed objects (vi is the source, en must have every key), and plurals, numbers and dates come from Intl.
  *
  * The flag is OFF: everyone gets Vietnamese, even an account that already picked English in Cài đặt › Ngôn ngữ (that
- * choice has been on the page since cc-24 and did nothing). It turns on with NEXT_PUBLIC_ENGLISH=1 at build time or, in a
+ * choice has been on the page since cc-24 and did nothing). It turns on with ENGLISH=1 at build time (next.config.ts bakes it into NEXT_PUBLIC_ENGLISH) or, in a
  * demo build only, with h1t_english_preview=1 in localStorage (tests/probes/i18n_foundation.py uses that).
  */
 
@@ -28,6 +28,8 @@ export function englishOn(buildOn: boolean, demoBuild: boolean, preview: string 
 }
 
 export function englishEnabled(): boolean {
+  // A live build never reads the preview key
+  if (!DEMO_BUILD) return BUILD_ON;
   let preview: string | null = null;
   try {
     preview = globalThis.localStorage?.getItem(ENGLISH_PREVIEW_KEY) ?? null;
@@ -63,10 +65,6 @@ const serverLocale = (): Locale => "vi";
 export function useT(): T {
   const locale = useSyncExternalStore(noSubscribe, currentLocale, serverLocale);
   return (key, params) => translate(locale, key, params);
-}
-
-export function formatNumberIn(locale: Locale, value: number, options?: Intl.NumberFormatOptions): string {
-  return new Intl.NumberFormat(INTL_LOCALE[locale], options).format(value);
 }
 
 export type { MessageKey };
