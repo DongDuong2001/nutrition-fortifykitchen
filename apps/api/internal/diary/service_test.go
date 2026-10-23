@@ -672,10 +672,15 @@ func TestDiaryService_GetDay_TrainingMinutesNullable(t *testing.T) {
 		t.Errorf("expected TrainingMinutes 45, got %v", day2.TrainingMinutes)
 	}
 
-	// Invalid training minutes returns ErrInvalidTrainingMinutes
-	_, err = svc.SetTraining(context.Background(), userID, today, 30)
+	// A Tùy chỉnh time (a multiple of 30 up to 480) is taken
+	if _, err = svc.SetTraining(context.Background(), userID, today, 150); err != nil {
+		t.Errorf("expected 150 min to be taken, got %v", err)
+	}
+
+	// Off the 30-minute steps returns ErrInvalidTrainingMinutes
+	_, err = svc.SetTraining(context.Background(), userID, today, 40)
 	if !errors.Is(err, ErrInvalidTrainingMinutes) {
-		t.Errorf("expected ErrInvalidTrainingMinutes for 30 min, got %v", err)
+		t.Errorf("expected ErrInvalidTrainingMinutes for 40 min, got %v", err)
 	}
 }
 
