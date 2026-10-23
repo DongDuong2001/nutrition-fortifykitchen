@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -26,6 +27,14 @@ import (
 )
 
 const testSecret = "integration-secret-0123456789abcdef"
+
+// One folder of course page images per test, shared by every client of that test (they are one server)
+var coursesDirs sync.Map
+
+func coursesDir(t *testing.T) string {
+	dir, _ := coursesDirs.LoadOrStore(t.Name(), t.TempDir())
+	return dir.(string)
+}
 
 type apiClient struct {
 	t      *testing.T
@@ -82,7 +91,7 @@ func setup(t *testing.T) (*apiClient, *pgxpool.Pool, uuid.UUID) {
 
 	os.Setenv("SUPABASE_JWT_SECRET", testSecret)
 	t.Cleanup(func() { os.Unsetenv("SUPABASE_JWT_SECRET") })
-	cfg := &config.Config{Port: "8080", Environment: "test", AllowedOrigins: []string{"*"}, SupabaseJWTSecret: testSecret}
+	cfg := &config.Config{Port: "8080", Environment: "test", AllowedOrigins: []string{"*"}, SupabaseJWTSecret: testSecret, CoursesDir: coursesDir(t)}
 
 	user := uuid.New()
 	email := fmt.Sprintf("it-%s@example.com", user.String()[:8])
