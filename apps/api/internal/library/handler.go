@@ -150,6 +150,39 @@ func (h *Handler) CreateSavedMeal(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteSavedMeal handles DELETE /api/v1/saved-meals/{id}
+// PutSavedMeal handles PUT /api/v1/saved-meals/{id}: create or replace (name and items) by the client's id, the same result when sent again.
+func (h *Handler) PutSavedMeal(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.GetUserID(r.Context())
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "Sign in required")
+		return
+	}
+	mealID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.FieldErrors(w, http.StatusBadRequest, "id must be a UUID", map[string]string{"id": "id must be a UUID"})
+		return
+	}
+	var req CreateSavedMealRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid request body")
+		return
+	}
+	meal, err := h.service.PutSavedMeal(r.Context(), userID, mealID, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrSavedMealNameRequired):
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		case errors.Is(err, ErrSavedMealIDConflict):
+			response.Error(w, http.StatusConflict, response.CodeIDConflict, "This id is already used")
+		default:
+			logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to save saved meal")
+			response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to save saved meal")
+		}
+		return
+	}
+	response.JSON(w, http.StatusOK, meal)
+}
+
 func (h *Handler) DeleteSavedMeal(w http.ResponseWriter, r *http.Request) {
 	userID, err := auth.GetUserID(r.Context())
 	if err != nil {
