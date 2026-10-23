@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { RICH_NUTRIENT_IDS, richInFoods, richName } from "../rich-in";
+import { RICH_NUTRIENT_IDS, richInFoods, richName, richUpperLimitLine } from "../rich-in";
+import { upperLimits } from "../rda";
 import { getNutrientDefinition } from "../nutrients";
 import type { FoodItem } from "../mock/foods";
 
@@ -54,9 +55,26 @@ describe("richInFoods", () => {
     });
   });
 
-  it("lists the eight nutrients of the brief", () => {
-    expect(RICH_NUTRIENT_IDS).toEqual(["calcium", "iron", "potassium", "magnesium", "protein", "fiber", "vitamin_d", "vitamin_c"]);
+  it("lists minerals, then vitamins, then đạm and chất xơ (feat/rich-more-nutrients); never sodium", () => {
+    expect(RICH_NUTRIENT_IDS).toEqual([
+      "calcium", "iron", "potassium", "magnesium", "zinc", "selenium", "phosphorus",
+      "vitamin_d", "vitamin_c", "vitamin_a", "b12", "folate", "vitamin_e", "vitamin_k", "b6",
+      "protein", "fiber",
+    ]);
+    expect(RICH_NUTRIENT_IDS).not.toContain("sodium");
   });
+
+  it("every nutrient has a catalogue definition, a unit, a colour and a name for its title", async () => {
+    const { NUTRIENT_COLORS } = await import("../nutrient-colors");
+    for (const id of RICH_NUTRIENT_IDS) {
+      const def = getNutrientDefinition(id);
+      expect(def, id).toBeDefined();
+      expect(def!.unit.length, id).toBeGreaterThan(0);
+      expect(richName(def!).length, id).toBeGreaterThan(0);
+      if (def!.group === "minerals" || def!.group === "vitamins") expect(NUTRIENT_COLORS[id], id).toBeDefined();
+    }
+  });
+
 });
 
 describe("richName", () => {
@@ -68,5 +86,36 @@ describe("richName", () => {
     expect(title("iron")).toBe("Giàu Iron");
     expect(title("protein")).toBe("Giàu đạm");
     expect(title("fiber")).toBe("Giàu chất xơ");
+  });
+});
+
+// A3 (23/10): a Giàu … row says when one portion of the food is above the nutrient's UL (lib/rda.ts); selenium in Brazil nuts
+describe("richUpperLimitLine", () => {
+  const adult = upperLimits(30);
+  const with_ = (id: string, nutrients: Record<string, number>, grams: number, category: FoodItem["category"] = "beo"): FoodItem => ({
+    id, nameVi: id, category, source: "USDA", servings: [{ label: `${grams} g`, grams }], nutrients,
+  });
+
+  it("one portion above the UL: the existing note line with the limit", () => {
+    // Hạt Brazil as in the 21/10 data: 1.920 µg per 100 g, first serving 100 g; the adult UL is 400 µg
+    expect(richUpperLimitLine(with_("brazil", { selenium: 1920 }, 100), "selenium", adult.selenium)).toBe("Vượt mức an toàn (400 µg)");
+  });
+
+  it("the same food with a real portion under the UL: no line (the data-1023 serving fix)", () => {
+    expect(richUpperLimitLine(with_("brazil", { selenium: 1920 }, 5), "selenium", adult.selenium)).toBeNull();
+  });
+
+  it("exactly at the UL is not above it", () => {
+    expect(richUpperLimitLine(with_("x", { zinc: 40 }, 100, "dam"), "zinc", adult.zinc)).toBeNull();
+  });
+
+  it("a UL for supplements only (folate) never counts ordinary food, only a supplement", () => {
+    expect(richUpperLimitLine(with_("matcha", { folate: 1200 }, 100, "do_uong"), "folate", adult.folate)).toBeNull();
+    expect(richUpperLimitLine(with_("pill", { folate: 120000 }, 1, "bo_sung"), "folate", adult.folate)).toBe("Vượt mức an toàn (1.000 µg)");
+  });
+
+  it("a nutrient with no UL (vitamin K) or no value never gets a line", () => {
+    expect(richUpperLimitLine(with_("matcha", { vitamin_k: 2900 }, 100, "do_uong"), "vitamin_k", adult.vitamin_k)).toBeNull();
+    expect(richUpperLimitLine(with_("y", {}, 100), "selenium", adult.selenium)).toBeNull();
   });
 });
