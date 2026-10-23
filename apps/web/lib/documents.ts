@@ -1,9 +1,9 @@
 /**
- * Tài liệu (feat/documents): the app's documents and rules, markdown text by file name. Live mode reads and writes them through
- * the Go API (/documents, /document-codes; apps/api/internal/documents, migration 000017). Every signed-in user reads them; a write
- * needs an access code that a coach (HLV) or an admin made, which the browser keeps for the tab in sessionStorage. The server
- * decides who may make codes. Mock mode keeps documents and codes in this browser's localStorage, so the gates and the demo run
- * without the API.
+ * Tài liệu (feat/documents): the coach's documents and rules, markdown text by file name, through the Go API (/documents,
+ * /document-codes; apps/api/internal/documents, migration 000017). A coach (HLV) or an admin writes them and reads them directly;
+ * every signed-in user sees the list, and a learner opens a document with an access code the coach made, which the browser keeps
+ * for the tab in sessionStorage. The server decides who is a coach. Mock mode keeps documents and codes in this browser's
+ * localStorage under the same rules, so the gates and the demo run without the API.
  */
 import { apiFetch } from "./api-client";
 import { isLiveMode } from "./api-mode";
@@ -99,14 +99,29 @@ export async function listDocuments(): Promise<DocumentMeta[]> {
   return (await api<{ items: DocumentMeta[] }>("/documents")).items;
 }
 
-/** The text and the version (updatedAt) it was read at, which an edit sends back with its save. */
-export async function readDocument(name: string): Promise<{ content: string; updatedAt: string }> {
+/**
+ * The coach's read: the text and the version (updatedAt) it was read at, which an edit sends back with its save. A learner gets
+ * 403 (`role` is the mock's stand-in for the server's check).
+ */
+export async function readDocument(name: string, role: Role): Promise<{ content: string; updatedAt: string }> {
   if (!isLiveMode()) {
+    if (!canManageClients(role)) throw new DocumentsError(403);
     const doc = mockDocs()[name];
     if (!doc) throw new DocumentsError(404);
     return doc;
   }
   return api(`/documents/${encodeURIComponent(name)}`);
+}
+
+/** A learner's read: the text, when `code` is a live access code (403 otherwise). The code goes in the body, never the URL. */
+export async function openDocument(name: string, code: string): Promise<string> {
+  if (!isLiveMode()) {
+    if (!mockCodeValid(code)) throw new DocumentsError(403);
+    const doc = mockDocs()[name];
+    if (!doc) throw new DocumentsError(404);
+    return doc.content;
+  }
+  return (await api<{ content: string }>(`/documents/${encodeURIComponent(name)}/open`, send("POST", { code }))).content;
 }
 
 /** Resolves when `code` is a live access code; a DocumentsError (403) otherwise. */
@@ -119,20 +134,20 @@ export async function checkAccessCode(code: string): Promise<void> {
 }
 
 /**
- * Writes `content` as the document `name`. An edit passes `baseUpdatedAt`, the version it loaded: if someone saved in between,
- * nothing is written and a DocumentsError (409) says so. An upload leaves it out and creates or replaces.
+ * The coach writes `content` as the document `name`. An edit passes `baseUpdatedAt`, the version it loaded: if someone saved in
+ * between, nothing is written and a DocumentsError (409) says so. A new document or an upload leaves it out and creates or replaces.
  */
-export async function saveDocument(name: string, content: string, code: string, baseUpdatedAt?: string): Promise<void> {
+export async function saveDocument(name: string, content: string, role: Role, baseUpdatedAt?: string): Promise<void> {
   if (!isLiveMode()) {
+    if (!canManageClients(role)) throw new DocumentsError(403);
     if (!isDocumentName(name)) throw new DocumentsError(400);
     if (new Blob([content]).size > MAX_DOCUMENT_BYTES) throw new DocumentsError(413);
-    if (!mockCodeValid(code)) throw new DocumentsError(403);
     const docs = mockDocs();
     if (baseUpdatedAt !== undefined && docs[name]?.updatedAt !== baseUpdatedAt) throw new DocumentsError(docs[name] ? 409 : 404);
     writeMock(DOCS_KEY, { ...docs, [name]: { content, updatedAt: new Date().toISOString() } });
     return;
   }
-  await api(`/documents/${encodeURIComponent(name)}`, send("PUT", { content, code, baseUpdatedAt }));
+  await api(`/documents/${encodeURIComponent(name)}`, send("PUT", { content, baseUpdatedAt }));
 }
 
 /**
