@@ -527,3 +527,5 @@
 ## feat/documents (23/10/2026)
 - [ ] (Hao) Tài liệu was asked for as a tab on the main navigation. IA-v2 fixes the phone bar at 5 slots (4 tabs and +) and ui-ux-pro-max §9 says bottom nav ≤ 5, so it ships as a pushed screen of Cài đặt (Hỗ trợ › Tài liệu, /documents). A fifth tab would need an IA-v2 revision: NAV_TABS, a nav icon, the 6-column bar, nav.test.ts.
 - [ ] (Dong) Tài liệu is served by the Go API (apps/api/internal/documents, migration 000017: nutrition.documents and nutrition.document_access_codes, docs/07 §2.13). Run migration 000017. In live mode only role coach or admin can make codes: set Coach Khánh's profile role to coach. The ACCESS_CODE lines this branch added to .env.example are unused now; remove them (the file is blocked to agents).
+## Food emoji (feat/food-emoji, 23/10/2026)
+- [ ] (Hao) Custom 3D chicken icons will replace 🐔 (ức, phi lê, lườn, gà xé, thịt gà, a chicken with no cut named) and 🍗 (đùi, má đùi, cánh, chân, gà rán, gà nướng, gà nguyên con); lib/food-emoji.ts, TODO there. Send the icons, and say whether pork (🍖 sườn and chân giò, 🥓 ba chỉ) gets them too.

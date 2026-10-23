@@ -24,6 +24,7 @@ import { readPrefs, writePrefs } from "@/lib/training-prefs";
 import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
 import { feedbackSeen, openFeedback, subscribeFeedback } from "@/lib/feedback";
+import { useT } from "@/lib/i18n";
 
 const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "male", label: "Nam" },
@@ -330,10 +331,11 @@ function TrainingSizeRow() {
 }
 
 export function AppCard() {
+  const t = useT();
   // The saved language is read after mount, so the server and first paint both show Tiếng Việt
-  const [language, setLanguage] = useState("Tiếng Việt");
-  // "Đã bật" or "Đã tắt" from the saved reminders. Empty until mounted, so the first paint never claims "Đã bật"
-  const [reminders, setReminders] = useState<string | null>(null);
+  const [language, setLanguage] = useState<"vi" | "en">("vi");
+  // On or off from the saved reminders. Null until mounted, so the first paint never claims "Đã bật"
+  const [reminders, setReminders] = useState<boolean | null>(null);
   // The tour and tips (cc-42): read after mount for the same reason
   const router = useRouter();
   const [flags, setFlags] = useState<OnboardingFlags | null>(null);
@@ -365,36 +367,36 @@ export function AppCard() {
   }, []);
   useEffect(() => {
     const saved = loadSettings();
-    setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
+    setLanguage(saved.language);
     const anyOn = [saved.breakfastReminder, saved.lunchReminder, saved.dinnerReminder, saved.workoutSaltReminder, saved.eveningSummaryReminder].some(Boolean);
-    setReminders(anyOn ? "Đã bật" : "Đã tắt");
+    setReminders(anyOn);
   }, []);
 
   return (
-    <Card as="section" aria-label="Ứng dụng" className="flex flex-col gap-1">
-      <SectionHeader>Ứng dụng</SectionHeader>
+    <Card as="section" aria-label={t("settings.app")} className="flex flex-col gap-1">
+      <SectionHeader>{t("settings.app")}</SectionHeader>
       <SettingsRow
         dense
         tone="app"
         glyph={SETTINGS_ICONS.replay}
-        label="Xem lại hướng dẫn"
-        hint="Ghi bữa ăn đầu tiên · 1 phút"
+        label={t("settings.app.replay")}
+        hint={t("settings.app.replay.hint")}
         onClick={replay}
         divider={false}
         minHeight="14"
         data-align-group="profile-row"
       >
         {flags && !flags.replayOpened && (
-          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>
+          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">{t("settings.app.new")}</span>
         )}
       </SettingsRow>
-      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.news} label={t("settings.app.whatsNew")} href="/settings/whats-new" minHeight="14" data-align-group="profile-row" />
       <SettingsRow
         dense
         tone="app"
         glyph={SETTINGS_ICONS.tips}
-        label="Mẹo trên từng màn hình"
-        hint="Bật lại để xem mẹo lần đầu"
+        label={t("settings.app.tips")}
+        hint={t("settings.app.tips.hint")}
         chevron={false}
         minHeight="14"
         data-align-group="profile-row"
@@ -403,7 +405,7 @@ export function AppCard() {
           checked={flags ? !flags.tipsOff : true}
           disabled={flags === null}
           onCheckedChange={(on) => setTipsOff(!on)}
-          aria-label="Mẹo trên từng màn hình"
+          aria-label={t("settings.app.tips")}
         />
       </SettingsRow>
       {haptics !== null && (
@@ -412,23 +414,23 @@ export function AppCard() {
             dense
             tone="app"
             glyph={SETTINGS_ICONS.vibrate}
-            label="Rung khi chạm"
-            hint="Rung nhẹ khi lưu, xóa hay hoàn tác"
+            label={t("settings.app.haptics")}
+            hint={t("settings.app.haptics.hint")}
             chevron={false}
             minHeight="14"
             data-align-group="profile-row"
           >
-            <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label="Rung khi chạm" />
+            <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label={t("settings.app.haptics")} />
           </SettingsRow>
         </div>
       )}
-      <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
-      {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label="Giao diện" value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
-      <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
-      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
+      <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label={t("settings.app.language")} value={t(language === "en" ? "settings.app.language.en" : "settings.app.language.vi")} href="/settings/language" data-align-group="profile-row" />
+      {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label={t("settings.app.appearance")} value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
+      <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label={t("settings.app.reminders")} value={reminders === null ? "" : t(reminders ? "settings.app.reminders.on" : "settings.app.reminders.off")} href="/settings/notifications" data-align-group="profile-row" />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label={t("settings.app.addToHome")} href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />
-      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" data-align-group="profile-row" />
-      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" data-align-group="profile-row" />
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label={t("settings.app.terms")} href="/terms" data-align-group="profile-row" />
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label={t("settings.app.privacy")} href="/privacy" data-align-group="profile-row" />
     </Card>
   );
 }
@@ -438,6 +440,7 @@ export function AppCard() {
  * Nguồn dữ liệu, moved here from Ứng dụng.
  */
 export function SupportCard() {
+  const t = useT();
   // Read after mount, so the first paint never shows a badge it will take away
   const [isNew, setIsNew] = useState(false);
   useEffect(() => {
@@ -445,23 +448,23 @@ export function SupportCard() {
     return subscribeFeedback(() => setIsNew(!feedbackSeen()));
   }, []);
   return (
-    <Card as="section" aria-label="Hỗ trợ" className="flex flex-col gap-1">
-      <SectionHeader>Hỗ trợ</SectionHeader>
+    <Card as="section" aria-label={t("settings.support")} className="flex flex-col gap-1">
+      <SectionHeader>{t("settings.support")}</SectionHeader>
       <SettingsRow
         dense
         tone="body"
         glyph={SETTINGS_ICONS.chat}
-        label="Góp ý & hỗ trợ"
-        hint="Báo lỗi, sai số liệu, yêu cầu thêm món"
+        label={t("settings.support.feedback")}
+        hint={t("settings.support.feedback.hint")}
         onClick={() => openFeedback({ screen: "Cài đặt" })}
         divider={false}
         minHeight="16"
         data-align-group="profile-row"
       >
-        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>}
+        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">{t("settings.app.new")}</span>}
       </SettingsRow>
-      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
-      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.document} label="Tài liệu" hint="Quy tắc và tài liệu của app" href="/documents" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label={t("settings.app.dataSources")} href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.document} label={t("settings.support.documents")} hint={t("settings.support.documents.hint")} href="/documents" minHeight="14" data-align-group="profile-row" />
     </Card>
   );
 }
