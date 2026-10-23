@@ -1,6 +1,6 @@
 # Import of the 23/10/2026 foods: Hao's server steps
 
-Data job `data/foods-1023` (for review, not merged, nothing imported). The file `docs/data/new-foods-2026-10-23.json` has **33 rows, all new**: no row of the live catalogue is updated, so the importer only inserts (`ON CONFLICT (source, source_id)` never fires). It uses the importer already on `main` (`apps/api/cmd/importfoods`, unchanged). The API's foods total goes from **1306** (read 23/10) to **1339**.
+Data job `data/foods-1023` (for review, not merged, nothing imported). The file `docs/data/new-foods-2026-10-23.json` has **35 rows, all new**: no row of the live catalogue is updated, so the importer only inserts (`ON CONFLICT (source, source_id)` never fires). It uses the importer already on `main` (`apps/api/cmd/importfoods`, unchanged). The API's foods total goes from **1306** (read 23/10) to **1341**.
 
 Same server set-up as `docs/data/new-foods-2026-10-21b-import.md`: repo in `/var/www/nutrition-meals`, database (Postgres 17, Supabase) through `DATABASE_URL` in `deploy/.env.prod`. The VPS has no Go and its `pg_dump` is 16, so every command runs in a throw-away container with `--network host`: `postgres:17-alpine` for `pg_dump` and `psql`, `golang:1.24-alpine` for the importer, `DATABASE_URL` passed as `-e DATABASE_URL`. Do the steps in order and stop at the first one that fails.
 
@@ -16,7 +16,7 @@ git show origin/data/foods-1023:docs/data/new-foods-2026-10-23.json > ~/new-food
 python3 -c "import json; print(len(json.load(open('/home/deploy/new-foods-2026-10-23.json'))), 'rows')"
 ```
 
-It must print `33 rows`. (After the merge, `git pull --ff-only` and use `docs/data/new-foods-2026-10-23.json`.)
+It must print `35 rows`. (After the merge, `git pull --ff-only` and use `docs/data/new-foods-2026-10-23.json`.)
 
 ## 1. Back up `nutrition.foods` and `nutrition.food_portions` first
 
@@ -31,7 +31,7 @@ docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c \
 gunzip -c ~/backups/foods-before-1023.sql.gz | grep -c '^INSERT INTO nutrition.foods '
 ```
 
-Write down the count it prints (call it **B**): the database count after the import must be **B + 33**. (The `GET /api/v1/foods` total is smaller than the database count; on 23/10 it is 1306, and it must read **1339** after the import.) Keep the file until the import is checked.
+Write down the count it prints (call it **B**): the database count after the import must be **B + 35**. (The `GET /api/v1/foods` total is smaller than the database count; on 23/10 it is 1306, and it must read **1341** after the import.) Keep the file until the import is checked.
 
 ## 2. Dry run (parse and completeness report, no database write)
 
@@ -47,8 +47,8 @@ Expected:
 ```
 === H1T MICRO Food Catalog Importer ===
 Mode: DRY RUN (No database changes will be saved)
-Loaded 33 food records from /data/x.json
-Completeness Report: 50.3% average coverage of the 22 counted nutrients across 33 foods
+Loaded 35 food records from /data/x.json
+Completeness Report: 47.7% average coverage of the 22 counted nutrients across 35 foods
 ```
 
 ## 3. The import
@@ -61,7 +61,7 @@ docker run --rm --network host -e DATABASE_URL -v "$PWD":/src -v ~/new-foods-202
   golang:1.24-alpine go run ./cmd/importfoods --file /data/x.json
 ```
 
-Expected last line: `Successfully imported 33 foods into nutrition.foods`. A row that fails prints `Error inserting food ...` and the run goes on, so read the output; a re-run is safe (same upsert, portions replaced per food).
+Expected last line: `Successfully imported 35 foods into nutrition.foods`. A row that fails prints `Error inserting food ...` and the run goes on, so read the output; a re-run is safe (same upsert, portions replaced per food).
 
 ## 4. Check
 
@@ -76,6 +76,8 @@ SELECT count(*) AS new_rows FROM nutrition.foods WHERE (source, source_id) IN (
   ('usda_sr_legacy', 'FDC 172883'),
   ('usda_fndds', 'FDC 2708708'),
   ('usda_fndds', 'FDC 2708724'),
+  ('label', 'lottemart.vn/product/ca-nuc-sot-ca-lilly-155g-8935105810167-p4395 (ảnh nhãn đọc 2026-10-23)'),
+  ('label', 'world.openfoodfacts.org/product/8938501141019 (ảnh nhãn đọc 2026-10-23)'),
   ('vn_nin', 'NIN 15006'),
   ('vn_nin', 'NIN 15077'),
   ('vn_nin', 'NIN 15030'),
@@ -110,7 +112,7 @@ SQL
 curl -s 'https://lehongkhanh.vn/api/v1/foods?limit=1' | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['total'])"
 ```
 
-Expected: `new_rows` = **33**, `foods_total` = **B + 33**, and the API total **1339**.
+Expected: `new_rows` = **35**, `foods_total` = **B + 35**, and the API total **1341**.
 
 ## Rolling back
 
@@ -128,6 +130,8 @@ DELETE FROM nutrition.food_portions WHERE food_id IN (SELECT id FROM nutrition.f
   ('usda_sr_legacy', 'FDC 172883'),
   ('usda_fndds', 'FDC 2708708'),
   ('usda_fndds', 'FDC 2708724'),
+  ('label', 'lottemart.vn/product/ca-nuc-sot-ca-lilly-155g-8935105810167-p4395 (ảnh nhãn đọc 2026-10-23)'),
+  ('label', 'world.openfoodfacts.org/product/8938501141019 (ảnh nhãn đọc 2026-10-23)'),
   ('vn_nin', 'NIN 15006'),
   ('vn_nin', 'NIN 15077'),
   ('vn_nin', 'NIN 15030'),
@@ -163,6 +167,8 @@ DELETE FROM nutrition.foods WHERE (source, source_id) IN (
   ('usda_sr_legacy', 'FDC 172883'),
   ('usda_fndds', 'FDC 2708708'),
   ('usda_fndds', 'FDC 2708724'),
+  ('label', 'lottemart.vn/product/ca-nuc-sot-ca-lilly-155g-8935105810167-p4395 (ảnh nhãn đọc 2026-10-23)'),
+  ('label', 'world.openfoodfacts.org/product/8938501141019 (ảnh nhãn đọc 2026-10-23)'),
   ('vn_nin', 'NIN 15006'),
   ('vn_nin', 'NIN 15077'),
   ('vn_nin', 'NIN 15030'),

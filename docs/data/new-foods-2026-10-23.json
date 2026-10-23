@@ -282,6 +282,61 @@
   ]
  },
  {
+  "source": "label",
+  "source_id": "lottemart.vn/product/ca-nuc-sot-ca-lilly-155g-8935105810167-p4395 (ảnh nhãn đọc 2026-10-23)",
+  "name": "Mackerel in tomato sauce, Lilly",
+  "name_vi": "Cá nục sốt cà Lilly",
+  "category": "dam",
+  "brand": "Lilly",
+  "tip_vi": "Hộp 155 g. Nhãn chỉ ghi năng lượng, không ghi đạm, béo, carb.",
+  "nutrients": {
+   "energy": 116
+  },
+  "portions": [
+   {
+    "label_vi": "1 hộp (155 g)",
+    "grams": 155,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "world.openfoodfacts.org/product/8938501141019 (ảnh nhãn đọc 2026-10-23)",
+  "name": "Mackerel in tomato sauce, Three Lady Cooks (richer flavour)",
+  "name_vi": "Cá nục sốt cà 3 Cô Gái (vị đậm đà)",
+  "category": "dam",
+  "brand": "3 Cô Gái",
+  "tip_vi": "Hộp 155 g, vị đậm đà. Số theo 100 g cá cả sốt.",
+  "nutrients": {
+   "energy": 90,
+   "carbs": 2,
+   "sugars": 1,
+   "fat": 2.5,
+   "saturated_fat": 0.7,
+   "protein": 13,
+   "calcium": 224,
+   "sodium": 430
+  },
+  "portions": [
+   {
+    "label_vi": "1 hộp (155 g)",
+    "grams": 155,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
   "source": "vn_nin",
   "source_id": "NIN 15006",
   "name": "Stuffed sticky rice cake (bánh chưng)",
