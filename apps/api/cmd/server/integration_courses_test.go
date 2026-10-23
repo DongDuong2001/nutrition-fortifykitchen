@@ -110,9 +110,9 @@ func summaries(c *apiClient) map[string]map[string]any {
 func TestCoursesAccessRules(t *testing.T) {
 	f := newCourseFixture(t)
 
-	// The library never needs access: every course is listed, with why it is shut
+	// The library never needs access: every course is listed, with why it is shut (other courses in a reused test database are not ours, so look up ours by id)
 	l := summaries(f.b)
-	if len(l) != 3 || l[f.openC]["unlocked"] != true || l[f.codeC]["lock"] != "code" || l[f.levelC]["lock"] != "level" || l[f.levelC]["minLevel"] != 3.0 {
+	if l[f.openC] == nil || l[f.codeC] == nil || l[f.levelC] == nil || l[f.openC]["unlocked"] != true || l[f.codeC]["lock"] != "code" || l[f.levelC]["lock"] != "level" || l[f.levelC]["minLevel"] != 3.0 {
 		t.Fatalf("library for a Level 0 user: %v", l)
 	}
 	if l[f.codeC]["lessonCount"] != 1.0 {
