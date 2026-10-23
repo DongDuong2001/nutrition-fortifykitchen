@@ -16,6 +16,10 @@ import { useRowMotion } from "./row-motion";
 import { PullIndicator, usePullRefresh } from "./pull-refresh";
 import { useTouchDrag } from "@/lib/use-touch-drag";
 import { Expand } from "@/components/ui/expand";
+import { useCoarsePointer, useRowSwipe } from "@/lib/use-row-swipe";
+import { SWIPE_ACTION_PX } from "@/lib/row-swipe";
+import { wasSwipedAway } from "@/lib/row-swipe-open";
+import { FoodMenuSheet } from "./food-menu-sheet";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -35,6 +39,7 @@ function FoodRow({
   tourTarget,
   motionClass = "",
   touchDrag,
+  swipe,
 }: {
   entry: HomeEntry;
   selected: boolean;
@@ -46,8 +51,14 @@ function FoodRow({
   motionClass?: string;
   /** cc-70: hold, then drag to another meal (touch and pen). Off: the long press alone. */
   touchDrag?: { enabled: boolean; onTarget: (slot: HomeMeal["slot"] | null) => void; onDrop: (slot: HomeMeal["slot"]) => void };
+  /** Job I: swipe left = Xoá, swipe right = ⋯ menu (today's rows, touch only). Absent: no swipe. */
+  swipe?: { onDelete: () => void; onMenu: () => void };
 }) {
   const router = useRouter();
+  const rowRef = useRef<HTMLButtonElement>(null);
+  const coarse = useCoarsePointer();
+  const swipeable = !!swipe && coarse && editable;
+  const sw = useRowSwipe({ id: entry.id, enabled: swipeable, rowRef, onDelete: () => swipe?.onDelete(), onMenu: () => swipe?.onMenu() });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
@@ -83,8 +94,9 @@ function FoodRow({
     onDrop: (slot) => touchDrag?.onDrop(slot as HomeMeal["slot"]),
   });
 
-  return (
+  const row = (
     <button
+      ref={rowRef}
       type="button"
       draggable={editable}
       onDragStart={(e) => {
@@ -106,6 +118,7 @@ function FoodRow({
       data-entry-id={entry.id}
       aria-label={`${entry.name}, ${quantity}${detail ? `, ${detail}` : ""}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
       onClick={() => {
+        if (swipeable && sw.handleClick()) return;
         if (suppressClick.current || drag.justLifted.current) {
           suppressClick.current = false;
           drag.justLifted.current = false;
@@ -114,6 +127,7 @@ function FoodRow({
         onSelect();
       }}
       onPointerDown={(e) => {
+        if (swipeable) sw.onPointerDown(e);
         if (drag.onPointerDown(e)) return;
         if (!editable) return;
         origin.current = { x: e.clientX, y: e.clientY };
@@ -130,14 +144,17 @@ function FoodRow({
         }, LONG_PRESS_MS);
       }}
       onPointerMove={(e) => {
+        if (swipeable) sw.onPointerMove(e);
         if (drag.onPointerMove(e)) return;
         const o = origin.current;
         if (o && Math.hypot(e.clientX - o.x, e.clientY - o.y) > MOVE_LIMIT_PX) cancel();
       }}
       onPointerUp={(e) => {
+        if (swipeable) sw.onPointerUp(e);
         if (!drag.onPointerUp(e)) cancel();
       }}
       onPointerCancel={(e) => {
+        if (swipeable) sw.onPointerCancel(e);
         if (!drag.onPointerCancel(e)) cancel();
       }}
       onPointerLeave={cancel}
@@ -147,7 +164,7 @@ function FoodRow({
       className={`${motionClass} ${touchDrag?.enabled ? "m-drag-lift" : ""} relative flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 py-1 text-left after:pointer-events-none after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-divider after:content-[''] lg:min-h-12 ${
         isDragging ? "opacity-40" : ""
       } ${
-        selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
+        selected ? "bg-cobalt text-on-accent" : swipeable ? "touch-pan-y bg-card text-text" : "bg-transparent text-text"
       }`}
     >
       {/* The name, its markers and, on a line of its own, how it was weighed (cc-53b) */}
@@ -187,6 +204,43 @@ function FoodRow({
         {quantity}
       </span>
     </button>
+  );
+  if (!swipeable) return row;
+  return (
+    // Job I: the buttons wait behind the row; swiping it left shows Xoá, right shows ⋯. Both stay in the accessibility tree
+    // (aria labels "Xoá <món>" and "Tuỳ chọn cho <món>"), so VoiceOver has the two actions on the row.
+    <div data-swipe-wrap={entry.id} className="relative overflow-x-clip">
+      <button
+        ref={sw.menuRef}
+        type="button"
+        tabIndex={sw.rest === "right" ? 0 : -1}
+        aria-label={`Tuỳ chọn cho ${entry.name}`}
+        aria-haspopup="dialog"
+        onClick={sw.onButtonMenu}
+        style={{ width: SWIPE_ACTION_PX }}
+        className="pointer-events-none absolute inset-y-0 left-0 flex cursor-pointer items-center justify-center border-0 bg-surface p-0 text-text opacity-0"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <circle cx="5" cy="12" r="1.8" />
+          <circle cx="12" cy="12" r="1.8" />
+          <circle cx="19" cy="12" r="1.8" />
+        </svg>
+      </button>
+      <button
+        ref={sw.trashRef}
+        type="button"
+        tabIndex={sw.rest === "left" ? 0 : -1}
+        aria-label={`Xoá ${entry.name}`}
+        onClick={sw.onButtonDelete}
+        style={{ width: SWIPE_ACTION_PX }}
+        className="pointer-events-none absolute inset-y-0 right-0 flex cursor-pointer items-center justify-center border-0 bg-destructive p-0 text-on-accent opacity-0"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3" />
+        </svg>
+      </button>
+      {row}
+    </div>
   );
 }
 
@@ -308,6 +362,8 @@ export function FoodList({
   onPullRefresh?: () => Promise<void>;
 }) {
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
+  const [menuEntry, setMenuEntry] = useState<HomeEntry | null>(null);
+  const { deleteEntries } = useDiary();
   const { listRef, rowsOf } = useRowMotion(meals, dayKey);
   // The grey dot's legend shows only when a grey dot is on screen (overnight 22→23/10); "chạm tên bữa" is the meal-focus tip
   const anyMissing = meals.some((m) => m.entries.some((e) => missingMicros(e)));
@@ -428,7 +484,7 @@ export function FoodList({
             {rowsOf(meal).map(({ entry, state }) =>
               state === "exit" ? (
                 <div key={entry.id} data-exiting className="m-row-exit" aria-hidden="true" inert>
-                  <div>
+                  <div style={wasSwipedAway(entry.id) ? { transform: "translateX(-100%)" } : undefined}>
                     <FoodRow entry={entry} selected={false} editable={false} onSelect={() => {}} />
                   </div>
                 </div>
@@ -447,6 +503,8 @@ export function FoodList({
                       ? { enabled: touchDrag && !readOnly, onTarget: setDragOverSlot, onDrop: (slot) => onMoveFood(entry.id, slot) }
                       : undefined
                   }
+                  // Job I: today's rows only, while no sheet is open
+                  swipe={!readOnly && !addDate && touchDrag ? { onDelete: () => deleteEntries([entry.id], dayKey), onMenu: () => setMenuEntry(entry) } : undefined}
                 />
               )
             )}
@@ -458,6 +516,14 @@ export function FoodList({
           </section>
         );
       })}
+      {!readOnly && !addDate && (
+        <FoodMenuSheet
+          entry={menuEntry}
+          onClose={() => setMenuEntry(null)}
+          onDelete={(e) => deleteEntries([e.id], dayKey)}
+          onMove={(e, slot) => onMoveFood?.(e.id, slot)}
+        />
+      )}
       {anyMissing && (
         <p data-missing-legend className="m-0 p-3 text-xs leading-snug text-secondary lg:text-cap">
           <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất
