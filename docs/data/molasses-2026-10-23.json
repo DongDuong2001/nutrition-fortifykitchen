@@ -1,0 +1,192 @@
+[
+ {
+  "source": "label",
+  "source_id": "Golden Barrel Blackstrap Molasses (label panel image not retrievable)",
+  "name": "Blackstrap molasses, Golden Barrel",
+  "name_vi": "Mật mía Golden Barrel (blackstrap)",
+  "category": "an_vat",
+  "brand": "Golden Barrel",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 300,
+   "protein": 5,
+   "fat": 0,
+   "saturated_fat": 0,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "carbs": 70,
+   "fiber": 0,
+   "sugars": 55,
+   "added_sugars": 55,
+   "calcium": 1040,
+   "iron": 15.3,
+   "magnesium": 210,
+   "manganese": 0.92,
+   "potassium": 2350,
+   "sodium": 150,
+   "zinc": 0.55,
+   "copper": 1.26
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 20,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "Grandma's Original Molasses (unsulphured) label, grandmasmolasses.com, read 2026-10-23",
+  "name": "Original molasses (unsulphured), Grandma's",
+  "name_vi": "Mật mía Grandma's Original (unsulphured)",
+  "category": "an_vat",
+  "brand": "Grandma's",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 300,
+   "protein": 0,
+   "fat": 0,
+   "saturated_fat": 0,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "carbs": 80,
+   "fiber": 5,
+   "sugars": 75,
+   "added_sugars": 75,
+   "calcium": 150,
+   "iron": 3.5,
+   "magnesium": 50,
+   "potassium": 1000,
+   "sodium": 25
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 20,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 168820:mat-mia-rabbit-song",
+  "name": "Full Flavor Molasses, Brer Rabbit",
+  "name_vi": "Mật mía Brer Rabbit Full Flavor",
+  "category": "an_vat",
+  "brand": "Brer Rabbit",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 300,
+   "protein": 0,
+   "fat": 0,
+   "saturated_fat": 0,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "carbs": 80,
+   "fiber": 5,
+   "sugars": 70,
+   "calcium": 400,
+   "iron": 9.5,
+   "magnesium": 100,
+   "potassium": 1250,
+   "sodium": 50
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 20,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "Brer Rabbit Mild Flavor Molasses label, bgfoods.com (Wayback copy 2025-11-16), read 2026-10-23",
+  "name": "Mild Flavor Molasses, Brer Rabbit",
+  "name_vi": "Mật mía Brer Rabbit Mild Flavor",
+  "category": "an_vat",
+  "brand": "Brer Rabbit",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 300,
+   "protein": 0,
+   "fat": 0,
+   "saturated_fat": 0,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "carbs": 80,
+   "fiber": 5,
+   "sugars": 70,
+   "calcium": 300,
+   "iron": 7.5,
+   "magnesium": 75,
+   "potassium": 1200,
+   "sodium": 25
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 20,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "Brer Rabbit Blackstrap Molasses label, bgfoods.com (Wayback copy 2025-12-14), read 2026-10-23",
+  "name": "Blackstrap Molasses, Brer Rabbit",
+  "name_vi": "Mật mía Brer Rabbit Blackstrap",
+  "category": "an_vat",
+  "brand": "Brer Rabbit",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 300,
+   "protein": 0,
+   "fat": 0,
+   "saturated_fat": 0,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "carbs": 70,
+   "fiber": 5,
+   "sugars": 55,
+   "calcium": 950,
+   "iron": 24,
+   "magnesium": 175,
+   "potassium": 1850,
+   "sodium": 125
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 20,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ }
+]
