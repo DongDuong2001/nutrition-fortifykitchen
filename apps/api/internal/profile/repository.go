@@ -26,7 +26,7 @@ func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (
 	query := `
 		SELECT user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
 		       near_period, language, reminders, COALESCE(training_prefs, '{}'::jsonb), display_name, COALESCE(role, 'user'), created_at, updated_at,
-		       macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets
+		       macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets, level, level_seen
 		FROM nutrition.profiles
 		WHERE user_id = $1
 	`
@@ -34,7 +34,7 @@ func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (
 	err := r.pool.QueryRow(ctx, query, userID).Scan(
 		&p.UserID, &p.Sex, &p.BirthYear, &p.WeightKg, &p.Goal, &p.TrainingMinutesDefault,
 		&p.NearPeriod, &p.Language, &p.Reminders, &p.TrainingPrefs, &p.DisplayName, &p.Role, &p.CreatedAt, &p.UpdatedAt,
-		&p.MacroMode, &p.MacroRatios, &p.MacroFixed, &p.CustomEnergyKcal, &p.CustomTargets,
+		&p.MacroMode, &p.MacroRatios, &p.MacroFixed, &p.CustomEnergyKcal, &p.CustomTargets, &p.Level, &p.LevelSeen,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -75,9 +75,9 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 		INSERT INTO nutrition.profiles (
 			user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
 			near_period, language, display_name, training_prefs, updated_at,
-			macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets
+			macro_mode, macro_ratios, macro_fixed, custom_energy_kcal, custom_targets, level_seen
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now(),
-			$11::text, $13::jsonb, $15::jsonb, $17::int, $19::jsonb)
+			$11::text, $13::jsonb, $15::jsonb, $17::int, $19::jsonb, COALESCE($21::smallint, 0))
 		ON CONFLICT (user_id) DO UPDATE SET
 			sex = EXCLUDED.sex,
 			birth_year = EXCLUDED.birth_year,
@@ -94,6 +94,8 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 			macro_fixed = CASE WHEN $16::bool THEN EXCLUDED.macro_fixed ELSE nutrition.profiles.macro_fixed END,
 			custom_energy_kcal = CASE WHEN $18::bool THEN EXCLUDED.custom_energy_kcal ELSE nutrition.profiles.custom_energy_kcal END,
 			custom_targets = CASE WHEN $20::bool THEN EXCLUDED.custom_targets ELSE nutrition.profiles.custom_targets END,
+			-- level is never written by a save; level_seen only when the save sends it (nil keeps it)
+			level_seen = COALESCE($21::smallint, nutrition.profiles.level_seen),
 			updated_at = now()
 	`
 	st := p.Settings
@@ -105,6 +107,7 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 		st.MacroFixed.Value, st.MacroFixed.Set,
 		st.CustomEnergyKcal.Value, st.CustomEnergyKcal.Set,
 		st.CustomTargets.Value, st.CustomTargets.Set,
+		p.SetLevelSeen,
 	)
 	return err
 }

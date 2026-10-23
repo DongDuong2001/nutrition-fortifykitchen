@@ -76,9 +76,12 @@ Fetches the authenticated user's profile and calculated daily targets.
   "training_minutes_default": 60,
   "display_name": "Dong",
   "targets": { ... },
-  "updated_at": "2026-10-12T07:30:00Z"
+  "updated_at": "2026-10-12T07:30:00Z",
+  "level": 2,
+  "levelSeen": 1
 }
 ```
+- **`level`, `levelSeen`** (migration 000021, camelCase like `macroMode` and `updatedAt`; the older fields stay snake_case): whole numbers 0–5, both 0 for a new profile. `level` is the user's Level, set by an admin or a coach (until the coach screens exist, by SQL: `docs/runbooks/migrate-1023.md`). `levelSeen` is the last Level the user was shown the Level-up celebration or card for. A user with no profile row gets `404 PROFILE_MISSING` as before (no Level yet means Level 0).
 
 #### `PUT /api/v1/me/profile`
 Updates profile settings.
@@ -102,6 +105,9 @@ Updates profile settings.
   - `period_mode`: Boolean. Effective only when `sex === "female"`. If `sex === "male"`, backend normalizes to `false`.
   - `training_minutes_default`: Integer between `0` and `120` (presets: `0`, `45`, `60`, `90`, `120`).
   - `display_name`: Optional string.
+  - `levelSeen`: Optional. A whole number from `0` up to the user's stored `level` (at most `5`). Left out: unchanged. Outside 0–5, not a whole number, or `null`: `400`, `error.fields.levelSeen`. Above the user's `level` (a user with no profile row yet is at Level 0): `400`, `error.fields.levelSeen`.
+  - `level`: **Never accepted.** A request that sends the key (any value, `null` included) is refused with `400 VALIDATION_FAILED`, `error.fields.level = "level is set by your coach"`, and nothing of that save is applied. The web never sends it.
+  - Every other field behaves as before: a save without `levelSeen` keeps `level` and `levelSeen` as stored.
 
 #### `DELETE /api/v1/me`
 Permanently deletes the authenticated user's account and cascades all personal records.

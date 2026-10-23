@@ -311,3 +311,49 @@ func TestCreateEntriesBatch_RollbackOnBadFoodID(t *testing.T) {
 		t.Fatalf("expected 0 entries saved due to rollback, got %d", len(dayEntries))
 	}
 }
+
+// The user's Level (migration 000021): a new row starts at 0/0, an admin's UPDATE is what GET /me shows, the user's own
+// save moves levelSeen up to that Level and never level.
+func TestProfileLevel(t *testing.T) {
+	c, pool, user := setup(t)
+	ctx := context.Background()
+	base := map[string]any{"sex": "male", "birth_year": 1995, "weight_kg": 65, "goal": "maintain"}
+	with := func(key string, v any) map[string]any {
+		out := map[string]any{key: v}
+		for k, val := range base {
+			out[k] = val
+		}
+		return out
+	}
+
+	me := m(c.must(http.StatusOK, "GET", "/api/v1/me", nil))
+	if me["level"] != float64(0) || me["levelSeen"] != float64(0) {
+		t.Fatalf("new profile: want level 0 / levelSeen 0, got %v / %v", me["level"], me["levelSeen"])
+	}
+
+	// What the run sheet's SQL does until the coach screens exist
+	if _, err := pool.Exec(ctx, `UPDATE nutrition.profiles SET level = 3 WHERE user_id = $1`, user); err != nil {
+		t.Fatal(err)
+	}
+	c.must(http.StatusBadRequest, "PUT", "/api/v1/me/profile", with("levelSeen", 4))
+	c.must(http.StatusBadRequest, "PUT", "/api/v1/me/profile", with("level", 5))
+	saved := m(c.must(http.StatusOK, "PUT", "/api/v1/me/profile", with("levelSeen", 3)))
+	if saved["level"] != float64(3) || saved["levelSeen"] != float64(3) {
+		t.Fatalf("after levelSeen 3: got level %v / levelSeen %v", saved["level"], saved["levelSeen"])
+	}
+
+	// A save without levelSeen keeps both
+	c.must(http.StatusOK, "PUT", "/api/v1/me/profile", base)
+	var level, seen int
+	if err := pool.QueryRow(ctx, `SELECT level, level_seen FROM nutrition.profiles WHERE user_id = $1`, user).Scan(&level, &seen); err != nil {
+		t.Fatal(err)
+	}
+	if level != 3 || seen != 3 {
+		t.Fatalf("stored: want 3 / 3, got %d / %d", level, seen)
+	}
+
+	// The checks hold even for a write that skips the API
+	if _, err := pool.Exec(ctx, `UPDATE nutrition.profiles SET level = 6 WHERE user_id = $1`, user); err == nil {
+		t.Fatal("level 6 was stored: the CHECK is missing")
+	}
+}

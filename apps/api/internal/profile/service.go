@@ -3,6 +3,7 @@ package profile
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -53,6 +54,10 @@ func (s *DefaultService) GetProfile(ctx context.Context, userID uuid.UUID) (*Pro
 }
 
 func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, req UpsertProfileRequest) (*Profile, error) {
+	levelSeen, levelErrs := ParseLevelFields(req)
+	if levelErrs != nil {
+		return nil, levelErrs
+	}
 	if req.Sex != "male" && req.Sex != "female" {
 		return nil, ErrInvalidSex
 	}
@@ -101,7 +106,23 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 		return nil, fieldErrs
 	}
 
+	if levelSeen != nil {
+		// Never above the user's own Level; a user with no profile row yet is at Level 0
+		level := 0
+		stored, err := s.repo.GetProfile(ctx, userID)
+		switch {
+		case err == nil:
+			level = stored.Level
+		case !errors.Is(err, ErrProfileNotFound):
+			return nil, err
+		}
+		if *levelSeen > level {
+			return nil, FieldErrors{"levelSeen": fmt.Sprintf("levelSeen must not be above your level (%d)", level)}
+		}
+	}
+
 	p := &Profile{
+		SetLevelSeen:           levelSeen,
 		Settings:               settings,
 		UserID:                 userID,
 		Sex:                    req.Sex,
