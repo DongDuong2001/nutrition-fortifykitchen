@@ -5,8 +5,8 @@
  * Light has no attribute and no rule, so it stays exactly as before.
  *
  * The flag is OFF: live users see no row and get no attribute until every screen is done. It turns on with
- * NEXT_PUBLIC_DARK_MODE=1 at build time, or, in a demo build only, with h1t_dark_preview=1 in localStorage (the
- * screenshots in the PR and tests/probes/dark_foundation.py use that).
+ * DARK_MODE=1 at build time (next.config.ts bakes it into NEXT_PUBLIC_DARK_MODE), or, in a demo build only, with
+ * h1t_dark_preview=1 in localStorage (the screenshots in the PR and tests/probes/dark_foundation.py use that).
  */
 
 export type ThemeChoice = "system" | "light" | "dark";
