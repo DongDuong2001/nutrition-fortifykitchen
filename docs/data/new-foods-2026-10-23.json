@@ -1,0 +1,1389 @@
+[
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 171278",
+  "name": "Goat milk, fluid, with added vitamin D",
+  "name_vi": "Sữa dê (tươi, nguyên kem)",
+  "category": "sua",
+  "tip_vi": "Sữa dê tươi nguyên kem, chưa pha đường.",
+  "nutrients": {
+   "energy": 69,
+   "water": 87,
+   "alcohol": 0.0,
+   "caffeine": 0.0,
+   "carbs": 4.5,
+   "fiber": 0,
+   "sugars": 4.45,
+   "fat": 4.1,
+   "monounsaturated_fat": 1.11,
+   "polyunsaturated_fat": 0.149,
+   "dha": 0.0,
+   "epa": 0.0,
+   "saturated_fat": 2.67,
+   "cholesterol": 11,
+   "protein": 3.6,
+   "cystine": 0.046,
+   "histidine": 0.089,
+   "isoleucine": 0.207,
+   "leucine": 0.314,
+   "lysine": 0.29,
+   "methionine": 0.08,
+   "phenylalanine": 0.155,
+   "threonine": 0.163,
+   "tryptophan": 0.044,
+   "tyrosine": 0.179,
+   "valine": 0.24,
+   "b1": 0.048,
+   "b2": 0.138,
+   "b3": 0.277,
+   "b5": 0.31,
+   "b6": 0.046,
+   "folate": 1,
+   "b12": 0.07,
+   "vitamin_a": 57,
+   "vitamin_c": 1.3,
+   "vitamin_d": 1.3,
+   "vitamin_e": 0.07,
+   "vitamin_k": 0.3,
+   "calcium": 134,
+   "copper": 0.046,
+   "iron": 0.05,
+   "magnesium": 14,
+   "manganese": 0.018,
+   "phosphorus": 111,
+   "potassium": 204,
+   "selenium": 1.4,
+   "sodium": 50,
+   "zinc": 0.3
+  },
+  "portions": [
+   {
+    "label_vi": "1 ly (200 ml)",
+    "grams": 206,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 172884",
+  "name": "Soup, stock, chicken, home-prepared",
+  "name_vi": "Nước dùng gà",
+  "category": "mon_viet",
+  "tip_vi": "Nước dùng gà nấu tại nhà. Một chén chỉ có chút đạm và collagen, không đáng kể so với bữa ăn.",
+  "nutrients": {
+   "energy": 36,
+   "water": 92.2,
+   "carbs": 3.5,
+   "fiber": 0,
+   "sugars": 1.58,
+   "fat": 1.2,
+   "monounsaturated_fat": 0.582,
+   "polyunsaturated_fat": 0.213,
+   "saturated_fat": 0.321,
+   "cholesterol": 3,
+   "protein": 2.5,
+   "b1": 0.035,
+   "b2": 0.085,
+   "b3": 1.58,
+   "b6": 0.061,
+   "folate": 5,
+   "b12": 0.0,
+   "vitamin_a": 1,
+   "vitamin_c": 0.2,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.03,
+   "vitamin_k": 0.2,
+   "calcium": 3,
+   "copper": 0.054,
+   "iron": 0.21,
+   "magnesium": 4,
+   "phosphorus": 27,
+   "potassium": 105,
+   "selenium": 2.2,
+   "sodium": 143,
+   "zinc": 0.14
+  },
+  "portions": [
+   {
+    "label_vi": "1 chén",
+    "grams": 250,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 172883",
+  "name": "Soup, stock, beef, home-prepared",
+  "name_vi": "Nước dùng bò",
+  "category": "mon_viet",
+  "tip_vi": "Nước dùng bò nấu tại nhà. Một chén chỉ có chút đạm và collagen, không đáng kể so với bữa ăn.",
+  "nutrients": {
+   "energy": 13,
+   "water": 95.9,
+   "carbs": 1.2,
+   "fiber": 0,
+   "sugars": 0.54,
+   "fat": 0.1,
+   "monounsaturated_fat": 0.043,
+   "polyunsaturated_fat": 0.005,
+   "saturated_fat": 0.035,
+   "cholesterol": 0.0,
+   "protein": 2,
+   "b1": 0.033,
+   "b2": 0.091,
+   "b3": 0.872,
+   "b6": 0.055,
+   "folate": 2,
+   "b12": 0.0,
+   "vitamin_a": 0.0,
+   "vitamin_c": 0.0,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.01,
+   "vitamin_k": 0.1,
+   "calcium": 8,
+   "copper": 0.05,
+   "iron": 0.27,
+   "magnesium": 7,
+   "phosphorus": 31,
+   "potassium": 185,
+   "selenium": 1.2,
+   "sodium": 198,
+   "zinc": 0.17
+  },
+  "portions": [
+   {
+    "label_vi": "1 chén",
+    "grams": 250,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_fndds",
+  "source_id": "FDC 2708708",
+  "name": "Wonton, dumpling or pot sticker, steamed",
+  "name_vi": "Sủi cảo hấp (nhân thịt)",
+  "category": "mon_viet",
+  "tip_vi": "Sủi cảo, hoành thánh hấp nhân thịt; số liệu chung của USDA, chưa tách tôm hay heo.",
+  "nutrients": {
+   "energy": 113,
+   "water": 75.8,
+   "carbs": 11.1,
+   "fiber": 1.2,
+   "sugars": 2.3,
+   "fat": 4.6,
+   "monounsaturated_fat": 2.1,
+   "polyunsaturated_fat": 0.652,
+   "saturated_fat": 1.44,
+   "cholesterol": 14,
+   "protein": 6.9,
+   "b1": 0.306,
+   "b2": 0.106,
+   "b3": 1.86,
+   "b6": 0.207,
+   "folate": 15,
+   "b12": 0.22,
+   "vitamin_a": 4,
+   "vitamin_c": 6.9,
+   "vitamin_d": 0.2,
+   "vitamin_e": 0.21,
+   "vitamin_k": 45.8,
+   "calcium": 23,
+   "copper": 0.028,
+   "iron": 0.62,
+   "magnesium": 18,
+   "phosphorus": 106,
+   "potassium": 237,
+   "selenium": 14.8,
+   "sodium": 368,
+   "zinc": 1.39
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (25 g)",
+    "grams": 25,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "usda_fndds",
+  "source_id": "FDC 2708724",
+  "name": "Bao bun (pork bun, char siu, manapua)",
+  "name_vi": "Bánh bao xá xíu",
+  "category": "mon_viet",
+  "tip_vi": "Bánh bao nhân thịt xá xíu, số liệu chung của USDA.",
+  "nutrients": {
+   "energy": 273,
+   "water": 39.3,
+   "carbs": 39.8,
+   "fiber": 1.2,
+   "sugars": 5.86,
+   "fat": 7.6,
+   "monounsaturated_fat": 3.11,
+   "polyunsaturated_fat": 1.32,
+   "saturated_fat": 2.32,
+   "cholesterol": 21,
+   "protein": 11.2,
+   "b1": 0.543,
+   "b2": 0.246,
+   "b3": 3.9,
+   "b6": 0.157,
+   "folate": 47,
+   "b12": 0.17,
+   "vitamin_a": 0.0,
+   "vitamin_c": 0.2,
+   "vitamin_d": 0.2,
+   "vitamin_e": 0.33,
+   "vitamin_k": 1.4,
+   "calcium": 140,
+   "copper": 0.085,
+   "iron": 2.86,
+   "magnesium": 20,
+   "phosphorus": 152,
+   "potassium": 162,
+   "selenium": 14.6,
+   "sodium": 354,
+   "zinc": 0.9
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (100 g)",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15006",
+  "name": "Stuffed sticky rice cake (bánh chưng)",
+  "name_vi": "Bánh chưng",
+  "category": "mon_viet",
+  "tip_vi": "Bánh chưng nhân đỗ thịt; 1 miếng là một phần tám cái.",
+  "nutrients": {
+   "energy": 181,
+   "water": 59.1,
+   "carbs": 31.6,
+   "fiber": 0.6,
+   "fat": 4.2,
+   "protein": 4.3,
+   "calcium": 25.6,
+   "iron": 0.94,
+   "phosphorus": 49.5,
+   "zinc": 1.4
+  },
+  "portions": [
+   {
+    "label_vi": "1 miếng (100 g)",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15077",
+  "name": "Bánh dày (sticky rice cake)",
+  "name_vi": "Bánh giầy",
+  "category": "tinh_bot",
+  "tip_vi": "Bánh giầy trắng, chưa kèm giò chả.",
+  "nutrients": {
+   "energy": 156,
+   "water": 64.7,
+   "carbs": 28.7,
+   "fiber": 0.4,
+   "fat": 3.1,
+   "protein": 3.3,
+   "calcium": 12.2,
+   "iron": 0.78,
+   "zinc": 0.32
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (80 g)",
+    "grams": 80,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15030",
+  "name": "Rice cake filled with meat (bánh tẻ)",
+  "name_vi": "Bánh tẻ",
+  "category": "mon_viet",
+  "tip_vi": "Bánh tẻ nhân thịt, gói lá dong hoặc lá chuối.",
+  "nutrients": {
+   "energy": 104,
+   "water": 77.7,
+   "carbs": 17.2,
+   "fiber": 1.1,
+   "fat": 3.2,
+   "protein": 1.5,
+   "calcium": 59.4,
+   "iron": 0.71,
+   "phosphorus": 13.2,
+   "zinc": 0.34
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (60 g)",
+    "grams": 60,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15015",
+  "name": "Stuffed sticky rice cake with ramie leaves (bánh gai)",
+  "name_vi": "Bánh gai",
+  "category": "an_vat",
+  "tip_vi": "Bánh gai lá gai, nhân đỗ xanh.",
+  "nutrients": {
+   "energy": 251,
+   "water": 39.3,
+   "carbs": 52.3,
+   "fiber": 0.4,
+   "fat": 2.5,
+   "protein": 4.7,
+   "calcium": 240,
+   "iron": 11.8,
+   "phosphorus": 44.3,
+   "zinc": 0.56
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (80 g)",
+    "grams": 80,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15021",
+  "name": "Glutinous rice cake with gnaphalium leaves (bánh khúc)",
+  "name_vi": "Bánh khúc",
+  "category": "an_vat",
+  "tip_vi": "Bánh khúc nhân đỗ xanh, rắc xôi.",
+  "nutrients": {
+   "energy": 249,
+   "water": 41.6,
+   "carbs": 49.7,
+   "fiber": 0.6,
+   "fat": 3.8,
+   "protein": 4.1,
+   "calcium": 27.5,
+   "iron": 1.13,
+   "phosphorus": 44.8,
+   "zinc": 1.57
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (50 g)",
+    "grams": 50,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15032",
+  "name": "Stuffed sticky rice balls (bánh trôi)",
+  "name_vi": "Bánh trôi",
+  "category": "an_vat",
+  "tip_vi": "Bánh trôi nhân đường, tính cả nước đường theo NIN.",
+  "nutrients": {
+   "energy": 202,
+   "water": 50.1,
+   "carbs": 46.4,
+   "fiber": 0.2,
+   "fat": 0.6,
+   "protein": 2.8,
+   "b2": 81,
+   "calcium": 16.1,
+   "iron": 1.86,
+   "phosphorus": 13.9,
+   "zinc": 0.45
+  },
+  "portions": [
+   {
+    "label_vi": "1 viên (30 g)",
+    "grams": 30,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 chén (5 viên, 150 g)",
+    "grams": 150,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15004",
+  "name": "Stuffed sticky rice balls, large (bánh chay)",
+  "name_vi": "Bánh chay",
+  "category": "an_vat",
+  "tip_vi": "Bánh chay nhân đỗ xanh, tính cả nước.",
+  "nutrients": {
+   "energy": 156,
+   "water": 64.7,
+   "carbs": 28.7,
+   "fiber": 0.4,
+   "fat": 3.1,
+   "protein": 3.3,
+   "calcium": 12.2,
+   "iron": 0.78,
+   "phosphorus": 26.4,
+   "zinc": 0.32
+  },
+  "portions": [
+   {
+    "label_vi": "1 viên (40 g)",
+    "grams": 40,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15070",
+  "name": "Sticky rice with Gac fruit, cooked (xôi gấc)",
+  "name_vi": "Xôi gấc",
+  "category": "tinh_bot",
+  "tip_vi": "Xôi gấc đã nấu chín.",
+  "nutrients": {
+   "energy": 231,
+   "water": 42.8,
+   "carbs": 52.9,
+   "fiber": 0.1,
+   "fat": 0.8,
+   "protein": 3.1,
+   "calcium": 23.6,
+   "iron": 0.28,
+   "phosphorus": 23,
+   "zinc": 1.18
+  },
+  "portions": [
+   {
+    "label_vi": "1 chén (150 g)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 nắm xôi (80 g)",
+    "grams": 80,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15071",
+  "name": "Sticky rice with peanut, cooked (xôi lạc)",
+  "name_vi": "Xôi lạc",
+  "category": "tinh_bot",
+  "tip_vi": "Xôi lạc đã nấu chín.",
+  "nutrients": {
+   "energy": 246,
+   "water": 43.6,
+   "carbs": 47.5,
+   "fiber": 1.1,
+   "fat": 4.3,
+   "protein": 4.2,
+   "calcium": 33.3,
+   "iron": 0.32,
+   "phosphorus": 96.9,
+   "zinc": 1.04
+  },
+  "portions": [
+   {
+    "label_vi": "1 chén (150 g)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 nắm xôi (80 g)",
+    "grams": 80,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15014",
+  "name": "Plain rice flan, hot (bánh đúc nóng)",
+  "name_vi": "Bánh đúc (trắng, nóng)",
+  "category": "mon_viet",
+  "tip_vi": "Bánh đúc nóng ăn kèm nước chấm hoặc thịt băm; số theo NIN 'nóng'.",
+  "nutrients": {
+   "energy": 108,
+   "water": 79.8,
+   "carbs": 8.9,
+   "fiber": 0.1,
+   "fat": 6.3,
+   "protein": 3.9,
+   "calcium": 61.3,
+   "iron": 1.48,
+   "phosphorus": 9.4,
+   "zinc": 0.33
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (250 g)",
+    "grams": 250,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15031",
+  "name": "Crisp shrimp pastry (bánh tôm Hồ Tây)",
+  "name_vi": "Bánh tôm Hồ Tây",
+  "category": "an_vat",
+  "tip_vi": "Bánh tôm chiên giòn.",
+  "nutrients": {
+   "energy": 204,
+   "water": 61.1,
+   "carbs": 22.6,
+   "fiber": 0.4,
+   "fat": 10.8,
+   "protein": 4,
+   "calcium": 232,
+   "iron": 2.54,
+   "phosphorus": 24.1,
+   "zinc": 0.43
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (50 g)",
+    "grams": 50,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15058",
+  "name": "Vermicelli made of cassava, with eels (miến lươn)",
+  "name_vi": "Miến lươn",
+  "category": "mon_viet",
+  "tip_vi": "Miến lươn có nước dùng.",
+  "nutrients": {
+   "energy": 73,
+   "water": 83.9,
+   "carbs": 9.9,
+   "fiber": 0.2,
+   "fat": 2.6,
+   "protein": 2.4,
+   "calcium": 30.3,
+   "iron": 2.97,
+   "phosphorus": 35.4,
+   "zinc": 0.44
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (350 g)",
+    "grams": 350,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7070",
+  "name": "Pork, head meat with spices, steamed (giò thủ)",
+  "name_vi": "Giò thủ",
+  "category": "dam",
+  "tip_vi": "Giò thủ lợn, chín.",
+  "nutrients": {
+   "energy": 553,
+   "water": 29,
+   "fat": 54.3,
+   "protein": 16
+  },
+  "portions": [
+   {
+    "label_vi": "1 lát (30 g)",
+    "grams": 30,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 7068",
+  "name": "Beef, minced lean meat and spices, steamed (giò bò)",
+  "name_vi": "Giò bò",
+  "category": "dam",
+  "tip_vi": "Giò bò chín.",
+  "nutrients": {
+   "energy": 335,
+   "water": 50.3,
+   "fat": 29,
+   "protein": 18.2,
+   "calcium": 17.8,
+   "iron": 3.2,
+   "phosphorus": 12.2
+  },
+  "portions": [
+   {
+    "label_vi": "1 lát (30 g)",
+    "grams": 30,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 15008",
+  "name": "Young rice cake (bánh cốm)",
+  "name_vi": "Bánh cốm",
+  "category": "an_vat",
+  "tip_vi": "Bánh cốm nhân đỗ xanh.",
+  "nutrients": {
+   "energy": 250,
+   "water": 37.1,
+   "carbs": 58.5,
+   "fiber": 1.1,
+   "fat": 0.3,
+   "protein": 3.4,
+   "calcium": 27.9,
+   "iron": 0.6,
+   "phosphorus": 105,
+   "zinc": 0.77
+  },
+  "portions": [
+   {
+    "label_vi": "1 cái (30 g)",
+    "grams": 30,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 12005",
+  "name": "Mungbean cake (bánh đậu xanh)",
+  "name_vi": "Bánh đậu xanh",
+  "category": "an_vat",
+  "tip_vi": "Bánh đậu xanh; NIN không ghi nơi làm (Hải Dương).",
+  "nutrients": {
+   "energy": 420,
+   "water": 6.8,
+   "carbs": 63.5,
+   "fiber": 1.1,
+   "fat": 11.5,
+   "protein": 15.6,
+   "b1": 0.2,
+   "b2": 0.15,
+   "b3": 6.6,
+   "vitamin_a": 8.75,
+   "calcium": 111,
+   "iron": 3.4,
+   "phosphorus": 273
+  },
+  "portions": [
+   {
+    "label_vi": "1 miếng (25 g)",
+    "grams": 25,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 1041:banh-da-kho",
+  "name": "Vietnamese flat rice noodles / bánh đa, dry",
+  "name_vi": "Bánh đa (đỏ, trắng), khô",
+  "category": "tinh_bot",
+  "tip_vi": "Bánh đa khô, trắng hoặc đỏ (Hải Phòng); số theo 100 g khô.",
+  "nutrients": {
+   "energy": 347,
+   "water": 13,
+   "carbs": 81.4,
+   "fiber": 1.6,
+   "protein": 5.3,
+   "b1": 0.12,
+   "b2": 0.03,
+   "b3": 0.25,
+   "calcium": 37.3,
+   "iron": 0.62,
+   "phosphorus": 99.4
+  },
+  "portions": [
+   {
+    "label_vi": "1 vắt (70 g)",
+    "grams": 70,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 1041002:banh-da-luoc",
+  "name": "Vietnamese flat rice noodles / bánh đa, boiled",
+  "name_vi": "Bánh đa (đỏ, trắng), luộc",
+  "category": "tinh_bot",
+  "tip_vi": "Bánh đa đã luộc, trắng hoặc đỏ (Hải Phòng); số theo 100 g đã luộc.",
+  "nutrients": {
+   "energy": 97,
+   "water": 75.6,
+   "carbs": 22.8,
+   "fiber": 0.4,
+   "protein": 1.5,
+   "b1": 0.02,
+   "b2": 0.01,
+   "b3": 0.04,
+   "calcium": 10.4,
+   "iron": 0.17,
+   "phosphorus": 27.9
+  },
+  "portions": [
+   {
+    "label_vi": "1 chén (160 g)",
+    "grams": 160,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 tô vừa (300 g)",
+    "grams": 300,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:canh-bau",
+  "name": "Bottle gourd soup",
+  "name_vi": "Canh bầu",
+  "category": "mon_viet",
+  "tip_vi": "Canh rau nấu nước, không thịt. Giá trị là công thức tham khảo, chỉnh khi cần.",
+  "nutrients": {
+   "energy": 4.5,
+   "water": 98,
+   "carbs": 1.1,
+   "fiber": 0.4,
+   "fat": 0,
+   "monounsaturated_fat": 0.0012,
+   "polyunsaturated_fat": 0.0027,
+   "saturated_fat": 0.0006,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.2,
+   "b1": 0.0087,
+   "b2": 0.0066,
+   "b3": 0.117,
+   "b5": 0.0432,
+   "b6": 0.0114,
+   "folate": 1.2,
+   "b12": 0.0,
+   "vitamin_c": 2.55,
+   "vitamin_d": 0.0,
+   "calcium": 7.34,
+   "copper": 0.00798,
+   "iron": 0.077,
+   "magnesium": 3.31,
+   "manganese": 0.0204,
+   "phosphorus": 3.9,
+   "potassium": 51,
+   "selenium": 0.0606,
+   "sodium": 233,
+   "zinc": 0.211
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (300 g)",
+    "grams": 300,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:canh-bi-xanh",
+  "name": "Winter melon soup",
+  "name_vi": "Canh bí xanh",
+  "category": "mon_viet",
+  "tip_vi": "Canh rau nấu nước, không thịt. Giá trị là công thức tham khảo, chỉnh khi cần.",
+  "nutrients": {
+   "energy": 4.2,
+   "water": 98.2,
+   "carbs": 0.9,
+   "fiber": 0.3,
+   "sugars": 0.354,
+   "fat": 0.1,
+   "monounsaturated_fat": 0.0111,
+   "polyunsaturated_fat": 0.0264,
+   "saturated_fat": 0.0048,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.1,
+   "b1": 0.0102,
+   "b2": 0.0003,
+   "b3": 0.115,
+   "b5": 0.0363,
+   "b6": 0.0096,
+   "folate": 1.2,
+   "b12": 0.0,
+   "vitamin_a": 0.0,
+   "vitamin_c": 3.15,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.024,
+   "vitamin_k": 0.84,
+   "calcium": 5.54,
+   "copper": 0.00678,
+   "iron": 0.116,
+   "magnesium": 3.01,
+   "manganese": 0.0174,
+   "phosphorus": 5.1,
+   "potassium": 1.55,
+   "selenium": 0.0606,
+   "sodium": 265,
+   "zinc": 0.178
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (300 g)",
+    "grams": 300,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:canh-cai-ngot",
+  "name": "Sweet mustard greens soup",
+  "name_vi": "Canh cải ngọt",
+  "category": "mon_viet",
+  "tip_vi": "Canh rau nấu nước, không thịt. Giá trị là công thức tham khảo, chỉnh khi cần.",
+  "nutrients": {
+   "energy": 3.6,
+   "water": 98.1,
+   "alcohol": 0.0,
+   "carbs": 0.5,
+   "fiber": 0.3,
+   "sugars": 0.249,
+   "fat": 0,
+   "monounsaturated_fat": 0.0036,
+   "polyunsaturated_fat": 0.0231,
+   "saturated_fat": 0.0063,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.5,
+   "b1": 0.0096,
+   "b2": 0.0189,
+   "b3": 0.129,
+   "b5": 0.0237,
+   "b6": 0.051,
+   "folate": 12.3,
+   "b12": 0.0,
+   "vitamin_a": 63.6,
+   "vitamin_c": 7.8,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.027,
+   "vitamin_k": 10.2,
+   "calcium": 28,
+   "copper": 0.00588,
+   "iron": 0.314,
+   "magnesium": 3.31,
+   "manganese": 0.0426,
+   "phosphorus": 8.7,
+   "potassium": 111,
+   "selenium": 0.121,
+   "sodium": 243,
+   "zinc": 0.0516
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (300 g)",
+    "grams": 300,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:canh-bap-cai",
+  "name": "Cabbage soup",
+  "name_vi": "Canh bắp cải",
+  "category": "mon_viet",
+  "tip_vi": "Canh rau nấu nước, không thịt. Giá trị là công thức tham khảo, chỉnh khi cần.",
+  "nutrients": {
+   "energy": 6.9,
+   "water": 97.2,
+   "alcohol": 0.0,
+   "carbs": 1.7,
+   "fiber": 0.6,
+   "sugars": 0.837,
+   "fat": 0,
+   "monounsaturated_fat": 0.0057,
+   "polyunsaturated_fat": 0.0069,
+   "saturated_fat": 0.0,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.4,
+   "b1": 0.0183,
+   "b2": 0.0114,
+   "b3": 0.075,
+   "b5": 0.051,
+   "b6": 0.033,
+   "folate": 9,
+   "b12": 0.0,
+   "vitamin_a": 1.2,
+   "vitamin_c": 11.2,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.042,
+   "vitamin_k": 32.7,
+   "calcium": 14.5,
+   "copper": 0.00528,
+   "iron": 0.053,
+   "magnesium": 4.51,
+   "manganese": 0.0606,
+   "phosphorus": 9.9,
+   "potassium": 58.8,
+   "selenium": 0.181,
+   "sodium": 235,
+   "zinc": 0.0606
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô (300 g)",
+    "grams": 300,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:banh-da-cua",
+  "name": "Hai Phong crab noodle soup",
+  "name_vi": "Bánh đa cua (Hải Phòng)",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: bánh đa đỏ, riêu cua đồng, rau muống, chưa tính nước chấm.",
+  "nutrients": {
+   "energy": 54.1,
+   "water": 81.1,
+   "carbs": 6.5,
+   "fiber": 0.5,
+   "fat": 2.1,
+   "protein": 2.7,
+   "b1": 0.0181,
+   "b2": 0.0176,
+   "b3": 0.307,
+   "calcium": 106,
+   "iron": 0.546,
+   "phosphorus": 40.9
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô",
+    "grams": 624,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:bun-thang",
+  "name": "Hanoi bun thang",
+  "name_vi": "Bún thang",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: bún, ức gà, giò lụa, trứng, nấm hương, tôm khô.",
+  "nutrients": {
+   "energy": 53.8,
+   "water": 87.6,
+   "carbs": 6.5,
+   "fiber": 0.3,
+   "sugars": 0.0507,
+   "fat": 1.3,
+   "monounsaturated_fat": 0.277,
+   "polyunsaturated_fat": 0.163,
+   "saturated_fat": 0.201,
+   "cholesterol": 18.1,
+   "protein": 3.8,
+   "b1": 0.0114,
+   "b2": 0.0337,
+   "b3": 0.705,
+   "b5": 0.204,
+   "b6": 0.0346,
+   "folate": 3.41,
+   "b12": 0.0468,
+   "vitamin_a": 7.95,
+   "vitamin_c": 0.457,
+   "vitamin_d": 0.0966,
+   "vitamin_e": 0.0835,
+   "vitamin_k": 1.92,
+   "calcium": 7.39,
+   "copper": 0.0434,
+   "iron": 0.211,
+   "magnesium": 3.76,
+   "manganese": 0.0554,
+   "phosphorus": 29.9,
+   "potassium": 29.3,
+   "selenium": 3.91,
+   "sodium": 248,
+   "zinc": 0.219
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô",
+    "grams": 603,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:bun-ca-hai-phong",
+  "name": "Hai Phong fish noodle soup",
+  "name_vi": "Bún cá (Hải Phòng)",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: bún, cá rô phi, rau muống, cà chua, thì là.",
+  "nutrients": {
+   "energy": 46.2,
+   "water": 83.4,
+   "carbs": 6,
+   "fiber": 0.5,
+   "sugars": 0.146,
+   "fat": 1.1,
+   "monounsaturated_fat": 0.278,
+   "polyunsaturated_fat": 0.511,
+   "saturated_fat": 0.215,
+   "cholesterol": 5.27,
+   "protein": 3.1,
+   "b1": 0.0171,
+   "b2": 0.0163,
+   "b3": 0.548,
+   "b5": 0.0803,
+   "b6": 0.0246,
+   "folate": 6.64,
+   "b12": 0.172,
+   "vitamin_a": 23.6,
+   "vitamin_c": 4.65,
+   "vitamin_d": 0.342,
+   "vitamin_e": 0.172,
+   "vitamin_k": 3.46,
+   "calcium": 9.67,
+   "copper": 0.0222,
+   "iron": 0.236,
+   "magnesium": 9.31,
+   "manganese": 0.0499,
+   "phosphorus": 27.4,
+   "potassium": 71.2,
+   "selenium": 6.13,
+   "sodium": 250,
+   "zinc": 0.122
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô",
+    "grams": 649,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:canh-cua-rau-day",
+  "name": "Crab and jute mallow soup",
+  "name_vi": "Canh cua rau đay",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: cua đồng giã, rau đay luộc.",
+  "nutrients": {
+   "energy": 19.2,
+   "water": 93.3,
+   "carbs": 2,
+   "fat": 0.4,
+   "protein": 2.3,
+   "b1": 0.0229,
+   "b2": 0.0518,
+   "b3": 0.463,
+   "vitamin_a": 62,
+   "calcium": 149,
+   "iron": 0.918,
+   "magnesium": 33.2,
+   "phosphorus": 37.6,
+   "potassium": 134,
+   "sodium": 412
+  },
+  "portions": [
+   {
+    "label_vi": "1 tô",
+    "grams": 503,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:pho-xao-bo",
+  "name": "Stir-fried rice noodles with beef",
+  "name_vi": "Phở xào (bò)",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: bánh phở, bò thăn, hành tây, giá, dầu ăn.",
+  "nutrients": {
+   "energy": 140.5,
+   "water": 71.4,
+   "carbs": 14.7,
+   "fiber": 0.9,
+   "sugars": 0.748,
+   "fat": 5.3,
+   "monounsaturated_fat": 1.53,
+   "polyunsaturated_fat": 2.02,
+   "saturated_fat": 1.26,
+   "cholesterol": 18.3,
+   "protein": 7.8,
+   "b1": 0.0392,
+   "b2": 0.0494,
+   "b3": 1.97,
+   "b5": 0.178,
+   "b6": 0.16,
+   "folate": 10.4,
+   "b12": 0.37,
+   "vitamin_a": 0.78,
+   "vitamin_c": 1.98,
+   "vitamin_d": 0.0223,
+   "vitamin_e": 0.397,
+   "vitamin_k": 12.1,
+   "calcium": 10.6,
+   "copper": 0.0586,
+   "iron": 0.606,
+   "magnesium": 10.1,
+   "manganese": 0.0931,
+   "phosphorus": 69.8,
+   "potassium": 113,
+   "selenium": 10.1,
+   "sodium": 258,
+   "zinc": 1.39
+  },
+  "portions": [
+   {
+    "label_vi": "1 đĩa",
+    "grams": 359,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:pho-cuon",
+  "name": "Hanoi rice-sheet rolls with beef and herbs",
+  "name_vi": "Phở cuốn",
+  "category": "mon_viet",
+  "tip_vi": "Công thức tham khảo: bánh phở cuốn bò, xà lách, dưa leo; chưa tính nước chấm.",
+  "nutrients": {
+   "energy": 122.3,
+   "water": 74.4,
+   "carbs": 13.3,
+   "fiber": 0.8,
+   "sugars": 0.311,
+   "fat": 4.1,
+   "monounsaturated_fat": 1.23,
+   "polyunsaturated_fat": 1.34,
+   "saturated_fat": 1.05,
+   "cholesterol": 17.7,
+   "protein": 7.5,
+   "b1": 0.039,
+   "b2": 0.0494,
+   "b3": 1.9,
+   "b5": 0.173,
+   "b6": 0.154,
+   "folate": 9.59,
+   "b12": 0.359,
+   "vitamin_a": 49.5,
+   "vitamin_c": 1.84,
+   "vitamin_d": 0.0216,
+   "vitamin_e": 0.322,
+   "vitamin_k": 26.5,
+   "calcium": 13.9,
+   "copper": 0.0476,
+   "iron": 0.641,
+   "magnesium": 10.2,
+   "manganese": 0.103,
+   "phosphorus": 66.7,
+   "potassium": 126,
+   "selenium": 9.73,
+   "sodium": 260,
+   "zinc": 1.34
+  },
+  "portions": [
+   {
+    "label_vi": "1 đĩa (4 cuốn)",
+    "grams": 231,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ }
+]
