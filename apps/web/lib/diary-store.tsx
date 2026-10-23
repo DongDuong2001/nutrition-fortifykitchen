@@ -150,7 +150,7 @@ export interface ToastInfo {
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
   undoIds?: string[];
-  /** "foodDeleted" (Xoá món): what Hoàn tác does. */
+  /** "foodDeleted" (Xóa món): what Hoàn tác does. */
   undoFood?: () => void;
   /** "moved": where each moved entry was, for Hoàn tác. */
   undoMoves?: SlotMove[];
@@ -199,7 +199,7 @@ interface DiaryContextValue {
   dismissToastAfterAction: (shown: ToastInfo) => void;
   /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. "share": with a Chia sẻ action (share-spotlight). */
   notify: (message: string, kind?: "notice" | "share") => void;
-  /** A message with Hoàn tác that runs `onUndo`, for as long as a delete's undo stays (8 s): Xoá món. */
+  /** A message with Hoàn tác that runs `onUndo`, for as long as a delete's undo stays (8 s): Xóa món. */
   notifyUndo: (message: string, onUndo: () => void) => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
   pauseToast: () => void;

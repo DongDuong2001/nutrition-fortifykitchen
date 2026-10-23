@@ -29,7 +29,7 @@ export default function ExploreCategoryPage() {
   const minhHao = params?.category === MINH_HAO_SLUG;
   const category = minhHao ? undefined : FOOD_CATEGORIES.find((c) => c.key === params?.category);
   const { foods: catalogue, pending, failed, retry } = useCatalogFoods();
-  // Job C: every row of Món ăn của tôi has a ⋯ (Sửa món, Xoá món)
+  // Job C: every row of Món ăn của tôi has a ⋯ (Sửa món, Xóa món)
   const own = category?.key === "cua_toi";
   const [menuFood, setMenuFood] = useState<FoodItem | null>(null);
   const { requestDelete, confirm } = useOwnFoodDelete();

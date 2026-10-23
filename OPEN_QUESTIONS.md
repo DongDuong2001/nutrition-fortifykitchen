@@ -541,8 +541,8 @@
 - [ ] (Dong) PUT /foods/custom/{id} does not set an `updated_at`: nutrition.foods has no such column and nothing reads one, so no migration 000020 was written. If you want one (a sync or a "đã sửa" mark), it is a new column on foods plus the touch trigger the other tables use.
 - [ ] (Dong) The integration tests ran on PostgreSQL 16 (the Homebrew one; Docker was not running), the migrations are written for 17. The new SQL is a plain UPDATE, DELETE and INSERT; run scripts/test-integration.sh on 17 before the merge if you want it exact.
 
-## Sửa và xoá Món ăn của tôi (feat/my-foods-crud, 24/10/2026)
-- [ ] (Hao) The brief writes "Xoá" and "Huỷ"; the rest of the app writes "Xóa" and "Hủy" (Ngày ăn mẫu, Bữa ăn đã lưu). This job follows the brief. Say which spelling wins and one pass changes the other.
-- [ ] (Hao) A food made only on this device in the live app (not a uuid) has no server row: Sửa món on it saves in the catalogue of this device only, and Xoá món removes it from this device (nothing to delete on the server).
+## Sửa và xóa Món ăn của tôi (feat/my-foods-crud, 24/10/2026)
+- [ ] (Hao) The brief writes "Xoá", "Huỷ" and "Tuỳ chọn"; docs/voice-audit.md and the cc2_18 probe require "Xóa", "Hủy" and "Tùy" (the app's spelling everywhere else). This job follows the repo's rule, so the probe stays green. Say which spelling wins and one pass changes it.
+- [ ] (Hao) A food made only on this device in the live app (not a uuid) has no server row: Sửa món on it saves in the catalogue of this device only, and Xóa món removes it from this device (nothing to delete on the server).
 - [ ] (Dong) The delete is held 8 s in the outbox and the service worker honours it through nextAttemptAt; a forced sync in the page honours the new `notBefore`. If the sw ever sends items whatever their nextAttemptAt, the undo window could be cut short; it does not today (public/sw.js drainOutbox).
-- [ ] (Hao) Xoá món is not offered for foods of the shared catalogue, only for the user's own (Món ăn của tôi). Dishes made from ingredients are deleted whole; their server copies go with them.
+- [ ] (Hao) Xóa món is not offered for foods of the shared catalogue, only for the user's own (Món ăn của tôi). Dishes made from ingredients are deleted whole; their server copies go with them.

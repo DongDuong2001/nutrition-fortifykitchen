@@ -361,8 +361,8 @@ export const TIPS: readonly Tip[] = [
   {
     id: "own-food-menu",
     target: "own-food-menu",
-    title: "Sửa hoặc xoá món của bạn",
-    body: "Chạm dấu ⋯ ở cuối dòng để sửa hoặc xoá món bạn đã tạo. Xoá nhầm thì bấm Hoàn tác trong 8 giây.",
+    title: "Sửa hoặc xóa món của bạn",
+    body: "Chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn đã tạo. Xóa nhầm thì bấm Hoàn tác trong 8 giây.",
     used: ["own-food-menu"],
     when: (c) => c.pathname === "/explore/cua_toi",
   },

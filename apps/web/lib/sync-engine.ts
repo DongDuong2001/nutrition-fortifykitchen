@@ -78,7 +78,7 @@ export async function loadOfflineOutbox(): Promise<void> {
   void requestPersistentStorage();
   const scope = currentScope();
   await loadOutbox(scope);
-  // Xoá món waiting out its undo window (the app was closed or reloaded inside it): the food stays out of the catalogue
+  // Xóa món waiting out its undo window (the app was closed or reloaded inside it): the food stays out of the catalogue
   for (const id of pendingFoodDeleteIds()) removeCatalogFood(id);
   // Hotfix 20/10: writes the server held with the 409 for a past day go back to queued, once per app version, and are sent with made_at
   if (scope && (await prepareOutbox(scope)) > 0) void syncOfflineOutbox({ force: true });
@@ -440,7 +440,7 @@ async function runOutbox(retryHeld: boolean, force: boolean, onProgress?: SyncOp
       if (!item) continue;
       // Waiting after a failure (backoff) and parked ones stay put unless the person asked (Thử lại) or the network just came back (force)
       const waiting = !force && (item.nextAttemptAt ?? 0) > Date.now();
-      // An undo window (Xoá món) is never cut short, not even by Thử lại or a sync forced when the network came back
+      // An undo window (Xóa món) is never cut short, not even by Thử lại or a sync forced when the network came back
       const embargoed = (item.notBefore ?? 0) > Date.now();
       if (blocked.has(item.id) || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || embargoed || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
         blocked.add(item.id);
@@ -557,7 +557,7 @@ export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PU
 }
 
 
-/** Takes back a side write that has not left the device (Hoàn tác of Xoá món). False: nothing of it waits, or its request already went out. */
+/** Takes back a side write that has not left the device (Hoàn tác of Xóa món). False: nothing of it waits, or its request already went out. */
 export async function cancelSideWrite(entity: string): Promise<boolean> {
   const scope = currentScope();
   if (!scope) return false;
@@ -567,7 +567,7 @@ export async function cancelSideWrite(entity: string): Promise<boolean> {
   return true;
 }
 
-/** The own foods whose Xoá món waits in the outbox (their delete has not been sent): the catalogue must not show them. */
+/** The own foods whose Xóa món waits in the outbox (their delete has not been sent): the catalogue must not show them. */
 export function pendingFoodDeleteIds(): Set<string> {
   return new Set(readItems(currentScope()).flatMap((item) => (item.kind === "food" && item.method === "DELETE" && item.entity ? [item.entity.slice("food:".length)] : [])));
 }

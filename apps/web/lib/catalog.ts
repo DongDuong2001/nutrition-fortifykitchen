@@ -195,10 +195,10 @@ export function addCatalogFood(food: FoodItem): void {
   catalogChanged();
 }
 
-/** Own foods deleted on this device (Xoá món): a catalogue load that still lists one, while its delete waits to be sent, leaves it out. */
+/** Own foods deleted on this device (Xóa món): a catalogue load that still lists one, while its delete waits to be sent, leaves it out. */
 const deletedFoodIds = new Set<string>();
 
-/** Xoá món: takes the food out of the catalogue at once and keeps it out of later loads. Returns it for Hoàn tác (undefined: not there). */
+/** Xóa món: takes the food out of the catalogue at once and keeps it out of later loads. Returns it for Hoàn tác (undefined: not there). */
 export function removeCatalogFood(id: string): FoodItem | undefined {
   // Remembered even when it is not in the catalogue yet: a load still to come must leave it out too
   deletedFoodIds.add(id);
@@ -209,7 +209,7 @@ export function removeCatalogFood(id: string): FoodItem | undefined {
   return food;
 }
 
-/** Hoàn tác of Xoá món: the same food is in the catalogue again and later loads keep it. */
+/** Hoàn tác of Xóa món: the same food is in the catalogue again and later loads keep it. */
 export function putBackCatalogFood(food: FoodItem): void {
   deletedFoodIds.delete(food.id);
   addCatalogFood(food);

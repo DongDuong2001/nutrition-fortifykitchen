@@ -64,14 +64,14 @@ function FoodDetailInner() {
     // recipesReady: the stored recipes are put into the catalogue by then. catalogVersion: so is the live catalogue.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodId, recipesReady, catalogVersion]);
-  // Xoá món takes the food out of the catalogue and the page goes back: it keeps drawing the food while it slides away (no "Không tìm thấy món" flash)
+  // Xóa món takes the food out of the catalogue and the page goes back: it keeps drawing the food while it slides away (no "Không tìm thấy món" flash)
   const lastFood = useRef(liveFood);
   if (liveFood) lastFood.current = liveFood;
   const [leaving, setLeaving] = useState(false);
   const food = liveFood ?? (leaving ? lastFood.current : undefined);
   const recipe = useMemo(() => (isRecipe && recipesReady ? getRecipe(foodId) : null), [isRecipe, recipesReady, foodId]);
 
-  // Job C: Sửa món and Xoá món on one's own food (the toast's Hoàn tác brings it back); the page leaves itself after a delete
+  // Job C: Sửa món and Xóa món on one's own food (the toast's Hoàn tác brings it back); the page leaves itself after a delete
   const { requestDelete, confirm: confirmDelete } = useOwnFoodDelete();
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
@@ -322,7 +322,7 @@ function FoodDetailInner() {
               Sửa món
             </PillButton>
             <PillButton variant="danger" onClick={() => requestDelete(food, () => { setLeaving(true); goBack(); })}>
-              Xoá món
+              Xóa món
             </PillButton>
           </div>
         )}

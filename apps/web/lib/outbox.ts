@@ -53,7 +53,7 @@ export interface OutboxItem {
   /** Not sent before this time (ms), backoff with jitter. */
   nextAttemptAt?: number;
   /**
-   * Not sent before this time (ms) whatever else asks (a forced sync, Thử lại): the undo window of Xoá món. Written with the same
+   * Not sent before this time (ms) whatever else asks (a forced sync, Thử lại): the undo window of Xóa món. Written with the same
    * time in nextAttemptAt, which the service worker honours.
    */
   notBefore?: number;

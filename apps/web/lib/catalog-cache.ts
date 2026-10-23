@@ -107,7 +107,7 @@ export function withCatalogFood(saved: SavedCatalog, food: FoodItem): SavedCatal
   return { at: saved.at, foods: [food, ...saved.foods.filter((f) => f.id !== food.id)] };
 }
 
-/** The copy without the food `id` (Xoá món), its age as it was. */
+/** The copy without the food `id` (Xóa món), its age as it was. */
 export function withoutCatalogFood(saved: SavedCatalog, id: string): SavedCatalog {
   return saved.foods.some((f) => f.id === id) ? { at: saved.at, foods: saved.foods.filter((f) => f.id !== id) } : saved;
 }

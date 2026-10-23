@@ -68,11 +68,11 @@ export const RELEASES: readonly Release[] = [
       // feat/hero-sources (Job A, overnight 23→24/10)
       { icon: "bars", title: "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen (hoặc dòng Chất xơ) là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
       // feat/my-foods-crud (Job C, overnight 23→24/10)
-      { icon: "meal", title: "Sửa và xoá Món ăn của tôi", body: "Món bạn tự tạo giờ sửa được số liệu và xoá được. Xoá nhầm thì bấm Hoàn tác trong 8 giây, nhật ký đã ghi vẫn giữ số cũ." },
+      { icon: "meal", title: "Sửa và xóa Món ăn của tôi", body: "Món bạn tự tạo giờ sửa được số liệu và xóa được. Xóa nhầm thì bấm Hoàn tác trong 8 giây, nhật ký đã ghi vẫn giữ số cũ." },
     ],
     tour: [
       { target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." },
-      { target: "nav-explore", title: "Sửa hoặc xoá món của bạn", body: "Vào Khám phá › Món ăn của tôi, chạm dấu ⋯ ở cuối dòng để sửa hoặc xoá món bạn tạo." },
+      { target: "nav-explore", title: "Sửa hoặc xóa món của bạn", body: "Vào Khám phá › Món ăn của tôi, chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn tạo." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item

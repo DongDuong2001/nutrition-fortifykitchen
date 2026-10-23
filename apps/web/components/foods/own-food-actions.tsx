@@ -18,7 +18,7 @@ export const editFoodHref = (food: FoodItem, meal?: string | null) =>
   `/foods/new?${isRecipeId(food.id) ? "recipe" : "edit"}=${encodeURIComponent(food.id)}${meal ? `&meal=${meal}` : ""}`;
 
 /**
- * Xoá món for the screens (Job C): no confirm, the food goes at once with a Hoàn tác toast. The one exception is a food a Ngày ăn mẫu
+ * Xóa món for the screens (Job C): no confirm, the food goes at once with a Hoàn tác toast. The one exception is a food a Ngày ăn mẫu
  * or a Bữa ăn đã lưu holds: the sheet says how many first (the diary keeps its numbers either way). `confirm` is that sheet; render it
  * once on the screen. `then` runs after the delete (the food page leaves itself).
  */
@@ -49,11 +49,11 @@ export function useOwnFoodDelete() {
   );
 
   const confirm = (
-    <Sheet open={open} onClose={() => setOpen(false)} title={asked ? `Xoá ${asked.food.nameVi}?` : ""} titleId="own-food-delete-title" desktopDialog>
+    <Sheet open={open} onClose={() => setOpen(false)} title={asked ? `Xóa ${asked.food.nameVi}?` : ""} titleId="own-food-delete-title" desktopDialog>
       <div className="flex flex-col gap-3">
         <p className="m-0 px-1 text-sm leading-snug text-secondary">{asked ? usedNote(asked.uses) : ""}</p>
         <PillButton type="button" variant="tertiary" onClick={() => setOpen(false)}>
-          Huỷ
+          Hủy
         </PillButton>
         <PillButton
           type="button"
@@ -63,7 +63,7 @@ export function useOwnFoodDelete() {
             if (asked) run(asked.food, asked.then, SHEET_EXIT_MS + SHEET_BACK_DELAY_MS + 100);
           }}
         >
-          Xoá món
+          Xóa món
         </PillButton>
       </div>
     </Sheet>
@@ -71,11 +71,11 @@ export function useOwnFoodDelete() {
   return { requestDelete, confirm };
 }
 
-/** The ⋯ of a row in Món ăn của tôi: one 44 px button that opens the menu of that food (Sửa món, Xoá món). */
+/** The ⋯ of a row in Món ăn của tôi: one 44 px button that opens the menu of that food (Sửa món, Xóa món). */
 export function OwnFoodMenuButton({ food, onOpen, tour }: { food: FoodItem; onOpen: (food: FoodItem) => void; tour?: boolean }) {
   return (
     <IconButton
-      label={`Tuỳ chọn cho ${food.nameVi}`}
+      label={`Tùy chọn cho ${food.nameVi}`}
       aria-haspopup="dialog"
       data-tour={tour ? "own-food-menu" : undefined}
       className="-mr-2 text-secondary"
@@ -93,7 +93,7 @@ export function OwnFoodMenuButton({ food, onOpen, tour }: { food: FoodItem; onOp
   );
 }
 
-/** What the ⋯ opens: Sửa món and Xoá món for that food, in the sheet the rest of the app uses. */
+/** What the ⋯ opens: Sửa món and Xóa món for that food, in the sheet the rest of the app uses. */
 export function OwnFoodMenuSheet({ food, onClose, onDelete }: { food: FoodItem | null; onClose: () => void; onDelete: (food: FoodItem) => void }) {
   // The text stays while the sheet closes
   const [shown, setShown] = useState<FoodItem | null>(food);
@@ -115,7 +115,7 @@ export function OwnFoodMenuSheet({ food, onClose, onDelete }: { food: FoodItem |
             if (target) onDelete(target);
           }}
         >
-          Xoá món
+          Xóa món
         </PillButton>
       </div>
     </Sheet>

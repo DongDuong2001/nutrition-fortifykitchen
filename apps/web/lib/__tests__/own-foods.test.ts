@@ -5,7 +5,7 @@ import type { FoodItem } from "../catalog";
 import type { DayTemplate } from "../day-templates";
 import type { SavedMeal } from "../saved-meals";
 
-// Job C: the rules of Sửa món (what the form starts with) and Xoá món (when a confirm is asked).
+// Job C: the rules of Sửa món (what the form starts with) and Xóa món (when a confirm is asked).
 
 const food = (over: Partial<FoodItem> = {}): FoodItem =>
   ({
@@ -55,7 +55,7 @@ describe("editFormOf: Sửa món starts with what the person typed", () => {
   });
 });
 
-describe("foodUses and usedNote: the confirm of Xoá món", () => {
+describe("foodUses and usedNote: the confirm of Xóa món", () => {
   const meal = (id: string, ...foodIds: string[]): SavedMeal => ({ id, name: id, createdAt: "", items: foodIds.map((foodId) => ({ foodId, servingLabel: "1 phần", grams: 100 })) });
   const template = (id: string, ...foodIds: string[]): DayTemplate => ({
     id,

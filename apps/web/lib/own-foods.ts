@@ -4,10 +4,10 @@ import type { DayTemplate } from "./day-templates";
 import type { SavedMeal } from "./saved-meals";
 
 /**
- * Món ăn của tôi: Sửa món and Xoá món (Job C, overnight 23→24/10). Pure rules; the screens and the stores call these.
+ * Món ăn của tôi: Sửa món and Xóa món (Job C, overnight 23→24/10). Pure rules; the screens and the stores call these.
  */
 
-/** Xoá món has no confirm: Hoàn tác stays this long, and the DELETE is held in the outbox as long (8 s, as every delete's undo). */
+/** Xóa món has no confirm: Hoàn tác stays this long, and the DELETE is held in the outbox as long (8 s, as every delete's undo). */
 export const OWN_FOOD_UNDO_MS = 8000;
 
 export type ServingUnit = "g" | "ml" | "cái";
@@ -47,7 +47,7 @@ export function editFormOf(food: FoodItem): EditForm {
   return { nameVi: food.nameVi, servingSize: asText(size), servingUnit: unit, values, added };
 }
 
-/** How many saved meals and Ngày ăn mẫu hold the food (each counted once): Xoá món asks for a confirm only when this is above 0. */
+/** How many saved meals and Ngày ăn mẫu hold the food (each counted once): Xóa món asks for a confirm only when this is above 0. */
 export function foodUses(foodId: string, meals: readonly SavedMeal[], templates: readonly DayTemplate[]): number {
   return (
     meals.filter((m) => m.items.some((i) => i.foodId === foodId)).length +
@@ -55,5 +55,5 @@ export function foodUses(foodId: string, meals: readonly SavedMeal[], templates:
   );
 }
 
-/** The line of the confirm sheet of Xoá món. */
+/** The line of the confirm sheet of Xóa món. */
 export const usedNote = (uses: number): string => `${uses} mẫu / bữa đã lưu có món này · Món đã ghi trong nhật ký vẫn giữ số liệu cũ`;

@@ -3,7 +3,7 @@ import { apiClient, loadSyncEngine, outboxItems, pendingFoodDeleteIds, syncOffli
 import { resetOutboxState } from "../outbox";
 import { OWN_FOOD_UNDO_MS } from "../own-foods";
 
-// Job C: the DELETE of Xoá món waits OWN_FOOD_UNDO_MS in the outbox (not in a timer held in memory): Hoàn tác takes it back,
+// Job C: the DELETE of Xóa món waits OWN_FOOD_UNDO_MS in the outbox (not in a timer held in memory): Hoàn tác takes it back,
 // and a reload inside the window still sends it afterwards.
 
 function memoryStorage(): Storage {

@@ -6,7 +6,7 @@ import { keyedStorage } from "../storage-keys";
 import { deleteRecipe, readRecipes, restoreRecipe, syncRecipeFoods } from "../recipe-store";
 import { OWN_FOOD_UNDO_MS } from "../own-foods";
 
-// Job C: Xoá món on a dish made from ingredients (recipe-store: device only, plus a hidden server food per version in live mode).
+// Job C: Xóa món on a dish made from ingredients (recipe-store: device only, plus a hidden server food per version in live mode).
 
 function memoryStorage(): Storage {
   const data = new Map<string, string>();

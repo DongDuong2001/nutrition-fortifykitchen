@@ -4,7 +4,7 @@ import { CATALOG_FOODS, browsableFoods, catalogFoodById, putBackCatalogFood, set
 import { deleteOwnFood } from "../own-food-actions";
 import { OWN_FOOD_UNDO_MS } from "../own-foods";
 
-// Job C: what one Xoá món does end to end, and what its Hoàn tác undoes.
+// Job C: what one Xóa món does end to end, and what its Hoàn tác undoes.
 
 function memoryStorage(): Storage {
   const data = new Map<string, string>();
@@ -53,11 +53,11 @@ afterEach(() => {
 });
 
 describe("deleteOwnFood", () => {
-  it("the food is gone at once and one toast says Đã xoá <món> with its Hoàn tác; nothing is sent yet", async () => {
+  it("the food is gone at once and one toast says Đã xóa <món> with its Hoàn tác; nothing is sent yet", async () => {
     expect(deleteOwnFood(mine, notifyUndo)).toBe(true);
     expect(catalogFoodById(ID)).toBeUndefined();
     expect(browsableFoods().some((f) => f.id === ID)).toBe(false);
-    expect(toasts.map((t) => t.message)).toEqual(["Đã xoá Chè đậu xanh"]);
+    expect(toasts.map((t) => t.message)).toEqual(["Đã xóa Chè đậu xanh"]);
     await vi.advanceTimersByTimeAsync(100);
     expect(calls).toEqual([]);
     expect(outboxItems().map((i) => i.path)).toEqual([`/foods/custom/${ID}`]);

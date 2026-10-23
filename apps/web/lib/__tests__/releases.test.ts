@@ -6,7 +6,7 @@ const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
 
 // 2026-10-23a's tour (the night of 23→24/10): each PR of the night that adds a step appends its title here
-const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xoá món của bạn"];
+const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xóa món của bạn"];
 
 describe("RELEASES", () => {
   it("is newest first with unique ids", () => {
@@ -193,7 +193,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
     expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
     expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
-    expect(r?.items.map((i) => i.title)).toContain("Sửa và xoá Món ăn của tôi");
+    expect(r?.items.map((i) => i.title)).toContain("Sửa và xóa Món ăn của tôi");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 

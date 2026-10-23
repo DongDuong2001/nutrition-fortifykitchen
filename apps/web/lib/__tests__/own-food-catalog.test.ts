@@ -4,7 +4,7 @@ import { resolveFavourites } from "../favourites";
 import { savedMealEntries, type SavedMeal } from "../saved-meals";
 import { searchFoods } from "../search";
 
-// Job C: Xoá món. A deleted own food leaves the catalogue at once (lists, search, Gần đây, Yêu thích and the add sheet all read it),
+// Job C: Xóa món. A deleted own food leaves the catalogue at once (lists, search, Gần đây, Yêu thích and the add sheet all read it),
 // stays out when a catalogue load brings it back while the delete is still waiting, and Hoàn tác puts it back.
 
 const mine: FoodItem = {

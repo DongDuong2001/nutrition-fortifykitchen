@@ -1,7 +1,7 @@
-"""Job C (feat/my-foods-crud, overnight 23→24/10): Món ăn của tôi: Sửa món and Xoá món, at 390 and 1440 (demo build).
+"""Job C (feat/my-foods-crud, overnight 23→24/10): Món ăn của tôi: Sửa món and Xóa món, at 390 and 1440 (demo build).
 
-create → ⋯ → Sửa món (the form is filled in, a change is saved and shows in the list) → ⋯ → Xoá món (no confirm: the toast says
-Đã xoá <món> with Hoàn tác, the row goes, Hoàn tác brings it back) → Xoá món on the food page (goes back, the row stays gone) →
+create → ⋯ → Sửa món (the form is filled in, a change is saved and shows in the list) → ⋯ → Xóa món (no confirm: the toast says
+Đã xóa <món> with Hoàn tác, the row goes, Hoàn tác brings it back) → Xóa món on the food page (goes back, the row stays gone) →
 a food held by a Bữa ăn đã lưu asks first ("n mẫu / bữa đã lưu có món này") and still has the toast.
 Screenshots: .screenshots/own-foods/*.png (390×844 and 1440×900).
 Run with: ALIGN_BASE_URL=http://localhost:3106 npm run probe -- tests/probes/own_foods_crud.py
@@ -30,7 +30,7 @@ def check(cond, msg):
 
 
 def toast(pg):
-    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã xoá"))
+    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã xóa"))
     return re.sub(r"\s+", " ", t.first.inner_text()) if t.count() else ""
 
 
@@ -66,7 +66,7 @@ def run(browser, tag, size):
     pg.wait_for_url(re.compile(r".*/app$"), timeout=8000)
     pg.wait_for_timeout(800)
 
-    # 2. save the dinner as a Bữa ăn đã lưu, so this food is held by one (the confirm of Xoá món)
+    # 2. save the dinner as a Bữa ăn đã lưu, so this food is held by one (the confirm of Xóa món)
     pg.locator("button[aria-label='Xem riêng bữa tối']:visible").first.click()
     pg.wait_for_timeout(300)
     pg.locator("button[aria-label='Tùy chọn Bữa tối']:visible").first.click()
@@ -79,7 +79,7 @@ def run(browser, tag, size):
 
     open_own_list(pg, size)
     check(rows(pg) == 1, f"{tag}: the food is in Món ăn của tôi")
-    menu = pg.get_by_role("button", name=f"Tuỳ chọn cho {NAME}")
+    menu = pg.get_by_role("button", name=f"Tùy chọn cho {NAME}")
     box = menu.bounding_box()
     check(menu.count() == 1 and box and box["width"] >= 44 and box["height"] >= 44, f"{tag}: the row's ⋯ is a 44 px button ({box and (round(box['width']), round(box['height']))})")
     pg.screenshot(path=str(SHOTS / f"{tag}-1-list.png"))
@@ -88,7 +88,7 @@ def run(browser, tag, size):
     menu.click()
     pg.wait_for_timeout(500)
     pg.screenshot(path=str(SHOTS / f"{tag}-2-menu.png"))
-    check(pg.get_by_role("link", name="Sửa món").count() == 1 and pg.get_by_role("button", name="Xoá món").count() == 1, f"{tag}: the ⋯ menu has Sửa món and Xoá món")
+    check(pg.get_by_role("link", name="Sửa món").count() == 1 and pg.get_by_role("button", name="Xóa món").count() == 1, f"{tag}: the ⋯ menu has Sửa món and Xóa món")
     pg.get_by_role("link", name="Sửa món").click()
     pg.wait_for_url(re.compile(r".*/foods/new\?edit="), timeout=8000)
     pg.wait_for_timeout(800)
@@ -104,41 +104,41 @@ def run(browser, tag, size):
     check("300" in row.inner_text(), f"{tag}: the list shows the new kcal ({re.sub(r'\\s+', ' ', row.inner_text())!r})")
     check(rows(pg) == 1, f"{tag}: still one row (same food, not a copy)")
 
-    # 4. Xoá món on a food a Bữa ăn đã lưu holds: asks first
-    pg.get_by_role("button", name=f"Tuỳ chọn cho {NAME}").click()
+    # 4. Xóa món on a food a Bữa ăn đã lưu holds: asks first
+    pg.get_by_role("button", name=f"Tùy chọn cho {NAME}").click()
     pg.wait_for_timeout(500)
-    pg.get_by_role("button", name="Xoá món").click()
+    pg.get_by_role("button", name="Xóa món").click()
     pg.wait_for_timeout(600)
     dialog = pg.locator("[role=dialog]").filter(visible=True).first
     dtext = re.sub(r"\s+", " ", dialog.inner_text())
     check("1 mẫu / bữa đã lưu có món này" in dtext and "vẫn giữ số liệu cũ" in dtext, f"{tag}: a saved meal holds it, so it asks ({dtext[:120]!r})")
     pg.screenshot(path=str(SHOTS / f"{tag}-4-confirm.png"))
-    pg.get_by_role("button", name="Huỷ").click()
+    pg.get_by_role("button", name="Hủy").click()
     pg.wait_for_timeout(500)
-    check(rows(pg) == 1, f"{tag}: Huỷ leaves the food")
-    pg.get_by_role("button", name=f"Tuỳ chọn cho {NAME}").click()
+    check(rows(pg) == 1, f"{tag}: Hủy leaves the food")
+    pg.get_by_role("button", name=f"Tùy chọn cho {NAME}").click()
     pg.wait_for_timeout(500)
-    pg.get_by_role("button", name="Xoá món").click()
+    pg.get_by_role("button", name="Xóa món").click()
     pg.wait_for_timeout(600)
     dialog = pg.locator("[role=dialog]").filter(visible=True).first
-    dialog.get_by_role("button", name="Xoá món").click()
+    dialog.get_by_role("button", name="Xóa món").click()
     pg.wait_for_timeout(700)
     check(rows(pg) == 0, f"{tag}: the row is gone")
-    check(toast(pg) == f"Đã xoá {NAME} Hoàn tác", f"{tag}: the toast says Đã xoá <món> with Hoàn tác ({toast(pg)!r})")
+    check(toast(pg) == f"Đã xóa {NAME} Hoàn tác", f"{tag}: the toast says Đã xóa <món> with Hoàn tác ({toast(pg)!r})")
     pg.screenshot(path=str(SHOTS / f"{tag}-5-deleted.png"))
     pg.locator("[role=status]").get_by_role("button", name="Hoàn tác").click()
     pg.wait_for_timeout(600)
     check(rows(pg) == 1, f"{tag}: Hoàn tác puts the food back in the list")
 
-    # 5. Xoá món on the food page: no confirm for a food nothing holds? (this one is held: confirm again), then back and gone
+    # 5. Xóa món on the food page: no confirm for a food nothing holds? (this one is held: confirm again), then back and gone
     pg.locator("[data-food-row]").filter(has_text=NAME).first.click()
     pg.wait_for_url(re.compile(r".*/foods/"), timeout=8000)
     pg.wait_for_timeout(800)
-    check(pg.get_by_role("link", name="Sửa món").count() == 1 and pg.get_by_role("button", name="Xoá món").count() == 1, f"{tag}: the food page has Sửa món and Xoá món")
+    check(pg.get_by_role("link", name="Sửa món").count() == 1 and pg.get_by_role("button", name="Xóa món").count() == 1, f"{tag}: the food page has Sửa món and Xóa món")
     pg.screenshot(path=str(SHOTS / f"{tag}-6-food-page.png"), full_page=True)
-    pg.get_by_role("button", name="Xoá món").click()
+    pg.get_by_role("button", name="Xóa món").click()
     pg.wait_for_timeout(600)
-    pg.locator("[role=dialog]").filter(visible=True).first.get_by_role("button", name="Xoá món").click()
+    pg.locator("[role=dialog]").filter(visible=True).first.get_by_role("button", name="Xóa món").click()
     pg.wait_for_url(re.compile(r".*/explore/cua_toi$"), timeout=8000)
     pg.wait_for_timeout(800)
     check(rows(pg) == 0 and "Không tìm thấy" not in pg.inner_text("body"), f"{tag}: the food page deleted it and went back; no 'not found' screen")
@@ -162,12 +162,12 @@ def run_free(browser, tag, size):
     pg.wait_for_url(re.compile(r".*/app$"), timeout=8000)
     pg.wait_for_timeout(800)
     open_own_list(pg, size)
-    pg.get_by_role("button", name=f"Tuỳ chọn cho {NAME}").click()
+    pg.get_by_role("button", name=f"Tùy chọn cho {NAME}").click()
     pg.wait_for_timeout(500)
-    pg.get_by_role("button", name="Xoá món").click()
+    pg.get_by_role("button", name="Xóa món").click()
     pg.wait_for_timeout(700)
     check(pg.locator("[role=dialog]").filter(visible=True).count() == 0, f"{tag} free: nothing holds it, so no question")
-    check(rows(pg) == 0 and toast(pg) == f"Đã xoá {NAME} Hoàn tác", f"{tag} free: gone at once, with the toast ({toast(pg)!r})")
+    check(rows(pg) == 0 and toast(pg) == f"Đã xóa {NAME} Hoàn tác", f"{tag} free: gone at once, with the toast ({toast(pg)!r})")
     pg.screenshot(path=str(SHOTS / f"{tag}-7-free-delete.png"))
     pg.locator("[role=status]").get_by_role("button", name="Hoàn tác").click()
     pg.wait_for_timeout(600)

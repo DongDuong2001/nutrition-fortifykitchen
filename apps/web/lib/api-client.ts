@@ -1031,7 +1031,7 @@ export const apiClient = {
   },
 
   /**
-   * Xoá món: DELETE /foods/custom/{id} through the outbox, held OWN_FOOD_UNDO_MS so Hoàn tác can take it back. The hold is in the
+   * Xóa món: DELETE /foods/custom/{id} through the outbox, held OWN_FOOD_UNDO_MS so Hoàn tác can take it back. The hold is in the
    * outbox item, not a timer: a reload or a closed app still sends it afterwards. Outside live mode there is no server food.
    */
   async deleteOwnFood(id: string): Promise<WriteResult> {
@@ -1041,7 +1041,7 @@ export const apiClient = {
     return withEngine((e) => e.sideWrite({ kind: "food", entity: `food:${id}`, method: "DELETE", path: `/foods/custom/${id}`, payload: {}, holdMs: OWN_FOOD_UNDO_MS }));
   },
 
-  /** Hoàn tác of Xoá món: true when the delete had not left the device and is now gone from the outbox. */
+  /** Hoàn tác of Xóa món: true when the delete had not left the device and is now gone from the outbox. */
   async undoOwnFoodDelete(id: string, food?: FoodItem): Promise<boolean> {
     if (!isLiveMode() || !isUuid(id)) return true;
     if (food) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), food));

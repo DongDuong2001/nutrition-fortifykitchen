@@ -44,7 +44,7 @@ describe("withCatalogFood (review 07:00: a food just made is in the device's cop
   });
 });
 
-describe("withoutCatalogFood (Xoá món: a deleted food is not in the device's copy either)", () => {
+describe("withoutCatalogFood (Xóa món: a deleted food is not in the device's copy either)", () => {
   const food = (id: string) => ({ id, nameVi: id }) as FoodItem;
   it("drops the food and keeps the copy's age and the order of the others", () => {
     const saved = { at: 1234, foods: [food("a"), food("mine"), food("b")] };

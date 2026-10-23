@@ -163,7 +163,7 @@ export interface DeletedRecipe {
 }
 
 /**
- * Xoá món on a dish made from ingredients: gone from this device and the lists at once. In live mode its server foods (this version
+ * Xóa món on a dish made from ingredients: gone from this device and the lists at once. In live mode its server foods (this version
  * and the earlier ones, hidden behind the dish) are deleted through the outbox after the undo window; past entries keep their own
  * numbers. Null when the dish is not stored (or the device would not save the list): nothing changed.
  */
