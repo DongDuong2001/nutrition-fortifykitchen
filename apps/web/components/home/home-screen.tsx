@@ -8,7 +8,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
-import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
+import { AppHeader, CalendarGlyph } from "@/components/ui/app-header";
 import { TabWash } from "@/components/ui/tab-wash";
 import { IconShare } from "@/components/ui/icons";
 import { setHomeDay } from "@/lib/home-scroll";
@@ -82,6 +82,7 @@ import { formatDayLabel } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
+import type { HeroMacro } from "@/lib/macro-kcal";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
@@ -95,10 +96,12 @@ let lastWellFed: { iso: string; value: boolean } | null = null;
 /** The picker's first card: Chép hôm qua (Chép hôm kia on yesterday). */
 const YESTERDAY_OPTION = "yesterday";
 
-/** share-spotlight (Hao 22/10): the share button is a 44 px glass pill, the cobalt glyph and "Chia sẻ" (people missed the bare icon) */
-const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt")
-  .replace("h-11 w-11", "min-h-11 gap-2 whitespace-nowrap")
-  .replace("p-0", "py-0 pl-3 pr-4 text-callout font-bold");
+/** share-spotlight (Hao 22/10): the share button says Chia sẻ (people missed the bare icon). C3: the visible pill is 34 px (light glass,
+ *  14 px semibold, a 17 px glyph, 10 px before it and 12 px after the word) inside a transparent 44 px tap area, so it sits lighter
+ *  next to the wordmark; the button (and its spotlight target) is the 44 px area. The pill is in rem (2.125) so it grows with the text */
+const SHARE_BUTTON =
+  "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-0 bg-transparent p-0 text-cobalt cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
+const SHARE_PILL = "inline-flex h-[2.125rem] items-center gap-1.5 rounded-full pl-2.5 pr-3 text-sm font-semibold glass-light lg:bg-card lg:shadow-ring";
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
@@ -444,6 +447,14 @@ function HomeContent() {
     markShareNudgeDay(todayIso);
     notify(SHARE_NUDGE_TEXT, "share");
   }, [nudgePending, toast, pathname, isPast, todayIso, notify]);
+  // feat/hero-macro-kcal: a macro tapped on the hero shows its kcal; a change of day or of the selected meal clears it
+  const [heroMacro, setHeroMacro] = useState<HeroMacro | null>(null);
+  const heroMacroKey = `${viewIso} ${JSON.stringify(mode)}`;
+  const [heroMacroFor, setHeroMacroFor] = useState(heroMacroKey);
+  if (heroMacroFor !== heroMacroKey) {
+    setHeroMacroFor(heroMacroKey);
+    setHeroMacro(null);
+  }
   const macroTargets = useMemo(
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
@@ -486,6 +497,25 @@ function HomeContent() {
   useEffect(() => {
     if (!selecting) emitSignal("select-off");
   }, [selecting]);
+  // Desktop parity (23/10): Esc is Hủy while no sheet or tour step is up, and when select mode ends (Hủy, Xóa, a copy) focus goes back
+  // to ⋯ instead of the page body; on a phone neither applies (no keyboard, no focus ring)
+  const wasSelecting = useRef(false);
+  useEffect(() => {
+    if (wasSelecting.current && !selecting && window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
+      const active = document.activeElement;
+      // The copy and move sheets close inert, so the button that closed them still holds focus there
+      if (!active || active === document.body || active.closest("[inert]")) document.getElementById("home-day-menu")?.focus();
+    }
+    wasSelecting.current = selecting;
+    if (!selecting || targetSheet !== null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector('[role="dialog"][aria-modal="true"], [data-onboarding-overlay]')) return;
+      setSelecting(false);
+      setSelectedIds(new Set());
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selecting, targetSheet]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {
@@ -745,8 +775,10 @@ function HomeContent() {
               aria-describedby={nothingLogged ? "share-reason" : undefined}
               className={`${SHARE_BUTTON} disabled:cursor-default disabled:opacity-50`}
             >
-              <IconShare />
-              <span aria-hidden="true">Chia sẻ</span>
+              <span className={SHARE_PILL}>
+                <IconShare size={17} />
+                <span aria-hidden="true">Chia sẻ</span>
+              </span>
             </button>
             </div>
           }
@@ -799,7 +831,12 @@ function HomeContent() {
             finished={isPast}
             selected={selected}
             kcalNote={unknownKcalNote(modeEntries(mode, entries))}
-            countKey={`${viewIso} ${JSON.stringify(mode)}`}
+            countKey={heroMacroKey}
+            macro={heroMacro}
+            onMacro={(m) => {
+              if (m) markUsed("hero-macro");  // the tip of the same name
+              setHeroMacro(m);
+            }}
           />
           {coach && !selecting && (
             <div className="mt-2 flex min-h-11 flex-none items-center justify-end px-3 lg:px-0">
@@ -868,6 +905,7 @@ function HomeContent() {
                 extras={extras}
                 groups={groups}
                 summary={levelCounts}
+                fiberTarget={macroTargets.fiber}
                 targets={nutrientTargets}
                 selected={selected}
                 microsHref={`/micros?date=${viewIso}`}
@@ -882,8 +920,8 @@ function HomeContent() {
       {sheets && sourcesMounted && (
         <sheets.NutrientSourcesSheet
           nutrient={sourcesOf}
-          value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
-          target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+          value={sourcesOf === "fiber" ? shown.fiber : sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+          target={sourcesOf === "fiber" ? macroTargets.fiber : sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
           onClose={() => setSourcesOf(null)}
         />
       )}

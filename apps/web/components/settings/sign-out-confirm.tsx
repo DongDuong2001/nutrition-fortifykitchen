@@ -4,6 +4,7 @@ import React from "react";
 import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { AlertLine } from "@/components/ui/alert-line";
+import { useT } from "@/lib/i18n";
 
 /** A sync that ran and left writes behind: how many, and the plain reason. */
 export interface SignOutFailure {
@@ -45,30 +46,31 @@ export function SignOutConfirm({
   onSeeItems: () => void;
   onClose: () => void;
 }) {
+  const t = useT();
   return (
-    <Sheet open={open} onClose={onClose} title="Đăng xuất?" titleId="sign-out-title" desktopDialog>
+    <Sheet open={open} onClose={onClose} title={t("settings.signOut.title")} titleId="sign-out-title" desktopDialog>
       <div className="flex flex-col gap-3 py-1">
-        <p className="m-0 text-callout leading-snug text-text">Còn {count} món chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này.</p>
+        <p className="m-0 text-callout leading-snug text-text">{t("settings.signOut.body", { count })}</p>
         {/* cc-66b: the progress and the failure lines open and close without pushing the buttons in one frame */}
         <AlertLine show={busy} gap={3} role="status" aria-live="polite" className="m-0 text-cap leading-snug text-secondary" data-sign-out-progress="">
-          {progress && progress.total > 0 ? `Đang đồng bộ… ${Math.min(progress.done, progress.total)}/${progress.total}` : "Đang đồng bộ…"}
+          {progress && progress.total > 0 ? t("settings.signOut.progress", { done: Math.min(progress.done, progress.total), total: progress.total }) : t("settings.signOut.syncing")}
         </AlertLine>
         <AlertLine show={!!failure && !busy} gap={3} className="m-0 text-cap leading-snug text-destructive-text" data-sign-out-failure="">
-          {failure && <>Còn {failure.left} món chưa đồng bộ được: {failure.reason}.</>}
+          {failure && t("settings.signOut.failure", { count: failure.left, reason: failure.reason })}
         </AlertLine>
         <AlertLine show={!!error && !busy} gap={3} className="m-0 text-cap leading-snug text-destructive-text" data-sign-out-error="">
           {error}
         </AlertLine>
         <PillButton type="button" onClick={onSyncThenLeave} disabled={busy}>
-          {busy ? "Đang đồng bộ…" : "Đồng bộ rồi đăng xuất"}
+          {busy ? t("settings.signOut.syncing") : t("settings.signOut.syncThenLeave")}
         </PillButton>
         {(failure || error) && !busy && (
           <PillButton type="button" variant="secondary" onClick={onSeeItems}>
-            Xem các món
+            {t("settings.signOut.seeItems")}
           </PillButton>
         )}
         <PillButton type="button" variant="secondary" onClick={onLeave} disabled={busy}>
-          {failure ? `Vẫn đăng xuất (mất ${failure.left} món)` : `Vẫn đăng xuất (mất ${count} món)`}
+          {t("settings.signOut.leave", { count: failure ? failure.left : count })}
         </PillButton>
       </div>
     </Sheet>

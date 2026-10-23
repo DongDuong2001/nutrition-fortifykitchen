@@ -150,7 +150,10 @@ def home(browser, w, big):
         if eid == "dish-1":
             check(r["detail"] == "495 g · gồm 46 g mắm tôm", f"{tag} Hôm nay: the line under the name reads 495 g · gồm 46 g mắm tôm ({r['detail']!r})")
         if eid == "dish-3" and not big:
-            check(43.5 <= r["rowHeight"] <= 48.5, f"{tag} Hôm nay: a plain row is the V3 44 px row ({r['rowHeight']:.1f})")
+            # C3 (homnay-c2.md item 3): food amounts are 17 px, so at 360 "Cơm gạo lứt" misses its line by 2 px and wraps (no cut):
+            # the V3 44 px row then grows by at most that second name line (18,75 px), nothing else
+            most = 48.5 if r["nameLines"] == 1 else 44 + 18.75 + 0.5
+            check(r["nameLines"] <= 2 and 43.5 <= r["rowHeight"] <= most, f"{tag} Hôm nay: a plain row is the V3 44 px row, plus a wrapped name's line ({r['rowHeight']:.1f}, {r['nameLines']} line(s))")
     share(pg, tag, w, scale)
     ctx.close()
 

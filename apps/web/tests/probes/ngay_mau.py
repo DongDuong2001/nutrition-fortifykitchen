@@ -151,7 +151,7 @@ def run(browser, width, height):
     check(cards.count() == 1, f"{tag}: one template card ({cards.count()})")
     card = flat(cards.first.inner_text())
     check("Ngày tập" in card and f"{saved_count} món · {saved_kcal} kcal" in card and "%" in card, f"{tag}: the card has the name, tag, N món · X kcal and a level % ({card!r})")
-    check(pg.locator("a:visible", has_text="Tạo ngày ăn mẫu").count() == 1, f"{tag}: + Tạo ngày ăn mẫu")
+    check(pg.locator("a:visible, button:visible", has_text="Tạo ngày ăn mẫu").count() == 1, f"{tag}: + Tạo ngày ăn mẫu")
     shot(pg, "NMList", tag, full=True)
     cards.first.click()
     pg.wait_for_url(re.compile(r".*/explore/ngay-mau/[^/]+$"), timeout=8000)

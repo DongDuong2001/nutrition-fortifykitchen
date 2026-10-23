@@ -21,6 +21,30 @@
 /* cc-66 (S16): see-through surfaces become solid when the system asks for less transparency */
 @custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
 
+/* C3: a small pill on the header (Chia sẻ): lighter glass, a hairline and a soft shadow, the same fallbacks as glass */
+@utility glass-light {
+  background-color: var(--color-glass-light);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-glass-light);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-contrast: more) {
+    background-color: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 0 0 1px var(--color-card-border);
+  }
+}
+
+/* Food icons are the phone's own emoji (lib/food-emoji): its colour emoji font first, whatever the text font */
+@utility font-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
 /* V3-SPEC §4 Liquid Glass, for the navigation layer only (tab bar, sheet header, toast, Back and trailing circles), never
    content. Solid card colour under reduced transparency; solid with the card-border edge under more contrast. Never
    animate backdrop-filter (D-MAT-05). */
@@ -312,6 +336,8 @@
   /* Liquid Glass (V3-SPEC §4): the navigation layer only (tab bar, sheet header, toast, Back and trailing circles).
      The .glass utility below applies it; prefers-reduced-transparency makes it the solid card colour. */
   --color-glass: rgba(255, 255, 255, 0.72);
+  /* C3 (Hao 22/10): the lighter glass of the Chia sẻ pill */
+  --color-glass-light: rgba(255, 255, 255, 0.86);
   --color-glass-text: #111317;
   /* The sheet header's glass (V3 sheetGlass) */
   --color-glass-sheet: rgba(255, 255, 255, 0.8);
@@ -362,6 +388,7 @@
   --shadow-glass-tab: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 10px 28px rgb(0 0 0 / 0.16);
   --shadow-glass-tab-dark: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 0.5px rgb(255 255 255 / 0.1), 0 10px 28px rgb(0 0 0 / 0.5);
   --shadow-glass: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12);
+  --shadow-glass-light: inset 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.1);
   /* The food-group icon tile (IconTile.dc.html): a top highlight and a soft shadow; Tất cả (ink) adds a faint ring */
   --shadow-tile: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
   --shadow-tile-ink: inset 0 0 0 1px rgb(255 255 255 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.35), 0 1px 2px rgb(0 0 0 / 0.12);
@@ -612,6 +639,17 @@
   .m-tint:is(:active, [data-pressed])::after {
     opacity: 1;
     transition-duration: var(--m-tint-in);
+  }
+  /* Desktop parity (23/10): with a mouse on a desktop width, a tinted row or card shows half its press tint on hover, so
+     what can be clicked says so before the click; a pressed row keeps its full press tint (the press rule above is weaker
+     than this one). .m-hover gives the same to a card link that presses by scaling (its ::after is the a.flex one above).
+     Phones and touch never match: no change there. */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .m-tint:hover:not(:disabled, [aria-disabled="true"], :active, [data-pressed])::after,
+    .m-hover:hover::after {
+      opacity: 0.5;
+      transition-duration: var(--m-tint-in);
+    }
   }
   /* A full-width pill is a main action (Lưu, Thêm vào ..., Lưu & chọn tiếp): it scales, no tint */
   button.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
@@ -1397,4 +1435,72 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   ::view-transition-new(*) {
     animation: m-fade-in var(--m-fade) var(--ease-out) both !important;
   }
+}
+
+/* Dark mode, the hidden foundation (job 14, docs/plans/dark-mode.md). Only under data-theme="dark", which lib/theme.ts
+   sets before the first paint and only while its flag is on, so light mode has no new rule at all. Values: the V3
+   dark map (design/v3/V3-SPEC.md: page, card, raised, divider, text, secondary, field, segment track, the Apple dark
+   system colours, status text, glass rgba(28,28,30,.70)); the ones V3 does not give are marked "proposed".
+   docs/plans/dark-mode-tokens.md lists every token with its source. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-page: #000000;
+  --color-card: #1C1C1E;
+  --color-raised: #2C2C2E;
+  --color-surface: #3A3A3C;
+  --color-seg-track: #3A3A3C;
+  --color-paper-dark: #48484A; /* proposed */
+  --color-card-border: #38383A;
+  --color-divider: #38383A;
+  --color-text: #FFFFFF;
+  --color-secondary: #AEAEB2;
+  --color-secondary-strong: #D1D1D6; /* proposed */
+  --color-destructive: #FF4245;
+  --color-destructive-text: #FF4245;
+  --color-success: #30D158;
+  --color-amber: #FFD600;
+  --color-sys-red: #FF4245;
+  --color-sys-orange: #FF9230;
+  --color-sys-yellow: #FFD600;
+  --color-sys-green: #30D158;
+  --color-sys-mint: #00DAC3;
+  --color-sys-teal: #00D2E0;
+  --color-sys-cyan: #3CD3FE;
+  --color-sys-blue: #0091FF;
+  --color-sys-indigo: #6D7CFF;
+  --color-sys-purple: #DB34F2;
+  --color-sys-pink: #FF375F;
+  --color-sys-brown: #B78A66;
+  /* "The dot is deep in light and the dark column in dark" (V3-SPEC, nutrient colours): text colours take the dark column */
+  --color-deep-red: #FF4245;
+  --color-deep-orange: #FF9230;
+  --color-deep-yellow: #FFD600;
+  --color-deep-green: #30D158;
+  --color-deep-mint: #00DAC3;
+  --color-deep-teal: #00D2E0;
+  --color-deep-cyan: #3CD3FE;
+  --color-deep-blue: #0091FF;
+  --color-deep-indigo: #6D7CFF;
+  --color-deep-purple: #DB34F2;
+  --color-deep-pink: #FF375F;
+  --color-deep-brown: #B78A66;
+  --color-level-empty: #38383A;
+  --color-track: #38383A;
+  --color-cobalt-tint: #16224A;
+  --color-hover: #2C2C2E; /* proposed */
+  --color-grabber: #48484A; /* proposed */
+  --color-scrim: rgba(0, 0, 0, 0.6); /* proposed */
+  --color-scrim-2: rgba(0, 0, 0, 0.33); /* proposed */
+  --color-press: rgba(255, 255, 255, 0.1);
+  --color-press-hold: rgba(255, 255, 255, 0.2); /* proposed */
+  --color-warning-bg: #3A2E14;
+  --color-warning-text: #FFD600;
+  --color-fill: rgba(120, 120, 128, 0.16); /* V3 keeps it in dark */
+  --color-glass: rgba(28, 28, 30, 0.7);
+  --color-glass-text: #FFFFFF;
+  --color-glass-sheet: rgba(28, 28, 30, 0.86);
+  --color-glass-tab: var(--color-glass-tab-dark);
+  --color-glass-tab-off: #C9CDD6;
+  --color-tab-teal: var(--color-tab-teal-dark);
+  --color-tab-orange: var(--color-tab-orange-dark);
 }

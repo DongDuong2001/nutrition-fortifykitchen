@@ -64,7 +64,9 @@ window.__shareSnaps = [];
         const m = (e) => { const q = e.getBoundingClientRect(); return (q.top + q.bottom) / 2; };
         return { name: p0.innerText.trim(), nameMid: m(p0.parentElement), badgeMid: b ? m(b) : null }; })(),
       groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.textContent.trim()),
-      rows: [...r.querySelectorAll('aside[aria-label="Vi chất"] [data-align-group=home-nutrient]')].length,
+      // C3 (homnay-c2.md item 2): the Chất xơ row heads the column and is not one of the Level's nutrients: counted apart
+      rows: [...r.querySelectorAll('aside[aria-label="Vi chất"] [data-align-group=home-nutrient]:not([data-nutrient-row=fiber])')].length,
+      fiber: r.querySelectorAll('aside[aria-label="Vi chất"] [data-nutrient-row=fiber]').length,
     });
   }, 5);
 })();
@@ -112,6 +114,8 @@ def column(pg):
           const aside = [...document.querySelectorAll("aside[aria-label='Vi chất']")].find(a => a.getBoundingClientRect().width > 0);
           const out = {}; const extras = [];
           for (const sec of aside.querySelectorAll('section')) {
+            // C3: Chất xơ is a section of its own with no h3 (its title is the row's name) and no Level group: skip it
+            if (!sec.querySelector('h3')) continue;
             const title = sec.querySelector('h3').textContent.trim();  // cc-44: the pill draws it uppercase
             out[title] = [...sec.querySelectorAll('[data-align-group=home-nutrient]')].map(r => r.innerText.split('\\n')[0].trim());
             if (title.startsWith('Chi tiết')) for (const r of sec.querySelectorAll('[data-extra]')) extras.push({ text: r.innerText.replace(/\\s+/g, ' ').trim(), bars: r.querySelectorAll('[role=progressbar]').length, pct: /%/.test(r.innerText) });
@@ -141,8 +145,10 @@ def level_run(browser, size, tag, level):
         # V3 22/10: the extras header is the first section header, under the x/N đạt header (no ink band any more)
         top = pg.evaluate("""() => { const h = [...document.querySelectorAll("aside[aria-label='Vi chất'] h3")].find(x => x.getBoundingClientRect().width > 0); const s = document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]"); return [h.getBoundingClientRect().top, s.getBoundingClientRect().bottom]; }""")
         check(top[0] >= top[1] - 1, f"{tag} L{level}: the first section header sits under the x/N đạt header ({top})")
-    bars = pg.evaluate("[...document.querySelectorAll(\"aside[aria-label='Vi chất'] [role=progressbar]\")].filter(b => b.getBoundingClientRect().width > 0).length")
-    check(bars == TOTAL[level], f"{tag} L{level}: one bar per counted nutrient ({bars})")
+    # C3 (homnay-c2.md item 2): the Chất xơ row has a bar too, but is not counted in x/N đạt: one bar per counted nutrient, plus Chất xơ's
+    bars = pg.evaluate("[...document.querySelectorAll(\"aside[aria-label='Vi chất'] [role=progressbar]\")].filter(b => b.getBoundingClientRect().width > 0 && !b.closest('[data-nutrient-row=fiber]')).length")
+    fiber = pg.evaluate("[...document.querySelectorAll(\"aside[aria-label='Vi chất'] [data-nutrient-row=fiber] [role=progressbar]\")].filter(b => b.getBoundingClientRect().width > 0).length")
+    check(bars == TOTAL[level] and fiber == 1, f"{tag} L{level}: one bar per counted nutrient, and Chất xơ's ({bars} + {fiber})")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28b-home-L{level}-{w}.png"))
     if level in (0, 3):
         # /micros keeps all 22
@@ -170,7 +176,7 @@ def share_run(browser, size, tag):
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["badge"] == "2" and "LEVEL 2" in s["badgeText"].upper(), f"{tag} share L2: badge ({s and s['badgeText']!r})")
     check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L2: the badge is centred on the name column ({s and s['head']})")
-    check(s and s["groups"] == ["Khoáng chất", "Vitamin"] and s["rows"] == 14, f"{tag} share L2: 14 nutrients ({s and s['rows']})")
+    check(s and s["groups"] == ["Khoáng chất", "Vitamin"] and s["rows"] == 14 and s["fiber"] == 1, f"{tag} share L2: 14 nutrients and Chất xơ ({s and (s['rows'], s['fiber'])})")
     check(s and re.search(r"\d+/14 đạt", s["text"]) is not None, f"{tag} share L2: x/14 đạt in the image")
     with pg.expect_download() as info:
         pg.get_by_role("button", name="Lưu ảnh").click()
@@ -186,7 +192,7 @@ def share_run(browser, size, tag):
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["badge"] == "0", f"{tag} share L0: the badge is there at Level 0 ({s and s['badge']})")
     check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L0: the badge is centred on the name column ({s and s['head']})")
-    check(s and s["rows"] == 8, f"{tag} share L0: 8 nutrients ({s and s['rows']})")
+    check(s and s["rows"] == 8 and s["fiber"] == 1, f"{tag} share L0: 8 nutrients and Chất xơ ({s and (s['rows'], s['fiber'])})")
     with pg.expect_download() as info:
         pg.get_by_role("button", name="Lưu ảnh").click()
     path = os.path.join(SHOTS, f"cc-28b-share-L0-past-{w}.png")
@@ -205,7 +211,7 @@ def share_run(browser, size, tag):
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A", f"{tag} share L5: the name is on top ({s and s['head']})")
-    check(s and s["badge"] == "5" and s["rows"] == 22 + 6, f"{tag} share L5: badge 5 and 22 nutrients plus 6 extras ({s and (s['badge'], s['rows'])})")
+    check(s and s["badge"] == "5" and s["rows"] == 22 + 6 and s["fiber"] == 1, f"{tag} share L5: badge 5 and 22 nutrients plus 6 extras, and Chất xơ ({s and (s['badge'], s['rows'], s['fiber'])})")
     with pg.expect_download() as info:
         pg.get_by_role("button", name="Lưu ảnh").click()
     path = os.path.join(SHOTS, f"cc-28b-share-L5-long-{w}.png")

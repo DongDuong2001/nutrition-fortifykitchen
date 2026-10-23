@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { THEME_CHOICES, darkModeEnabled, loadThemeChoice } from "@/lib/theme";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { InstallRow } from "@/components/pwa/install-row";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import { readPrefs, writePrefs } from "@/lib/training-prefs";
 import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
 import { feedbackSeen, openFeedback, subscribeFeedback } from "@/lib/feedback";
+import { useT } from "@/lib/i18n";
 
 const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "male", label: "Nam" },
@@ -102,10 +104,24 @@ function ChoiceGroup({
 
 // Same rule as setup: a year from 1900 to this year. An invalid year keeps its error on screen.
 // It saves on blur or Enter, so typing "2" on the way to "2003" does not show an error.
-// The row shows the year; tapping it turns into the field.
+// The row shows the year; tapping it turns into the field. Desktop parity (23/10): the field opens with the year selected (typing
+// replaces it), Esc puts the year back and closes it, and closing returns the focus to the row.
+/** Desktop parity (23/10): the keyboard extras of the year field (select on focus, focus back to the row) are for a mouse and
+    keyboard from 1024 px; a phone keeps its own caret and Go key */
+const finePointerDesktop = () => window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+
 function BirthYearField() {
   const { profile, updateProfile } = useDiary();
   const [editing, setEditing] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const refocus = useRef(false);
+  const cancelled = useRef(false);
+  useEffect(() => {
+    if (!editing && refocus.current) {
+      refocus.current = false;
+      rowRef.current?.querySelector<HTMLElement>("button")?.focus();
+    }
+  }, [editing]);
   const [typed, setTyped] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
   const shown = typed ?? String(profile.birthYear);
@@ -122,27 +138,48 @@ function BirthYearField() {
   }
 
   function save() {
+    // The field unmounting after Esc blurs it: that blur must not save what Esc dropped
+    if (cancelled.current) {
+      cancelled.current = false;
+      return;
+    }
     const message = birthYearError(shown);
     setError(message);
     const birthYear = parseBirthYear(shown);
-    if (message || birthYear === null) return;
+    if (message || birthYear === null) {
+      refocus.current = false;
+      return;
+    }
     if (birthYear !== profile.birthYear) updateProfile({ birthYear });
     setTyped(null);
     setEditing(false);
   }
 
+  function cancel() {
+    cancelled.current = true;
+    refocus.current = finePointerDesktop();
+    setTyped(null);
+    setError(undefined);
+    setEditing(false);
+  }
+
   if (!editing) {
     return (
+      <div ref={rowRef}>
       <SettingsRow
         tone="profile"
         glyph={SETTINGS_ICONS.calendar}
         label="Năm sinh"
         hint="Dùng để chọn mức khuyến nghị theo tuổi."
         value={String(profile.birthYear)}
-        onClick={() => setEditing(true)}
+        onClick={() => {
+          cancelled.current = false;
+          setEditing(true);
+        }}
         minHeight="16"
         data-align-group="profile-row"
       />
+      </div>
     );
   }
 
@@ -157,9 +194,18 @@ function BirthYearField() {
           autoFocus
           value={shown}
           onChange={(e) => change(e.target.value)}
+          onFocus={(e) => {
+            if (finePointerDesktop()) e.currentTarget.select();
+          }}
           onBlur={save}
           onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Enter") {
+              refocus.current = finePointerDesktop();
+              e.currentTarget.blur();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancel();
+            }
           }}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "profile-birth-year-error" : undefined}
@@ -285,10 +331,11 @@ function TrainingSizeRow() {
 }
 
 export function AppCard() {
+  const t = useT();
   // The saved language is read after mount, so the server and first paint both show Tiếng Việt
-  const [language, setLanguage] = useState("Tiếng Việt");
-  // "Đã bật" or "Đã tắt" from the saved reminders. Empty until mounted, so the first paint never claims "Đã bật"
-  const [reminders, setReminders] = useState<string | null>(null);
+  const [language, setLanguage] = useState<"vi" | "en">("vi");
+  // On or off from the saved reminders. Null until mounted, so the first paint never claims "Đã bật"
+  const [reminders, setReminders] = useState<boolean | null>(null);
   // The tour and tips (cc-42): read after mount for the same reason
   const router = useRouter();
   const [flags, setFlags] = useState<OnboardingFlags | null>(null);
@@ -313,38 +360,43 @@ export function AppCard() {
     startTour();
     router.push(HOME_ROUTE);
   };
+  // Giao diện (job 14): only while the dark mode flag is on (lib/theme.ts), read after mount like the rest
+  const [appearance, setAppearance] = useState<string | null>(null);
+  useEffect(() => {
+    if (darkModeEnabled()) setAppearance(THEME_CHOICES.find((c) => c.id === loadThemeChoice())?.label ?? null);
+  }, []);
   useEffect(() => {
     const saved = loadSettings();
-    setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
+    setLanguage(saved.language);
     const anyOn = [saved.breakfastReminder, saved.lunchReminder, saved.dinnerReminder, saved.workoutSaltReminder, saved.eveningSummaryReminder].some(Boolean);
-    setReminders(anyOn ? "Đã bật" : "Đã tắt");
+    setReminders(anyOn);
   }, []);
 
   return (
-    <Card as="section" aria-label="Ứng dụng" className="flex flex-col gap-1">
-      <SectionHeader>Ứng dụng</SectionHeader>
+    <Card as="section" aria-label={t("settings.app")} className="flex flex-col gap-1">
+      <SectionHeader>{t("settings.app")}</SectionHeader>
       <SettingsRow
         dense
         tone="app"
         glyph={SETTINGS_ICONS.replay}
-        label="Xem lại hướng dẫn"
-        hint="Ghi bữa ăn đầu tiên · 1 phút"
+        label={t("settings.app.replay")}
+        hint={t("settings.app.replay.hint")}
         onClick={replay}
         divider={false}
         minHeight="14"
         data-align-group="profile-row"
       >
         {flags && !flags.replayOpened && (
-          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>
+          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">{t("settings.app.new")}</span>
         )}
       </SettingsRow>
-      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.news} label={t("settings.app.whatsNew")} href="/settings/whats-new" minHeight="14" data-align-group="profile-row" />
       <SettingsRow
         dense
         tone="app"
         glyph={SETTINGS_ICONS.tips}
-        label="Mẹo trên từng màn hình"
-        hint="Bật lại để xem mẹo lần đầu"
+        label={t("settings.app.tips")}
+        hint={t("settings.app.tips.hint")}
         chevron={false}
         minHeight="14"
         data-align-group="profile-row"
@@ -353,7 +405,7 @@ export function AppCard() {
           checked={flags ? !flags.tipsOff : true}
           disabled={flags === null}
           onCheckedChange={(on) => setTipsOff(!on)}
-          aria-label="Mẹo trên từng màn hình"
+          aria-label={t("settings.app.tips")}
         />
       </SettingsRow>
       {haptics !== null && (
@@ -362,22 +414,23 @@ export function AppCard() {
             dense
             tone="app"
             glyph={SETTINGS_ICONS.vibrate}
-            label="Rung khi chạm"
-            hint="Rung nhẹ khi lưu, xóa hay hoàn tác"
+            label={t("settings.app.haptics")}
+            hint={t("settings.app.haptics.hint")}
             chevron={false}
             minHeight="14"
             data-align-group="profile-row"
           >
-            <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label="Rung khi chạm" />
+            <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label={t("settings.app.haptics")} />
           </SettingsRow>
         </div>
       )}
-      <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" data-align-group="profile-row" />
-      <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" data-align-group="profile-row" />
-      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" data-align-group="profile-row" />
+      <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label={t("settings.app.language")} value={t(language === "en" ? "settings.app.language.en" : "settings.app.language.vi")} href="/settings/language" data-align-group="profile-row" />
+      {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label={t("settings.app.appearance")} value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
+      <SettingsRow dense tone="notifications" glyph={SETTINGS_ICONS.bell} label={t("settings.app.reminders")} value={reminders === null ? "" : t(reminders ? "settings.app.reminders.on" : "settings.app.reminders.off")} href="/settings/notifications" data-align-group="profile-row" />
+      <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.install} label={t("settings.app.addToHome")} href="/install" data-align-group="profile-row" />
       <InstallRow alignGroup="profile-row" />
-      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" data-align-group="profile-row" />
-      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" data-align-group="profile-row" />
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.document} label={t("settings.app.terms")} href="/terms" data-align-group="profile-row" />
+      <SettingsRow dense tone="privacy" glyph={SETTINGS_ICONS.shield} label={t("settings.app.privacy")} href="/privacy" data-align-group="profile-row" />
     </Card>
   );
 }
@@ -387,6 +440,7 @@ export function AppCard() {
  * Nguồn dữ liệu, moved here from Ứng dụng.
  */
 export function SupportCard() {
+  const t = useT();
   // Read after mount, so the first paint never shows a badge it will take away
   const [isNew, setIsNew] = useState(false);
   useEffect(() => {
@@ -394,22 +448,22 @@ export function SupportCard() {
     return subscribeFeedback(() => setIsNew(!feedbackSeen()));
   }, []);
   return (
-    <Card as="section" aria-label="Hỗ trợ" className="flex flex-col gap-1">
-      <SectionHeader>Hỗ trợ</SectionHeader>
+    <Card as="section" aria-label={t("settings.support")} className="flex flex-col gap-1">
+      <SectionHeader>{t("settings.support")}</SectionHeader>
       <SettingsRow
         dense
         tone="body"
         glyph={SETTINGS_ICONS.chat}
-        label="Góp ý & hỗ trợ"
-        hint="Báo lỗi, sai số liệu, yêu cầu thêm món"
+        label={t("settings.support.feedback")}
+        hint={t("settings.support.feedback.hint")}
         onClick={() => openFeedback({ screen: "Cài đặt" })}
         divider={false}
         minHeight="16"
         data-align-group="profile-row"
       >
-        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>}
+        {isNew && <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">{t("settings.app.new")}</span>}
       </SettingsRow>
-      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
+      <SettingsRow dense tone="data" glyph={SETTINGS_ICONS.database} label={t("settings.app.dataSources")} href="/settings/data-sources" minHeight="14" data-align-group="profile-row" />
     </Card>
   );
 }

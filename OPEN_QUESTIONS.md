@@ -523,3 +523,5 @@
 - [ ] (Hao, Dong) English (docs/plans/english.md): glossary sign-off; Đạm / Tinh bột / Chất béo in English or kept; serving_label and default names stored locale-independent first (Dong); an account `language` field (Dong); English food names later (name_en or a translation table, Dong).
 - [ ] (Hao) Job 9: B6 tops with Red Bull (fortified) and folate / K with matcha per 100 g in the new Giàu lists; keep, or leave fortified drinks out of Giàu.
 
+## Food emoji (feat/food-emoji, 23/10/2026)
+- [ ] (Hao) Custom 3D chicken icons will replace 🐔 (ức, phi lê, lườn, gà xé, thịt gà, a chicken with no cut named) and 🍗 (đùi, má đùi, cánh, chân, gà rán, gà nướng, gà nguyên con); lib/food-emoji.ts, TODO there. Send the icons, and say whether pork (🍖 sườn and chân giò, 🥓 ba chỉ) gets them too.

@@ -1,7 +1,7 @@
 """cc-61 (audit M1, M2), 390x844 and 1440x900.
 
 M1. Hôm nay: the "x/N đạt" micro verdict is the Vi chất column's header row, above the first group band (N covers
-    minerals and vitamins), on a logged day and on an empty one. "Đủ 22 vi chất" stays at the foot.
+    minerals and vitamins; C3: above the Chất xơ section, which heads the bands), on a logged day and on an empty one. "Đủ 22 vi chất" stays at the foot.
 M2. The portion panel draws the size-chip row ("Kích cỡ") only when the food has 2 or more sizes: Phở bò (Tô | Gam)
     shows the toggle and the stepper and no lone "Tô" chip (a food with several sizes keeps its chips: portion-panel.test.tsx).
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_61.py
@@ -32,7 +32,8 @@ COLUMN = """() => {
   const aside = [...document.querySelectorAll("aside[aria-label='Vi chất']")].find(a => a.getBoundingClientRect().width > 0);
   const verdicts = aside.querySelectorAll('[data-level-summary]');
   const v = verdicts[0];
-  const band = aside.querySelector('h3');
+  // C3 (homnay-c2.md item 2): the Chất xơ section sits above the first group band, so the verdict heads the first section
+  const band = aside.querySelector('section');
   const bar = aside.querySelector('[role=progressbar]');
   const link = [...aside.querySelectorAll('a')].find(a => a.textContent.includes('Đủ 22 vi chất'));
   const r = (e) => e ? e.getBoundingClientRect() : null;
@@ -62,7 +63,7 @@ def day(browser, size, empty):
     tag = f"{size['width']} {'empty day' if empty else 'logged day'}"
     check(c["count"] == 1, f"{tag}: one verdict ({c['count']})")
     check(c["text"] is not None and re.match(r"^\d+/\d+ đạt", c["text"]) is not None, f"{tag}: it reads x/N đạt ({c['text']!r})")
-    check(c["bottom"] <= c["bandTop"] + 0.5 and c["bandTop"] - c["bottom"] <= 8, f"{tag}: right above the first band ({c['bottom']:.0f} -> {c['bandTop']:.0f})")
+    check(c["bottom"] <= c["bandTop"] + 0.5 and c["bandTop"] - c["bottom"] <= 8, f"{tag}: right above the first section ({c['bottom']:.0f} -> {c['bandTop']:.0f})")
     check(c["top"] - c["asideTop"] < 12, f"{tag}: at the top of the column ({c['top'] - c['asideTop']:.0f} px down)")
     check(c["inArea"] is False, f"{tag}: outside the scrolling area, so it never scrolls away")
     h = c["bottom"] - c["top"]

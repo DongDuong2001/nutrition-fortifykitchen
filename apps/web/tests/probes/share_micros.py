@@ -152,7 +152,7 @@ COLUMN = """() => {
   }
   const keyLines = lines.filter((l) => key.contains(document.elementFromPoint(l.r.left + 1, l.r.top + 1)));
   return {
-    overlap, onBar, keyOverflow, keyOverlap, rows: rows.length, bars: bars.length,
+    overlap, onBar, keyOverflow, keyOverlap, rows: rows.length, bars: bars.length, fiber: aside.querySelectorAll('[data-nutrient-row=fiber]').length,
     firstRow, lastRow, summaryTop: s.top, summaryBottom: s.bottom, keyTop: k.top, keyBottom: k.bottom, asideBottom: a.bottom,
     footerTop: footer ? footer.getBoundingClientRect().top : null,
     summaryText: summary.innerText.replace(/\\s+/g, ' ').trim(),
@@ -205,11 +205,13 @@ def share(browser, kind, level, engine="chromium", text=100):
     # The a11y pass draws the same image as Chromium (the share page ignores the text scale): kept out of docs
     path = (SHOTS if engine == "a11y" or text != 100 else OUT) / f"share-{tag}.png"
     info.value.save_as(str(path))
-    w = pg.evaluate(
-        "async (b64) => { const i = new Image(); i.src = 'data:image/png;base64,' + b64; await i.decode(); return i.naturalWidth; }",
+    w, h = pg.evaluate(
+        "async (b64) => { const i = new Image(); i.src = 'data:image/png;base64,' + b64; await i.decode(); return [i.naturalWidth, i.naturalHeight]; }",
         base64.b64encode(path.read_bytes()).decode(),
     )
-    check(w == 1080, f"{tag}: PNG 1080 wide ({w}) -> {path}")
+    # A page taller than the 12.000 px cap is drawn smaller overall (lib/share-card shareImageSize, share-card.test.ts). C3's two-line
+    # micro rows and the Chất xơ row (homnay-c2.md item 2) take a Level 5 day at 150 % text past it: then the height is the cap
+    check(w == 1080 or (h == 12000 and 1000 <= w < 1080), f"{tag}: PNG 1080 wide, or smaller at the 12.000 px cap ({w}x{h}) -> {path}")
     svgs = pg.evaluate("window.__shareSvgs")
     ctx.close()
     if not check(bool(svgs), f"{tag}: the SVG of the image was grabbed"):
@@ -236,8 +238,9 @@ def column_checks(browser, body, kind, level, tag, mode, text=100):
     lay.close()
     if not check(r is not None, f"{tag}: the nutrient column is in the SVG"):
         return
-    want_rows = 8 if level <= 1 else 28
-    check(r["rows"] == want_rows, f"{tag}: every row drawn ({r['rows']}/{want_rows})")
+    # C3 (homnay-c2.md item 2): the Level's rows, plus the Chất xơ row above them (not counted in x/N đạt)
+    want_rows = (8 if level <= 1 else 28) + 1
+    check(r["rows"] == want_rows and r["fiber"] == 1, f"{tag}: every row drawn, Chất xơ's too ({r['rows']}/{want_rows}, Chất xơ {r['fiber']})")
     check(not r["overlap"], f"{tag}: no text line crosses another in the column ({r['overlap'][:4]})")
     # The stress pass widens every glyph after the columns were fixed: a label may then run 2 px into the card's padding, so it
     # only has to stay clear of its neighbours there
