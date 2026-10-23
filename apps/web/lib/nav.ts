@@ -30,6 +30,7 @@ const OWNER: Record<string, NavTab> = {
   privacy: "settings",
   terms: "settings",
   admin: "settings",
+  documents: "settings",
   micros: "today",
   trends: "overview",
   training: "today",
@@ -76,7 +77,7 @@ function backTarget(first: string | undefined, second: string | undefined, third
   if (first === "explore" && second === "ngay-mau" && third) return "/explore/ngay-mau";
   if (first === "foods" && second === "compare") return compareBack(search);
   if (first === "explore" || first === "foods") return "/explore";
-  if (first === "privacy" || first === "terms" || first === "admin") return "/settings";
+  if (first === "privacy" || first === "terms" || first === "admin" || first === "documents") return "/settings";
   if (first === "add" || first === "entry") return HOME_ROUTE;
   return HOME_ROUTE;
 }
