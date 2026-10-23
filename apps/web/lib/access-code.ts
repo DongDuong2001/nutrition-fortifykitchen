@@ -7,6 +7,8 @@ import { ACCESS_CODE_HEADER } from "./documents";
 
 export const MAX_FAILURES = 10;
 export const LOCK_MS = 15 * 60_000;
+/** Past this many addresses the stale ones are dropped, so a scan from many addresses cannot grow the map for ever. */
+export const MAX_TRACKED = 10_000;
 
 // shortcut: the failures live in this server process (one instance), upgrade to the API's rate limiter when documents move to the Go API
 const failures = new Map<string, { n: number; at: number }>();
@@ -33,6 +35,7 @@ export function checkAccess(req: Request, code: string | null = req.headers.get(
     failures.delete(ip);
     return "ok";
   }
+  if (failures.size >= MAX_TRACKED) for (const [address, f] of failures) if (now - f.at >= LOCK_MS) failures.delete(address);
   failures.set(ip, { n: counted + 1, at: now });
   return "wrong";
 }
