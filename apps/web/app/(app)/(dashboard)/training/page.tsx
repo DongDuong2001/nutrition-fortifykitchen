@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
-import { calculateSaltTarget, getTrainingPhases, serverAcceptsTrainingMinutes, type TrainingCheckItem, type TrainingPhase, type TrainingSize } from "@/lib/training";
+import { calculateSaltTarget, getTrainingPhases, type TrainingCheckItem, type TrainingPhase, type TrainingSize } from "@/lib/training";
 import { TrainingMinutesPicker } from "@/components/training/minutes-picker";
 import {
   type DayChecklist,
@@ -222,8 +222,7 @@ function TrainingContent() {
     if (isPast) return;
     setSelectedDuration(id);
     saveDay({ ...record, minutes, ticked });
-    // A Tùy chỉnh value the API does not take yet stays on this device (lib/training-limits): never sent, never refused
-    if (isLiveMode() && todayIso && serverAcceptsTrainingMinutes(minutes)) {
+    if (isLiveMode() && todayIso) {
       apiClient.setTraining(todayIso, minutes).catch(() => {});
     }
   };
