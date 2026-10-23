@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PillButton } from "@/components/ui/pill-button";
+import { chunkOutcome, reloadPage } from "@/lib/chunk-reload";
 import { OVERVIEW_ROUTE } from "@/lib/home-route";
 
 export interface ErrorProps {
@@ -12,6 +13,9 @@ export interface ErrorProps {
 
 export default function ErrorPage({ error, reset }: ErrorProps) {
   const [timeStr, setTimeStr] = useState<string>("14:05");
+  // A chunk error (the page is older than the deploy): reloads once by itself; if that did not help it says so and offers Tải lại
+  const [chunk, setChunk] = useState("");
+  useEffect(() => setChunk(chunkOutcome(error)), [error]);
 
   useEffect(() => {
     const now = new Date();
@@ -43,14 +47,14 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
           </svg>
         </div>
 
-        <h1 className="m-0 text-lg font-bold text-text">Không tải được dữ liệu</h1>
+        <h1 className="m-0 text-lg font-bold text-text">{chunk ? "Có bản cập nhật mới" : "Không tải được dữ liệu"}</h1>
         <p className="m-0 text-sm leading-relaxed text-secondary">
-          Máy chủ đang bận. Dữ liệu bạn đã ghi vẫn an toàn trên máy.
+          {chunk ? "Tải lại để dùng bản mới nhất." : "Máy chủ đang bận."} Dữ liệu bạn đã ghi vẫn an toàn trên máy.
         </p>
 
         <div className="w-full pt-2 flex flex-col gap-3">
-          <PillButton variant="primary" onClick={() => reset()} fullWidth>
-            Thử lại
+          <PillButton variant="primary" onClick={chunk ? reloadPage : () => reset()} fullWidth>
+            {chunk ? "Tải lại" : "Thử lại"}
           </PillButton>
           <Link
             href={OVERVIEW_ROUTE}
