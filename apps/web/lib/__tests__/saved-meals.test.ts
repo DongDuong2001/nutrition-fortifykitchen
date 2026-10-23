@@ -12,6 +12,7 @@ import {
   savedMealSkipped,
   savedMealTotals,
   type SavedMeal,
+  savedMealWrites,
 } from "../saved-meals";
 
 const items = [
@@ -152,5 +153,18 @@ describe("itemsFromEntries", () => {
 
   it("leaves out quick kcal entries, which have no food", () => {
     expect(itemsFromEntries([entry({ kind: "quick", foodId: "quick" }), entry({ id: "f" })])).toHaveLength(1);
+  });
+});
+
+describe("savedMealWrites", () => {
+  const meal = (id: string, name = "Bữa sáng"): SavedMeal => ({ id, name, items: [{ foodId: "f1", servingLabel: "1 tô", grams: 300 }], createdAt: "2026-10-23T08:00:00.000Z" });
+
+  it("sends new and changed meals and the ids that went, nothing for an unchanged list", () => {
+    const a = meal("a");
+    const b = meal("b");
+    expect(savedMealWrites([a, b], [a, b])).toEqual({ put: [], remove: [] });
+    expect(savedMealWrites([a], [a, b])).toEqual({ put: [b], remove: [] });
+    const renamed = meal("a", "Bữa sáng mới");
+    expect(savedMealWrites([a, b], [renamed])).toEqual({ put: [renamed], remove: ["b"] });
   });
 });
