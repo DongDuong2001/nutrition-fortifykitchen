@@ -8,7 +8,7 @@ Overnight 22→23/10, job 14. The foundation ships hidden in feat/dark-mode-foun
 - **Applied before the first paint:** an inline script in `<head>` (`THEME_SCRIPT`, lib/theme.ts) sets `data-theme="dark"` on `<html>` for Tối, or for Hệ thống when the phone is dark; `ThemeSync` follows the phone switching while the app is open. No flash: the probe sees the attribute at DOMContentLoaded.
 - **Tokens:** one `:root[data-theme="dark"]` block at the end of globals.css. Hệ thống on a dark phone works through the script, not through a `prefers-color-scheme` rule, so the flag can keep it off.
 - **Flag OFF:** the row is hidden, `/settings/appearance` is a 404 and the script does nothing, whatever is stored. It turns on with `DARK_MODE=1` at build time (next.config.ts bakes it into `NEXT_PUBLIC_DARK_MODE` for the browser and the server alike; the day it turns on, pass `DARK_MODE` as a build arg in the Dockerfile and deploy/docker-compose.prod.yml), or in a demo build with `h1t_dark_preview=1` (the probe and the screenshots use that).
-- **Light is unchanged:** the light screens at 390 px (Hôm nay, Tổng quan, Khám phá, Cài đặt) are pixel-identical to main, viewport and full page, 0 changed pixels in two runs.
+- **Light is unchanged:** the light screens at 390 px (Hôm nay, Tổng quan, Khám phá, Cài đặt) are pixel-identical to main 650687b, full page, 0 changed pixels (docs/screenshots/overnight-1023/dark/light-before-*-390.png and light-after-*-390.png).
 - **Proof:** Hôm nay in Tối at 390 and 1440 (docs/screenshots/overnight-1023/dark/). It is a token-only pass, so the gaps below still show: the hero has no edge, and links are still the button blue.
 
 ## Inventory (counts from main 8eeb7b7)
