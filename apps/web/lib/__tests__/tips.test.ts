@@ -12,7 +12,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -118,7 +118,8 @@ describe("pickTip: pull to refresh (cc-51)", () => {
     // Overnight 22→23/10: Xem riêng một bữa (meal-focus), then Kcal từ đạm, tinh bột, béo (hero-macro), the last tip of Hôm nay
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day"] }))).toBe("meal-focus");
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus"] }))).toBe("hero-macro");
-    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro"] }))).toBe(null);
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro"] }))).toBe("hero-hold");
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe(null);
   });
 });
 
@@ -128,7 +129,7 @@ describe("pickTip: tap a nutrient (cc-51)", () => {
     expect(ids(ctx({ foodsToday: 1 }), seen)).toBe("nutrient-sources");
     expect(ids(ctx({ foodsToday: 1, pastDay: true }), seen)).toBe("past-day");
     expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add"], used: ["nutrient-sources", "share-day"] }))).toBe("meal-focus");
-    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "meal-focus", "hero-macro"], used: ["nutrient-sources", "share-day"] }))).toBe(null);
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "meal-focus", "hero-macro", "hero-hold"], used: ["nutrient-sources", "share-day"] }))).toBe(null);
   });
 });
 
@@ -227,7 +228,8 @@ describe("pickTip", () => {
     expect(ids(ctx(), shared(["home-logged", "meal-add"]))).toBe("nutrient-sources");
     expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources"]))).toBe("meal-focus");
     expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources", "meal-focus"]))).toBe("hero-macro");
-    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources", "meal-focus", "hero-macro"]))).toBeNull();
+    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources", "meal-focus", "hero-macro"]))).toBe("hero-hold");
+    expect(ids(ctx(), shared(["home-logged", "meal-add", "nutrient-sources", "meal-focus", "hero-macro", "hero-hold"]))).toBeNull();
   });
 
   it("Hôm nay tips wait for the first food (an empty day has only Chép ngày ăn mẫu), and the past-day tip is for a past day only", () => {
@@ -420,7 +422,7 @@ describe("the Chép ngày ăn mẫu tip (feat/ngay-mau)", () => {
   });
 
   it("is for an empty day that can be added to: not a day with food, not a past day, not select mode, not a sheet over it", () => {
-    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources", "meal-focus", "hero-macro"], used: ["share-day"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources", "meal-focus", "hero-macro", "hero-hold"], used: ["share-day"] }))).toBeNull();
     expect(ids(ctx({ foodsToday: 0, pastDay: true }))).toBe("past-day");
     expect(ids(ctx({ foodsToday: 0, selectMode: true }))).toBe("multi-select");
     expect(ids(ctx({ foodsToday: 0, sheetOpen: true }))).toBeNull();

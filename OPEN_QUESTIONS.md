@@ -532,3 +532,8 @@
 
 ## feat/level-ui (24/10)
 - Share image, Level 3+: in "Chi tiết béo & xơ" the long names (Béo không bão hòa đơn / đa, Xơ hòa tan, Xơ không tan) wrap to 3 lines beside "chưa có dữ liệu" (share-L5.png). origin/main 86d8b69 draws it the same way, so it is not from feat/level-ui. Own fix later: the name on one line and "chưa có dữ liệu" under it (or "—"). Hao to confirm which.
+## Hero hold (feat/hero-sources, 24/10/2026)
+- [ ] (Hao) The hold is 500 ms, the length the meal row already uses (components/food-list.tsx LONG_PRESS_MS), not the "about 450 ms" of the brief: one hold length in the app. lib/hold.ts repeats the constant instead of importing it so this PR does not touch food-list.tsx (feat/food-swipe edits it); one import can replace the copy after both merge.
+- [ ] (Hao) On Chất xơ a tap already opened the sources sheet, so the hold on it only does the same thing earlier; kept because the tip and the release item name Chất xơ with the others. Say if you would rather the tip left Chất xơ out.
+- [ ] (Hao) The sheet of a macro lists the day's foods even when a meal or one food is picked on Hôm nay (the title says "hôm nay"; the vi chất rows already behave this way).
+- [ ] (Hao) Adding a step to 2026-10-23a's tour pushes 22a's last step ("Chia sẻ ngày ăn") out of the 8-step Thử ngay for a user who skipped both releases (lib/releases.ts MAX_TOUR_STEPS).

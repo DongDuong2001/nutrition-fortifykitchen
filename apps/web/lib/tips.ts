@@ -348,6 +348,15 @@ export const TIPS: readonly Tip[] = [
     used: ["hero-macro"],
     when: today,
   },
+  // Job A (feat/hero-sources): a hold on the hero's macros, which nothing on them says; marked used by the first hold or the "Món nào?" link
+  {
+    id: "hero-hold",
+    target: "hero-macro",
+    title: "Giữ để xem món nào góp vào",
+    body: "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen, hoặc Chất xơ ở cột bên phải, là thấy những món nào góp vào số đó.",
+    used: ["hero-hold"],
+    when: today,
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */
