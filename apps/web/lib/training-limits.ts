@@ -12,18 +12,3 @@ export function clampTrainingMinutes(minutes: number): number {
   return Math.min(CUSTOM_MINUTES_MAX, Math.max(CUSTOM_MINUTES_MIN, stepped));
 }
 
-/**
- * The minutes the API takes today (apps/api diary and profile: ErrInvalidTrainingMinutes): 0, 45, 60, 90, 120 and 240. Until Dong
- * allows 0 or 30–480 in 30-minute steps, another value stays on this device and is never sent, so nothing is refused and held.
- */
-const SERVER_TRAINING_MINUTES = [0, 45, 60, 90, 120, 240];
-export const serverAcceptsTrainingMinutes = (minutes: number): boolean => SERVER_TRAINING_MINUTES.includes(minutes);
-
-/**
- * The value the API takes that is nearest to `minutes` (the lower one on a tie): what PUT /me/profile carries for a Tùy chỉnh default.
- * Leaving the field out does not keep the server's value (profile/service.go defaults it to 60), so a custom 150 sends 120, and the
- * device keeps its 150 (mergeServerProfile).
- */
-export function nearestServerTrainingMinutes(minutes: number): number {
-  return SERVER_TRAINING_MINUTES.reduce((best, m) => (Math.abs(m - minutes) < Math.abs(best - minutes) ? m : best));
-}
