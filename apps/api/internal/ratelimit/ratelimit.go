@@ -61,6 +61,8 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 		key := ""
 		if uid, err := auth.GetUserID(r.Context()); err == nil {
 			key = uid.String()
+		} else if cfip := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); cfip != "" {
+			key = cfip
 		} else if xrip := strings.TrimSpace(r.Header.Get("X-Real-IP")); xrip != "" {
 			key = xrip
 		} else if xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); xff != "" {

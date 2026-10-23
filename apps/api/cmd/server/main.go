@@ -199,6 +199,16 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	// API v1 Routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// Anti-caching headers for API responses to prevent CDNs and intermediary proxies
+		// from caching sensitive user profiles, diaries or personalized food queries.
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate")
+				w.Header().Set("Pragma", "no-cache")
+				next.ServeHTTP(w, r)
+			})
+		})
+
 		// Writes must come from an allowed origin and carry JSON (the CORS handler above answers preflights first).
 		// The two webhooks are server to server: no browser Origin, they verify their own signature.
 		r.Use(csrf.Middleware(csrf.Options{
