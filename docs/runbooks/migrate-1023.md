@@ -1,6 +1,8 @@
 # Migrations 23/10: run sheet for Hao
 
-Commands only: nobody has run them. Staging (Supabase project `hitmicro-staging`) first, then production.
+Commands only: nobody has run them on staging or production. Staging (Supabase project `hitmicro-staging`) first, then production.
+
+Rehearsed 23/10 on a local Postgres 17 in Docker (every migration in order, then this sheet's staging block, the set/read-back SQL, the rollback and the restore, copied as written with only `DATABASE_URL` different): all ran; the restore line was the one fix. Results in #88.
 
 **Order: 000021 on staging and prod first (the current API ignores the new columns), then merge #88, then deploy. Never deploy main with #88 before 000021 is on that database.**
 
@@ -145,4 +147,12 @@ psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema 
 ```
 
 - `000021` down drops the two checks and the two columns: every Level set by SQL is lost, and the web shows Level 0 again. Note the Levels first if they matter: `psql17 -c "SELECT u.email, p.level, p.level_seen FROM nutrition.profiles p JOIN auth.users u ON u.id = p.user_id WHERE p.level > 0"`.
-- Restoring the backup instead, only if the down migration is not enough, into an emptied `nutrition` schema: `gunzip -c ~/backups/prod-before-000021-*.sql.gz | docker run --rm -i --network host -e DATABASE_URL postgres:17-alpine sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1'` (staging: `~/backups/staging-before-000021-*.sql.gz`). Everything written after the backup is lost.
+- Restoring the backup instead, only if the down migration is not enough. The dump recreates the `nutrition` schema, so it is loaded into an emptied one: dropping the schema and loading the dump run in **one transaction**, so an error leaves the database as it was. Everything written after the backup is lost. (The extensions are in `public` and stay. The dump has no grants (`--no-acl`); the API connects as the owner, so it does not need them.)
+
+  ```bash
+  ( echo 'BEGIN;'; echo 'DROP SCHEMA nutrition CASCADE;'; gunzip -c ~/backups/prod-before-000021-*.sql.gz; echo 'COMMIT;' ) | psql17 -q
+  # staging: ~/backups/staging-before-000021-*.sql.gz instead
+  psql17 -Atc "SELECT count(*) FROM nutrition.profiles"     # the count from before the migration
+  ```
+
+  Loading the dump without the `DROP SCHEMA` stops at once with `ERROR: schema "nutrition" already exists` (checked in the 23/10 rehearsal).
