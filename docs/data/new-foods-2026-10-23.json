@@ -339,11 +339,11 @@
  {
   "source": "recipe_calc",
   "source_id": "recipe:meatcool-thit-heo-xay-it-mo",
-  "name": "Minced pork, extra lean, MeatCool (assumed 90 % lean + 10 % fat)",
-  "name_vi": "Thịt heo xay đặc biệt ít mỡ MeatCool",
+  "name": "Minced pork, extra lean, MeatCool (90/10 lean/fat)",
+  "name_vi": "Thịt heo xay đặc biệt ít mỡ MeatCool (90/10)",
   "category": "dam",
   "brand": "MeatCool",
-  "tip_vi": "Thịt sống. Số tính theo giả định 90 % nạc + 10 % mỡ heo vì hãng không công bố bảng dinh dưỡng.",
+  "tip_vi": "Thịt sống, tính theo 90 % nạc + 10 % mỡ heo (ước tính, hãng không công bố bảng dinh dưỡng).",
   "nutrients": {
    "energy": 201.8,
    "water": 66.6,
