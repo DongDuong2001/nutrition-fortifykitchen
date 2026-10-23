@@ -209,9 +209,30 @@ export function mealsKcalLine(meals: { slot: MealSlot; kcal: number }[]): string
   return meals.map((m) => `${SLOT_LABEL[m.slot]} ${formatAmount(m.kcal, "kcal")}`).join(" · ");
 }
 
-/** The toast after Lưu mẫu. */
-export function templateSavedMessage(name: string, itemCount: number, kcal: number): string {
-  return `Đã lưu ${name} · ${itemCount} món · ${formatAmount(kcal, "kcal")} kcal`;
+/** The toast after Lưu mẫu; without the kcal while it is not known (templateSaveSummary). */
+export function templateSavedMessage(name: string, itemCount: number, kcal: number | null): string {
+  return `Đã lưu ${name} · ${itemCount} món${kcal === null ? "" : ` · ${formatAmount(kcal, "kcal")} kcal`}`;
+}
+
+/**
+ * Whether Lưu ngày này thành mẫu and Lưu bữa này keep a food of the day (overnight 22→23/10). A food the server has (a uuid)
+ * is kept whether or not this device's catalogue has come yet: a device that did not log the day itself may not have loaded
+ * it (it loads when the browser is idle, or when + opens), and every device can add the food back once it has. A food only
+ * this device knows (a one-off dish) is kept when its catalogue has it. A quick kcal entry has no food.
+ */
+export function savableFood(foodId: string, byId: (id: string) => FoodItem | undefined): boolean {
+  return !!foodId && (isUuid(foodId) || byId(foodId) !== undefined);
+}
+
+/**
+ * What the save sheet says the day holds: every food it saves, and their kcal once the catalogue has every one of them (null
+ * until then, never a 0 for foods not counted yet).
+ */
+export function templateSaveSummary(meals: readonly DayTemplateMeal[], foods: FoodItem[]): { itemCount: number; kcal: number | null } {
+  const items = meals.flatMap((m) => m.items);
+  const known = new Set(foods.map((f) => f.id));
+  const kcal = items.every((i) => known.has(i.foodId)) ? templateTotals({ id: "", name: "", tag: "khac", meals: [...meals], createdAt: "" }, foods).kcal : null;
+  return { itemCount: items.length, kcal };
 }
 
 /** The toast after copying Hôm qua (Hôm kia, into yesterday): the words the copy sheet of Chép hôm qua has always used. */
