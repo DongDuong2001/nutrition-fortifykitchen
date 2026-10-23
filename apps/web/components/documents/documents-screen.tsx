@@ -362,11 +362,8 @@ export function DocumentsScreen() {
   );
 }
 
-const shortDate = (iso: string) =>
-  new Date(iso).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-  });
+// "23/10": vi-VN writes day and month alone with a dash, the app writes dd/mm
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }).replace("-", "/");
 
 /**
  * Mã truy cập cho học viên: a coach (HLV) or an admin makes a random code here and gives it to a learner, who types it in
