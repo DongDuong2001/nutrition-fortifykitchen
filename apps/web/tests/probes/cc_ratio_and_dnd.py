@@ -48,7 +48,7 @@ def test_home_and_select(browser):
     check(re.search(r"(\d[\d.]*|—)/\d[\d.]* g", hero_text) is not None, "HomeHero displays target grams alongside consumed")
 
     # 2. Test long press on first food item to enter select mode
-    first_food = pg.locator("section[aria-label*='Bữa'] button[aria-pressed][aria-label*=', ']").first
+    first_food = pg.locator("section[aria-label*='Bữa'] button[aria-pressed][aria-label*=', ']:not([data-hero-macro])").first
     first_food.wait_for(state="visible", timeout=4000)
 
     box = first_food.bounding_box()

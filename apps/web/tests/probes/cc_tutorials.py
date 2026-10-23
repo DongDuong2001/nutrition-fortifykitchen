@@ -43,8 +43,8 @@ OLD_TIPS = [
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 # share-spotlight: the share tip shows again after it was seen (until Để sau twice) and may follow Có gì mới; a returning user has shared once
-# meal-focus (22c, overnight 22→23/10) is the last tip of Hôm nay; seen here, so a reload after Có gì mới stays quiet
-RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
+# meal-focus (22c) and hero-macro (23a, overnight 22→23/10) are the last tips of Hôm nay; seen here, so a reload after Có gì mới stays quiet
+RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
 # The newest 8 of the joined tour on Hôm nay: 21c's first (Đồ ăn của Minh Hào: the Khám phá tab) and 22a's seven that are on Hôm nay: V3's meal +,
 # Ngày tập pill and Khám phá tab, feat/ngay-mau's two (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has
 # food), custom-food-nutrients' + Thêm vi chất khác (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel,
@@ -323,7 +323,7 @@ def portion_tips(browser):
 
 
 def drag(browser):
-    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
+    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
     go(pg, "/app", 1500)
     check(card(pg).count() == 0, "drag: no tip on Hôm nay before a sheet opens")
     pg.get_by_role("button", name="Tùy chọn ngày").first.tap()

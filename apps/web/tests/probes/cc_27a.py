@@ -56,7 +56,7 @@ def hero_count(pg):
 
 
 def meal_count(pg, name):
-    return pg.locator(f"section[aria-label='{name}'] [role=checkbox], section[aria-label='{name}'] button[aria-pressed][aria-label*=', ']").count()
+    return pg.locator(f"section[aria-label='{name}'] [role=checkbox], section[aria-label='{name}'] button[aria-pressed][aria-label*=', ']:not([data-hero-macro])").count()
 
 
 def start_select(pg):
