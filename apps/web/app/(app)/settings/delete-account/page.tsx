@@ -159,12 +159,12 @@ export default function DeleteAccountPage() {
         <PillButton
           type="button"
           variant="danger"
-          disabled={!isConfirmed}
-          aria-disabled={!isConfirmed}
+          disabled={!isConfirmed || deleting}
+          aria-disabled={!isConfirmed || deleting}
           aria-describedby="confirm-reason"
-          onClick={handleDelete}
+          onClick={() => void handleDelete()}
         >
-          Xóa tài khoản
+          {deleting ? "Đang xóa…" : "Xóa tài khoản"}
         </PillButton>
       </footer>
     </div>
