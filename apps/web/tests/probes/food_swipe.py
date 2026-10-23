@@ -199,10 +199,51 @@ def run(browser):
     ctx.close()
 
 
+def desktop(browser):
+    """Reviewer 24/10 (must): the swipe is touch only, so a mouse, a keyboard and a screen reader reach the same actions without it."""
+    ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+    ctx.add_init_script(NO_INSTALL)
+    pg = ctx.new_page()
+    pg.clock.set_fixed_time(NOW)
+    pg.goto(BASE + "/app", wait_until="networkidle")
+    pg.wait_for_timeout(2500)
+    check(pg.locator("[data-swipe-wrap]").count() == 0, "1440: with a mouse the rows have no swipe wrapper (nothing hidden behind the row)")
+    first = rows(pg).first
+    eid = first.get_attribute("data-entry-id")
+    first.click()
+    pg.wait_for_timeout(500)
+    edit = pg.get_by_role("link", name="Sửa món này")
+    check(first.get_attribute("aria-pressed") == "true" and edit.count() == 1, "1440: a click on a food picks it and shows the Sửa pill")
+    pg.screenshot(path=str(SHOTS / "1440-1-click-shows-sua.png"))
+    edit.click()
+    pg.wait_for_url(f"**/entry/{eid}*", timeout=8000)
+    pg.wait_for_timeout(800)
+    check(pg.get_by_role("button", name=re.compile("Xóa món")).count() == 1, "1440: Sửa leads to the edit screen, which has Xóa món")
+    pg.screenshot(path=str(SHOTS / "1440-2-entry-has-xoa.png"))
+    # keyboard: Tab to a row, Enter picks it, the Sửa pill is a link you can reach next
+    pg.goto(BASE + "/app", wait_until="networkidle")
+    pg.wait_for_timeout(2000)
+    row = rows(pg).first
+    row.focus()
+    pg.keyboard.press("Enter")
+    pg.wait_for_timeout(400)
+    check(row.get_attribute("aria-pressed") == "true" and pg.get_by_role("link", name="Sửa món này").count() == 1, "1440: Enter on a focused row picks it and shows Sửa (keyboard)")
+    ctx.close()
+    # a touch device keeps the swipe buttons in the accessibility tree under their names (VoiceOver reads them as the row's actions)
+    ctx, pg, cdp = new_page(browser)
+    first = rows(pg).first
+    eid = first.get_attribute("data-entry-id")
+    more, trash = wrap_buttons(pg, eid)
+    check((more.get_attribute("aria-label") or "").startswith("Tùy chọn cho ") and (trash.get_attribute("aria-label") or "").startswith("Xóa "), "390: the ⋯ and Xóa buttons are named in the accessibility tree even when the row is closed (VoiceOver)")
+    check(more.evaluate("(el) => getComputedStyle(el).display") != "none" and more.evaluate("(el) => getComputedStyle(el).visibility") != "hidden", "390: and they are not display:none or hidden")
+    ctx.close()
+
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     try:
         run(browser)
+        desktop(browser)
     finally:
         browser.close()
 
