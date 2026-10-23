@@ -1,7 +1,7 @@
 import { writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CATEGORY_EMOJI, EMOJI_RULES, MINH_HAO_EMOJI, foodEmoji, foodEmojiWithSource, nameWords } from "../food-emoji";
+import { CATEGORY_EMOJI, EMOJI_RULES, MINH_HAO_EMOJI, foodEmoji, foodEmojiWithSource, nameWords, NEUTRAL_EMOJI } from "../food-emoji";
 import { FOOD_CATEGORIES, type FoodCategory } from "../food-categories";
 import type { FoodItem } from "../catalog";
 
@@ -81,6 +81,19 @@ describe("foodEmoji: name rules", () => {
     expect(foodEmojiWithSource(food(name, category))).toEqual({ emoji, source: "rule" });
   });
 
+  // 12:40 review: a rule that keeps the category gives Đạm's neutral 🍽️, never the drumstick (tofu and beans are not chicken)
+  it("tofu and the other plant proteins in Đạm are 🍽️, not 🍗", () => {
+    for (const name of ["Đậu phụ", "Đậu hũ non", "Đậu hũ (đậu phụ trắng)", "Tàu hủ trắng cứng (hấp/luộc)", "Tàu hũ chiên", "Đậu gà (luộc)", "Đậu lăng nâu (luộc)", "Đậu đen (luộc)", "Đậu nành (luộc)", "Edamame (luộc)", "Tempeh", "Natto", "Miso"]) {
+      expect(foodEmojiWithSource(food(name, "dam")), name).toEqual({ emoji: NEUTRAL_EMOJI, source: "category" });
+    }
+    expect(NEUTRAL_EMOJI).toBe(CATEGORY_EMOJI.cua_toi);
+    // the same names outside Đạm keep their own category
+    expect(foodEmoji(food("Chè đậu đen", "an_vat"))).toBe(CATEGORY_EMOJI.an_vat);
+    expect(foodEmoji(food("Đậu phụ", "rau"))).toBe(CATEGORY_EMOJI.rau);
+    // an animal with no rule still takes Đạm's 🍗 (for Hao: lươn, chim cút, hải sâm…)
+    expect(foodEmoji(food("Chim cút (nấu chín)", "dam"))).toBe(CATEGORY_EMOJI.dam);
+  });
+
   // Hao 23/10 (11:00 review): chicken by cut, pork by cut
   it("ức gà is the bird 🐔, not a leg: ức, phi lê, lườn, gà xé, thịt gà and a chicken with no cut named", () => {
     for (const name of ["Ức gà", "Ức gà phi lê", "Ức gà luộc", "Ức gà nướng", "Lườn gà", "Gà xé phay", "Gà luộc xé", "Thịt gà", "Gà kho gừng", "Gà ta (luộc)", "Gan gà (sống)", "Da gà (nướng)"]) {
@@ -136,7 +149,7 @@ describe("foodEmoji: name rules", () => {
     expect(foodEmoji(food("Hoa chuối (bắp chuối)", "rau"))).toBe(CATEGORY_EMOJI.rau);
     expect(foodEmoji(food("Dưa lê", "trai_cay"))).toBe(CATEGORY_EMOJI.trai_cay);
     expect(foodEmoji(food("Trai sông (trai nước ngọt)", "dam"))).toBe("🦪");
-    expect(foodEmoji(food("Đậu gà", "dam"))).toBe(CATEGORY_EMOJI.dam);
+    expect(foodEmoji(food("Đậu gà", "dam"))).toBe(NEUTRAL_EMOJI);
     expect(foodEmoji(food("Nấm đùi gà", "rau"))).toBe("🍄");
     expect(foodEmoji(food("Cải bó xôi", "rau"))).toBe("🥬");
     expect(foodEmoji(food("Cơm dừa", "beo"))).toBe("🥥");

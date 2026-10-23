@@ -30,11 +30,13 @@ export const CATEGORY_EMOJI: Readonly<Record<FoodCategory, string>> = {
 };
 /** Đồ ăn của Minh Hào (Fortify Kitchen), when no name rule matches */
 export const MINH_HAO_EMOJI = "🍱";
+/** A food in Đạm that a rule keeps on its category: tofu and beans are not Đạm's drumstick (12:40 review; 🫘 is Unicode 14) */
+export const NEUTRAL_EMOJI = CATEGORY_EMOJI.cua_toi;
 
 interface Rule {
   /** Phrases of whole words, lower case with their marks */
   words: string[];
-  /** null: the food keeps its category's emoji (a fruit with no emoji of its own, "đậu phụ") */
+  /** null: the food keeps its category's emoji (a fruit with no emoji of its own), or 🍽️ in Đạm ("đậu phụ") */
   emoji: string | null;
   /** Only in these categories ("bơ" the fruit, not butter) */
   only?: FoodCategory[];
@@ -50,7 +52,9 @@ const NO_EMOJI_FRUITS = [
 export const EMOJI_RULES: readonly Rule[] = [
   // Names that hold another rule's word but are not that food ("Đậu bắp" is okra, not corn; "Đậu gà" is chickpeas; "Vú sữa" is not
   // milk; "Mâm xôi" is a raspberry)
-  { words: ["đậu phụ", "đậu hũ", "hạt nêm", "bơ bò", "bơ lạt", "bơ thực vật", "đậu bắp", "hoa chuối", "bắp chuối", "dưa lê", "đậu gà", "bánh tráng", "vú sữa", "diếp cá", "sừng bò", "mâm xôi"], emoji: null },
+  { words: ["đậu phụ", "đậu hũ", "tàu hủ", "tàu hũ", "hạt nêm", "bơ bò", "bơ lạt", "bơ thực vật", "đậu bắp", "hoa chuối", "bắp chuối", "dưa lê", "đậu gà", "bánh tráng", "vú sữa", "diếp cá", "sừng bò", "mâm xôi"], emoji: null },
+  // Plant proteins in Đạm: the neutral 🍽️, not the drumstick (the same beans in a chè keep Đồ ngọt's)
+  { words: ["đậu lăng", "đậu đen", "đậu đỏ", "đậu xanh", "đậu trắng", "đậu nành", "đậu ngự", "edamame", "tempeh", "natto", "miso"], emoji: null, only: ["dam"] },
   // Only as the seasoning: "Cánh gà chiên nước mắm" is chicken
   { words: ["nước mắm"], emoji: null, only: ["gia_vi"] },
   // Only as the grain: "Tép (tép gạo)" is shrimp
@@ -157,7 +161,8 @@ export function foodEmojiWithSource(food: EmojiFood): { emoji: string; source: F
   for (const rule of EMOJI_RULES) {
     if (rule.only && !rule.only.includes(category)) continue;
     if (rule.words.some((w) => words.includes(` ${w} `))) {
-      return rule.emoji ? { emoji: rule.emoji, source: "rule" } : { emoji: fallback(food, category), source: "category" };
+      if (rule.emoji) return { emoji: rule.emoji, source: "rule" };
+      return { emoji: category === "dam" ? NEUTRAL_EMOJI : fallback(food, category), source: "category" };
     }
   }
   return { emoji: fallback(food, category), source: "category" };
