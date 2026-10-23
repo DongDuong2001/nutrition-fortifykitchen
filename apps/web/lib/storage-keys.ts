@@ -13,6 +13,9 @@ import { OFFLINE_OUTBOX_KEY } from "./legacy-outbox-owner";
 // Named here, not in lib/saved-meals: that file pulls the whole diary (diary-edits, the sample foods) and this one is
 // on the sign-in page's path (cc-58)
 export const SAVED_MEALS_KEY = "h1t_saved_meals_v1";
+// Bữa ăn của tôi follow the account through the API (PUT /saved-meals/{id}); the flag says the first sync, which uploads what
+// this device saved before, is done
+export const SAVED_MEALS_SYNCED_KEY = "h1t_saved_meals_synced_v1";
 // Ngày ăn mẫu (feat/ngay-mau): the saved days, and the days whose "Chép ngày ăn mẫu" pill was hidden with its ×. Per account. The
 // saved days follow the account through the API (migration 000016, lib/day-template-store); the flag says the first sync, which
 // uploads what this device made before, is done. The hidden pills stay on the device.
