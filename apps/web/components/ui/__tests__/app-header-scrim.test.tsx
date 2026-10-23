@@ -40,6 +40,25 @@ describe("the status-bar scrim (fix/status-bar-scrim)", () => {
     expect(scrim()).toMatch(/--scrim-fade:\s*min\(12px,\s*calc\(var\(--scrim-inset\) \* 100\)\)/);
   });
 
+  it("is off at rest and on once content has scrolled under it (the data-scrolled mark), with a short fade; reduced motion is on/off", () => {
+    const u = scrim();
+    expect(u).toMatch(/opacity:\s*0;/);
+    expect(u).toMatch(/&\[data-scrolled\]\s*\{\s*opacity:\s*1;/);
+    expect(u).toContain("transition: opacity var(--m-switch-in) var(--ease-out)");
+    const reduced = /@media \(prefers-reduced-motion: reduce\) \{([^}]*)\}/.exec(u)?.[1] ?? "";
+    expect(reduced).toContain("transition: none");
+    // no scroll-driven animation: the mark comes from an IntersectionObserver, nothing runs per frame
+    expect(u).not.toContain("animation");
+  });
+
+  it("has a dark tint for a white clock: dark glass, solid ink under reduced transparency and more contrast", () => {
+    const u = scrim();
+    const dark = /&\[data-tint="dark"\]\s*\{([\s\S]*?)\n  \}/.exec(u)?.[1] ?? "";
+    expect(dark).toContain("background-color: var(--color-glass-tab-dark)");
+    expect(dark).toMatch(/prefers-reduced-transparency: reduce\) \{[^}]*background-color: var\(--color-ink\)/);
+    expect(dark).toMatch(/prefers-contrast: more\) \{[^}]*background-color: var\(--color-ink\)/);
+  });
+
   const phone = (props: React.ComponentProps<typeof AppHeader>) => renderToStaticMarkup(<AppHeader {...props} />);
   const scrimOf = (html: string) => /<div[^>]*data-status-scrim[^>]*>/.exec(html)?.[0] ?? "";
 
@@ -56,6 +75,9 @@ describe("the status-bar scrim (fix/status-bar-scrim)", () => {
     expect(el).toContain("pointer-events-none");
     expect(el).toContain('aria-hidden="true"');
     expect(html.match(/data-status-scrim/g)).toHaveLength(1);
+    expect(el).not.toContain("data-scrolled"); // off until the observer says content is under it
+    expect(el).toContain('data-tint="dark"'); // the default mode keeps the translucent status bar, whose clock is white
+    expect(html.match(/data-status-sentinel/g)).toHaveLength(1);
   });
 
   it("replaces the 24 px page-colour fade of the push screens", () => {

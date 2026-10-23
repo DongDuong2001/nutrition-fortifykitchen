@@ -58,3 +58,4 @@ apps/web/tests/probes/ag15_a11y_report.json
 
 # Production deploy secrets
 deploy/.env.prod
+.next-default/

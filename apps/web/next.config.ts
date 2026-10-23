@@ -79,6 +79,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "",
     NEXT_PUBLIC_APP_VERSION: APP_VERSION,
     NEXT_PUBLIC_DARK_MODE: process.env.DARK_MODE === "1" ? "1" : "",
+    // STATUS_BAR=default: iOS draws its own status bar with a black clock (lib/status-bar); anything else keeps black-translucent
+    NEXT_PUBLIC_STATUS_BAR: process.env.STATUS_BAR === "default" ? "default" : "",
     // ENGLISH=1 at build time turns the English flag on (lib/i18n), the same way
     NEXT_PUBLIC_ENGLISH: process.env.ENGLISH === "1" ? "1" : "",
   },
