@@ -12,8 +12,11 @@ export const PAGE_RETRY_WAITS_MS: readonly number[] = [1000, 3000];
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-/** The server said no (a page too big, no right to): sending it again says the same. Anything else (a 5xx, a dropped connection) may pass. */
-const refused = (err: unknown) => err instanceof CoursesError && err.status >= 400 && err.status < 500;
+/**
+ * The server said no (a page too big, no right to) or has no room (507, its disk is full): sending it again says the same. Anything
+ * else (another 5xx, a dropped connection) may pass.
+ */
+const refused = (err: unknown) => err instanceof CoursesError && ((err.status >= 400 && err.status < 500) || err.status === 507);
 
 export async function uploadPdfLesson(opts: {
   api: CoursesApi;

@@ -6,7 +6,7 @@ at Level 2 against Level 3. Coach: makes a course (code access), adds a part, up
 the button), adds a written lesson, reorders, makes a code; a learner opens the new course with that code and sees the three pages under
 the watermark. /documents redirects; Cài đặt no longer lists Tài liệu.
 Review fixes (24/10): Thêm bài is marked unsaved while a lesson is written or a PDF is converted and sent, closing it mid-upload asks
-(Dừng / Tiếp tục tải), a page that fails once is sent again (the mock fails page 2 once on sessionStorage h1t_mock_fail_page), and 60 pages
+(Dừng / Tiếp tục tải), a page that fails once is sent again (the mock fails page 2 once on sessionStorage h1t_mock_fail_page; a 507 says the server's disk is full, at once), and 60 pages
 are drawn on one canvas and every page is a real WebP, on Chromium and on WebKit (which cannot make WebP from a canvas: its pages come
 from the WASM encoder).
 Screenshots: .screenshots/courses/*.png (390×844 and 1440×900). Run with: ALIGN_BASE_URL=http://localhost:3120 npm run probe -- tests/probes/courses.py
@@ -411,6 +411,25 @@ def retry_flow(browser):
     ctx.close()
 
 
+def storage_full_flow(browser):
+    """The server's disk is full (the mock answers page 2 with a 507): the sheet says so in words, at once (no 'thử lại'), keeps no half lesson."""
+    tag = "390"
+    ctx, pg = new_page(browser, 390, 844)
+    ctx.add_init_script("try { sessionStorage.setItem('h1t_mock_fail_page', '2:9:507'); } catch (e) {}")
+    open_add_lesson(pg)
+    pick_pdf(pg, PDF, "Bài đầy ổ đĩa", 3)
+    pg.get_by_role("button", name="Thêm vào khóa").click()
+    alert = pg.get_by_role("dialog", name="Thêm bài").get_by_role("alert")
+    alert.wait_for(timeout=10000)
+    check("Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé." in alert.inner_text(), f"{tag}: a full server disk says 'Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé.' ({alert.inner_text()!r})")
+    check(pg.get_by_role("status").filter(has_text="Đang thử lại").count() == 0, f"{tag}: and it does not try again")
+    shot(pg, f"{tag}-c9-storage-full.png")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(900)
+    check("Bài đầy ổ đĩa" not in text(pg) and pg.locator("li[data-align-group=coach-lessons]").count() == 0, f"{tag}: no half lesson is left")
+    ctx.close()
+
+
 def written_lesson_marks(browser):
     tag = "390"
     ctx, pg = new_page(browser, 390, 844)
@@ -478,6 +497,7 @@ def run(browser):
     coach_flow(browser, 1440, 900)
     stop_upload_flow(browser)
     retry_flow(browser)
+    storage_full_flow(browser)
     written_lesson_marks(browser)
     sixty_pages(browser, "chromium")
     misc(browser)

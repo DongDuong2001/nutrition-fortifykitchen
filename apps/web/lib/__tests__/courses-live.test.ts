@@ -56,6 +56,15 @@ describe("the live client", () => {
     expect([e.status, e.kind]).toEqual([404, "other"]);
   });
 
+  it("a full server disk (507 STORAGE_FULL) says so in words, with the status for the code that decides what to do", async () => {
+    const { CoursesError } = await import("../courses");
+    reply = () => json(507, { error: { code: "STORAGE_FULL", message: "Not enough room left to store the lesson" } });
+    const e = (await (await api()).uploadPage("c1", "l1", 3, "UklGRg==").catch((x) => x)) as InstanceType<typeof CoursesError>;
+    expect(e).toBeInstanceOf(CoursesError);
+    expect(e.status).toBe(507);
+    expect(e.message).toBe("Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé.");
+  });
+
   it("progress, the coach's routes and the page upload use the contract's paths, methods and bodies", async () => {
     const a = await api();
     await a.progress("c1", "l1", { lastPage: 3 });

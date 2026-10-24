@@ -83,6 +83,15 @@ describe("uploadPdfLesson: a page that fails once is tried again", () => {
     expect(t.retried).toEqual([]);
   });
 
+  it("a full server disk (507) gives up at once too: another try in 1 s would find it just as full", async () => {
+    const { api, calls } = fakeApi({ 2: [new CoursesError(507)] });
+    const t = base(api);
+    await expect(t.run()).rejects.toMatchObject({ status: 507 });
+    expect(calls.filter((c) => c.startsWith("page2"))).toEqual(["page2#1"]);
+    expect(calls.at(-1)).toBe("delete");
+    expect(t.waits).toEqual([]);
+  });
+
   it("a page that cannot be made (PdfError) gives up at once and is never sent", async () => {
     const { api, calls } = fakeApi();
     const t = base(api, {

@@ -74,6 +74,8 @@ const MESSAGES: Record<number, string> = {
   409: "Bài này chưa đủ trang. Thử lại.",
   413: "Tệp quá lớn.",
   429: "Thử lại sau ít phút.",
+  // 507 STORAGE_FULL: the server's disk has less than 2 GiB left (apps/api internal/courses); only a page upload can get it
+  507: "Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé.",
 };
 
 /** A refusal from the API (or the mock). `kind` tells a wrong code from a lock; `lock` says why a course is shut. */

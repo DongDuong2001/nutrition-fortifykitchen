@@ -211,6 +211,16 @@ describe("the coach builds a course", () => {
     await api.uploadPage("c-an-quanh", id, 3, "UklGRg==");
   });
 
+  it("…with the status it is given: n:times:507 is a full disk", async () => {
+    const session = new Map<string, string>([["h1t_mock_fail_page", "2:1:507"]]);
+    globalThis.sessionStorage = { getItem: (k: string) => session.get(k) ?? null, setItem: (k: string, v: string) => void session.set(k, v), removeItem: (k: string) => void session.delete(k) } as Storage;
+    const api = coach();
+    const { id } = await api.addPdfLesson("c-an-quanh", { partId: "p-aq-1", title: "Ba trang", pageCount: 3 });
+    const e = await refusal(api.uploadPage("c-an-quanh", id, 2, "UklGRg=="));
+    expect([e.status, e.message]).toEqual([507, "Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé."]);
+    await api.uploadPage("c-an-quanh", id, 2, "UklGRg==");
+  });
+
   it("nothing fails unless that key is set", async () => {
     globalThis.sessionStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} } as unknown as Storage;
     const api = coach();
