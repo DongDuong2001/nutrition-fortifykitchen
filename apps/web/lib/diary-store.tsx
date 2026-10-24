@@ -593,6 +593,9 @@ function onDayText(day: string, todayIso: string): string {
 }
 
 
+/** How long after an add the change it makes still counts as local (lib/goals): the next change of the day is the add's own. */
+const LOCAL_ADD_WINDOW_MS = 3000;
+
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [demo, setDemo] = useState(false);
@@ -652,7 +655,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // local add, with what the account had before it. Only a local add can reach a goal, never a refetch.
   const goalBefore = useRef<GoalDay | null>(null);
   const pendingGoalCheck = useRef(false);
-  const goalAdd = useRef({ hadEntries: true, hadRecents: true });
+  const goalAdd = useRef({ hadEntries: true, hadRecents: true, at: 0 });
   const goalSnapshot = useRef({ hadEntries: true, hadRecents: true });
   // Gần đây has answered (live: /recents returned); an add before that gets no first-food moment
   const recentsAnswered = useRef(false);
@@ -1257,7 +1260,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   goalSnapshot.current = { hadEntries: edits.added.length > 0 || Object.keys(archive).length > 0, hadRecents: recentFoods.length > 0 };
   const markLocalAdd = useCallback(() => {
     pendingGoalCheck.current = true;
-    goalAdd.current = goalSnapshot.current;
+    goalAdd.current = { ...goalSnapshot.current, at: Date.now() };
   }, []);
 
   // Add a food entry
@@ -1787,8 +1790,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated || !todayIso) return;
     const after = goalDayFrom(compositeData, countedForLevel(level));
     const before = goalBefore.current;
-    const localAdd = pendingGoalCheck.current;
     const added = goalAdd.current;
+    // An add into an earlier day changes nothing today, so its mark would wait for a refetch: only the change that follows the add counts
+    const localAdd = pendingGoalCheck.current && Date.now() - added.at < LOCAL_ADD_WINDOW_MS;
     goalBefore.current = after;
     pendingGoalCheck.current = false;
     const record = loadGoalRecord();
