@@ -1,5 +1,67 @@
 # Changelog
 
+## [0.4.0](https://github.com/DongDuong2001/nutrition-fortifykitchen/compare/h1t-micro-v0.3.0...h1t-micro-v0.4.0) (2026-10-24)
+
+
+### Features
+
+* **api:** courses (Khoá → Phần → Bài) with access by open, code or Level, progress and PDF pages ([cb20a37](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/cb20a37d160e539d52e9e28524bfc82f7449886b))
+* **api:** PUT /foods/custom/{id} replaces one of the user's own custom foods ([e9ef91d](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/e9ef91d8d818e0a4695f675497e3e279132c7b39))
+* **api:** the user's Level on the profile (migration 000021) ([975b1f4](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/975b1f435579beb4c03ec716464b445f33aeaf50))
+* show vi chất and macros in the Ngày ăn mẫu builder ([f7344d9](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/f7344d91609e9a29000d1d31471205d81d53f280))
+* **web:** a full server disk says so (507 STORAGE_FULL) and is not retried ([ef9897f](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/ef9897f64aa743af527a7cdd42c5f5ded1a3cf6b))
+* **web:** a PDF lesson can be added from Safari and an iPhone (WASM WebP encoder) ([d641930](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/d641930cbcc8903008232e7e4905a8a5ee29b040))
+* **web:** Âm thanh setting, cue reads it, Level-up lands with the full chime ([fe324e0](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/fe324e0fc60909ba69d39122ef427f801bf23468))
+* **web:** apiClient.updateFood sends Sửa món to PUT /foods/custom/{id} ([df93ef2](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/df93ef20a82fa7c2a849a9d6ca60b557dd2cfe09))
+* **web:** coach header as the board; board comparison probe ([6b41168](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/6b41168ed5239d857a3ab23e0226b1088af428d7))
+* **web:** courses client (live API and demo mock), access, progress and tone logic with tests ([27f6c85](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/27f6c859fde7fb50edfec09a2b2b0937194f34b8))
+* **web:** courses in Khám phá: tiles, library, code sheet, course and coach screens, lesson reader; /documents redirects ([6392969](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/6392969cfba1f294bd2cf38111b577a7f3347b6c))
+* **web:** every cue site is a cue, and a local add queues its goal moment ([62f7984](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/62f7984e83f57d4a66e54be1598c97873922b357))
+* **web:** goal moments on Hôm nay (Đạt, Đủ kcal, Đủ chất) and the Đủ chất share text ([d7c3864](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/d7c3864348e2a11a340dac307468fb8563bc3a38))
+* **web:** hold Tinh bột, Đạm, Chất béo or Chất xơ on Hôm nay to see the foods behind it ([e694124](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/e694124e7d019d2caa432b8c053da79a5c8883f9))
+* **web:** lesson done, course finished and code accepted play their moments ([cec1a67](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/cec1a67c7555b6343a3c860da4344fba33de2583))
+* **web:** Level badge, Hôm nay header badge and the Level-up celebration ([cceb73b](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/cceb73ba386b3ffd7d643bb399f8f1c7d9024c99))
+* **web:** Món ăn của tôi plays the cues: delete, Hoàn tác, save a dish, edit a food ([744d621](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/744d621aa975b6340c91ca50ddfe6747f63eeb7e))
+* **web:** Ngày tập done, first food, save cues in Cài đặt, and the goal_moments probe ([af00aac](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/af00aac2c78a35535229c6fd9f1afb3c3ce9d882))
+* **web:** PDF pages as images in the browser (pdfjs-dist), a small markdown for written lessons ([889bd9f](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/889bd9fac7943b54a73b3cd17930fcca9a6fd518))
+* **web:** sound unlock on every activation, late resumes skipped, pure helpers for the goal moments ([c905ecd](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/c905ecd091b0a4b3b22b1d77560cc71629206d3e))
+* **web:** sound, goal and cue modules for sounds + goal moments ([7376917](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/73769176734f6737168905cb37a9107f39929d41))
+* **web:** Sửa món and Xoá món in Món ăn của tôi and on the food page ([70288ae](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/70288ae7e47c1884f49790aeceae1faf9879ec26))
+* **web:** swipe a food of today: left deletes, right opens the ⋯ menu ([105995a](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/105995a64e11adda951aadb31d5fe28dbd68631a))
+* **web:** the new Level badge (Badge.dc.html) ([326c7f7](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/326c7f7cabd2717c12f36294584ce223fc7fb271))
+* **web:** the profile save carries levelSeen when given, never level ([38d8404](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/38d84043a21c5ab3e3855e23e7933fe23bc054b7))
+* **web:** the profile save carries levelSeen when given, never level (from [#88](https://github.com/DongDuong2001/nutrition-fortifykitchen/issues/88)) ([b970005](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/b970005d351f4cedb66e0777dbf948991992e945))
+* **web:** the share image's Level header and Level 5 frame ([23ff772](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/23ff772defc5b2e69f02c42e20fcf9d16b3402c1))
+* **web:** the user's Level, Hôm nay's header badge and the Level-up celebration ([b106da9](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/b106da96c3037b4f5f9b37b55e2d74e6ae73d7f1))
+* **web:** Xoá món holds its DELETE in the outbox for the undo window, and Sửa món's form values ([4a28c06](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/4a28c06edaeb9de1bebd1a551cfaa57a3cb0e01d))
+
+
+### Bug fixes
+
+* **api:** courses refuse a page below 2 GiB free (507 STORAGE_FULL), and a new PDF lesson sweeps unfinished ones older than a day ([e24e266](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/e24e2662c4763ccf530b397393c997705abd8f55))
+* **api:** levelSeen above the level is stored as the level, not refused ([79779b8](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/79779b8eb283246039137b7a2888c9e27576dcf5))
+* keep a macro's target on one line, add screenshots ([81044ad](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/81044adfd03105a1786e892368d8a1b76c0685a2))
+* macro amounts and targets wrap as units at 200% text; new screenshots ([4f2017a](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/4f2017a68f35884f659d9446db6e1b2ca789dd3c))
+* vi chất lists all 22 at every Level, macros in Hôm nay's order, screenshots from the builder probe ([4b05189](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/4b051894c23f913622fcfa54e47af0c3a53d56b9))
+* **web:** a new press ends the click guard of a hold, so a stray guard never eats a real tap ([d10f186](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/d10f18652ffbf0106d373d46d321583621b2de3e))
+* **web:** an add into an earlier day cannot make a later refetch count as a local add ([0fafae5](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/0fafae580af336cd4f105f3c76e7230aa5323017))
+* **web:** course tile pill wraps at 200 % text; probe lists for the cumulative tour, chips and tips ([8e5fda6](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/8e5fda61ad23c96f593ae9c93291e3e8ac68632f))
+* **web:** courses client unwraps the {data} envelope the API answers with; live client tests ([9ad4a8c](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/9ad4a8c192f657e7364ecd83a3f38f604d0fb3a0))
+* **web:** Level review: no coach named in live mode, Close on the leading side, badge box covers its slant ([de63ee6](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/de63ee6647531687d543976bc795df3f804d62e0))
+* **web:** Level-up chimes when the badge lands, only an add into today counts as local, a Ngày tập first food keeps its moment ([244ad59](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/244ad59e376fe0da939fc7a3ae4d0b40d1436eb0))
+* **web:** library grid follows the text size (one column at 200 %); cc_57_strips scrolls its tile above the tab bar; the boards comparison is a manual tool ([3509a14](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/3509a1439596031920b29fa5c33349d20ead3714))
+* **web:** meal names in the share image are cobalt, as on Hôm nay ([558576b](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/558576b94361aba1e22c5d0e88e803cdbca7af5b))
+* **web:** one hold length, and Chuyển sang bữa… lists the day's meals including Trước tập ([0700694](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/07006941eb4efc5c822633f409c5fbf8f2e7c21f))
+* **web:** Sửa món and Xóa món copy follows docs/voice-audit.md (Xóa, Hủy, Tùy) ([57b3e65](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/57b3e658bd789ff97d5d5be0020096214428a594))
+* **web:** Sửa món keeps untouched values exactly, late Hoàn tác, no status code, confirm copy ([29f3166](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/29f3166c56fd8c37ca1dddfb5db5ad33dfaec6da))
+* **web:** swipe copy follows docs/voice-audit.md (Xóa, Tùy) ([eb62732](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/eb62732370dc6da703b7b506de248194a1629e1a))
+* **web:** the food list on a nutrient page adds up to the total at the top ([adea3bc](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/adea3bcbe1a0bb45cbf28dae14c207df6914b3bb))
+* **web:** the lesson check draws in (stroke-dasharray 1); the hero tour step says the number jumps; Q19 and Q20 answered ([4f9dff5](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/4f9dff511eb68c026ef25bf21188034d68e053d2))
+* **web:** the Level pill is one line at 390 (no lock beside the badge, a smaller badge) ([67d2a0d](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/67d2a0d137c637d7ac4f7ba02a3f52e67ee3f98a))
+* **web:** the sample courses stay out of the live build, one boards tool ([23e6bff](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/23e6bff1c667716d851fe7731c0f4d52be5e1211))
+* **web:** the sheen makes the bar track relative only for its run, so every other bar stays pixel for pixel ([06c97db](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/06c97db643b8e479e811d58ef2ad662c3617c959))
+* **web:** Thêm bài never loses a lesson to an update, retries a page, draws on one canvas ([6dff196](https://github.com/DongDuong2001/nutrition-fortifykitchen/commit/6dff196704ded768423e5c1adcf73b5c44027d5d))
+
 ## [0.3.0](https://github.com/DongDuong2001/nutrition-fortifykitchen/compare/h1t-micro-v0.2.1...h1t-micro-v0.3.0) (2026-10-23)
 
 
