@@ -106,7 +106,7 @@ Only when step 5 passed on **both** databases. Merge #88, then on the VPS:
 ssh deploy@14.225.210.185
 cd /var/www/nutrition-meals
 git rev-parse --short HEAD                                   # note it: the API to go back to (rollback below)
-deploy/deploy.sh                                             # latest main, with #88
+nice -n 19 deploy/deploy.sh                                  # latest main, with #88
 ```
 
 After the deploy: `curl -s https://api.lehongkhanh.vn/healthz`, sign in on the live app, Hôm nay loads (a 500 on `/me` means this database has no 000021), `GET /api/v1/me` has `"level":0,"levelSeen":0` for a user nobody has set, a profile save from Hồ sơ still saves.
@@ -149,7 +149,7 @@ Two ways back, in this order. The 000021 down file is the normal one: 000021 onl
 The API that does not read the columns goes back **first**, or `GET /me` answers 500 once they are gone. On production, after the `ssh`, `cd`, `psql17` and `export DATABASE_URL` lines of the production section; on staging, from your Mac as in the staging section.
 
 ```bash
-deploy/deploy.sh <the short sha noted before deploy.sh>       # production, on the VPS
+nice -n 19 deploy/deploy.sh <the short sha noted before deploy.sh>       # production, on the VPS
 psql17 -c "SELECT u.email, p.level, p.level_seen FROM nutrition.profiles p JOIN auth.users u ON u.id = p.user_id WHERE p.level > 0"   # note the Levels: they go with the columns
 ( echo 'BEGIN;'; cat ~/migrations-1023/000021_profile_level.down.sql; echo 'COMMIT;' ) | psql17 -q
 psql17 -Atc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'nutrition' AND table_name = 'profiles' AND column_name IN ('level', 'level_seen')"   # 0
