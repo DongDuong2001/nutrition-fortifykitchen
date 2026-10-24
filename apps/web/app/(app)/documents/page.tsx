@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
-import { DocumentsScreen } from "@/components/documents/documents-screen";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Tài liệu" };
-
-export default function DocumentsPage() {
-  return <DocumentsScreen />;
+/** Tài liệu moved into Khám phá as courses (an old link or bookmark lands on the library). */
+export default function DocumentsRedirect() {
+  redirect("/explore/documents");
 }

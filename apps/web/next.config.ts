@@ -52,8 +52,8 @@ const SECURITY_HEADERS = [
 ];
 
 // perf/live-bundle: the sample modules of lib/mock and their live stand-ins in lib/mock/live (same exports, what they
-// give outside demo mode). A live build never has a demo, so it gets the stand-ins and ships no sample day or food.
-const LIVE_STUBS = /(?:^|[\\/])mock[\\/](sample-foods|sample-day|history|weight-log|dish-demo-foods|recent-seed)$/;
+// give outside demo mode). A live build never has a demo, so it gets the stand-ins and ships no sample day, food or course.
+const LIVE_STUBS = /(?:^|[\\/])mock[\\/](sample-foods|sample-day|history|weight-log|dish-demo-foods|recent-seed|courses-mock)$/;
 
 const nextConfig: NextConfig = {
   // check:live-bundle builds into its own folder, so the demo build a running server serves is left alone

@@ -41,7 +41,7 @@ RELEASE = "2026-10-23a"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
 ITEMS = ["Giao diện mới: sáng hơn, nhiều màu hơn", "Nút + ở từng bữa", "Nhóm món có biểu tượng màu", "Mẹo không làm phiền", "So sánh món ngay khi đang thêm", "Ngày ăn mẫu", "Đổi tên cho dễ hiểu", "Nhập đủ vi chất trên nhãn", "Chia sẻ ngày ăn bằng một chạm"]  # the stack on top of 21c: V3, So sánh, Ngày ăn mẫu, the new names, custom-food-nutrients, share-spotlight (2026-10-22a)
-ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự chọn thời gian tập", "Tự tạo ngày ăn mẫu", "Kcal từ đạm, tinh bột, béo", "Món ăn có biểu tượng cho dễ tìm", "Thêm danh sách Giàu …", "Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào", "Sửa và xóa Món ăn của tôi", "Ảnh chia sẻ: tên bữa màu xanh như Hôm nay", "Vuốt món để xóa hoặc mở tùy chọn"]  # the night of 22→23/10 and 23→24/10 (2026-10-23a, shared by its PRs): three tour steps (the hold on the hero, Món ăn của tôi, vuốt món)
+ITEMS_2310A = ["Góp ý & báo lỗi ngay trong app", "Hôm nay dễ đọc hơn", "Dễ dùng hơn trên máy tính", "Tự chọn thời gian tập", "Tự tạo ngày ăn mẫu", "Kcal từ đạm, tinh bột, béo", "Món ăn có biểu tượng cho dễ tìm", "Thêm danh sách Giàu …", "Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào", "Sửa và xóa Món ăn của tôi", "Ảnh chia sẻ: tên bữa màu xanh như Hôm nay", "Vuốt món để xóa hoặc mở tùy chọn", "Tài liệu thành khóa học"]  # the night of 22→23/10 and 23→24/10 (2026-10-23a, shared by its PRs): four tour steps (the hold on the hero, Món ăn của tôi, vuốt món, Tài liệu)
 ITEMS_2210C = ["Món ghi theo gam", "Tổng quan đếm vi chất như Hôm nay", "Số trung bình ghi rõ"]  # overnight 22→23/10 (2026-10-22c), no tour
 ITEMS_2210B = ["Chia macro và Ngày ăn mẫu giờ đồng bộ giữa các máy"]  # backend-sync-1022 (2026-10-22b): one item, no tour
 ITEMS_2110C = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add, polish, rich-tabs, minh-hao-tab, glide, swap-ingredients (2026-10-21c, live)
@@ -155,7 +155,7 @@ def once(browser):
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
     check(all(t in text for t in ITEMS_2310A) and ITEMS_2210C[0] not in text, "the release's items (23a), not 22c's")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 23a has a tour (the hold on the hero, Món ăn của tôi, vuốt món)")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 23a has a tour (the hold on the hero, Món ăn của tôi, vuốt món, Tài liệu)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -307,7 +307,7 @@ def home_tour(browser):
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
     # 21b's 2 + 21c's 2 + 22a's 7 on Hôm nay (So sánh món is in the portion panel; + Thêm vi chất khác is the + of the bar) + 23a's 1 = 12, cut to 8 (22a's seven and 23a's one)
-    steps = [("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Chép ngày ăn mẫu", ["day-template-pill", "meal-pill"]), ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]), ("Sửa hoặc xóa món của bạn", ["nav-explore"]), ("Vuốt món để xóa hoặc mở tùy chọn", ["home-food-list", "meal-pill"])]
+    steps = [("Thêm vào từng bữa", ["meal-add", "nav-add"]), ("Ngày tập", ["training-pill", "day-date"]), ("Nhóm món có màu", ["nav-explore"]), ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]), ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]), ("Sửa hoặc xóa món của bạn", ["nav-explore"]), ("Vuốt món để xóa hoặc mở tùy chọn", ["home-food-list", "meal-pill"]), ("Tài liệu thành khóa học", ["explore-courses", "nav-explore"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()

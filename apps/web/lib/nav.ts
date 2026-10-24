@@ -30,7 +30,7 @@ const OWNER: Record<string, NavTab> = {
   privacy: "settings",
   terms: "settings",
   admin: "settings",
-  documents: "settings",
+  documents: "explore",
   micros: "today",
   trends: "overview",
   training: "today",
@@ -50,8 +50,8 @@ export function tabForPath(pathname: string | null | undefined): NavTab | null {
 /** Where back goes when there is no in-app history: the screen's parent, or its owning tab. */
 export function backFallback(pathname: string | null | undefined, search?: string | null): string {
   if (!pathname) return HOME_ROUTE;
-  const [first, second, third] = segments(pathname);
-  const target = backTarget(first, second, third, search);
+  const [first, second, third, fourth] = segments(pathname);
+  const target = backTarget(first, second, third, search, fourth);
   // Day screens keep the day being viewed, so back from a past day lands on that day, not on today.
   const date = new URLSearchParams(search ?? "").get("date");
   const isDayScreen = first === "micros" || first === "training" || first === "add" || first === "entry";
@@ -65,7 +65,7 @@ function compareBack(search: string | null | undefined): string {
   return first ? `/foods/${first}` : "/add";
 }
 
-function backTarget(first: string | undefined, second: string | undefined, third: string | undefined, search?: string | null): string {
+function backTarget(first: string | undefined, second: string | undefined, third: string | undefined, search?: string | null, fourth?: string): string {
   if (first === "micros" && second) return "/micros";
   if (first === "micros" || first === "training") return HOME_ROUTE;
   if (first === "trends" && second) return "/trends";
@@ -75,9 +75,13 @@ function backTarget(first: string | undefined, second: string | undefined, third
   }
   if (first === "explore" && second === "coaches" && third) return "/explore/coaches";
   if (first === "explore" && second === "ngay-mau" && third) return "/explore/ngay-mau";
+  // Tài liệu: a lesson goes back to its course, a course to the library
+  if (first === "explore" && second === "documents" && third && fourth) return `/explore/documents/${third}`;
+  if (first === "explore" && second === "documents" && third) return "/explore/documents";
   if (first === "foods" && second === "compare") return compareBack(search);
   if (first === "explore" || first === "foods") return "/explore";
-  if (first === "privacy" || first === "terms" || first === "admin" || first === "documents") return "/settings";
+  if (first === "privacy" || first === "terms" || first === "admin") return "/settings";
+  if (first === "documents") return "/explore/documents";
   if (first === "add" || first === "entry") return HOME_ROUTE;
   return HOME_ROUTE;
 }

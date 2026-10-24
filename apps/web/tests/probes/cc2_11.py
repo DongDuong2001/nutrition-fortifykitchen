@@ -108,7 +108,7 @@ def check_explore(browser, size_name, size):
         chip_names = [t.strip() for t in pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true").all_inner_texts()]
         # Huấn luyện viên and Bảng xếp hạng are Dong's chips (task-04); the food categories are the rest
         category_chips = [t for t in chip_names if t not in ("Huấn luyện viên", "Bảng xếp hạng")]
-        check(len(category_chips) == 13, f"{size_name} explore: Tất cả + 12 category chips, Đồ uống included ({len(category_chips)})")
+        check(len(category_chips) == 14, f"{size_name} explore: Tất cả + Tài liệu + 12 category chips, Đồ uống included ({len(category_chips)})")
     shot(pg, "explore", size_name)
     no_h_scroll(pg, f"{size_name} explore")
 

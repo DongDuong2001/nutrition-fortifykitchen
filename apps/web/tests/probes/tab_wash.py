@@ -74,7 +74,7 @@ def main():
         check(chips[0][1] == "rgb(0, 127, 150)" and chips[0][2] == "rgb(255, 255, 255)" and chips[0][3] == "page", f"the active chip is teal with white text ({chips[0]})")
         check(all(c[1] == "rgba(0, 0, 0, 0)" and c[2] == "rgb(99, 99, 102)" for c in chips[1:]), f"the others are unchanged ({chips[1:]})")
         # ---- the chip rows' fades (ChipScroller mask)
-        ROW = "[role=group][aria-label='Huấn luyện viên và bảng xếp hạng']"
+        ROW = "[role=group][aria-label='Lối tắt']"
         FADES = """(row) => { const c = getComputedStyle(row); const r = row.getBoundingClientRect();
           return { edges: row.dataset.fadeEdges ?? null, mask: c.maskImage || c.webkitMaskImage, right: r.right, top: r.top, height: r.height, over: row.scrollWidth > row.clientWidth + 1 }; }"""
         phone.goto(BASE + "/explore", wait_until="networkidle")

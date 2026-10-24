@@ -80,9 +80,11 @@ export default function ExplorePage() {
         { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
       ]
     : [];
+  // Tài liệu (courses) is there in live mode too; the coaching chips stay demo-only
+  const topChips = [...demoChips, { id: "documents", label: "Tài liệu", onClick: () => router.push("/explore/documents") }];
   const chips = [
     { id: "all", label: "Tất cả", active: true, icon: <IconTile k="all" size={20} /> },
-    ...demoChips,
+    ...topChips,
     ...FOOD_CATEGORIES.map((c) => ({
       id: c.key,
       label: c.label,
@@ -104,12 +106,10 @@ export default function ExplorePage() {
       />
 
       <main className="relative mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-4">
-        {/* Phone: the groups are Nhóm món below, so only the demo shortcuts stay as chips; desktop: the whole row */}
-        {demoChips.length > 0 && (
-          <div className="lg:hidden">
-            <ChipGroup scroll items={demoChips} ariaLabel="Huấn luyện viên và bảng xếp hạng" data-align-group="add-list" data-align-edge="left" />
-          </div>
-        )}
+        {/* Phone: the groups are Nhóm món below, so only the shortcuts (coaches, ranking in demo, Tài liệu) stay as chips; desktop: the whole row */}
+        <div className="lg:hidden">
+          <ChipGroup scroll items={topChips} ariaLabel="Lối tắt" data-align-group="add-list" data-align-edge="left" />
+        </div>
         <div className="max-lg:hidden">
           <ChipGroup scroll items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
         </div>

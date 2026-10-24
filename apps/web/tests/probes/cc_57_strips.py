@@ -121,6 +121,10 @@ def main():
         r = Rec(pg, "03-press-chip")
         # V3: Khám phá has no chip row on a phone; a Món giàu vi chất tile is the pressable that scales
         chip = pg.locator('#explore-rich a:visible').nth(1)
+        # The Tài liệu carousel (feat/courses-web) is above Món giàu vi chất now, which can start under the fold: bring the tile on screen first
+        chip.scroll_into_view_if_needed()
+        pg.evaluate("window.scrollBy(0, 220)")
+        pg.wait_for_timeout(300)
         box = chip.bounding_box()
         pg.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         pg.mouse.down()

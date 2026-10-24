@@ -16,6 +16,7 @@ import { Carousel } from "@/components/ui/carousel";
 import { FoodCardLink } from "@/components/foods/food-card-link";
 import { RichCarousel } from "@/components/explore/rich-carousel";
 import { MinhHaoCarousel } from "@/components/explore/minh-hao-carousel";
+import { CoursesCarousel } from "@/components/explore/courses-carousel";
 import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
 import { collapseTwins, dedupeTwins, rowName } from "@/lib/food-rows";
@@ -152,6 +153,8 @@ export function ExploreSections() {
 
   return (
     <>
+      <CoursesCarousel />
+
       <MinhHaoCarousel />
 
       <RichCarousel />

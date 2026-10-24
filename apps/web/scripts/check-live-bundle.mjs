@@ -15,6 +15,7 @@ const MARKERS = [
   { marker: '"item-4"', what: "sample day meals (lib/mock/sample-day.ts)" },
   { marker: "food-com-gao-lut", what: "mock foods (lib/mock/sample-foods.ts)" },
   { marker: "food-yogurt-kefir", what: "mock foods (lib/mock/sample-foods.ts, also named by lib/mock/recent-seed.ts)" },
+  { marker: "Vì sao theo dõi 22 vi chất", what: "mock courses (lib/mock/courses-mock.ts)" },
 ];
 
 function files(dir, out = []) {

@@ -15,7 +15,8 @@ export function contentSecurityPolicy({ development, apiOrigin }: { development:
   ].filter(Boolean);
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' ${development ? "'unsafe-eval' " : ""}https://hcaptcha.com https://*.hcaptcha.com`,
+    // 'wasm-unsafe-eval': WebAssembly may compile, JavaScript eval may not (the WASM WebP encoder of Thêm bài, which a WebKit coach's browser loads)
+    `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${development ? "'unsafe-eval' " : ""}https://hcaptcha.com https://*.hcaptcha.com`,
     "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",

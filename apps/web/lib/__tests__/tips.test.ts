@@ -16,11 +16,11 @@ const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DE
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
 
 describe("the tips table", () => {
-  it("has the 15 tips of the design boards, cc-49's Chưa lưu, the sheet, offline and cc-53b's portion tips, each with the card copy", () => {
+  it("has the 15 tips of the design boards, cc-49's Chưa lưu, the sheet, offline, cc-53b's portion tips and Học tiếp, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu", "food-swipe",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu", "food-swipe", "course-resume",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -452,5 +452,15 @@ describe("pickTip: the ⋯ of Món ăn của tôi (Job C)", () => {
     expect(ids(ctx({ pathname: "/explore/dam" }), flags())).toBeNull();
     expect(ids(ctx({ pathname: "/explore/cua_toi" }), flags({ seen: ["own-food-menu"] }))).toBeNull();
     expect(ids(ctx({ pathname: "/explore/cua_toi" }), flags({ used: ["own-food-menu"] }))).toBeNull();
+  });
+});
+
+describe("course-resume (Học tiếp)", () => {
+  it("shows on the library and on a course, not on the reader or Hôm nay, and a tap on Học tiếp retires it", () => {
+    expect(ids(ctx({ pathname: "/explore/documents" }))).toBe("course-resume");
+    expect(ids(ctx({ pathname: "/explore/documents/c-1" }))).toBe("course-resume");
+    expect(ids(ctx({ pathname: "/explore/documents/c-1/l-2" }))).not.toBe("course-resume");
+    expect(ids(ctx({ pathname: "/app" }))).not.toBe("course-resume");
+    expect(ids(ctx({ pathname: "/explore/documents" }), flags({ used: ["course-resume"] }))).not.toBe("course-resume");
   });
 });

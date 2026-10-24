@@ -7,7 +7,9 @@ describe("contentSecurityPolicy (cc-63, X6)", () => {
   it("production: no localhost in connect-src, and a form can only post to this site", () => {
     const csp = contentSecurityPolicy({ development: false, apiOrigin: "https://api.fortifykitchen.example" });
     expect(csp).not.toMatch(/localhost/);
-    expect(csp).not.toContain("unsafe-eval");
+    // JavaScript eval stays shut; WebAssembly may compile (the WASM WebP encoder of Thêm bài, for WebKit)
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(directive(csp, "script-src")).toContain("'wasm-unsafe-eval'");
     expect(directive(csp, "form-action")).toBe("form-action 'self'");
     expect(directive(csp, "connect-src")).toContain("https://api.fortifykitchen.example");
     expect(directive(csp, "connect-src")).toContain("https://*.supabase.co");
@@ -21,10 +23,10 @@ describe("contentSecurityPolicy (cc-63, X6)", () => {
     expect(directive(csp, "form-action")).toBe("form-action 'self'");
   });
 
-  it("no empty entry when there is no API origin, and the rest is unchanged (script-src keeps 'unsafe-inline' for now)", () => {
+  it("no empty entry when there is no API origin, and the rest is unchanged (script-src keeps 'unsafe-inline' for now, and gains 'wasm-unsafe-eval')", () => {
     const csp = contentSecurityPolicy({ development: false, apiOrigin: "" });
     expect(directive(csp, "connect-src")).not.toMatch(/\s{2}/);
-    expect(directive(csp, "script-src")).toBe("script-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com");
+    expect(directive(csp, "script-src")).toBe("script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://hcaptcha.com https://*.hcaptcha.com");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("base-uri 'self'");
