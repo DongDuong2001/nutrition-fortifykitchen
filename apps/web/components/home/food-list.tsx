@@ -162,8 +162,8 @@ function FoodRow({
       className={`${motionClass} ${touchDrag?.enabled ? "m-drag-lift" : ""} relative flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 py-1 text-left after:pointer-events-none after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-divider after:content-[''] lg:min-h-12 ${
         isDragging ? "opacity-40" : ""
       } ${
-        selected ? "bg-cobalt text-on-accent" : swipeable ? "touch-pan-y bg-card text-text" : "bg-transparent text-text"
-      }`}
+        swipeable ? "touch-pan-y" : ""
+      } ${selected ? "bg-cobalt text-on-accent" : swipeable ? "bg-card text-text" : "bg-transparent text-text"}`}
     >
       {/* The name, its markers and, on a line of its own, how it was weighed (cc-53b) */}
       <span className={`flex min-w-0 flex-wrap items-center gap-x-1.5 ${detail ? "py-0.5" : ""}`}>
