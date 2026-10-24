@@ -20,11 +20,13 @@ export type SwipeRest = "closed" | "left" | "right";
 export type SwipeEnd = "delete" | "open-left" | "open-right" | "menu" | "close";
 export type SwipeState = "idle" | "pressing" | "swiping" | "scroll" | "done";
 
+const rightMax = (width: number) => Math.round(width * SWIPE_RIGHT_MAX_FRACTION);
+
 /** Where the row is for a finger that has moved `dx` since it went down, starting from where the row rests. */
 export function offsetFor(rest: SwipeRest, dx: number, width: number): number {
   const base = rest === "left" ? -SWIPE_ACTION_PX : rest === "right" ? SWIPE_ACTION_PX : 0;
   const raw = base + dx;
-  const right = Math.round(width * SWIPE_RIGHT_MAX_FRACTION);
+  const right = rightMax(width);
   if (raw < -width) return -width + (raw + width) * RUBBER;
   if (raw > right) return right + (raw - right) * RUBBER;
   return raw;
@@ -33,8 +35,9 @@ export function offsetFor(rest: SwipeRest, dx: number, width: number): number {
 /** What letting go at `offset` does. */
 export function endOf(rest: SwipeRest, offset: number, width: number): SwipeEnd {
   if (offset <= -width * SWIPE_DELETE_FRACTION) return "delete";
-  // Resting on the ⋯ already puts the row past 25 % of a narrow row: from there it takes half a button more to open the menu
-  if (rest === "right") return offset >= SWIPE_ACTION_PX * 1.5 ? "menu" : offset > SWIPE_ACTION_PX / 2 ? "open-right" : "close";
+  // Resting on the ⋯ already puts the row past 25 % of a narrow row: from there it takes half a button more to open the menu, but never
+  // more than the pull can give (it is held at 35 % of the row, then a quarter of the finger: 65 px on the 185 px column, so 84 px was ~85 px of finger)
+  if (rest === "right") return offset >= Math.min(SWIPE_ACTION_PX * 1.5, rightMax(width) + 4) ? "menu" : offset > SWIPE_ACTION_PX / 2 ? "open-right" : "close";
   if (offset >= width * SWIPE_OPEN_FRACTION) return "menu";
   if (rest === "left") return offset < -SWIPE_ACTION_PX / 2 ? "open-left" : "close";
   if (offset <= -width * SWIPE_OPEN_FRACTION) return "open-left";

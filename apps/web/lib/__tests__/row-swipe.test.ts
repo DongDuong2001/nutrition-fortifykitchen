@@ -88,6 +88,34 @@ describe("endOf: what a release does", () => {
   });
 });
 
+// Bug 4 (lead audit 24/10): from a row resting on ⋯ the menu was wanted at 84 px, but the right pull is held at 35 % of the row (65 px at
+// 185) and then gives a quarter: the finger had to travel about 85 px more. A firm right swipe always reaches the menu, at any width and rest.
+describe("a firm right swipe reaches the menu from every rest", () => {
+  // A firm swipe: a third of the row's width with the finger (62 px on the phone column, 107 px on a wider one)
+  for (const width of [185, 320]) {
+    const firm = Math.round(width / 3);
+    for (const rest of ["closed", "right"] as const) {
+      it(`${width} px, resting ${rest}: ${firm} px of finger opens the menu`, () => {
+        const s = createRowSwipe({ width, rest });
+        s.down(40, 100);
+        s.move(40 + firm, 100);
+        expect(s.up()).toBe("menu");
+      });
+    }
+  }
+
+  it("resting on ⋯, the menu is within 30 px of finger on the narrow row, the closed row's threshold is as it was", () => {
+    // 185 px: the pull stops at 65 px, so from ⋯ (56) the finger only needs a little more than the cap
+    expect(endOf("right", offsetFor("right", 30, 185), 185)).toBe("menu");
+    // A short pull from ⋯ still rests (it does not open the menu by accident) and a push back still closes
+    expect(endOf("right", offsetFor("right", 5, 185), 185)).toBe("open-right");
+    expect(endOf("right", offsetFor("right", -40, 185), 185)).toBe("close");
+    // Closed: 25 % of the row, as before
+    expect(endOf("closed", 0.24 * 185, 185)).toBe("open-right");
+    expect(endOf("closed", 0.26 * 185, 185)).toBe("menu");
+  });
+});
+
 describe("a whole gesture", () => {
   it("up() answers with the end, once, and the machine is done", () => {
     const s = createRowSwipe({ width: W, rest: "closed" });
