@@ -23,7 +23,7 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 NOW = "2026-10-15T10:00:00+07:00"
 PAST = "2026-10-14"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
-LIST = "document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling"
+LIST = "document.querySelector('aside[aria-label=\"Vi chất\"]').parentElement.previousElementSibling"
 problems, notes = [], []
 
 
@@ -92,7 +92,7 @@ def run(browser, size, tag):
     n = foods.count()
     check(n >= 7, f"{tag} foods listed: {n}")
     if phone:
-        box = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling; return [l.scrollHeight, l.clientHeight]; })()")
+        box = pg.evaluate("(() => { const a = document.querySelector('aside[aria-label=\"Vi chất\"]'); const l = a.parentElement.previousElementSibling; return [l.scrollHeight, l.clientHeight]; })()")
         check(box[0] <= box[1] + 1, f"{tag} all foods visible without scrolling the list ({box})")
         col = pg.evaluate("(() => { const a = document.querySelector('aside[aria-label=\"Vi chất\"] > div'); return [a.scrollHeight, a.clientHeight]; })()")
         check(col[0] <= col[1] + 1, f"{tag} nutrient column fits ({col})")
@@ -204,7 +204,7 @@ def run(browser, size, tag):
     else:
         pg.evaluate(LIST + ".scrollTop = " + LIST + ".querySelector('section').offsetHeight / 2")
         pg.wait_for_timeout(200)
-        sticky = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling; const hs = [...l.querySelectorAll('button[aria-pressed]:not([aria-label*=\", \"])')]; return hs.map(h => Math.round(h.getBoundingClientRect().top - l.getBoundingClientRect().top)); })()")
+        sticky = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').parentElement.previousElementSibling; const hs = [...l.querySelectorAll('button[aria-pressed]:not([aria-label*=\", \"])')]; return hs.map(h => Math.round(h.getBoundingClientRect().top - l.getBoundingClientRect().top)); })()")
         # V3: the 44 px meal header row sticks flush to the top of the list (the card's 1 px border above it)
         check(any(abs(v - 1) <= 1 for v in sticky), f"{tag} a meal header sticks to the top of the list ({sticky}, scrollTop {pg.evaluate(LIST + '.scrollTop')})")
     # empty day: the slot rows
