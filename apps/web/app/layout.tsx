@@ -12,6 +12,7 @@ import { Vitals } from "@/components/vitals";
 import { CHUNK_RELOAD_SCRIPT } from "@/lib/chunk-reload-script";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 import { THEME_SCRIPT } from "@/lib/theme";
+import { SoundArm } from "@/components/sound-arm";
 import { ThemeSync } from "@/components/theme-sync";
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default function RootLayout({
         <KeyboardGuard />
         <Vitals />
         <ThemeSync />
+        <SoundArm />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>

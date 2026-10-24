@@ -70,4 +70,18 @@ describe("Settings store (lib/settings.ts)", () => {
     const loaded = loadSettings(storage);
     expect(loaded).toEqual(DEFAULT_SETTINGS);
   });
+
+  it("sound ('Âm thanh') is null until the person touches the switch, then the boolean they chose", () => {
+    expect(DEFAULT_SETTINGS.sound).toBeNull();
+    const storage = fakeStorage();
+    expect(loadSettings(storage).sound).toBeNull();
+    saveSettings({ sound: false }, storage);
+    expect(loadSettings(storage).sound).toBe(false);
+    saveSettings({ sound: true }, storage);
+    expect(loadSettings(storage).sound).toBe(true);
+  });
+
+  it("a stored sound that is not a boolean reads as untouched", () => {
+    expect(loadSettings(fakeStorage({ [SETTINGS_STORAGE_KEY]: JSON.stringify({ sound: "no" }) })).sound).toBeNull();
+  });
 });

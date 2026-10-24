@@ -1,5 +1,6 @@
 import { haptic, type HapticKind } from "./haptics";
 import type { Moment } from "./goals";
+import { loadSettings } from "./settings";
 import { playSound, type SoundKind } from "./sound";
 import { accountStorage, type KeyValueStore } from "./storage-keys";
 
@@ -23,9 +24,13 @@ export const TIER_CUE: Readonly<Record<Moment["tier"], SoundKind>> = { 1: "goal"
 // full vibrates goal100 twice: 15·60·15 ms, a 120 ms rest, 15·60·15 ms (the mockup's pattern)
 const SECOND_GOAL_MS = 15 + 60 + 15 + 120;
 
-/** `sound`: the Âm thanh switch (null until the person touches it, lib/sound soundWanted). */
-export function cue(kind: SoundKind, storage: KeyValueStore | null = accountStorage(), sound: boolean | null = null): void {
+/** The sound alone, with the Âm thanh switch (null until the person touches it, lib/sound soundWanted): Level-up's land, which already vibrates. */
+export function cueSound(kind: SoundKind, storage: KeyValueStore | null = accountStorage()): void {
+  playSound(kind, loadSettings(storage).sound);
+}
+
+export function cue(kind: SoundKind, storage: KeyValueStore | null = accountStorage()): void {
   haptic(CUE_HAPTICS[kind], storage);
   if (kind === "full") setTimeout(() => haptic("goal100", storage), SECOND_GOAL_MS);
-  playSound(kind, sound);
+  cueSound(kind, storage);
 }

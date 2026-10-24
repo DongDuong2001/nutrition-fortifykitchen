@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { MAX_LEVEL } from "@/lib/coaching-link";
+import { cueSound } from "@/lib/cue";
 import { haptic } from "@/lib/haptics";
 import { levelUpAnnouncement, levelUpReward, levelUpSubtitle, type LevelStep } from "@/lib/level-copy";
 import s from "./level-up.module.css";
@@ -117,6 +118,8 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   useEffect(() => {
     later(() => setSaid(levelUpAnnouncement(step, coachName)), 150);
     closeRef.current?.focus({ preventScroll: true });
+    // The badge lands: the full chime, sound only (the hatch below vibrates). It follows the Âm thanh switch, reduced motion or not
+    later(() => cueSound("full"), reduced ? 150 : H - 100);
     if (reduced) return clear;
     for (const ms of CROSS_FADES) later(() => haptic("tick"), ms);
     later(() => haptic("levelUp"), H - 100);

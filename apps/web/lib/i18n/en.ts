@@ -31,6 +31,8 @@ export const en: Record<MessageKey, Message> = {
   "settings.app.tips.hint": "Turn on to see the first-visit tips again",
   "settings.app.haptics": "Vibrate on tap",
   "settings.app.haptics.hint": "A light buzz when you save, delete or undo",
+  "settings.app.sound": "Sound",
+  "settings.app.sound.hint": "When you add food and when you reach a goal",
   "settings.app.language": "Language",
   "settings.app.language.vi": "Tiếng Việt",
   "settings.app.language.en": "English",

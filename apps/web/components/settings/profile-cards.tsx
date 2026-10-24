@@ -16,6 +16,7 @@ import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboardin
 import { profileToDraft } from "@/lib/profile";
 import { loadSettings, saveSettings } from "@/lib/settings";
 import { canVibrate, haptic, hapticsWanted } from "@/lib/haptics";
+import { iosWithoutAudioSession, playSound, soundWanted } from "@/lib/sound";
 import type { OnboardingFlags } from "@/lib/onboarding-flags";
 import { loadFlags, markUsed, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { startTour } from "@/lib/tour-bus";
@@ -374,6 +375,17 @@ export function AppCard() {
     markUsed("haptics-switch");
     if (on) haptic("saved");
   };
+  // "Âm thanh" (feat/sound-goals): on every device; an iPhone without navigator.audioSession starts off. Read after mount.
+  const [sound, setSound] = useState<boolean | null>(null);
+  useEffect(() => {
+    setSound(soundWanted(loadSettings().sound, iosWithoutAudioSession(navigator)));
+  }, []);
+  const toggleSound = (on: boolean) => {
+    saveSettings({ sound: on });
+    setSound(on);
+    // Switching it on plays the add sound once, as Rung khi chạm vibrates once; no vibration
+    if (on) playSound("add", true);
+  };
   useEffect(() => {
     setFlags(loadFlags());
     return subscribeFlags(() => setFlags(loadFlags()));
@@ -446,6 +458,20 @@ export function AppCard() {
             <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label={t("settings.app.haptics")} />
           </SettingsRow>
         </div>
+      )}
+      {sound !== null && (
+        <SettingsRow
+          dense
+          tone="app"
+          glyph={SETTINGS_ICONS.sound}
+          label={t("settings.app.sound")}
+          hint={t("settings.app.sound.hint")}
+          chevron={false}
+          minHeight="14"
+          data-align-group="profile-row"
+        >
+          <Switch checked={sound} onCheckedChange={toggleSound} aria-label={t("settings.app.sound")} />
+        </SettingsRow>
       )}
       <SettingsRow dense tone="language" glyph={SETTINGS_ICONS.language} label={t("settings.app.language")} value={t(language === "en" ? "settings.app.language.en" : "settings.app.language.vi")} href="/settings/language" data-align-group="profile-row" />
       {appearance && <SettingsRow dense tone="app" glyph={SETTINGS_ICONS.theme} label={t("settings.app.appearance")} value={appearance} href="/settings/appearance" data-align-group="profile-row" />}
