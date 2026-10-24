@@ -9,8 +9,8 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 
 /** The macros under the kcal of Tổng: the amount, and the day's target after it. Unknown is a dash, never 0. */
 const MACROS: { key: "protein" | "carbs" | "fat" | "fiber"; label: string }[] = [
-  { key: "protein", label: "Đạm" },
   { key: "carbs", label: "Tinh bột" },
+  { key: "protein", label: "Đạm" },
   { key: "fat", label: "Chất béo" },
   { key: "fiber", label: "Chất xơ" },
 ];
@@ -36,9 +36,9 @@ export function TemplateMacros({ values, targets }: { values: HomeValues; target
 }
 
 /**
- * Vi chất of the template being built: the same list Hôm nay shows at the user's Level (Khoáng chất, Vitamin and, from Level 3, the
- * extras as amounts only), each against the day's target, with "x/N đạt" and the lowest ones first. It is there so a few meal sets
- * can be tried and read against each other without copying any into the diary.
+ * Vi chất of the template being built: all 22 micros at every Level (Khoáng chất, Vitamin) and, from Level 3, the extras as amounts
+ * only, each against the day's target, with "x/N đạt" and the lowest ones first. It is there so a few meal sets can be tried and
+ * read against each other without copying any into the diary.
  */
 export function TemplateMicros({
   values,

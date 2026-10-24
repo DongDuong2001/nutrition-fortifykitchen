@@ -4,7 +4,8 @@ At 390 (demo build): Khám phá › Ngày ăn mẫu › + Tạo ngày ăn mẫu 
 ("Chưa có món", a 44 px + named "Thêm vào <bữa>"); + of Bữa sáng → the + sheet says it adds to the template, a food's Thêm puts it
 in the draft (Hôm nay's diary does not change) and comes back to the editor with the meal's kcal and the total; tapping the food
 changes its portion; Lưu lists the new day; Áp dụng cho hôm nay copies it into today. A second run leaves a new draft with Back:
-nothing is listed. Screenshots: .screenshots/template-builder-{empty,added,list}.png.
+nothing is listed. Screenshots: .screenshots/template-builder-{empty,added,list}.png, and of the saved day's Tổng and Vi chất (all 22) at 390x844, 1440x900 and
+390 at 200 % text: .screenshots/template-micros/template-micros-{390,1440,390-text200}.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/template_builder.py
 """
 # PROBE_COVERS: app/(app)/explore/ngay-mau/** components/templates/** components/add/** lib/template-draft.ts lib/day-templates.ts
@@ -20,6 +21,8 @@ from playwright.sync_api import sync_playwright
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
+SHOTS_MICROS = SHOTS / "template-micros"
+SHOTS_MICROS.mkdir(exist_ok=True)
 SETTINGS = json.dumps({"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}})
 problems = []
 
@@ -112,8 +115,8 @@ def run(browser):
     summary = pg.locator("[data-template-summary]").first.inner_text() if pg.locator("[data-template-summary]").count() else ""
     counts = re.search(r"(\d+)/(\d+)\s*đạt", summary)
     rows = pg.locator("[data-nutrient-row]").count()
-    check(counts is not None and rows > 0 and int(counts.group(2)) == rows, f"Vi chất shows x/N đạt and one row per nutrient of the Level ({summary!r}, {rows} rows)")
-    check(pg.locator("dl[data-align-group=template-macros] dt").all_inner_texts() == ["Đạm", "Tinh bột", "Chất béo", "Chất xơ"], "Tổng lists Đạm, Tinh bột, Chất béo, Chất xơ")
+    check(counts is not None and int(counts.group(2)) == 22 and rows == 22, f"Vi chất counts and lists all 22 whatever the Level ({summary!r}, {rows} rows)")
+    check(pg.locator("dl[data-align-group=template-macros] dt").all_inner_texts() == ["Tinh bột", "Đạm", "Chất béo", "Chất xơ"], "Tổng lists Tinh bột, Đạm, Chất béo, Chất xơ, as the hero on Hôm nay")
     micros_before = pg.locator("[data-nutrient-row]").all_inner_texts()
     over = pg.evaluate("() => document.documentElement.scrollWidth > innerWidth")
     check(not over, "the page does not scroll sideways")
@@ -142,6 +145,18 @@ def run(browser):
     pg.screenshot(path=str(SHOTS / "template-builder-list.png"))
     pg.get_by_role("link", name=re.compile("^Ngày ăn mẫu mới")).click()
     pg.wait_for_timeout(800)
+    # Screenshots of the saved day (Tổng and Vi chất) at real sizes: 390x844, 1440x900 and 390 at 200 % text
+    for name, w, h, scale in (("390", 390, 844, 100), ("1440", 1440, 900, 100), ("390-text200", 390, 844, 200)):
+        pg.set_viewport_size({"width": w, "height": h})
+        pg.evaluate(f"document.documentElement.style.fontSize = '{scale}%'")
+        pg.wait_for_timeout(400)
+        over = pg.evaluate("() => document.documentElement.scrollWidth - innerWidth")
+        check(over <= 0, f"{name}: the editor does not scroll sideways ({over})")
+        pg.locator("#tpl-micros").scroll_into_view_if_needed()
+        pg.screenshot(path=str(SHOTS_MICROS / f"template-micros-{name}.png"), full_page=True)
+    pg.evaluate("document.documentElement.style.fontSize = ''")
+    pg.set_viewport_size({"width": 390, "height": 844})
+    pg.wait_for_timeout(300)
     pg.get_by_role("button", name="Áp dụng cho hôm nay").click()
     pg.wait_for_url(re.compile(r"/app"), timeout=8000)
     pg.wait_for_timeout(800)

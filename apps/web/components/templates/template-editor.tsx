@@ -40,8 +40,8 @@ import {
 } from "@/lib/day-templates";
 import { formatAmount, formatRange } from "@/lib/format";
 import { SLOT_LABEL, pctLabel, pctOf, targetOf } from "@/lib/home";
-import { columnGroups, countedForLevel, levelSummary } from "@/lib/level-nutrients";
-import { templateNutrition } from "@/lib/template-micros";
+import { levelSummary } from "@/lib/level-nutrients";
+import { templateList, templateNutrition } from "@/lib/template-micros";
 import { getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
 import { markUsed } from "@/lib/onboarding-store";
 import { SHEET_BACK_DELAY_MS } from "@/lib/sheet-history";
@@ -143,10 +143,9 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
   const perMeal = useMemo(() => templateMealKcal(draft, CATALOG_FOODS), [draft, version]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nutrition = useMemo(() => templateNutrition(draft, CATALOG_FOODS), [draft, version]);
-  // Vi chất at the user's Level, against the day's targets (the same list and rule as Hôm nay)
+  // Vi chất: all 22 at every Level against the day's targets (Q15); only the extras follow the user's Level
   const { level } = useCoaching();
-  const groups = useMemo(() => columnGroups(level), [level]);
-  const countedIds = useMemo(() => countedForLevel(level), [level]);
+  const { groups, counted: countedIds } = useMemo(() => templateList(level), [level]);
   const microTargets = useMemo(() => Object.fromEntries(countedIds.map((id) => [id, targetOf(data, id)])), [countedIds, data]);
   const macroTargets = useMemo(
     () => ({ protein: targetOf(data, "protein"), carbs: targetOf(data, "carbs"), fat: targetOf(data, "fat"), fiber: targetOf(data, "fiber") }),
