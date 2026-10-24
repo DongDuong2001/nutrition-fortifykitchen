@@ -6,6 +6,7 @@ row; one row open at a time; a tap elsewhere closes it; a past day has no swipe;
 The food that is picked (tapped: the hero shows it, the row is cobalt) swipes both ways like any other row (fix/swipe-picked-row, 24/10).
 ⋯ › Sửa opens the edit screen and it stays open (the sheet's own history.back used to undo the push), and Back returns to Hôm nay in one step.
 From a row resting on ⋯ a second short right swipe opens the menu (the threshold is within what the pull can reach).
+The root is "only light" (Chrome's Auto Dark would recolour the rows and the list differently); the app's own dark mode keeps "dark".
 At rest a swipeable row is the colour of the list behind it, light and dark, so touch rows are not boxes (the row only covers the buttons).
 Screenshots: .screenshots/food-swipe/*.png (390×844).
 Run with: ALIGN_BASE_URL=http://localhost:3115 npm run probe -- tests/probes/food_swipe.py
@@ -397,6 +398,22 @@ def menu_from_rest(browser):
     ctx.close()
 
 
+def color_scheme(browser):
+    """Hao 24/10 22:00 (A21): the boxes were the phone's own dark mode: Android Chrome auto-darkened the light app and recoloured the rows and
+    the list differently. The root opts out ("only light", in the CSS and in the document's metadata) until the app's own dark mode ships;
+    that mode (data-theme dark) still sets color-scheme dark. Chrome's Auto Dark itself cannot be run here: the phone check is Hao's."""
+    ctx, pg, cdp = new_page(browser)
+    scheme = pg.evaluate("getComputedStyle(document.documentElement).colorScheme")
+    meta = pg.evaluate("(document.querySelector('meta[name=color-scheme]') || {}).content || null")
+    # the browser writes the computed value as "light only"
+    check(sorted(scheme.split()) == ["light", "only"], f"390: the root's color-scheme is 'only light' without the dark flag ({scheme!r})")
+    check(meta == "only light", f"390: the document says <meta name=color-scheme content='only light'> ({meta!r})")
+    pg.evaluate("document.documentElement.dataset.theme = 'dark'")
+    dark = pg.evaluate("getComputedStyle(document.documentElement).colorScheme")
+    check(dark == "dark", f"390: with the app's own dark mode (data-theme dark) the root is 'dark' ({dark!r})")
+    ctx.close()
+
+
 def desktop(browser):
     """Reviewer 24/10 (must): the swipe is touch only, so a mouse, a keyboard and a screen reader reach the same actions without it."""
     ctx = browser.new_context(viewport={"width": 1440, "height": 900})
@@ -445,6 +462,7 @@ with sync_playwright() as p:
         rows_at_rest(browser)
         menu_edit(browser)
         menu_from_rest(browser)
+        color_scheme(browser)
         desktop(browser)
     finally:
         browser.close()
