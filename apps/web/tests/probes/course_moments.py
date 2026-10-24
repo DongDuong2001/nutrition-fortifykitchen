@@ -57,6 +57,15 @@ def dash(pg):
     return pg.evaluate("(() => { const p = document.querySelector(\"section[aria-label='Kết thúc bài'] button svg path\"); return p ? getComputedStyle(p).strokeDashoffset : null; })()")
 
 
+def mid_draw(pg):
+    """Holds the check's draw at 40 ms of its 200 (the shot and the reading cannot catch it finished) and reads the dash array and offset there."""
+    return pg.evaluate("(() => { const p = document.querySelector(\"section[aria-label='Kết thúc bài'] button svg path\"); if (!p) return null; const a = p.getAnimations(); a.forEach((x) => { x.pause(); x.currentTime = 40; }); const c = getComputedStyle(p); return { anims: a.length, array: c.strokeDasharray, offset: parseFloat(c.strokeDashoffset) }; })()")
+
+
+def resume_draw(pg):
+    pg.evaluate("document.querySelector(\"section[aria-label='Kết thúc bài'] button svg path\").getAnimations().forEach((x) => x.play())")
+
+
 def lesson_by_tap(browser, vp, tag):
     ctx, pg = page(browser, vp)
     # ?trang=1: the last page is not on screen, so the lesson is not finished by the reader
@@ -66,9 +75,13 @@ def lesson_by_tap(browser, vp, tag):
     pg.evaluate(WATCH)
     before = sound_count(pg)
     btn.click()
-    pg.wait_for_timeout(120)
+    pg.wait_for_timeout(40)
+    mid = mid_draw(pg)
     pg.screenshot(path=f"{SHOTS}/course-lesson-done-{tag}.png", animations="allow")
+    resume_draw(pg)
     pg.wait_for_timeout(700)
+    # a dash offset does nothing without a dash array: mid-draw the path must be dashed and partly drawn
+    check(mid is not None and mid["anims"] >= 1 and mid["array"] != "none" and 0 < mid["offset"] < 1, f"{tag} lesson: the check at a mid-draw frame (dash array and offset {mid})")
     check("Đã xong bài này" in btn.inner_text() and btn.get_attribute("aria-pressed") == "true", f"{tag} lesson: the button reads Đã xong bài này")
     check(btn.get_attribute("data-done") is not None and overlay_opacity(pg) == "1", f"{tag} lesson: the success ring is the overlay, in ({overlay_opacity(pg)})")
     check(len(seen(pg, "m-check-draw")) >= 1, f"{tag} lesson: the check draws in once")

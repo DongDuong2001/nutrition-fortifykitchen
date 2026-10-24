@@ -962,6 +962,7 @@
 }
 /* Lesson done: the check draws in (its path carries pathLength="1"); backwards, so once the class is off the path is whole */
 .m-check-draw path {
+  stroke-dasharray: 1;
   animation: m-check-draw var(--m-check-draw) var(--ease-out) backwards;
 }
 @keyframes m-check-draw {

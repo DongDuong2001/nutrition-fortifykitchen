@@ -591,5 +591,5 @@
 - [ ] (Hao) Q16 [OPEN]: a micro that one food has no value for adds nothing to the template's sum (the rule Hôm nay uses), so a total can read lower than the real day. If no answer: same as Hôm nay.
 ## Âm thanh và chúc mừng (feat/sound-goals, 24/10/2026)
 - [x] (Hao) Q17 [ANSWERED]: the overtone is 0,35 of the note's length (the mockup's number). Q18 [ANSWERED]: the first food leads, a T1 nutrient of the same add only pops.
-- [ ] (Hao) Q19 [OPEN]: when the three macros reach 100 % (T2), the three macro percents pop and their bars sheen; the plan's text had the kcal percent pop, but kcal has not reached its goal then. If no answer: as built.
-- [ ] (Hao) Q20 [OPEN]: an iPhone whose Safari has no `navigator.audioSession` (before 17) starts with Âm thanh off, because Web Audio would ignore the silent switch there. If no answer: as built.
+- [x] (Hao) Q19 [ANSWERED]: when the three macros reach 100 % (T2), the three macro percents pop and their bars sheen; the plan's text had the kcal percent pop, but kcal has not reached its goal then. Hao, 24/10: keep it as built.
+- [x] (Hao) Q20 [ANSWERED]: an iPhone whose Safari has no `navigator.audioSession` (before 17) starts with Âm thanh off, because Web Audio would ignore the silent switch there. Decided 24/10: as built.

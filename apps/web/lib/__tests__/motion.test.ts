@@ -365,9 +365,9 @@ describe("goal moments", () => {
   });
 
   // Lesson done and code accepted (components/courses), with the lead fixes that keep them inside the rules above
-  it("the check draws in from stroke-dashoffset 1 with a backwards fill (whole once the class is off), from tokens", () => {
+  it("the check draws in from stroke-dashoffset 1 over a stroke-dasharray of 1 (an offset does nothing without a dash), with a backwards fill (whole once the class is off), from tokens", () => {
     expect(motion).toMatch(/--m-check-draw: 200ms;/);
-    expect(main).toMatch(/\.m-check-draw path \{\s*animation: m-check-draw var\(--m-check-draw\) var\(--ease-out\) backwards;/);
+    expect(main).toMatch(/\.m-check-draw path \{\s*stroke-dasharray: 1;\s*animation: m-check-draw var\(--m-check-draw\) var\(--ease-out\) backwards;/);
     expect(css).toMatch(/@keyframes m-check-draw \{\s*from \{\s*stroke-dashoffset: 1;/);
     expect(main).not.toMatch(/m-check-draw[^;]*forwards/);
   });

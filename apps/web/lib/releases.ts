@@ -96,7 +96,7 @@ export const RELEASES: readonly Release[] = [
         title: "Tài liệu thành khóa học",
         body: "Ở Khám phá, mục Tài liệu giờ là các khóa học của HLV. Mở bằng mã hoặc khi bạn đủ Level, và app nhớ trang bạn đang đọc.",
       },
-      { target: "home-hero", fallback: "home-food-list", title: "Chúc mừng khi bạn đạt mục tiêu", body: "Đạt một mục tiêu là thẻ đen sáng lên và có tiếng nhẹ. Tắt ở Cài đặt › Âm thanh." },
+      { target: "home-hero", fallback: "home-food-list", title: "Chúc mừng khi bạn đạt mục tiêu", body: "Đạt một mục tiêu là con số đó nhảy lên, kèm một tiếng nhẹ. Tắt ở Cài đặt › Âm thanh." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
