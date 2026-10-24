@@ -1,0 +1,86 @@
+import React from "react";
+import { MicroRow } from "@/components/home/nutrient-column";
+import { ExtraRow, GroupTitle, LevelSummary } from "@/components/nutrients/column-parts";
+import { Card } from "@/components/ui/card";
+import { SectionHeader } from "@/components/ui/section-title";
+import { formatAmount } from "@/lib/format";
+import type { HomeValues } from "@/lib/home";
+import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
+import { getNutrientDefinition } from "@/lib/nutrients";
+
+/** The macros under the kcal of Tổng: the amount, and the day's target after it. Unknown is a dash, never 0. */
+const MACROS: { key: "protein" | "carbs" | "fat" | "fiber"; label: string }[] = [
+  { key: "carbs", label: "Tinh bột" },
+  { key: "protein", label: "Đạm" },
+  { key: "fat", label: "Chất béo" },
+  { key: "fiber", label: "Chất xơ" },
+];
+
+export function TemplateMacros({ values, targets }: { values: HomeValues; targets: Record<"protein" | "carbs" | "fat" | "fiber", number | null> }) {
+  return (
+    <dl data-align-group="template-macros" className="m-0 grid grid-cols-2 gap-x-2 gap-y-2 min-[480px]:grid-cols-4">
+      {MACROS.map(({ key, label }) => {
+        const value = values[key];
+        const target = targets[key];
+        return (
+          <div key={key} className="flex min-w-0 flex-col gap-0.5">
+            <dt className="text-cap text-secondary">{label}</dt>
+            <dd className="m-0 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 font-condensed text-callout font-extrabold leading-none tabular-nums">
+              <span className="whitespace-nowrap">{value === null ? "—" : `${formatAmount(value, "g")} g`}</span>
+              {target !== null && <span className="whitespace-nowrap font-sans text-xs font-normal text-secondary">/ {formatAmount(target, "g")} g</span>}
+            </dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
+
+/**
+ * Vi chất of the template being built: all 22 micros at every Level (Khoáng chất, Vitamin) and, from Level 3, the extras as amounts
+ * only, each against the day's target, with "x/N đạt" and the lowest ones first. It is there so a few meal sets can be tried and
+ * read against each other without copying any into the diary.
+ */
+export function TemplateMicros({
+  values,
+  extras,
+  groups,
+  targets,
+  summary,
+  empty,
+}: {
+  values: HomeValues;
+  extras: Record<string, number | null>;
+  groups: ColumnGroup[];
+  targets: Record<string, number | null>;
+  summary: { reached: number; total: number; lacking: string[] };
+  empty: boolean;
+}) {
+  return (
+    <section aria-labelledby="tpl-micros" className="flex flex-col gap-1">
+      <SectionHeader id="tpl-micros" className="flex min-h-11 items-center">
+        Vi chất
+      </SectionHeader>
+      <Card padding={false} className="overflow-hidden">
+        {empty ? (
+          <p className="m-0 p-4 text-cap leading-snug text-secondary">Thêm món vào các bữa để xem vi chất của cả ngày.</p>
+        ) : (
+          <>
+            <LevelSummary summary={summary} />
+            {groups.map((group) => (
+              <section key={group.title} aria-label={group.title} className="flex flex-col">
+                <GroupTitle title={group.title} />
+                {group.ids.map((id) => {
+                  const def = getNutrientDefinition(id);
+                  if (!def) return null;
+                  if (isExtra(id)) return <ExtraRow key={id} name={def.name} unit={def.unit} amount={extras[id] ?? null} />;
+                  return <MicroRow key={id} id={id} name={def.name} unit={def.unit} value={values.nutrients[id] ?? null} target={targets[id] ?? null} />;
+                })}
+              </section>
+            ))}
+          </>
+        )}
+      </Card>
+    </section>
+  );
+}

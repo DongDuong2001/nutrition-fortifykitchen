@@ -5,6 +5,7 @@ import { nutrientRowLabel, pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { ColumnScroll } from "./column-scroll";
+import { ExtraRow, GroupTitle, LevelSummary } from "@/components/nutrients/column-parts";
 import { LevelBar } from "@/components/ui/level-bar";
 import { getLevel, getLevelLabel } from "@/lib/levels";
 import { useHold } from "@/lib/use-hold";
@@ -53,26 +54,7 @@ export const NutrientColumn = memo(function NutrientColumn({
     >
       {/* cc-61: the verdict covers every group below (N is minerals plus vitamins), so it heads the column, above the first band.
           Whole-pixel heights (a 40 px numeral line, 20 px text lines) keep the whole-row cut of the area clean. */}
-      {summary && (
-        // C3: the count is the column's biggest number (40 px, cobalt), "đạt" 17 px; the lacking names in full ink and bolder than
-        // their label (Hao's canvas comment). Only the label is at 75 %: an opacity on the parent would fade the names too.
-        // 8 px under the count: the 40 px Saira glyph box reaches about 11 px below its 40 px line. The space after the label is
-        // outside it, so the names can go to the next line where the share image keeps the label on one line (share-sheet markLines).
-        <p data-level-summary className="m-0 flex flex-none flex-col gap-2 px-3 pb-2 pt-3 text-text">
-          <span className="block text-body-lg font-bold leading-none">
-            <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
-              {summary.reached}/{summary.total}
-            </span>{" "}
-            đạt
-          </span>
-          {summary.lacking.length > 0 && (
-            <span className="text-sm leading-5">
-              <span className="text-text/75">Thiếu nhiều nhất:</span>{" "}
-              <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
-            </span>
-          )}
-        </p>
-      )}
+      {summary && <LevelSummary summary={summary} />}
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
       <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "") + (fiberTarget !== undefined ? "+fiber" : "")}>
         {fiberTarget !== undefined && (
@@ -92,30 +74,11 @@ export const NutrientColumn = memo(function NutrientColumn({
         )}
         {groups.map((group, groupIndex) => (
           <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex shrink-0 flex-col">
-            {/* V3: an inset hairline, then the section header in Saira (no ink band). The hairline is part of the header so the area's row snap starts on it. */}
-            <h3 data-snap-row className="relative m-0 flex-none snap-start p-3 font-display text-body-lg font-extrabold uppercase leading-5 tracking-[0.01em] text-text before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-divider before:content-['']">
-              {group.title}
-            </h3>
+            <GroupTitle title={group.title} snap />
             {group.ids.map((id) => {
               const def = getNutrientDefinition(id);
               if (!def) return null;
-              if (isExtra(id)) {
-                const amount = extras[id] ?? null;
-                return (
-                  <div
-                    key={id}
-                    data-align-group="home-nutrient"
-                    data-extra
-                    data-snap-row
-                    className="flex min-h-11 snap-start items-center justify-between gap-2 px-3 py-1 lg:min-h-12"
-                  >
-                    <span className="min-w-0 break-words text-callout font-semibold leading-snug text-text">{def.name}</span>
-                    <span className="shrink-0 text-xs leading-tight text-secondary tabular-nums">
-                      {amount === null ? "chưa có dữ liệu" : `${formatAmount(amount, def.unit)} ${def.unit}`}
-                    </span>
-                  </div>
-                );
-              }
+              if (isExtra(id)) return <ExtraRow key={id} name={def.name} unit={def.unit} amount={extras[id] ?? null} snap />;
               return <MicroRow key={id} id={id} name={def.name} unit={def.unit} value={values.nutrients[id] ?? null} target={targets[id] ?? null} onNutrient={onNutrient} />;
             })}
           </section>

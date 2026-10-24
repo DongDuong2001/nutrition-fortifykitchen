@@ -4,7 +4,8 @@ At 390 (demo build): Khám phá › Ngày ăn mẫu › + Tạo ngày ăn mẫu 
 ("Chưa có món", a 44 px + named "Thêm vào <bữa>"); + of Bữa sáng → the + sheet says it adds to the template, a food's Thêm puts it
 in the draft (Hôm nay's diary does not change) and comes back to the editor with the meal's kcal and the total; tapping the food
 changes its portion; Lưu lists the new day; Áp dụng cho hôm nay copies it into today. A second run leaves a new draft with Back:
-nothing is listed. Screenshots: .screenshots/template-builder-{empty,added,list}.png.
+nothing is listed. Screenshots: .screenshots/template-builder-{empty,added,list}.png, and of the saved day's Tổng and Vi chất (all 22) at 390x844, 1440x900 and
+390 at 200 % text: .screenshots/template-micros/template-micros-{390,1440,390-text200}.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/template_builder.py
 """
 # PROBE_COVERS: app/(app)/explore/ngay-mau/** components/templates/** components/add/** lib/template-draft.ts lib/day-templates.ts
@@ -20,6 +21,8 @@ from playwright.sync_api import sync_playwright
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
+SHOTS_MICROS = SHOTS / "template-micros"
+SHOTS_MICROS.mkdir(exist_ok=True)
 SETTINGS = json.dumps({"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}})
 problems = []
 
@@ -62,6 +65,8 @@ def run(browser):
     plus = pg.get_by_role("link", name="Thêm vào Bữa sáng")
     box = plus.bounding_box()
     check(box is not None and box["width"] >= 44 and box["height"] >= 44, f"each meal has a 44 px + ({box})")
+    check(pg.get_by_role("heading", name="Vi chất").count() == 1 and pg.get_by_text("Thêm món vào các bữa để xem vi chất của cả ngày.").count() == 1, "an empty day has the Vi chất section with a line to add foods, no rows")
+    check(pg.locator("[data-nutrient-row]").count() == 0, "…and no nutrient rows (an unknown is never 0)")
     pg.screenshot(path=str(SHOTS / "template-builder-empty.png"))
 
     plus.click()
@@ -106,6 +111,15 @@ def run(browser):
     check(diary_count(pg) == logged, f"still nothing in the diary ({diary_count(pg)} = {logged})")
     check(diary_count(pg) == logged, f"nothing went into the diary ({diary_count(pg)} = {logged})")
     total_before = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
+    # Vi chất: the Level's own list with "x/N đạt", the macros under the kcal
+    summary = pg.locator("[data-level-summary]").first.inner_text() if pg.locator("[data-level-summary]").count() else ""
+    counts = re.search(r"(\d+)/(\d+)\s*đạt", summary)
+    rows = pg.locator("[data-nutrient-row]").count()
+    check(counts is not None and int(counts.group(2)) == 22 and rows == 22, f"Vi chất counts and lists all 22 whatever the Level ({summary!r}, {rows} rows)")
+    check(pg.locator("dl[data-align-group=template-macros] dt").all_inner_texts() == ["Tinh bột", "Đạm", "Chất béo", "Chất xơ"], "Tổng lists Tinh bột, Đạm, Chất béo, Chất xơ, as the hero on Hôm nay")
+    micros_before = pg.locator("[data-nutrient-row]").all_inner_texts()
+    over = pg.evaluate("() => document.documentElement.scrollWidth > innerWidth")
+    check(not over, "the page does not scroll sideways")
     pg.screenshot(path=str(SHOTS / "template-builder-added.png"))
 
     # Change the portion
@@ -121,6 +135,7 @@ def run(browser):
     pg.wait_for_timeout(600)
     total_after = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
     check(total_after != total_before, f"a new portion changes the total live ({total_before} → {total_after})")
+    check(pg.locator("[data-nutrient-row]").all_inner_texts() != micros_before, "…and the vi chất with it")
 
     # Lưu lists it, Áp dụng copies it
     pg.get_by_role("button", name="Lưu").first.click()
@@ -130,6 +145,21 @@ def run(browser):
     pg.screenshot(path=str(SHOTS / "template-builder-list.png"))
     pg.get_by_role("link", name=re.compile("^Ngày ăn mẫu mới")).click()
     pg.wait_for_timeout(800)
+    # Screenshots of the saved day (Tổng and Vi chất) at real sizes: 390x844, 1440x900 and 390 at 200 % text
+    for name, w, h, scale in (("390", 390, 844, 100), ("1440", 1440, 900, 100), ("390-text200", 390, 844, 200)):
+        pg.set_viewport_size({"width": w, "height": h})
+        pg.evaluate(f"document.documentElement.style.fontSize = '{scale}%'")
+        pg.wait_for_timeout(400)
+        over = pg.evaluate("() => document.documentElement.scrollWidth - innerWidth")
+        check(over <= 0, f"{name}: the editor does not scroll sideways ({over})")
+        # The save toast has gone (it would sit on the shot); a phone shows the screen as it is (nav bar included) from Tổng down, a desktop the whole page
+        pg.locator("[role=status]", has_text="Đã lưu").first.wait_for(state="hidden", timeout=8000)
+        pg.evaluate("() => document.getElementById('tpl-total')?.scrollIntoView({ block: 'start' })")
+        pg.wait_for_timeout(300)
+        pg.screenshot(path=str(SHOTS_MICROS / f"template-micros-{name}.png"), full_page=w >= 1024)
+    pg.evaluate("document.documentElement.style.fontSize = ''")
+    pg.set_viewport_size({"width": 390, "height": 844})
+    pg.wait_for_timeout(300)
     pg.get_by_role("button", name="Áp dụng cho hôm nay").click()
     pg.wait_for_url(re.compile(r"/app"), timeout=8000)
     pg.wait_for_timeout(800)
