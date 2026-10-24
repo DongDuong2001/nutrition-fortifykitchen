@@ -871,6 +871,74 @@ paths:
                 $ref: '#/components/schemas/Food'
 
   /foods/custom/{id}:
+    put:
+      summary: Replace the values and portions of one of the user's own custom foods (same id)
+      description: >
+        The body of POST /foods/custom, scaled and checked the same way. The id stays, so templates, saved meals and favourites
+        keep pointing at the food; diary entries keep the snapshot they were logged with. Another user's food, an archived
+        one and a catalogue food are all 404 (never 403).
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name_vi
+                - serving_size
+              properties:
+                name_vi:
+                  type: string
+                serving_unit:
+                  type: string
+                serving_size:
+                  type: number
+                calories:
+                  type: number
+                protein:
+                  type: number
+                carbs:
+                  type: number
+                fat:
+                  type: number
+                micros:
+                  type: object
+                one_off:
+                  type: boolean
+      responses:
+        '200':
+          description: Custom food updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+        '400':
+          description: Invalid body (name, serving size or a negative macro)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Not the caller's custom food, archived, or not a custom food
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
     delete:
       summary: Delete user custom food
       security:

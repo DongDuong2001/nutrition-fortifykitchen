@@ -602,6 +602,48 @@ function profileBody(profile: SetupProfile, targets?: TargetSettings, levelSeen?
   };
 }
 
+/** The body POST and PUT /foods/custom take (both spellings of the names, as the API reads them). */
+function customFoodBody(input: CreateFoodInput) {
+  return {
+    name_vi: input.nameVi,
+    nameVi: input.nameVi,
+    serving_unit: input.servingUnit,
+    servingUnit: input.servingUnit,
+    serving_size: input.servingSize,
+    servingSize: input.servingSize,
+    calories: input.calories,
+    protein: input.protein,
+    carbs: input.carbs,
+    fat: input.fat,
+    micros: input.micros,
+    ...(input.oneOff ? { one_off: true } : {}),
+  };
+}
+
+/** A custom food made on this device (demo mode, no server): the typed portion scaled to 100 g. */
+function deviceFood(id: string, input: CreateFoodInput): FoodItem {
+  const factor = input.servingSize > 0 ? 100 / input.servingSize : 1;
+  return {
+    id,
+    nameVi: input.nameVi,
+    category: "cua_toi",
+    source: "user",
+    servings: [
+      { label: `${input.servingSize} ${input.servingUnit}`, grams: input.servingSize },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: {
+      ...Object.fromEntries(
+        Object.entries(input.micros ?? {}).map(([k, v]) => [k, typeof v === "number" ? Math.round(v * factor * 100) / 100 : null])
+      ),
+      energy: input.calories != null ? Math.round(input.calories * factor) : null,
+      protein: input.protein != null ? Math.round(input.protein * factor * 10) / 10 : null,
+      carbs: input.carbs != null ? Math.round(input.carbs * factor * 10) / 10 : null,
+      fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
+    },
+  };
+}
+
 export const apiClient = {
   /** The day as the server has it. Null in live mode when it could not be read: never an empty day, which a refetch would take for "everything was deleted". */
   async getDay(date?: string): Promise<DaySummaryResponse | null> {
@@ -677,24 +719,7 @@ export const apiClient = {
   async createFood(input: CreateFoodInput): Promise<FoodItem> {
     if (isLiveMode()) {
       try {
-        const payload = {
-          name_vi: input.nameVi,
-          nameVi: input.nameVi,
-          serving_unit: input.servingUnit,
-          servingUnit: input.servingUnit,
-          serving_size: input.servingSize,
-          servingSize: input.servingSize,
-          calories: input.calories,
-          protein: input.protein,
-          carbs: input.carbs,
-          fat: input.fat,
-          micros: input.micros,
-          ...(input.oneOff ? { one_off: true } : {}),
-        };
-        const res = await apiFetch(`/foods/custom`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
+        const res = await apiFetch(`/foods/custom`, { method: "POST", body: JSON.stringify(customFoodBody(input)) });
         if (res.ok) {
           const json = await res.json();
           const raw = json.data ?? json;
@@ -714,28 +739,38 @@ export const apiClient = {
       }
     }
 
-    const factor = input.servingSize > 0 ? 100 / input.servingSize : 1;
-    const newFood: FoodItem = {
-      id: `custom-${Date.now()}`,
-      nameVi: input.nameVi,
-      category: "cua_toi",
-      source: "user",
-      servings: [
-        { label: `${input.servingSize} ${input.servingUnit}`, grams: input.servingSize },
-        { label: "100 g", grams: 100 },
-      ],
-      nutrients: {
-        ...Object.fromEntries(
-          Object.entries(input.micros ?? {}).map(([k, v]) => [k, typeof v === "number" ? Math.round(v * factor * 100) / 100 : null])
-        ),
-        energy: input.calories != null ? Math.round(input.calories * factor) : null,
-        protein: input.protein != null ? Math.round(input.protein * factor * 10) / 10 : null,
-        carbs: input.carbs != null ? Math.round(input.carbs * factor * 10) / 10 : null,
-        fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
-      },
-    };
+    const newFood = deviceFood(`custom-${Date.now()}`, input);
     addCatalogFood(newFood);
     return newFood;
+  },
+
+  /**
+   * Sửa món (Job B): the body of createFood to PUT /foods/custom/{id}, the same id. The catalogue and the device's copy of it take the
+   * new values at once (a food with the same id is replaced); a refused edit changes nothing here.
+   */
+  async updateFood(id: string, input: CreateFoodInput): Promise<FoodItem> {
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/foods/custom/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(customFoodBody(input)) });
+        if (res.ok) {
+          const json = await res.json();
+          const mapped = mapApiFoodToFoodItem(json.data ?? json);
+          addCatalogFood(mapped);
+          if (!input.oneOff) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
+          return mapped;
+        }
+        throw new Error(`Không thể sửa món (${res.status})`);
+      } catch (err) {
+        if (err instanceof Error && err.message.startsWith("Không thể sửa món")) {
+          throw err;
+        }
+        throw new Error("Lỗi kết nối khi sửa món. Vui lòng thử lại.");
+      }
+    }
+
+    const food = deviceFood(id, input);
+    addCatalogFood(food);
+    return food;
   },
 
   async addEntry(payload: {

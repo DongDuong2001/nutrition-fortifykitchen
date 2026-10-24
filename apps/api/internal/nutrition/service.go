@@ -23,6 +23,7 @@ type Service interface {
 	GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error)
 	GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) (*RichInResponse, error)
 	CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error)
+	UpdateCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error)
 	DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error
 }
 
@@ -96,7 +97,9 @@ func round(val float64) float64 {
 	return math.Round(val*100) / 100
 }
 
-func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+// buildCustomFood validates a custom food body and turns it into the food row (per 100 g) and its two portions. Create and
+// update share it, so a body is accepted or refused the same way by both. The caller sets the id.
+func buildCustomFood(req CreateCustomFoodRequest) (*FoodDetail, []Portion, error) {
 	if req.NameVi == "" && req.NameViAlt != "" {
 		req.NameVi = req.NameViAlt
 	}
@@ -108,16 +111,16 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	}
 
 	if req.NameVi == "" {
-		return nil, ErrNameRequired
+		return nil, nil, ErrNameRequired
 	}
 	if req.ServingSize <= 0 {
-		return nil, ErrInvalidServingSize
+		return nil, nil, ErrInvalidServingSize
 	}
 	if (req.Calories != nil && *req.Calories < 0) ||
 		(req.Protein != nil && *req.Protein < 0) ||
 		(req.Carbs != nil && *req.Carbs < 0) ||
 		(req.Fat != nil && *req.Fat < 0) {
-		return nil, ErrNegativeMacronutrients
+		return nil, nil, ErrNegativeMacronutrients
 	}
 
 	// Scale factor to convert user's portion to 100g standard
@@ -176,15 +179,34 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	}
 
 	food := &FoodDetail{
-		ID:               uuid.New(),
 		NameVi:           req.NameVi,
 		Category:         category,
 		Source:           "custom",
 		IsCustom:         true,
 		Per100gNutrients: per100g,
 	}
+	return food, portions, nil
+}
 
+func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+	food, portions, err := buildCustomFood(req)
+	if err != nil {
+		return nil, err
+	}
+	food.ID = uuid.New()
 	return s.repo.CreateCustomFood(ctx, userID, food, portions)
+}
+
+// UpdateCustomFood replaces the values and portions of one of the user's own custom foods. The id stays, so templates, saved
+// meals and favourites keep pointing at it; diary entries keep the snapshot they were logged with. ErrFoodNotFound for a
+// food that is not the user's, is archived or is not a custom food.
+func (s *nutritionService) UpdateCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+	food, portions, err := buildCustomFood(req)
+	if err != nil {
+		return nil, err
+	}
+	food.ID = foodID
+	return s.repo.UpdateCustomFood(ctx, userID, foodID, food, portions)
 }
 
 func (s *nutritionService) DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {

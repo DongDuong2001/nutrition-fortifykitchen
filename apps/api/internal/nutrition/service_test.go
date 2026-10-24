@@ -14,8 +14,12 @@ import (
 )
 
 type mockNutritionRepo struct {
-	foods      map[uuid.UUID]*FoodDetail
-	customFood *FoodDetail
+	foods       map[uuid.UUID]*FoodDetail
+	customFood  *FoodDetail
+	updatedFood *FoodDetail
+	updatedID   uuid.UUID
+	updateCalls int
+	updateErr   error
 }
 
 func (m *mockNutritionRepo) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
@@ -73,6 +77,20 @@ func (m *mockNutritionRepo) CreateCustomFood(ctx context.Context, userID uuid.UU
 
 func (m *mockNutritionRepo) DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
 	return nil
+}
+
+// UpdateCustomFood records what the service passed down; err stands in for "no such live custom food of this user".
+func (m *mockNutritionRepo) UpdateCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error) {
+	m.updateCalls++
+	if m.updateErr != nil {
+		return nil, m.updateErr
+	}
+	food.Servings = portions
+	food.IsCustom = true
+	food.CreatedBy = &userID
+	m.updatedFood = food
+	m.updatedID = foodID
+	return food, nil
 }
 
 func TestNutritionService_CreateCustomFood_Scaling(t *testing.T) {
@@ -508,3 +526,94 @@ func TestNutritionService_CreateCustomFood_OneOff(t *testing.T) {
 }
 
 
+
+// PUT /foods/custom/{id} (Job B): the same body and the same checks as POST, the same id.
+func TestNutritionService_UpdateCustomFood_ScalesLikeCreate(t *testing.T) {
+	repo := &mockNutritionRepo{}
+	svc := NewService(repo)
+	cal, pro, carb, fat, ca := 150.0, 15.0, 30.0, 7.5, 60.0
+	req := CreateCustomFoodRequest{
+		NameVi: "Bánh mì trứng", ServingSize: 150, ServingUnit: "g",
+		Calories: &cal, Protein: &pro, Carbs: &carb, Fat: &fat,
+		Micros: map[string]*float64{"calcium": &ca, "potassium": nil},
+	}
+	userID, foodID := uuid.New(), uuid.New()
+
+	created, err := NewService(&mockNutritionRepo{}).CreateCustomFood(context.Background(), userID, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated, err := svc.UpdateCustomFood(context.Background(), userID, foodID, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if updated.ID != foodID || repo.updatedID != foodID {
+		t.Errorf("the id must stay %s, got %s (repo %s)", foodID, updated.ID, repo.updatedID)
+	}
+	if updated.Category != created.Category || updated.NameVi != created.NameVi || updated.Source != "custom" || !updated.IsCustom {
+		t.Errorf("update built %+v, create built %+v", updated, created)
+	}
+	for key, want := range created.Per100gNutrients {
+		got, ok := updated.Per100gNutrients[key]
+		if !ok || (want == nil) != (got == nil) || (want != nil && *want != *got) {
+			t.Errorf("%s: update %v, create %v", key, got, want)
+		}
+	}
+	if updated.Per100gNutrients["potassium"] != nil {
+		t.Error("an unknown nutrient must stay unknown on update")
+	}
+	if len(updated.Servings) != 2 || updated.Servings[0].LabelVi != "150 g" || updated.Servings[0].Grams != 150 || updated.Servings[1].Grams != 100 {
+		t.Errorf("servings: %+v", updated.Servings)
+	}
+}
+
+func TestNutritionService_UpdateCustomFood_OneOffFlagFollowsTheBody(t *testing.T) {
+	repo := &mockNutritionRepo{}
+	svc := NewService(repo)
+	req := CreateCustomFoodRequest{NameVi: "Bữa tiệc", ServingSize: 100, OneOff: true}
+	food, err := svc.UpdateCustomFood(context.Background(), uuid.New(), uuid.New(), req)
+	if err != nil || food.Category != "one_off" {
+		t.Fatalf("one_off: %v %+v", err, food)
+	}
+	req.OneOff = false
+	food, err = svc.UpdateCustomFood(context.Background(), uuid.New(), uuid.New(), req)
+	if err != nil || food.Category != "cua_toi" {
+		t.Fatalf("cua_toi: %v %+v", err, food)
+	}
+}
+
+func TestNutritionService_UpdateCustomFood_ValidationIsTheSameAsCreate(t *testing.T) {
+	neg := -1.0
+	cases := []struct {
+		name string
+		req  CreateCustomFoodRequest
+		want error
+	}{
+		{"no name", CreateCustomFoodRequest{ServingSize: 100}, ErrNameRequired},
+		{"serving size 0", CreateCustomFoodRequest{NameVi: "A", ServingSize: 0}, ErrInvalidServingSize},
+		{"negative serving size", CreateCustomFoodRequest{NameVi: "A", ServingSize: -5}, ErrInvalidServingSize},
+		{"negative calories", CreateCustomFoodRequest{NameVi: "A", ServingSize: 100, Calories: &neg}, ErrNegativeMacronutrients},
+		{"negative protein", CreateCustomFoodRequest{NameVi: "A", ServingSize: 100, Protein: &neg}, ErrNegativeMacronutrients},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := &mockNutritionRepo{}
+			_, createErr := NewService(&mockNutritionRepo{}).CreateCustomFood(context.Background(), uuid.New(), tc.req)
+			_, err := NewService(repo).UpdateCustomFood(context.Background(), uuid.New(), uuid.New(), tc.req)
+			if !errors.Is(err, tc.want) || !errors.Is(createErr, tc.want) {
+				t.Fatalf("update %v, create %v, want %v", err, createErr, tc.want)
+			}
+			if repo.updateCalls != 0 {
+				t.Error("an invalid body must not reach the repository")
+			}
+		})
+	}
+}
+
+func TestNutritionService_UpdateCustomFood_NotFoundComesBackAsIs(t *testing.T) {
+	repo := &mockNutritionRepo{updateErr: ErrFoodNotFound}
+	_, err := NewService(repo).UpdateCustomFood(context.Background(), uuid.New(), uuid.New(), CreateCustomFoodRequest{NameVi: "A", ServingSize: 100})
+	if !errors.Is(err, ErrFoodNotFound) {
+		t.Fatalf("want ErrFoodNotFound, got %v", err)
+	}
+}

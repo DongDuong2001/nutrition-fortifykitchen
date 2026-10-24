@@ -572,6 +572,18 @@ Allows users to create and store custom foods with nutritional values.
   - Creates 2 default servings: the user's portion (`150 g`) and standard `100 g`.
 - **Response `201 Created`**: Returns the saved `FoodItem` object.
 
+#### `PUT /api/v1/foods/custom/{id}`
+Replaces the values and portions of one of the user's own custom foods (Sửa món).
+- **Request Body**: the same as `POST /api/v1/foods/custom`, with the same checks (`name_vi` required, `serving_size > 0`, no negative macro: `400`) and the same scaling to 100 g. `one_off` is read as on create.
+- **The id stays.** Day templates, saved meals and favourites hold the food by id, so they follow the new values. **Diary entries keep the snapshot they were logged with** (`name_snapshot`, `nutrients_snapshot`): editing a food never rewrites a past day. An entry logged after the edit uses the new values.
+- Both nutrient columns and both portions (the user's serving and `100 g`) are rewritten in one transaction.
+- **Response `200 OK`**: the saved `FoodItem`, as POST returns it (`created_at` is the food's own).
+- **`404 NOT_FOUND`** for a food that is another user's, archived, or a catalogue food (never `403`, so ids do not leak); a malformed id is `404` too. `401` without a sign-in.
+- No migration: `nutrition.foods` has no `updated_at` column and nothing reads one.
+
+#### `DELETE /api/v1/foods/custom/{id}`
+Archives (`is_archived = true`) one of the user's own custom foods: `200 {"success":true}`, `404` when it is not theirs or already archived. Past diary entries keep their snapshot.
+
 ### 2.11b. Saved meals ("Bữa ăn của tôi")
 A named set of foods with portions, logged in one tap. The web keeps each meal under an id it makes (a uuid) and sends every change through its outbox, so a save sent twice is one meal.
 - **Used by screens**: Khám phá › Bữa ăn của tôi, "Lưu bữa này" on Hôm nay.

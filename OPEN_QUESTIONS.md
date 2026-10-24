@@ -537,3 +537,6 @@
 - [ ] (Hao) On Chất xơ a tap already opened the sources sheet, so the hold on it only does the same thing earlier; kept because the tip and the release item name Chất xơ with the others. Say if you would rather the tip left Chất xơ out.
 - [ ] (Hao) The sheet of a macro lists the day's foods even when a meal or one food is picked on Hôm nay (the title says "hôm nay"; the vi chất rows already behave this way).
 - [ ] (Hao) Adding a step to 2026-10-23a's tour pushes 22a's last step ("Chia sẻ ngày ăn") out of the 8-step Thử ngay for a user who skipped both releases (lib/releases.ts MAX_TOUR_STEPS).
+## Custom food update (feat/custom-food-update, 24/10/2026)
+- [ ] (Dong) PUT /foods/custom/{id} does not set an `updated_at`: nutrition.foods has no such column and nothing reads one, so no migration 000020 was written. If you want one (a sync or a "đã sửa" mark), it is a new column on foods plus the touch trigger the other tables use.
+- [ ] (Dong) The integration tests ran on PostgreSQL 16 (the Homebrew one; Docker was not running), the migrations are written for 17. The new SQL is a plain UPDATE, DELETE and INSERT; run scripts/test-integration.sh on 17 before the merge if you want it exact.

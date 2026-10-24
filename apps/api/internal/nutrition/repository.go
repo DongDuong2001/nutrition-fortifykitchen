@@ -3,6 +3,7 @@ package nutrition
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -16,6 +17,7 @@ type Repository interface {
 	GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error)
 	GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) ([]RichInFoodItem, error)
 	CreateCustomFood(ctx context.Context, userID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error)
+	UpdateCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error)
 	DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error
 }
 
@@ -386,6 +388,56 @@ func (r *pgxRepository) CreateCustomFood(ctx context.Context, userID uuid.UUID, 
 			`, food.ID, portions[idx].LabelVi, portions[idx].Grams, idx).Scan(&portions[idx].ID)
 		}
 		if err != nil {
+			return nil, fmt.Errorf("failed to insert portion: %w", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	food.Servings = portions
+	food.CreatedBy = &userID
+	return food, nil
+}
+
+// UpdateCustomFood rewrites a live custom food of this user in place (same id) and replaces its portions. Both nutrient
+// columns are written, as in CreateCustomFood: the diary reads per_100g when a food is logged. ErrFoodNotFound when no row is
+// the user's, live and custom. Nothing else points at a portion id, so the portions are deleted and written again.
+func (r *pgxRepository) UpdateCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	nutrientsJSON, err := json.Marshal(food.Per100gNutrients)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal nutrients: %w", err)
+	}
+
+	err = tx.QueryRow(ctx, `
+		UPDATE nutrition.foods
+		SET name = $3::text, name_vi = $3::text, category = $4, per_100g = $5::jsonb, per_100g_nutrients = $5::jsonb
+		WHERE id = $1 AND created_by = $2 AND is_custom = true AND is_archived = false
+		RETURNING created_at
+	`, foodID, userID, food.NameVi, food.Category, nutrientsJSON).Scan(&food.CreatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrFoodNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to update custom food: %w", err)
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM nutrition.food_portions WHERE food_id = $1`, foodID); err != nil {
+		return nil, fmt.Errorf("failed to clear portions: %w", err)
+	}
+	for idx := range portions {
+		if err := tx.QueryRow(ctx, `
+			INSERT INTO nutrition.food_portions (food_id, label_vi, grams, sort)
+			VALUES ($1, $2, $3, $4)
+			RETURNING id
+		`, foodID, portions[idx].LabelVi, portions[idx].Grams, idx).Scan(&portions[idx].ID); err != nil {
 			return nil, fmt.Errorf("failed to insert portion: %w", err)
 		}
 	}

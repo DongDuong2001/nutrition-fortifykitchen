@@ -252,8 +252,9 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 				r.Delete("/", profileHandler.DeleteMe)
 			})
 
-			// Custom food creation & deletion
+			// Custom food creation, update & deletion
 			r.Post("/foods/custom", nutritionHandler.CreateCustomFood)
+			r.Put("/foods/custom/{id}", nutritionHandler.UpdateCustomFood)
 			r.Delete("/foods/custom/{id}", nutritionHandler.DeleteCustomFood)
 
 			// Diary routes (Phase 3)
