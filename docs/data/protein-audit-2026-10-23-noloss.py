@@ -11,8 +11,10 @@ How a record finds its snapshot row: by (source, source_id) when the record keep
 
 Usage:
   python3 protein-audit-2026-10-23-noloss.py SNAPSHOT.json RECORDS.json [SOURCE-FIX.sql] [--allow ALLOW.json] [--list]
-Exit code 0 = no unlisted loss, 1 = at least one. --list prints the new keys per record as well.
-ALLOW.json: {"<new source>|<new source_id>": {"<nutrient>": "<reason>", ...}}. Standard library only.
+Exit code 0 = no unlisted loss and nothing pending, 1 = at least one. --list prints the new keys per record as well.
+ALLOW.json: {"<new source>|<new source_id>": {"<nutrient>": "<reason>", ...}}. A reason that starts with "PENDING" is a loss
+nobody has signed off yet: it is printed as PENDING and the exit code stays 1 until the reason is rewritten by the person who
+approves it. Standard library only.
 """
 import json
 import re
@@ -59,6 +61,17 @@ def self_test():
     (_, _, _, _, unlisted), = compare(snap, rec, moves, {"s|new": {"b12": "x", "sodium": "y"}})
     assert unlisted == {}
     assert UPDATE.findall(sql) == [("s", "new", snap[0]["id"])]
+    # a PENDING reason is not a sign-off: the script reports it and exits 1
+    import tempfile, os, subprocess
+    d = tempfile.mkdtemp()
+    same = [dict(source="s", source_id="old", name_vi="x", nutrients=dict(energy=1, iron=3))]
+    json.dump(snap, open(d + "/s.json", "w")); json.dump(same, open(d + "/r.json", "w"))
+    json.dump({"s|old": {"b12": "PENDING Hao", "sodium": "zero"}}, open(d + "/a.json", "w"))
+    out = subprocess.run([sys.executable, __file__, d + "/s.json", d + "/r.json", "--allow", d + "/a.json"], capture_output=True, text=True)
+    assert out.returncode == 1 and "PENDING" in out.stdout, out.stdout
+    json.dump({"s|old": {"b12": "approved by Hao 23/10", "sodium": "zero"}}, open(d + "/a.json", "w"))
+    out = subprocess.run([sys.executable, __file__, d + "/s.json", d + "/r.json", "--allow", d + "/a.json"], capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout
     print("self-test ok")
 
 
@@ -82,15 +95,16 @@ def main(argv):
         if row is None:
             print(f"NO ROW   {tag} ({r['name_vi']}): not in the snapshot and not moved by the SQL: it would be an INSERT")
             continue
-        status = "FAIL" if unlisted else ("ALLOWED" if lost else "ok")
-        failed += bool(unlisted)
+        pending = {k: v for k, v in lost.items() if str(allow.get(tag, {}).get(k, "")).startswith("PENDING")}
+        status = "FAIL" if unlisted else ("PENDING" if pending else ("ALLOWED" if lost else "ok"))
+        failed += bool(unlisted or pending)
         print(f"{status:8} {tag} ({r['name_vi']}): lost {len(lost)}, new {len(new)}")
         for k, v in lost.items():
             why = allow.get(tag, {}).get(k)
-            print(f"           lost {k} = {v}" + (f"  [allowed: {why}]" if why else "  [NOT ALLOWED]"))
+            print(f"           lost {k} = {v}" + (f"  [{'pending' if str(why).startswith('PENDING') else 'allowed'}: {why}]" if why else "  [NOT ALLOWED]"))
         if show_new and new:
             print(f"           new  {', '.join(new)}")
-    print("RESULT:", "FAIL (unlisted loss)" if failed else "pass (no unlisted loss)")
+    print("RESULT:", "FAIL (unlisted or pending loss)" if failed else "pass (no unlisted loss)")
     return 1 if failed else 0
 
 

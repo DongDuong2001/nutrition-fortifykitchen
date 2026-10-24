@@ -181,8 +181,8 @@
  },
  {
   "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 167812",
+   "source": "vn_nin",
+   "source_id": "NIN 7018",
    "name_vi": "Ba chỉ heo (sống)"
   },
   "cooked": {
@@ -192,12 +192,12 @@
   },
   "method": "luộc",
   "yield": 74,
-  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: nearest tabulated fatty fresh-pork cut for boiled belly. A protein balance is not usable here: the raw USDA belly (518 kcal) and the NIN boiled row (220 kcal) are different fat levels, it would keep only 28 % of the energy. Low confidence"
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: nearest tabulated fatty fresh-pork cut for boiled belly. A protein balance is not usable here: the raw USDA belly (518 kcal) and the NIN boiled row (220 kcal) are different fat levels, it would keep only 28 % of the energy. Low confidence Since 23/10 the raw side is NIN 7018; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 167812",
+   "source": "vn_nin",
+   "source_id": "NIN 7018",
    "name_vi": "Ba chỉ heo (sống)"
   },
   "cooked": {
@@ -207,12 +207,12 @@
   },
   "method": "nướng",
   "yield": 76,
-  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10940 \"Pork, fresh, spareribs, separable lean and fat\", baked or roasted, n=1: nearest tabulated fatty fresh-pork cut for roast belly. A protein balance is not usable here (different fat level of the two rows, 36 % of the energy kept). Low confidence"
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10940 \"Pork, fresh, spareribs, separable lean and fat\", baked or roasted, n=1: nearest tabulated fatty fresh-pork cut for roast belly. A protein balance is not usable here (different fat level of the two rows, 36 % of the energy kept). Low confidence Since 23/10 the raw side is NIN 7018; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 168226",
+   "source": "vn_nin",
+   "source_id": "NIN 7032",
    "name_vi": "Chân giò heo (sống)"
   },
   "cooked": {
@@ -222,7 +222,7 @@
   },
   "method": "luộc",
   "yield": 74,
-  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: the nearest tabulated cut for a boiled chân giò (the raw USDA shank row and the NIN boiled row are not the same cut, so a protein balance would give 127)"
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: the nearest tabulated cut for a boiled chân giò (the raw USDA shank row and the NIN boiled row are not the same cut, so a protein balance would give 127) Since 23/10 the raw side is NIN 7032; Hao kept this yield (the NIN cooked row is a scaled copy of its raw row, so a protein balance gives a yield above 100 %), and the pair check flags the pair."
  },
  {
   "raw": {
@@ -586,21 +586,6 @@
  },
  {
   "raw": {
-   "source": "vn_nin",
-   "source_id": "NIN 8022",
-   "name_vi": "Cá lóc (cá quả, sống)"
-  },
-  "cooked": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 175127",
-   "name_vi": "Cá lóc (nấu chín)"
-  },
-  "method": "nướng",
-  "yield": 74,
-  "yield_source": "protein balance: 100 x protein raw 18.2 / protein cooked 24.69 (NIN 8022 vs FDC 175127); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
- },
- {
-  "raw": {
    "source": "usda_sr_legacy",
    "source_id": "FDC 175159",
    "name_vi": "Cá ngừ tươi (sống)"
@@ -613,21 +598,6 @@
   "method": "nướng",
   "yield": 84,
   "yield_source": "protein balance: 100 x protein raw 24.4 / protein cooked 29.15 (FDC 175159 vs FDC 172006); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
- },
- {
-  "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 173672",
-   "name_vi": "Cá nục (sống)"
-  },
-  "cooked": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 171994",
-   "name_vi": "Cá nục (nấu chín)"
-  },
-  "method": "nướng",
-  "yield": 78,
-  "yield_source": "USDA SR Legacy household measures: cooked fillet 176 g / raw fillet 225 g (FDC 171994, FDC 173672)"
  },
  {
   "raw": {
@@ -826,8 +796,8 @@
  },
  {
   "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 173672",
+   "source": "vn_nin",
+   "source_id": "NIN 8020",
    "name_vi": "Cá nục (sống)"
   },
   "cooked": {
@@ -841,8 +811,8 @@
  },
  {
   "raw": {
-   "source": "usda_sr_legacy",
-   "source_id": "FDC 173672",
+   "source": "vn_nin",
+   "source_id": "NIN 8020",
    "name_vi": "Cá nục (sống)"
   },
   "cooked": {
@@ -1903,5 +1873,20 @@
   "method": "luộc",
   "yield": 146,
   "yield_source": "dry-matter balance: 100 x (100 - 43.95 % water raw) / (100 - 61.57 % water cooked) from the two rows (FDC 170164, FDC 170166); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171779",
+   "name_vi": "Thịt bò nạc"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171778",
+   "name_vi": "Thịt bò nạc (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 81,
+  "yield_source": "protein balance: 100 x protein raw 22.4 / protein cooked 27.5 (FDC 171779 vs FDC 171778, the raw and cooked rows of the same USDA composite of lean retail cuts)"
  }
 ]
