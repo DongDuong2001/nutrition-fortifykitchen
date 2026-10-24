@@ -194,6 +194,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
     expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
     expect(r?.items.map((i) => i.title)).toContain("Sửa và xóa Món ăn của tôi");
+    expect(r?.items.map((i) => i.title)).toContain("Ảnh chia sẻ: tên bữa màu xanh như Hôm nay");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 

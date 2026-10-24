@@ -27,10 +27,10 @@ function ShareMeal({ meal }: { meal: HomeMeal }) {
           className="h-2 w-2 flex-none rounded-full"
           style={{ backgroundColor: shareMealDot(meal.slot) }}
         />
-        <span className="font-display text-callout font-extrabold uppercase italic leading-[1.1] tracking-[0.01em] text-text">
+        <span className="font-display text-callout font-extrabold uppercase italic leading-[1.1] tracking-[0.01em] text-cobalt">
           {meal.label}
         </span>
-        {/* C3, as Hôm nay's meal card; the name stays ink here (nothing in the image can be tapped) */}
+        {/* C3, as Hôm nay's meal card; the name is cobalt here too: the image mirrors Hôm nay (Hao 24/10), even if nothing in the image can be tapped */}
         <span className="ml-0.5 font-condensed text-callout font-extrabold leading-none text-text/75 tabular-nums">
           {kcalValue(meal.kcal)}
         </span>
