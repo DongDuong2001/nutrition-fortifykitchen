@@ -1,8 +1,8 @@
 """Job H2: every courses screen beside its design board (design/courses), as one PNG each: board on the left, the app on the right.
 
-Needs the screenshots courses.py wrote (.screenshots/courses/390-*.png), so run that first. The boards are drawn by _dc_render.py (the design
+Needs the screenshots courses.py and courses_upload.py wrote (.screenshots/courses/390-*.png), so run that first. The boards are drawn by _dc_render.py (the design
 tool's runtime is not in the folder). Output: .screenshots/courses/compare/<n>-<name>.png. No server needed: it reads files only.
-Not part of probe:all (it needs courses.py's screenshots and the design folder; the underscore keeps run_all away). Run with: npm run probe -- tests/probes/_courses_boards.py
+Not part of probe:all (it needs the screenshots of courses.py and courses_upload.py and the design folder; the underscore keeps run_all away). Run with: npm run probe -- tests/probes/_courses_boards.py
 """
 # PROBE_COVERS:
 import base64
@@ -53,5 +53,5 @@ with sync_playwright() as p:
         print("[done] " + name)
     b.close()
 if missing:
-    print("missing app screenshots (run courses.py first): " + ", ".join(missing))
+    print("missing app screenshots (run courses.py and courses_upload.py first): " + ", ".join(missing))
     sys.exit(1)
