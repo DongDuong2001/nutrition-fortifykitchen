@@ -37,10 +37,10 @@ export function StatePill({ course, simple = false, className = "" }: { course: 
   const shown = simple && state !== "code" && state !== "level" ? "open" : state;
   return (
     <span className={`${PILL} ${className}`}>
-      {shown === "code" || shown === "level" ? <LockGlyph /> : !simple && <CheckGlyph size={14} />}
+      {shown === "code" ? <LockGlyph /> : shown !== "level" && !simple && <CheckGlyph size={14} />}
       <span className="whitespace-nowrap">{STATE_WORDS[shown]}</span>
       {/* The badge is the Level tag at pill size (13 px text, 20 px high), as the design board */}
-      {shown === "level" && <LevelBadge level={toLevel(course.minLevel)} className="px-1.5! py-0.5! text-cap!" />}
+      {shown === "level" && <LevelBadge level={toLevel(course.minLevel)} className="px-1.5! py-0.5! text-micro!" />}
     </span>
   );
 }
