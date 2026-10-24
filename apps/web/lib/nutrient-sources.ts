@@ -20,6 +20,11 @@ export interface NutrientSource {
   grams: number | null;
 }
 
+/** The nutrients Hôm nay's hero and Chất xơ row show as macros: a quick kcal entry has no nutrient record, so its typed grams (the entry's own fields, which the day total adds) stand in. */
+const MACRO_SOURCES = ["carbs", "protein", "fat", "fiber"] as const;
+export type MacroSource = (typeof MACRO_SOURCES)[number];
+export const macroSourceOf = (key: string | null): MacroSource | null => MACRO_SOURCES.find((m) => m === key) ?? null;
+
 /** "1.200 g", "2,5 chén đầy": the number and the rest of a portion label. Null without a leading number. */
 const AMOUNT_TEXT = /^(\d[\d.]*(?:,\d+)?)\s+(\S.*)$/;
 
@@ -92,13 +97,14 @@ export function nutrientSourcesIn(
   key: string,
   sampleItems: SampleItemInfo[] = SAMPLE_ITEMS
 ): NutrientSource[] {
+  const macro = macroSourceOf(key);
   const fromSamples = sampleItems.map((info) => {
     const effect = sampleEffect(info, sampleEdits[info.item.id]);
     return {
       id: info.item.id,
       name: info.item.name,
       qty: effect.qty,
-      amount: effect.deleted ? null : effect.numbers?.nutrients[key],
+      amount: effect.deleted ? null : effect.numbers?.nutrients[key] ?? (macro ? effect.numbers?.[macro] : undefined),
       foodId: info.food?.id ?? "",
       grams: sampleEdits[info.item.id]?.grams ?? info.grams,
     };
@@ -107,7 +113,7 @@ export function nutrientSourcesIn(
     id: entry.id,
     name: entry.foodName,
     qty: entry.displayQty,
-    amount: entry.nutrients[key],
+    amount: entry.nutrients[key] ?? (macro ? entry[macro] : null),
     foodId: entry.kind === "quick" ? "" : entry.foodId,
     grams: entry.kind === "quick" ? null : entry.grams,
   }));

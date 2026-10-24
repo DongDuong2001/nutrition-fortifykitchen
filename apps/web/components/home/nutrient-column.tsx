@@ -7,6 +7,8 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 import { ColumnScroll } from "./column-scroll";
 import { LevelBar } from "@/components/ui/level-bar";
 import { getLevel, getLevelLabel } from "@/lib/levels";
+import { useHold } from "@/lib/use-hold";
+import { haptic } from "@/lib/haptics";
 
 /**
  * The right column of the home body: the nutrients of the user's Level against the day's targets (lib/level-
@@ -83,6 +85,7 @@ export const NutrientColumn = memo(function NutrientColumn({
               value={values.fiber}
               target={fiberTarget}
               onNutrient={onNutrient}
+              holdOpens
               className="relative before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-divider before:content-['']"
             />
           </section>
@@ -145,6 +148,7 @@ export function MicroRow({
   onNutrient,
   title = false,
   share = false,
+  holdOpens = false,
   className = "",
 }: {
   id: string;
@@ -157,8 +161,14 @@ export function MicroRow({
   title?: boolean;
   /** The share image (share-day): the name keeps the lines it had on the page (data-share-wrap) */
   share?: boolean;
+  /** Job A: a hold opens the foods behind it as a tap does (the hero's macros open on hold, so Chất xơ does too) */
+  holdOpens?: boolean;
   className?: string;
 }) {
+  const hold = useHold<string>((key) => {
+    haptic("longPress");
+    onNutrient?.(key);
+  });
   const pct = pctOf(value, target);
   const Row = onNutrient ? "button" : "div";
   const amount = value === null ? "chưa có dữ liệu" : `${formatAmount(value, unit)} ${unit}${title && target !== null ? ` / ${formatAmount(target, unit)} ${unit}` : ""}`;
@@ -167,7 +177,10 @@ export function MicroRow({
       {...(Row === "button"
         ? {
             type: "button" as const,
-            onClick: () => onNutrient?.(id),
+            onClick: () => {
+              if (!hold.heldClick()) onNutrient?.(id);
+            },
+            ...(holdOpens ? hold.bind(id) : {}),
             "aria-label": nutrientRowLabel({ name, unit, value, target, level: pct === null ? null : getLevelLabel(getLevel(pct)) }),
             "aria-haspopup": "dialog" as const,
           }

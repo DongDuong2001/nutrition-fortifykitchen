@@ -67,6 +67,7 @@ import { LevelBadge } from "@/components/profile/level-badge";
 import { Expand } from "@/components/ui/expand";
 import { ZERO_HINT_TEXT, noticeText, type LevelStep } from "@/lib/level-copy";
 import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
+import { macroSourceOf } from "@/lib/nutrient-sources";
 import {
   chosenEntries,
   chosenKcal,
@@ -474,6 +475,7 @@ function HomeContent() {
   }, []);
   // cc-58: each sheet is mounted closed once its chunk is in (see loadSheets), and open from then on by its flag
   const sheets = useHomeSheets();
+  const sourcesMacro = macroSourceOf(sourcesOf);
   const sourcesMounted = useOnceOpen(sourcesOf !== null, sheets !== null);
   const mealMenuMounted = useOnceOpen(menuSlot !== null, sheets !== null);
   const explainerMounted = useOnceOpen(explainerOpen, sheets !== null);
@@ -486,6 +488,12 @@ function HomeContent() {
   const calendarMounted = useOnceOpen(isCalendarOpen, sheets !== null);
   const openSources = useCallback((id: string) => {
     markUsed("nutrient-sources");
+    setSourcesOf(id);
+  }, []);
+
+  // Job A: a hold on a hero macro (or its "Món nào?" link) opens the foods behind it; the tip of the same name is done
+  const openMacroSources = useCallback((id: string) => {
+    markUsed("hero-hold");
     setSourcesOf(id);
   }, []);
 
@@ -863,6 +871,7 @@ function HomeContent() {
               if (m) markUsed("hero-macro");  // the tip of the same name
               setHeroMacro(m);
             }}
+            onSources={isPast ? undefined : openMacroSources}
           />
           <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 ${
               selecting ? "mt-2" : "mx-3 mt-2 items-start gap-2 pb-4"
@@ -933,8 +942,8 @@ function HomeContent() {
       {sheets && sourcesMounted && (
         <sheets.NutrientSourcesSheet
           nutrient={sourcesOf}
-          value={sourcesOf === "fiber" ? shown.fiber : sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
-          target={sourcesOf === "fiber" ? macroTargets.fiber : sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+          value={sourcesMacro ? dayValues[sourcesMacro] : sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+          target={sourcesMacro ? macroTargets[sourcesMacro] : sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
           onClose={() => setSourcesOf(null)}
         />
       )}

@@ -5,6 +5,9 @@ import { whatsNewSteps } from "../tour-bus";
 const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
 
+// 2026-10-23a's tour (the night of 23→24/10): each PR of the night that adds a step appends its title here
+const T23A = ["Giữ để xem món nào góp vào"];
+
 describe("RELEASES", () => {
   it("is newest first with unique ids", () => {
     const ids = RELEASES.map((r) => r.id);
@@ -175,7 +178,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-23a, the night of 22→23/10, shared by its PRs) says what is new in plain words; no tour", () => {
+  it("the newest release (2026-10-23a, the night of 22→23/10, shared by its PRs) says what is new in plain words and has a tour (the night of 23→24/10)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-23a");
     expect(r?.date).toBe("23/10");
@@ -188,7 +191,8 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Hôm nay dễ đọc hơn");
     expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
     expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
-    expect(r?.tour).toBeUndefined();
+    expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
+    expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 
@@ -336,8 +340,8 @@ describe("joinedTour (what Thử ngay runs)", () => {
   // 22a (the stack: V3, So sánh, Ngày ăn mẫu): a meal's +, the Ngày tập pill, the Khám phá tab, So sánh, the ⋯ of the day, the Chép ngày ăn mẫu pill
   // custom-food-nutrients adds + Thêm vi chất khác at the end, share-spotlight the share button
   const T22A = ["Thêm vào từng bữa", "Ngày tập", "Nhóm món có màu", "So sánh món", "Lưu cả ngày thành mẫu", "Chép ngày ăn mẫu", "Nhập đủ vi chất", "Chia sẻ ngày ăn"];
-  // 32 steps from 18c on, 8 at most: the oldest releases give up their last steps first; 22a alone is 8, so it goes whole and every older tour goes
-  const CAPPED = T22A;
+  // 33 steps from 18c on, 8 at most: the oldest releases give up their last steps first; 22a and 23a come to 9, so 22a (the older) gives up its last step
+  const CAPPED = [...T22A.slice(0, MAX_TOUR_STEPS - T23A.length), ...T23A];
 
   it("seen 18b: 18c, 18e, 18f, 19a, 19b, then 20a (oldest first; 18d has no tour), cut to 8 steps from the end of the oldest tours (the newest tours are whole)", () => {
     expect(titles("2026-10-18b")).toEqual(CAPPED);
@@ -363,9 +367,10 @@ describe("joinedTour (what Thử ngay runs)", () => {
   it("releases without a tour add nothing", () => {
     expect(titles("2026-10-17")).toEqual(CAPPED);
     expect(titles("2026-10-21b")).toEqual(CAPPED);
-    expect(titles("2026-10-21c")).toEqual(T22A);
-    expect(titles("2026-10-21b")).toEqual(T22A);
-    expect(titles("2026-10-22a")).toEqual([]);
+    expect(titles("2026-10-21c")).toEqual(CAPPED);
+    expect(titles("2026-10-21b")).toEqual(CAPPED);
+    expect(titles("2026-10-22a")).toEqual(T23A);
+    expect(titles("2026-10-23a")).toEqual([]);
   });
 
   // Hôm nay as "Thử ngay" sees it: 18c's, 18e's (through the Ngày tập pill), 18f's, 19b's and 20a's controls
@@ -376,15 +381,15 @@ describe("joinedTour (what Thử ngay runs)", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
     expect(ids).toEqual(["2026-10-23a", "2026-10-22c", "2026-10-22b", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
     // So sánh món points at the portion panel (and its Xem chi tiết), never on Hôm nay, so it gives its place: 22a's 7 and 21c's first on the page
-    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([T21C[0], ...T22A.filter((t) => t !== "So sánh món")]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T22A.filter((t) => t !== "So sánh món"), ...T23A]);
   });
 
   it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
-    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
-    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 32 }, (_, i) => i));
-    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A]);
+    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-23a", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 33 }, (_, i) => i));
+    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A, ...T23A]);
   });
 
   it("the cap still holds after the filter: more than 8 steps on the page drops the oldest release's last ones", () => {

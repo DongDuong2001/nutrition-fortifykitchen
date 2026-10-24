@@ -76,7 +76,7 @@ def run(browser, width, text):
     if text == 100:
         fiber.click()
         pg.wait_for_timeout(700)
-        check(pg.locator("#nutrient-sources-title").inner_text().strip() == "Chất xơ", "tapping Chất xơ opens its foods sheet")
+        check(pg.locator("#nutrient-sources-title").inner_text().strip() == "Chất xơ hôm nay", "tapping Chất xơ opens its foods sheet")
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(500)
         if width == 390:

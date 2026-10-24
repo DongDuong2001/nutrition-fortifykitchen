@@ -65,7 +65,10 @@ export const RELEASES: readonly Release[] = [
         title: "Huy hiệu Level mới và màn chúc mừng khi lên Level",
         body: "Huy hiệu Level của bạn nằm ngay cạnh logo ở Hôm nay, chạm để xem Level là gì. Khi HLV nâng Level, app chúc mừng bạn và Hôm nay hiện thêm vi chất ngay.",
       },
+      // feat/hero-sources (Job A, overnight 23→24/10)
+      { icon: "bars", title: "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen (hoặc dòng Chất xơ) là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
     ],
+    tour: [{ target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." }],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item
   // to this same entry, whichever merges second keeps both. No tour: no new control, and the one new hint, Xem riêng một bữa, is a tip
