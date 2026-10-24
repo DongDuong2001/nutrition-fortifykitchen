@@ -34,6 +34,9 @@ HOME_TIPS = ["sync-offline", "unsaved", "home-logged", "meal-add", "home-share",
 problems = []
 
 
+NOW = "2026-10-24T12:30:00+07:00"
+
+
 def check(cond, msg):
     print(("[PASS] " if cond else "[FAIL] ") + msg)
     if not cond:
@@ -43,7 +46,11 @@ def check(cond, msg):
 def seeded(browser, settings, **extra):
     ctx = browser.new_context(**{**PHONE, **extra})
     ctx.add_init_script(f"if (localStorage.getItem('{SETTINGS_KEY}') === null) localStorage.setItem('{SETTINGS_KEY}', {json.dumps(json.dumps(settings))});")
-    return ctx, ctx.new_page()
+    pg = ctx.new_page()
+    # The add sheet draws the shortlists of the meal the clock says (Gần đây, Hay ăn), so its size changes with the hour: 637 to 665 nodes
+    # between 02:00 and 12:30 on the same build. Pinned to lunch (the largest), so a count is the same at any hour (fix/probe-polish-1020).
+    pg.clock.set_fixed_time(NOW)
+    return ctx, pg
 
 
 def home(pg):
@@ -194,11 +201,12 @@ def add_sheet():
         rows = pg.locator("[data-add-panel] button[data-food-row]").count()
         stops = pg.evaluate("() => [...document.querySelectorAll('[data-add-panel] button, [data-add-panel] a[href], [data-add-panel] input')].filter((e) => !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]')).length")
         nodes = pg.evaluate("() => document.querySelectorAll('[data-add-panel] *').length")
-        # Measured on the demo catalogue (43 foods) at 390 px: 34 rows, 112 Tab stops, 598 nodes with the V3 glass header, grabber, switcher and
-        # shortcut carousels (before the trim: 49, 140, 616); a small margin each
-        check(rows <= 40, f"3: the add list draws {rows} food rows first (measured 34; a few per category, not the whole catalogue)")
+        # Measured on the demo catalogue (43 foods) at 390 px with the clock at 12:30: 35 rows, 112 Tab stops, 665 nodes (598 when this check was
+        # written, 20/10; the add sheet has gained shortlist rows since, and its count moves with the hour: 637 at 15:30, 651 at night, 665 at lunch;
+        # before the per-category trim: 49 rows, 140 stops, 616 nodes); a small margin each
+        check(rows <= 40, f"3: the add list draws {rows} food rows first (measured 35; a few per category, not the whole catalogue)")
         check(stops <= 125, f"3: Tab has {stops} stops in the sheet (measured 112; before 140)")
-        check(nodes <= 650, f"3: the sheet is {nodes} nodes (measured 598 with the V3 header; the whole catalogue drew 616 before the per-category trim, and 49 rows)")
+        check(nodes <= 680, f"3: the sheet is {nodes} nodes (measured 665 at 12:30; the whole catalogue drew 616 before the per-category trim, and 49 rows)")
         more = pg.get_by_role("button", name=re.compile(r"^Xem thêm .+ \(\d+ món\)$")).first
         check(more.count() == 1, "3: a category with more foods ends in Xem thêm <category> (n món)")
         label = more.inner_text()
