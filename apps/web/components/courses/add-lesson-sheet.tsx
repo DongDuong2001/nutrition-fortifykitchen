@@ -94,10 +94,14 @@ function LessonForm({
   useEffect(() => {
     if (progress === null) setAsking(false);
   }, [progress]);
-  // The sheet leaving the screen (a Back that took its entry) ends the upload too: the half lesson is deleted, nothing keeps sending
+  // The sheet leaving the screen (a Back that took its entry) ends the upload too: the half lesson is deleted, nothing keeps sending, and the
+  // PDF (with its canvas and its encoder worker) is let go
+  const openPdfRef = useRef<OpenedPdf | null>(null);
+  openPdfRef.current = file?.pdf ?? null;
   useEffect(
     () => () => {
       stopped.current = true;
+      openPdfRef.current?.destroy();
     },
     []
   );

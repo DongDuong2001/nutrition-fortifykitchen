@@ -7,13 +7,15 @@ the button), adds a written lesson, reorders, makes a code; a learner opens the 
 the watermark. /documents redirects; Cài đặt no longer lists Tài liệu.
 Review fixes (24/10): Thêm bài is marked unsaved while a lesson is written or a PDF is converted and sent, closing it mid-upload asks
 (Dừng / Tiếp tục tải), a page that fails once is sent again (the mock fails page 2 once on sessionStorage h1t_mock_fail_page), and 60 pages
-are drawn on one canvas (counted on Chromium; WebKit cannot make WebP from a canvas, so it must say so at page 1 and keep nothing).
+are drawn on one canvas and every page is a real WebP, on Chromium and on WebKit (which cannot make WebP from a canvas: its pages come
+from the WASM encoder).
 Screenshots: .screenshots/courses/*.png (390×844 and 1440×900). Run with: ALIGN_BASE_URL=http://localhost:3120 npm run probe -- tests/probes/courses.py
 """
 # PROBE_COVERS: app/(app)/explore/documents/** app/(app)/documents/** components/courses/** lib/lesson-upload.ts components/explore/courses-carousel.tsx hooks/use-courses.ts lib/courses.ts lib/mock/courses-mock.ts lib/course-logic.ts lib/pdf-pages.ts
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 import _demo  # noqa: F401
@@ -27,6 +29,10 @@ SIXTY = Path(__file__).resolve().parent / "fixtures" / "sixty-pages.pdf"
 # Counts the canvases the page makes (pdfjs and lib/pdf-pages): Safari refuses new ones after a few dozen big ones, so a 60-page PDF must reuse one
 # A slow server: each page the mock stores takes 150 ms, so the 60 pages take long enough to answer a question in the middle
 SLOW_PAGES = "(() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('h1t_mock_course_page_v1_')) { const t = Date.now(); while (Date.now() - t < 150); } return o.call(this, k, v); }; })();"
+# What the mock was sent for each page: the first bytes, as the server would read them (the mock itself wraps anything as image/webp)
+RECORD_PAGES = "window.__pageHeads = []; (() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('h1t_mock_course_page_v1_')) { const b = atob(String(v).split(',')[1].slice(0, 16)); window.__pageHeads.push({ riff: b.slice(0, 4), webp: b.slice(8, 12) }); } return o.call(this, k, v); }; })();"
+# The workers the page starts (pdf.js's own, and the WASM encoder's: lib/webp-worker, a chunk) and what toBlob answers, and the longest the main thread went without answering a 50 ms timer
+WATCH_THREADS = "window.__workers = []; (() => { const W = window.Worker; window.Worker = class extends W { constructor(u, o) { window.__workers.push(String(u)); super(u, o); } }; })(); window.__toBlob = []; (() => { const t = HTMLCanvasElement.prototype.toBlob; HTMLCanvasElement.prototype.toBlob = function (cb, type, q) { return t.call(this, (b) => { window.__toBlob.push(b && b.type); cb(b); }, type, q); }; })(); window.__maxGap = 0; (() => { let last = performance.now(); setInterval(() => { const n = performance.now(); window.__maxGap = Math.max(window.__maxGap, n - last); last = n; }, 50); })();"
 COUNT_CANVASES = "window.__canvases = 0; (() => { const o = Document.prototype.createElement; Document.prototype.createElement = function (t, ...r) { if (String(t).toLowerCase() === 'canvas') window.__canvases++; return o.call(this, t, ...r); }; })();"
 NO_INSTALL = "try { sessionStorage.setItem('h1t_install_shown', '1'); } catch (e) {}"
 problems = []
@@ -38,10 +44,14 @@ def check(cond, msg):
         problems.append(msg)
 
 
+REQUESTS = []  # every URL any page of this probe asked for, in order
+
+
 def new_page(browser, w=390, h=844, touch=False):
     ctx = browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=2 if w < 800 else 1, has_touch=touch)
     ctx.add_init_script(NO_INSTALL)
     pg = ctx.new_page()
+    pg.on("request", lambda r: REQUESTS.append(r.url))
     return ctx, pg
 
 
@@ -77,6 +87,7 @@ def scroll_wheel_to(pg, selector, tries=60):
 
 def learner_flow(browser, w, h, touch):
     tag = str(w)
+    first_request = len(REQUESTS)
     ctx, pg = new_page(browser, w, h, touch)
     go(pg, "/explore?as=user2")
     # ---- Khám phá: the chip and the carousel
@@ -196,6 +207,8 @@ def learner_flow(browser, w, h, touch):
     go(pg, "/explore/documents/c-vi-chat?level=2")
     check("Mở khi bạn lên Level 3" in text(pg), f"{tag}: a deep link to the Level 3 course at Level 2 says Mở khi bạn lên Level 3")
     shot(pg, f"{tag}-9-level-locked.png")
+    # A learner never fetches the WASM WebP encoder (it is the coach's, and only a browser that cannot make WebP itself loads it)
+    check(not [u for u in REQUESTS[first_request:] if u.endswith(".wasm") or "webp_enc" in u], f"{tag}: a learner fetches no WASM encoder")
     ctx.close()
 
 
@@ -414,28 +427,37 @@ def written_lesson_marks(browser):
 
 
 def sixty_pages(browser, name):
-    """60 pages in one go: the lesson is added and the pages came from one canvas (not 60 left for the garbage collector).
-    A browser that cannot make WebP from a canvas (WebKit answers with a PNG, on a Mac and on an iPhone) stops at page 1 with its message
-    and keeps nothing: there the check is that it says so, leaves no half lesson and still has not made a canvas per page."""
+    """60 pages in one go, in every browser: the lesson is ready, every page that was sent is a real WebP (RIFF....WEBP: WebKit cannot make
+    one from a canvas, so there the pages come from the WASM encoder), and the pages were drawn on one canvas, not one each."""
     ctx, pg = new_page(browser, 390, 844)
-    ctx.add_init_script(COUNT_CANVASES)
+    ctx.add_init_script(COUNT_CANVASES + RECORD_PAGES + WATCH_THREADS)
+    first_request = len(REQUESTS)
     open_add_lesson(pg)
-    webp = pg.evaluate("() => new Promise((r) => { const c = document.createElement('canvas'); c.width = 4; c.height = 4; c.toBlob((b) => r(b && b.type), 'image/webp', 0.8); })") == "image/webp"
     pick_pdf(pg, SIXTY, "Sáu mươi trang", 60)
+    started = time.time()
     pg.get_by_role("button", name="Thêm vào khóa").click()
-    if webp:
-        pg.get_by_role("dialog", name="Thêm bài").wait_for(state="detached", timeout=170000)
-        pg.wait_for_timeout(900)
-        check("PDF · 60 trang" in text(pg), f"{name}: 60 pages, the lesson is added")
-    else:
-        pg.get_by_role("alert").filter(has_text="chưa tạo được ảnh trang").wait_for(timeout=20000)
-        check(True, f"{name}: no WebP from a canvas here, so it says so on page 1 (Dùng Chrome hoặc Edge)")
-        check(not unsaved(pg), f"{name}: and holds nothing back")
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(1000)
-        check("Sáu mươi trang" not in text(pg) and pg.locator("li[data-align-group=coach-lessons]").count() == 0, f"{name}: no half lesson is left")
+    pg.locator("[data-tour=course-add-lesson-go]", has_text="Đang chuyển trang").wait_for(timeout=30000)
+    pg.wait_for_timeout(1500)
+    shot(pg, f"390-{name}-c7-uploading.png")
+    seen_alert = pg.get_by_role("dialog", name="Thêm bài").get_by_role("alert").count()
+    pg.get_by_role("dialog", name="Thêm bài").wait_for(state="detached", timeout=240000)
+    pg.wait_for_timeout(900)
+    took = time.time() - started
+    check("PDF · 60 trang" in text(pg) and seen_alert == 0, f"{name}: 60 pages, the lesson is added, no error on the way ({took:.0f} s)")
+    shot(pg, f"390-{name}-c8-lesson-added.png")
+    heads = pg.evaluate("() => window.__pageHeads")
+    check(len(heads) == 60 and all(h["riff"] == "RIFF" and h["webp"] == "WEBP" for h in heads), f"{name}: all 60 pages were sent as WebP (RIFF…WEBP) ({len(heads)} sent, first {heads[:1]})")
     made = pg.evaluate("() => window.__canvases")
     check(made <= 3, f"{name}: the pages were drawn on {made} canvas(es), not one each")
+    answers = set(pg.evaluate("() => window.__toBlob"))
+    check(("image/png" in answers) == (name == "webkit"), f"{name}: the browser's own toBlob('image/webp') answered {sorted(map(str, answers))}")
+    wasm = [u.rsplit("/", 1)[-1] for u in REQUESTS[first_request:] if u.endswith(".wasm")]
+    check(len(wasm) == (1 if name == "webkit" else 0), f"{name}: {'one' if wasm else 'no'} WASM file fetched, only when the browser needed it ({wasm})")
+    workers = [w for w in pg.evaluate("() => window.__workers") if "pdf.worker" not in w]
+    gap = pg.evaluate("() => window.__maxGap")
+    # Chrome and Edge make WebP themselves; where the browser cannot, the encoder runs in its own worker and the page stays alive
+    check(bool(workers) == (name == "webkit"), f"{name}: the WASM encoder worker {'ran' if workers else 'did not run'} ({workers[:1]})")
+    check(gap < 1000, f"{name}: the page never stopped answering for a second ({gap:.0f} ms at the longest)")
     ctx.close()
 
 
