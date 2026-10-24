@@ -76,9 +76,13 @@ describe("the queued moment", () => {
 describe("the add's source", () => {
   it("is taken once: the next add has none", () => {
     expect(takeAddSource()).toBeNull();
-    setAddSource("training");
-    expect(takeAddSource()).toBe("training");
-    expect(takeAddSource()).toBeNull();
+    setAddSource("training", 1000);
+    expect(takeAddSource(1100)).toBe("training");
+    expect(takeAddSource(1100)).toBeNull();
+  });
+  it("goes stale: a source whose add never came (a refused add) does not mark the next one", () => {
+    setAddSource("training", 1000);
+    expect(takeAddSource(1000 + 2001)).toBeNull();
   });
 });
 

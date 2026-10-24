@@ -21,6 +21,8 @@ export function momentText(key: string): { announce: string; label: string | nul
 
 /** How long a moment's hero label holds before the usual one glides back (--m-goal-hold). */
 export const GOAL_LABEL_HOLD_MS = 2400;
+/** How long the polite line keeps its words (long enough to be read out; then empty, so the same goal on another day is announced afresh). */
+export const ANNOUNCE_MS = 4000;
 
 export interface QueuedMoment {
   /** The day the add was made on */
@@ -58,16 +60,18 @@ export function clearQueuedMoment(): void {
   changed();
 }
 
-// Where the add came from, when it is not Hôm nay's: Ngày tập records its nutrient goals and replays none of them on Hôm nay
-let addSource: "training" | null = null;
-export function setAddSource(source: "training" | null): void {
-  addSource = source;
+// Where the add came from, when it is not Hôm nay's: Ngày tập records its nutrient goals and replays none of them on Hôm nay.
+// Set just before the add; one that was never taken (the add was refused) goes stale and does not mark a later add.
+const ADD_SOURCE_MS = 2000;
+let addSource: { source: "training"; at: number } | null = null;
+export function setAddSource(source: "training" | null, now = Date.now()): void {
+  addSource = source ? { source, at: now } : null;
 }
 /** The source of the add that just happened, once. */
-export function takeAddSource(): "training" | null {
-  const source = addSource;
+export function takeAddSource(now = Date.now()): "training" | null {
+  const taken = addSource;
   addSource = null;
-  return source;
+  return taken && now - taken.at <= ADD_SOURCE_MS ? taken.source : null;
 }
 
 export interface ColumnSummary {

@@ -14,6 +14,7 @@ import { gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import type { TrainingCheckItem } from "@/lib/training";
 import { carbsIn, gramsForCarbs, lonPortion, lonsForCarbs, mixPrefill, resolveChoices, type ResolvedChoice } from "@/lib/training-foods";
+import { setAddSource } from "@/lib/goal-moments";
 import { generateUuid } from "@/lib/uuid";
 
 /** Grams as the gram field takes them: a decimal comma and no thousands dot (formatAmount's "1.000" reads as 1 g). */
@@ -144,6 +145,8 @@ function PortionChoice({ item, choice, onLogged }: { item: TrainingCheckItem; ch
     setSubmitting(true);
     const id = generateUuid();
     const qty = servingLabel || gramsServingLabel(parsed);
+    // Ngày tập records the nutrient goals this add reaches and replays none of them on Hôm nay (a T3 stays queued there)
+    setAddSource("training");
     if (await addFoodEntry(food, parsed, "snack", qty, { id })) onLogged(item.id, [id], qty);
     else setSubmitting(false);
   };
@@ -203,6 +206,7 @@ function MixPanel({ item, redBull, matMia, onLogged }: { item: TrainingCheckItem
       { food: redBull, grams: rb, label: rbLabel || gramsServingLabel(rb), id: generateUuid(), short: "Red Bull" },
       { food: matMia, grams: mm, label: mmLabel || gramsServingLabel(mm), id: generateUuid(), short: "mật mía" },
     ].filter((p) => p.grams > 0);
+    setAddSource("training");
     if (addFoodEntries(parts, "snack")) {
       onLogged(item.id, parts.map((p) => p.id), parts.map((p) => `${p.label} ${p.short}`).join(" + "));
     } else {

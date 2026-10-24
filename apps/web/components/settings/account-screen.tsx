@@ -22,6 +22,7 @@ import { cleanDisplayName, limitDisplayName, validateDisplayName } from "@/lib/d
 
 // Only a person who signs out with writes waiting ever sees it: its chunk is not part of the page
 import type { SignOutFailure } from "@/components/settings/sign-out-confirm";
+import { cue } from "@/lib/cue";
 const SignOutConfirm = dynamic(() => import("@/components/settings/sign-out-confirm").then((m) => m.SignOutConfirm), { ssr: false });
 const SyncList = dynamic(() => import("@/components/sync/sync-list").then((m) => m.SyncList), { ssr: false });
 
@@ -40,6 +41,7 @@ function DisplayNameRow() {
     setValue(name);
     if (name === profile.displayName) return;
     if (!(await saveName(name))) setError("Đã lưu trên máy này, chưa gửi lên máy chủ được. Thử lại sau.");
+    else cue("save");
   }
 
   return (

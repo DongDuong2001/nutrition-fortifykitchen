@@ -40,6 +40,8 @@ import { RestDayCard } from "@/components/training/rest-day-card";
 import { TrainingTipBanner } from "@/components/training/training-tip-banner";
 import { markUsed } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
+import { MOMENT_AFTER_SHEET_MS, SHEET_EXIT_MS } from "@/lib/goals";
+import { useTrainingMoment } from "@/hooks/use-training-moment";
 
 export default function TrainingPage() {
   return (
@@ -186,6 +188,7 @@ function TrainingContent() {
     } else if (action === "tick") {
       // No catalogue food for it (OPEN_QUESTIONS): a plain tick
       saveDay({ ...day, ticked: [...ticked, item.id] });
+      finishDay([...ticked, item.id], 0);
     }
   };
 
@@ -201,6 +204,8 @@ function TrainingContent() {
   const handleLogged = (itemId: string, entryIds: string[], qty: string) => {
     saveDay(logTick({ ...record, minutes: trainingMinutes, ticked }, itemId, entryIds, qty));
     setLogItem(null);
+    // 150 ms after the portion sheet's exit (the add's own sound played at Thêm)
+    finishDay([...ticked, itemId], SHEET_EXIT_MS + MOMENT_AFTER_SHEET_MS);
   };
 
   const addOwn = (item: Omit<OwnTrainingItem, "id">) => {
@@ -241,6 +246,9 @@ function TrainingContent() {
     () => getTrainingPhases(trainingMinutes, ticked, { size, logged: loggedAmounts(record, ticked), own: prefs?.own ?? [] }),
     [trainingMinutes, ticked, size, record, prefs]
   );
+  // feat/sound-goals RA1: the tick that completes the day pops its phase's "x / y" and the header says "Xong Ngày tập hôm nay" for 2,4 s
+  const { dayDone, announce, finish: finishDay, popEnded } = useTrainingMoment(phases, ticked, todayIso, isPast);
+
   // The rest-day tips quote this user's protein and energy targets (from Hồ sơ), not a sample profile's
   const restTargets = useMemo(() => targetsFor(profile), [profile]);
 
@@ -324,6 +332,8 @@ function TrainingContent() {
             busyId={waitingId}
             readOnly={isPast}
             variant="mobile"
+            dayDone={dayDone}
+            onPopEnd={popEnded}
           />
         )}
 
@@ -373,6 +383,8 @@ function TrainingContent() {
                 busyId={waitingId}
                 readOnly={isPast}
                 variant="desktop"
+                dayDone={dayDone}
+                onPopEnd={popEnded}
               />
             )}
             {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
@@ -380,6 +392,10 @@ function TrainingContent() {
         )}
       </main>
 
+      {/* D-MOT-02: the moment also says it in words, for a screen reader */}
+      <p aria-live="polite" className="sr-only">
+        {announce}
+      </p>
       <TrainingSizeSheet open={sizeOpen} value={size} onChoose={chooseSize} onClose={() => setSizeOpen(false)} />
       <TrainingLogSheet item={logItem} foods={foods} onClose={() => setLogItem(null)} onLogged={handleLogged} />
       <OwnItemSheet target={ownTarget} onClose={() => setOwnTarget(null)} onAdd={addOwn} />

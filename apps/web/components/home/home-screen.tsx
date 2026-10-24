@@ -880,7 +880,7 @@ function HomeContent() {
         )}
         <main className="relative mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           {/* D-MOT-02: a goal that changes no label says so here ("Vitamin C đạt mục tiêu"); the hero's own h2 is aria-live for the rest */}
-          <p role="status" aria-live="polite" className="sr-only">
+          <p aria-live="polite" className="sr-only">
             {announce}
           </p>
           <HomeHero

@@ -814,6 +814,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore storage access errors
     }
+    // Gần đây is this device's own unless the server answers (live: /recents, below): until it has, the first-food moment waits
+    if (!isLiveMode()) recentsAnswered.current = true;
     // Entries of earlier days are filed by date in the same step, so today starts with today's entries only
     // Entries of a recipe that has since reached the server name its server food, so they are sent
     // cc-68: yesterday stays in the list while it can be edited, and a day that was filed but can be edited again comes back

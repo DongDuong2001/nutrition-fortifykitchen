@@ -27,6 +27,7 @@ import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
 import { feedbackSeen, openFeedback, subscribeFeedback } from "@/lib/feedback";
 import { useT } from "@/lib/i18n";
+import { cue } from "@/lib/cue";
 
 const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "male", label: "Nam" },
@@ -152,7 +153,10 @@ function BirthYearField() {
       refocus.current = false;
       return;
     }
-    if (birthYear !== profile.birthYear) updateProfile({ birthYear });
+    if (birthYear !== profile.birthYear) {
+      updateProfile({ birthYear });
+      cue("save");
+    }
     setTyped(null);
     setEditing(false);
   }

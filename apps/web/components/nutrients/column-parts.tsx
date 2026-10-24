@@ -1,4 +1,5 @@
 import React from "react";
+import { GoalCheck } from "@/components/ui/goal-label";
 import { formatAmount } from "@/lib/format";
 
 /**
@@ -26,9 +27,7 @@ export function LevelSummary({ summary }: { summary: { reached: number; total: n
       {summary.done ? (
         // Hôm nay only (the Ngày ăn mẫu builder passes no `done`): the line follows the numbers, so "Thiếu nhiều nhất" is back when a delete takes the column under
         <span data-fx="done-line" className="inline-flex items-center gap-1 text-callout font-bold leading-5 text-cobalt">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M5 12.5l4.5 4.5L19 7.5" />
-          </svg>
+          <GoalCheck size={16} />
           Đủ chất hôm nay
         </span>
       ) : (

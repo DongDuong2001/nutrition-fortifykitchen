@@ -3,8 +3,9 @@ import { formatAmount, formatRange } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelColor, getLevelLabel } from "@/lib/levels";
+import { GoalCheck, GoalLabel } from "@/components/ui/goal-label";
 import { LevelBar } from "@/components/ui/level-bar";
-import { useRef, type ReactNode } from "react";
+import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
 import { Expand } from "@/components/ui/expand";
 import { HERO_MACRO_LABEL, macroKcal, toggleMacro, type HeroMacro } from "@/lib/macro-kcal";
@@ -124,9 +125,7 @@ export function HomeHero({
             {moment && !picked ? (
               moment.text ? (
                 <GoalLabel key={moment.key}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12.5l4.5 4.5L19 7.5" />
-                  </svg>
+                  <GoalCheck />
                   {moment.text}
                 </GoalLabel>
               ) : (
@@ -244,17 +243,5 @@ export function HomeHero({
         </Expand>
       )}
     </>
-  );
-}
-
-/** A goal moment's label, or the usual one gliding back: it glides in once (m-goal-label) and the class is gone when it ends. */
-function GoalLabel({ children, plain = false }: { children: ReactNode; plain?: boolean }) {
-  return (
-    <span
-      className={`m-goal-label ${plain ? "" : "inline-flex items-center gap-1"}`}
-      onAnimationEnd={(e) => e.currentTarget.classList.remove("m-goal-label")}
-    >
-      {children}
-    </span>
   );
 }

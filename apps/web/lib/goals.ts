@@ -158,6 +158,8 @@ export function saveFirstFoodSeen(storage: KeyValueStore | null = accountStorage
 }
 
 export const MOMENT_AFTER_SHEET_MS = 150;
+/** A sheet's exit (--m-sheet-out): the moment after a portion sheet starts this long after it closes, plus MOMENT_AFTER_SHEET_MS. */
+export const SHEET_EXIT_MS = 220;
 
 export interface GateState {
   /** The day the moment was queued */

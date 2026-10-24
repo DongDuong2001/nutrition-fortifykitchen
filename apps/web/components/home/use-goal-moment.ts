@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { cue, TIER_CUE } from "@/lib/cue";
 import { runMoment } from "@/lib/goal-fx";
-import { GOAL_LABEL_HOLD_MS, clearQueuedMoment, momentText, queuedMoment, subscribeMoment } from "@/lib/goal-moments";
+import { ANNOUNCE_MS, GOAL_LABEL_HOLD_MS, clearQueuedMoment, momentText, queuedMoment, subscribeMoment } from "@/lib/goal-moments";
 import { FIRST_FOOD, momentGate, type Moment } from "@/lib/goals";
 import { HOME_ROUTE } from "@/lib/nav";
 import { isOverlayOpen, subscribeTipBusy } from "@/lib/tour-bus";
@@ -59,7 +59,14 @@ export function useGoalMoment({
   const played = useRef(onPlayed);
   played.current = onPlayed;
   const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(holdTimer.current), []);
+  const announceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(
+    () => () => {
+      clearTimeout(holdTimer.current);
+      clearTimeout(announceTimer.current);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!queued || !todayIso) return;
@@ -92,6 +99,8 @@ export function useGoalMoment({
         holdTimer.current = setTimeout(() => setHeroMoment({ key: ++seq.current, text: null }), GOAL_LABEL_HOLD_MS);
       } else {
         setAnnounce(text.announce);
+        clearTimeout(announceTimer.current);
+        announceTimer.current = setTimeout(() => setAnnounce(""), ANNOUNCE_MS);
       }
     }, gate);
     return () => clearTimeout(timer);

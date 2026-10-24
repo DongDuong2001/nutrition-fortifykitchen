@@ -19,6 +19,7 @@ import {
   type MacroRatios,
   type MacroTargetMode,
 } from "@/lib/targets";
+import { cue } from "@/lib/cue";
 
 
 /**
@@ -258,6 +259,7 @@ function MacroTargetsForm() {
     }
 
     // cc-64 (A3): the app's toast, which stays while the screen goes back to Mục tiêu
+    cue("save");
     notify("Đã lưu mục tiêu đa lượng mới");
     setTimeout(() => {
       router.push("/settings/targets");
@@ -276,6 +278,7 @@ function MacroTargetsForm() {
       customEnergyKcal: undefined,
     });
     // cc-64 (A3): the app's toast, which stays while the screen goes back to Mục tiêu
+    cue("save");
     notify("Đã lưu mục tiêu đa lượng mới");
     setTimeout(() => {
       router.push("/settings/targets");
