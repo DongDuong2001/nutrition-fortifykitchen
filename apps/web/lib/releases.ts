@@ -66,7 +66,7 @@ export const RELEASES: readonly Release[] = [
         body: "Huy hiệu Level của bạn nằm ngay cạnh logo ở Hôm nay, chạm để xem Level là gì. Khi HLV nâng Level, app chúc mừng bạn và Hôm nay hiện thêm vi chất ngay.",
       },
       // feat/hero-sources (Job A, overnight 23→24/10)
-      { icon: "bars", title: "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen (hoặc dòng Chất xơ) là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
+      { icon: "bars", title: "Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
       // feat/my-foods-crud (Job C, overnight 23→24/10)
       { icon: "meal", title: "Sửa và xóa Món ăn của tôi", body: "Món bạn tự tạo giờ sửa được số liệu và xóa được. Xóa nhầm thì bấm Hoàn tác trong 8 giây, nhật ký đã ghi vẫn giữ số cũ." },
       // fix/share-meal-cobalt (24/10): a look, no control to teach (no tour step, no tip)

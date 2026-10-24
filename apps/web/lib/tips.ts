@@ -353,7 +353,7 @@ export const TIPS: readonly Tip[] = [
     id: "hero-hold",
     target: "hero-macro",
     title: "Giữ để xem món nào góp vào",
-    body: "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen, hoặc Chất xơ ở cột bên phải, là thấy những món nào góp vào số đó.",
+    body: "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen là thấy những món nào góp vào số đó.",
     used: ["hero-hold"],
     when: today,
   },

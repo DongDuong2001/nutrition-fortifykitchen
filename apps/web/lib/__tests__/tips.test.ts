@@ -3,6 +3,14 @@ import { canVibrate } from "../haptics";
 import { DEFAULT_FLAGS, markSeenIn, markShareLaterIn, markTipShownIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
 import { TIPS, pickTip, type TipContext } from "../tips";
 
+describe("hero-hold copy (Hao 24/10)", () => {
+  it("teaches the hold on Tinh bột, Đạm and Chất béo only: Chất xơ already opens its foods on a tap", () => {
+    const tip = TIPS.find((t) => t.id === "hero-hold");
+    expect(tip?.body).toBe("Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen là thấy những món nào góp vào số đó.");
+    expect(tip?.body).not.toContain("Chất xơ");
+  });
+});
+
 const ctx = (over: Partial<TipContext> = {}): TipContext => ({ pathname: "/app", pastDay: false, foodsToday: 2, ...over });
 const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DEFAULT_FLAGS, ...over });
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;

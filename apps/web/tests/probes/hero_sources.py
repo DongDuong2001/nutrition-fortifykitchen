@@ -10,12 +10,14 @@ Run with: ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/her
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** components/home/home-hero.tsx components/home/home-screen.tsx components/home/nutrient-sources-sheet.tsx components/home/nutrient-column.tsx lib/hold.ts lib/use-hold.ts lib/nutrient-sources.ts
 import datetime
+import json
 import os
 import re
 import sys
 from pathlib import Path
 
 import _demo  # noqa: F401
+import _seed
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3112")
@@ -186,11 +188,31 @@ def run_desktop(browser):
     ctx.close()
 
 
+def run_tip(browser):
+    """The hold tip names Tinh bột, Đạm and Chất béo only (Hao 24/10): a tap on Chất xơ already opens its foods."""
+    _seed.onboarding(True)
+    flags = {"tourDone": True, "seen": ["home-logged", "meal-add", "nutrient-sources"], "used": ["pull-refresh", "share-day", "meal-focus", "hero-macro"], "whatsNewSeen": "2026-10-23a"}
+    seed = {"onboarding": flags, "installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}}
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, has_touch=True, is_mobile=True)
+    ctx.add_init_script(NO_INSTALL_POPUP + f"if (localStorage.getItem('h1t_settings_v1_demo') === null) localStorage.setItem('h1t_settings_v1_demo', {json.dumps(json.dumps(seed))});")
+    pg = ctx.new_page()
+    pg.goto(BASE + "/app", wait_until="networkidle")
+    pg.wait_for_timeout(2500)
+    card = pg.locator("[data-onboarding-card]")
+    text = re.sub(r"\s+", " ", card.first.inner_text()) if card.count() else ""
+    check("Giữ để xem món nào góp vào" in text and "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen là thấy những món nào góp vào số đó." in text, f"390: the hold tip says Tinh bột, Đạm, Chất béo ({text[:140]!r})")
+    check("Chất xơ" not in text, "390: …and does not name Chất xơ")
+    pg.screenshot(path=str(SHOTS / "390-6-hold-tip.png"))
+    ctx.close()
+    _seed.onboarding(False)
+
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     try:
         run_phone(browser)
         run_desktop(browser)
+        run_tip(browser)
     finally:
         browser.close()
 

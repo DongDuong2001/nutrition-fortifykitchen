@@ -192,7 +192,11 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
     expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
     expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
-    expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
+    expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào");
+    // Hao 24/10: a tap on Chất xơ already opened its foods, so the hold there is not something new to teach
+    const hold = r?.items.find((i) => i.title.startsWith("Giữ Tinh bột"));
+    expect(hold?.body).toBe("Giữ ngón tay trên một chất ở thẻ đen là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được.");
+    expect(hold?.title + (hold?.body ?? "")).not.toContain("Chất xơ");
     expect(r?.items.map((i) => i.title)).toContain("Sửa và xóa Món ăn của tôi");
     expect(r?.items.map((i) => i.title)).toContain("Ảnh chia sẻ: tên bữa màu xanh như Hôm nay");
     expect(r?.items.map((i) => i.title)).toContain("Vuốt món để xóa hoặc mở tùy chọn");
