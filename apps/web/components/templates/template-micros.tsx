@@ -26,7 +26,7 @@ export function TemplateMacros({ values, targets }: { values: HomeValues; target
             <dt className="text-cap text-secondary">{label}</dt>
             <dd className="m-0 font-condensed text-callout font-extrabold leading-none tabular-nums">
               {value === null ? "—" : `${formatAmount(value, "g")} g`}
-              {target !== null && <span className="ml-1 font-sans text-xs font-normal text-secondary">/ {formatAmount(target, "g")} g</span>}
+              {target !== null && <span className="ml-1 whitespace-nowrap font-sans text-xs font-normal text-secondary">/ {formatAmount(target, "g")} g</span>}
             </dd>
           </div>
         );
