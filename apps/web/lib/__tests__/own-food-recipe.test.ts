@@ -4,7 +4,7 @@ import { MOCK_FOODS, browsableFoods, catalogFoodById } from "../mock/foods";
 import { RECIPES_KEY, type Recipe } from "../recipe";
 import { keyedStorage } from "../storage-keys";
 import { deleteRecipe, readRecipes, restoreRecipe, syncRecipeFoods } from "../recipe-store";
-import { OWN_FOOD_UNDO_MS } from "../own-foods";
+import { OWN_FOOD_HOLD_MS } from "../own-foods";
 
 // Job C: Xóa món on a dish made from ingredients (recipe-store: device only, plus a hidden server food per version in live mode).
 
@@ -99,7 +99,7 @@ describe("deleteRecipe / restoreRecipe", () => {
     await vi.advanceTimersByTimeAsync(10);
     expect(outboxItems().map((i) => i.path).sort()).toEqual([`/foods/custom/${SERVER_NOW}`, `/foods/custom/${SERVER_OLD}`]);
     expect(calls.filter((c) => c.startsWith("DELETE"))).toEqual([]);
-    await vi.advanceTimersByTimeAsync(OWN_FOOD_UNDO_MS + 1000);
+    await vi.advanceTimersByTimeAsync(OWN_FOOD_HOLD_MS + 1000);
     expect(calls.filter((c) => c.startsWith("DELETE")).sort()).toEqual([`DELETE /foods/custom/${SERVER_NOW}`, `DELETE /foods/custom/${SERVER_OLD}`]);
   });
 
@@ -108,7 +108,7 @@ describe("deleteRecipe / restoreRecipe", () => {
     const gone = deleteRecipe("recipe-1")!;
     await vi.advanceTimersByTimeAsync(3000);
     await restoreRecipe(gone);
-    await vi.advanceTimersByTimeAsync(OWN_FOOD_UNDO_MS * 3);
+    await vi.advanceTimersByTimeAsync(OWN_FOOD_HOLD_MS * 3);
     expect(calls.filter((c) => c.startsWith("DELETE"))).toEqual([]);
     expect(outboxItems()).toEqual([]);
     expect(readRecipes()[0].serverFoodId).toBe(SERVER_NOW);

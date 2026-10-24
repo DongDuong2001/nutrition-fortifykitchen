@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient, loadSyncEngine, outboxItems, pendingFoodDeleteIds, syncOfflineOutbox } from "../api-client";
 import { resetOutboxState } from "../outbox";
-import { OWN_FOOD_UNDO_MS } from "../own-foods";
+import { OWN_FOOD_HOLD_MS, OWN_FOOD_UNDO_MS } from "../own-foods";
 
-// Job C: the DELETE of Xóa món waits OWN_FOOD_UNDO_MS in the outbox (not in a timer held in memory): Hoàn tác takes it back,
+// Job C: the DELETE of Xóa món waits OWN_FOOD_HOLD_MS (the toast's 8 s and 1,5 s more) in the outbox (not in a timer held in memory): Hoàn tác takes it back,
 // and a reload inside the window still sends it afterwards.
 
 function memoryStorage(): Storage {
@@ -56,6 +56,7 @@ const tick = (ms: number) => vi.advanceTimersByTimeAsync(ms);
 describe("apiClient.deleteOwnFood", () => {
   it("is 8 s of undo window", () => {
     expect(OWN_FOOD_UNDO_MS).toBe(8000);
+    expect(OWN_FOOD_HOLD_MS).toBe(9500);
   });
 
   it("sends nothing at once: the DELETE waits in the outbox, with a not-before time", async () => {
@@ -64,14 +65,14 @@ describe("apiClient.deleteOwnFood", () => {
     expect([...pendingFoodDeleteIds()]).toEqual([FOOD]);
     const [item] = outboxItems();
     expect(item).toMatchObject({ kind: "food", method: "DELETE", path: `/foods/custom/${FOOD}`, entity: `food:${FOOD}` });
-    expect(item.notBefore).toBe(Date.now() + OWN_FOOD_UNDO_MS);
+    expect(item.notBefore).toBe(Date.now() + OWN_FOOD_HOLD_MS);
     // Written for the service worker too, which reads nextAttemptAt
     expect(item.nextAttemptAt).toBe(item.notBefore);
   });
 
   it("goes out once the window is over, and the outbox is empty after", async () => {
     await apiClient.deleteOwnFood(FOOD);
-    await tick(OWN_FOOD_UNDO_MS - 100);
+    await tick(OWN_FOOD_HOLD_MS - 100);
     expect(calls).toEqual([]);
     await tick(1000);
     expect(calls).toEqual([`DELETE /foods/custom/${FOOD}`]);
@@ -83,7 +84,7 @@ describe("apiClient.deleteOwnFood", () => {
     await tick(3000);
     await syncOfflineOutbox({ force: true });
     expect(calls).toEqual([]);
-    await tick(OWN_FOOD_UNDO_MS);
+    await tick(OWN_FOOD_HOLD_MS);
     expect(calls).toEqual([`DELETE /foods/custom/${FOOD}`]);
   });
 
@@ -98,7 +99,7 @@ describe("apiClient.deleteOwnFood", () => {
 
   it("Hoàn tác after the DELETE went out has nothing to take back", async () => {
     await apiClient.deleteOwnFood(FOOD);
-    await tick(OWN_FOOD_UNDO_MS + 1000);
+    await tick(OWN_FOOD_HOLD_MS + 1000);
     expect(await apiClient.undoOwnFoodDelete(FOOD)).toBe(false);
   });
 
@@ -111,7 +112,7 @@ describe("apiClient.deleteOwnFood", () => {
     await syncOfflineOutbox();
     expect(calls).toEqual([]);
     expect([...pendingFoodDeleteIds()]).toEqual([FOOD]);
-    await tick(OWN_FOOD_UNDO_MS);
+    await tick(OWN_FOOD_HOLD_MS);
     expect(calls).toEqual([`DELETE /foods/custom/${FOOD}`]);
   });
 
@@ -126,7 +127,7 @@ describe("apiClient.deleteOwnFood", () => {
   it("a 404 (the server has no such food any more) counts as done", async () => {
     answer = 404;
     await apiClient.deleteOwnFood(FOOD);
-    await tick(OWN_FOOD_UNDO_MS + 1000);
+    await tick(OWN_FOOD_HOLD_MS + 1000);
     expect(calls).toEqual([`DELETE /foods/custom/${FOOD}`]);
     expect(outboxItems()).toEqual([]);
   });
@@ -135,7 +136,7 @@ describe("apiClient.deleteOwnFood", () => {
     await apiClient.deleteOwnFood(FOOD);
     await apiClient.deleteOwnFood(OTHER);
     expect(await apiClient.undoOwnFoodDelete(FOOD)).toBe(true);
-    await tick(OWN_FOOD_UNDO_MS + 1000);
+    await tick(OWN_FOOD_HOLD_MS + 1000);
     expect(calls).toEqual([`DELETE /foods/custom/${OTHER}`]);
   });
 });

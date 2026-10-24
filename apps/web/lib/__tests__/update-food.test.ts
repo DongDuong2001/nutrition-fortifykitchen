@@ -63,7 +63,7 @@ describe("apiClient.updateFood", () => {
   it("says why in fixed words and leaves the catalogue as it was when the server refuses", async () => {
     await apiClient.updateFood(ID, input);
     status = 404;
-    await expect(apiClient.updateFood(ID, { ...input, nameVi: "Không được lưu" })).rejects.toThrow("Không thể sửa món (404)");
+    await expect(apiClient.updateFood(ID, { ...input, nameVi: "Không được lưu" })).rejects.toThrow("Chưa sửa được món. Thử lại sau nhé.");
     expect(catalogFoodById(ID)?.nameVi).toBe("Bánh mới");
   });
 

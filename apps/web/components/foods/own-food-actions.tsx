@@ -23,7 +23,7 @@ export const editFoodHref = (food: FoodItem, meal?: string | null) =>
  * once on the screen. `then` runs after the delete (the food page leaves itself).
  */
 export function useOwnFoodDelete() {
-  const { notifyUndo, savedMeals } = useDiary();
+  const { notifyUndo, notify, savedMeals } = useDiary();
   const { templates } = useDayTemplates();
   const [asked, setAsked] = useState<{ food: FoodItem; uses: number; then?: () => void } | null>(null);
   const [open, setOpen] = useState(false);
@@ -31,11 +31,11 @@ export function useOwnFoodDelete() {
   // `after`: the confirm sheet is still closing (it takes its history entry back when it has gone): a Back before that would only close it
   const run = useCallback(
     (food: FoodItem, then?: () => void, after = 0) => {
-      if (!deleteOwnFood(food, notifyUndo) || !then) return;
+      if (!deleteOwnFood(food, notifyUndo, notify) || !then) return;
       if (after > 0) window.setTimeout(then, after);
       else then();
     },
-    [notifyUndo]
+    [notifyUndo, notify]
   );
 
   const requestDelete = useCallback(

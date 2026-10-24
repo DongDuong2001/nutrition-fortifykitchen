@@ -7,7 +7,7 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { OWN_FOOD_UNDO_MS } from "./own-foods";
+import { OWN_FOOD_HOLD_MS } from "./own-foods";
 import { CATALOG_FOODS, addCatalogFood, catalogChanged, catalogFoodById, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./catalog";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
@@ -605,6 +605,9 @@ function profileBody(profile: SetupProfile, targets?: TargetSettings, levelSeen?
   };
 }
 
+/** What Sửa món says when the server refuses the PUT. */
+const EDIT_FOOD_REFUSED = "Chưa sửa được món. Thử lại sau nhé.";
+
 /** The body POST and PUT /foods/custom take (both spellings of the names, as the API reads them). */
 function customFoodBody(input: CreateFoodInput) {
   return {
@@ -637,7 +640,7 @@ function deviceFood(id: string, input: CreateFoodInput): FoodItem {
     ],
     nutrients: {
       ...Object.fromEntries(
-        Object.entries(input.micros ?? {}).map(([k, v]) => [k, typeof v === "number" ? Math.round(v * factor * 100) / 100 : null])
+        Object.entries(input.micros ?? {}).map(([k, v]) => [k, typeof v === "number" ? Number((v * factor).toPrecision(6)) : null])
       ),
       energy: input.calories != null ? Math.round(input.calories * factor) : null,
       protein: input.protein != null ? Math.round(input.protein * factor * 10) / 10 : null,
@@ -762,9 +765,10 @@ export const apiClient = {
           if (!input.oneOff) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
           return mapped;
         }
-        throw new Error(`Không thể sửa món (${res.status})`);
+        // No status code in the words: a PUT the server does not have yet (the web deployed before the API) is a 405 the person cannot act on
+        throw new Error(EDIT_FOOD_REFUSED);
       } catch (err) {
-        if (err instanceof Error && err.message.startsWith("Không thể sửa món")) {
+        if (err instanceof Error && err.message === EDIT_FOOD_REFUSED) {
           throw err;
         }
         throw new Error("Lỗi kết nối khi sửa món. Vui lòng thử lại.");
@@ -1031,21 +1035,23 @@ export const apiClient = {
   },
 
   /**
-   * Xóa món: DELETE /foods/custom/{id} through the outbox, held OWN_FOOD_UNDO_MS so Hoàn tác can take it back. The hold is in the
+   * Xóa món: DELETE /foods/custom/{id} through the outbox, held OWN_FOOD_HOLD_MS (the toast's 8 s and 1,5 s more) so Hoàn tác can take it back. The hold is in the
    * outbox item, not a timer: a reload or a closed app still sends it afterwards. Outside live mode there is no server food.
    */
   async deleteOwnFood(id: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
     // The device's copy of the catalogue forgets it now; the outbox hides it from a load that runs before the DELETE is sent
     void catalogCache().then((c) => c.removeFromCatalogCache(currentAccountId(), id));
-    return withEngine((e) => e.sideWrite({ kind: "food", entity: `food:${id}`, method: "DELETE", path: `/foods/custom/${id}`, payload: {}, holdMs: OWN_FOOD_UNDO_MS }));
+    return withEngine((e) => e.sideWrite({ kind: "food", entity: `food:${id}`, method: "DELETE", path: `/foods/custom/${id}`, payload: {}, holdMs: OWN_FOOD_HOLD_MS }));
   },
 
   /** Hoàn tác of Xóa món: true when the delete had not left the device and is now gone from the outbox. */
   async undoOwnFoodDelete(id: string, food?: FoodItem): Promise<boolean> {
     if (!isLiveMode() || !isUuid(id)) return true;
-    if (food) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), food));
-    return withEngine((e) => e.cancelSideWrite(`food:${id}`));
+    const taken = await withEngine((e) => e.cancelSideWrite(`food:${id}`));
+    // The device's copy only gets the food back when the server never heard of the delete
+    if (taken && food) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), food));
+    return taken;
   },
 
   /** Bữa ăn của tôi on the server (GET /saved-meals), or null when it could not be read (or outside live mode). */

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { catalogFoodById } from "@/lib/catalog";
-import { editFormOf } from "@/lib/own-foods";
+import { editFormOf, editedValues, type EditForm } from "@/lib/own-foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
@@ -118,10 +118,13 @@ function CreateFoodInner() {
   const { version: catalogVersion, pending: catalogPending } = useCatalogFoods();
   const editFood = editFoodId ? catalogFoodById(editFoodId) : undefined;
   const filled = useRef(false);
+  // What the form started with: a field still equal to it was not touched and is saved exactly as the food had it (lib/own-foods editedValues)
+  const startForm = useRef<EditForm | null>(null);
   useEffect(() => {
     if (!editFood || filled.current) return;
     filled.current = true;
     const form = editFormOf(editFood);
+    startForm.current = form;
     setNameVi(form.nameVi);
     setServingSize(form.servingSize);
     setServingUnit(form.servingUnit);
@@ -211,7 +214,7 @@ function CreateFoodInner() {
     try {
       const parsedSize = parseNumberInput(servingSize) || 100;
       // A field taken off with its × has dropped its value, so this is exactly what the form shows
-      const { calories: parsedCals, ...nutrition } = customFoodPayload(values);
+      const { calories: parsedCals, ...nutrition } = customFoodPayload(editFoodId && startForm.current ? editedValues(startForm.current, values) : values);
 
       if (editFoodId) {
         setSaveError(null);

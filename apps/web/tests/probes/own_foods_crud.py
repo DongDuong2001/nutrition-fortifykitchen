@@ -2,7 +2,7 @@
 
 create → ⋯ → Sửa món (the form is filled in, a change is saved and shows in the list) → ⋯ → Xóa món (no confirm: the toast says
 Đã xóa <món> with Hoàn tác, the row goes, Hoàn tác brings it back) → Xóa món on the food page (goes back, the row stays gone) →
-a food held by a Bữa ăn đã lưu asks first ("n mẫu / bữa đã lưu có món này") and still has the toast.
+a food held by a Bữa ăn đã lưu asks first ("Món này đang có trong n bữa đã lưu hoặc ngày ăn mẫu") and still has the toast.
 Screenshots: .screenshots/own-foods/*.png (390×844 and 1440×900).
 Run with: ALIGN_BASE_URL=http://localhost:3106 npm run probe -- tests/probes/own_foods_crud.py
 """
@@ -103,6 +103,16 @@ def run(browser, tag, size):
     row = pg.locator("[data-food-row]").filter(has_text=NAME).first
     check("300" in row.inner_text(), f"{tag}: the list shows the new kcal ({re.sub(r'\\s+', ' ', row.inner_text())!r})")
     check(rows(pg) == 1, f"{tag}: still one row (same food, not a copy)")
+    # A value the person did not touch is still what it was after a save (review 24/10: Sửa món used to round and drift)
+    pg.get_by_role("button", name=f"Tùy chọn cho {NAME}").click()
+    pg.wait_for_timeout(500)
+    pg.get_by_role("link", name="Sửa món").click()
+    pg.wait_for_url(re.compile(r".*/foods/new\?edit="), timeout=8000)
+    pg.wait_for_timeout(800)
+    check(pg.locator("#cf-kcal").input_value() == "300" and pg.locator("#cf-pro").input_value() == "5", f"{tag}: edited again, the saved 300 and the untouched 5 are as they were ({pg.locator('#cf-kcal').input_value()}, {pg.locator('#cf-pro').input_value()})")
+    pg.get_by_role("button", name="Lưu thay đổi").click()
+    pg.wait_for_url(re.compile(r".*/explore/cua_toi$"), timeout=8000)
+    pg.wait_for_timeout(600)
 
     # 4. Xóa món on a food a Bữa ăn đã lưu holds: asks first
     pg.get_by_role("button", name=f"Tùy chọn cho {NAME}").click()
@@ -111,7 +121,7 @@ def run(browser, tag, size):
     pg.wait_for_timeout(600)
     dialog = pg.locator("[role=dialog]").filter(visible=True).first
     dtext = re.sub(r"\s+", " ", dialog.inner_text())
-    check("1 mẫu / bữa đã lưu có món này" in dtext and "vẫn giữ số liệu cũ" in dtext, f"{tag}: a saved meal holds it, so it asks ({dtext[:120]!r})")
+    check("Món này đang có trong 1 bữa đã lưu hoặc ngày ăn mẫu. Các lần đã ghi trong nhật ký vẫn giữ nguyên." in dtext, f"{tag}: a saved meal holds it, so it asks ({dtext[:120]!r})")
     pg.screenshot(path=str(SHOTS / f"{tag}-4-confirm.png"))
     pg.get_by_role("button", name="Hủy").click()
     pg.wait_for_timeout(500)
