@@ -57,6 +57,7 @@ import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
 import { FoodList } from "./food-list";
 import { loadFlags, markShareNudgeDay, markUsed, onboardingDisabled } from "@/lib/onboarding-store";
+import { cue } from "@/lib/cue";
 import { SHARE_NUDGE_TEXT, dayWellFed, shareNudgeDue } from "@/lib/share-nudge";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
@@ -592,6 +593,7 @@ function HomeContent() {
     });
     if (!template) return;
     setTemplates([template, ...savedTemplates]);
+    cue("save");
     const totals = templateSaveSummary(template.meals, CATALOG_FOODS);
     notify(templateSavedMessage(template.name, totals.itemCount, totals.kcal));
   }

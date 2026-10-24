@@ -3,6 +3,8 @@ import {
   FIRST_FOOD,
   MOMENT_AFTER_SHEET_MS,
   firstFoodDue,
+  loadFirstFoodSeen,
+  saveFirstFoodSeen,
   goalsMet,
   loadGoalRecord,
   momentFor,
@@ -210,5 +212,21 @@ describe("onGoal (for the later gamification layers)", () => {
     emitGoal(event);
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith(event);
+  });
+});
+
+describe("the first food's record (per account, once)", () => {
+  it("not seen until saved; saved, it stays seen", () => {
+    const storage = memoryStorage();
+    expect(loadFirstFoodSeen(storage)).toBe(false);
+    saveFirstFoodSeen(storage);
+    expect(loadFirstFoodSeen(storage)).toBe(true);
+  });
+  it("no storage, or storage that throws: not seen, and saving never throws", () => {
+    expect(loadFirstFoodSeen(null)).toBe(false);
+    expect(() => saveFirstFoodSeen(null)).not.toThrow();
+    const broken = { getItem: () => { throw new Error("x"); }, setItem: () => { throw new Error("x"); }, removeItem: () => undefined };
+    expect(loadFirstFoodSeen(broken)).toBe(false);
+    expect(() => saveFirstFoodSeen(broken)).not.toThrow();
   });
 });

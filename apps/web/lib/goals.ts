@@ -138,6 +138,25 @@ export function firstFoodDue({ seen, hadEntries, hadRecents, demo }: { seen: boo
   return !seen && !hadEntries && !hadRecents && !demo;
 }
 
+const FIRST_FOOD_KEY = "h1t_first_food_v1";
+
+/** Whether this account has had its first-food moment (kept per account, like the goal record). */
+export function loadFirstFoodSeen(storage: KeyValueStore | null = accountStorage()): boolean {
+  try {
+    return storage?.getItem(FIRST_FOOD_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveFirstFoodSeen(storage: KeyValueStore | null = accountStorage()): void {
+  try {
+    storage?.setItem(FIRST_FOOD_KEY, "1");
+  } catch {
+    // Storage full or blocked: the moment may play once more
+  }
+}
+
 export const MOMENT_AFTER_SHEET_MS = 150;
 
 export interface GateState {
@@ -162,14 +181,14 @@ export function momentGate(s: GateState): "drop" | "wait" | number {
 
 export interface GoalEvent {
   date: string;
-  /** Every goal the add reached, the lead included */
+  /** Every goal the add reached, the lead included (the moment the goal is reached, queued or not: later layers read it here) */
   keys: string[];
   moment: Moment;
 }
 
 const listeners = new Set<(event: GoalEvent) => void>();
 
-/** Hears every moment that plays; returns the unsubscribe. */
+/** Hears every goal an add reaches, when it is reached; returns the unsubscribe. */
 export function onGoal(listener: (event: GoalEvent) => void): () => void {
   listeners.add(listener);
   return () => void listeners.delete(listener);
