@@ -898,7 +898,11 @@
     transform: scale(1);
   }
 }
-/* T1: one light band across the bar (the bar track already clips: overflow-hidden, and is relative for good) */
+/* T1: one light band across the bar (the bar track already clips: overflow-hidden). The track holds only its fill, no absolute child, so being
+   relative for the run moves nothing; keeping it off the track otherwise leaves every other bar of the app pixel-for-pixel as it was. */
+.m-goal-sheen {
+  position: relative;
+}
 .m-goal-sheen::after {
   content: "";
   position: absolute;

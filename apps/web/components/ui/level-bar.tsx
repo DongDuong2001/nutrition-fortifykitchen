@@ -31,7 +31,7 @@ export function LevelBar({
       aria-valuetext={known ? `${Math.round(value)}% · ${getLevelLabel(getLevel(value))}` : "Chưa có dữ liệu"}
       aria-valuemin={0}
       aria-valuemax={100}
-      className={`relative w-full overflow-hidden rounded-full ${heightClass} ${surface === "dark" ? "bg-level-empty-dark" : "bg-track"}`}
+      className={`w-full overflow-hidden rounded-full ${heightClass} ${surface === "dark" ? "bg-level-empty-dark" : "bg-track"}`}
     >
       {/* cc-51: a full-width rounded fill slid left (transform only) keeps its rounded end and eases to a new value.
           cc-57: always drawn (off the track at 0), so a bar going from 0 to a value grows instead of appearing */}
