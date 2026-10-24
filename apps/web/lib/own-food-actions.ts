@@ -1,4 +1,5 @@
 import { apiClient } from "./api-client";
+import { cue } from "./cue";
 import { putBackCatalogFood, removeCatalogFood, type FoodItem } from "./catalog";
 import { isRecipeId } from "./recipe";
 import { deleteRecipe, restoreRecipe } from "./recipe-store";
@@ -16,13 +17,19 @@ export function deleteOwnFood(food: FoodItem, notifyUndo: (message: string, onUn
   if (isRecipeId(food.id)) {
     const gone = deleteRecipe(food.id);
     if (!gone) return false;
-    notifyUndo(message, () => void restoreRecipe(gone));
+    cue("remove");
+    notifyUndo(message, () => {
+      cue("undo");
+      void restoreRecipe(gone);
+    });
     return true;
   }
   const removed = removeCatalogFood(food.id);
   if (!removed) return false;
   void apiClient.deleteOwnFood(food.id);
+  cue("remove");
   notifyUndo(message, () => {
+    cue("undo");
     // The DELETE is held past the toast, so this is nearly always true. When it has already gone the server no longer has the food:
     // it stays out of the catalogue (never back on screen with no server copy) and the toast says so.
     void apiClient.undoOwnFoodDelete(food.id, removed).then((taken) => {
