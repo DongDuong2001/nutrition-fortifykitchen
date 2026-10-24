@@ -117,9 +117,13 @@ def t3(browser, vp, tag):
     check(not seen(pg, "m-goal-sparks") and ("m-goal-pop", "count") in seen(pg), f"{tag} T3: no Đủ chất yet, only the T1 of Vitamin A")
     pg.evaluate("window.__fx.length = 0")
     add_from_sheet(pg, "Đậu gà", 120)
-    check(wait_class(pg, "m-goal-sheen"), f"{tag} T3: the bars sheen")
+    check(wait_class(pg, "m-goal-sparks"), f"{tag} T3: the sparks fly")
+    # ~350 ms into the 600 ms flight (the screenshot itself takes ~100 ms): the sparks in the air and the Đủ chất line on the card
+    pg.wait_for_timeout(250)
     got = pg.evaluate("document.querySelectorAll('.m-goal-sparks > i').length")
     pg.screenshot(path=f"{SHOTS}/t3-{tag}.png", animations="allow")
+    check(pg.evaluate("document.querySelector('[data-fx=done-line]')?.textContent.trim()") == "Đủ chất hôm nay", f"{tag} T3: the line is on the card while the sparks fly")
+    check(("m-goal-sheen", "fiber") in seen(pg) or any(e["cls"] == "m-goal-sheen" for e in fx(pg)), f"{tag} T3: the bars sheen")
     check(got == 10, f"{tag} T3: ten sparks ({got})")
     bounds = spark_bounds_ok(pg)
     check(bounds.get("n") == 10 and bounds.get("ok") and bounds.get("sameBox"), f"{tag} T3: every spark ends within the card ±8 px, in a layer beside it ({bounds})")
@@ -280,7 +284,11 @@ def sound_row(browser):
         pg.wait_for_timeout(1500)
         row = pg.locator('[role=switch][aria-label="Âm thanh"]:visible').first
         check(row.count() == 1, f"{tag} Cài đặt: the Âm thanh switch is there")
-        row.scroll_into_view_if_needed()
+        card = pg.locator("section[aria-label='Ứng dụng']:visible").first
+        # Scrolled clear of the bottom nav, with Rung khi chạm above it (a phone that can vibrate shows that row)
+        card.evaluate("el => el.scrollIntoView({ block: 'start' })")
+        pg.evaluate("window.scrollBy(0, -80)")
+        pg.wait_for_timeout(300)
         check(row.get_attribute("aria-checked") == "true", f"{tag} Cài đặt: on by default")
         before = sound_count(pg)
         row.click()
@@ -288,7 +296,15 @@ def sound_row(browser):
         row.click()
         pg.wait_for_timeout(600)
         check(sound_count(pg) - before == 1, f"{tag} Cài đặt: switching it on plays the add sound once ({sound_count(pg) - before})")
-        pg.locator('[role=switch][aria-label="Âm thanh"]:visible').first.locator("xpath=ancestor::div[contains(@class,'flex')][1]").screenshot(path=f"{SHOTS}/sound-row-{tag}.png")
+        haptics = pg.locator('[role=switch][aria-label="Rung khi chạm"]:visible').count()
+        nav_top = pg.evaluate("(() => { const n = document.querySelector('#mobile-add-fab')?.closest('nav, [role=navigation]'); const r = n && n.getBoundingClientRect(); return r && r.width > 0 ? r.top : null; })()")
+        box = card.bounding_box()
+        if tag == "390":
+            sw = row.bounding_box()
+            check(nav_top is not None and sw["y"] + sw["height"] < nav_top, f"{tag} Cài đặt: the Âm thanh row is clear of the bottom nav (its bottom {sw['y'] + sw['height']:.0f}, nav top {nav_top})")
+        if tag == "390":
+            check(haptics == 1, f"{tag} Cài đặt: Rung khi chạm is the row above Âm thanh on a phone")
+        pg.screenshot(path=f"{SHOTS}/sound-row-{tag}.png", clip={"x": 0, "y": max(0, box["y"] - 8), "width": vp["viewport"]["width"], "height": min(box["height"] + 16, vp["viewport"]["height"] - max(0, box["y"] - 8))})
         ctx.close()
 
 

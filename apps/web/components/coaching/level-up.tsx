@@ -118,8 +118,6 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   useEffect(() => {
     later(() => setSaid(levelUpAnnouncement(step, coachName)), 150);
     closeRef.current?.focus({ preventScroll: true });
-    // The badge lands: the full chime, sound only (the hatch below vibrates). It follows the Âm thanh switch, reduced motion or not
-    later(() => cueSound("full"), reduced ? 150 : H - 100);
     if (reduced) return clear;
     for (const ms of CROSS_FADES) later(() => haptic("tick"), ms);
     later(() => haptic("levelUp"), H - 100);
@@ -169,6 +167,8 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   useEffect(() => {
     if (phase !== "land") return;
     const done = () => {
+      // The badge has landed, after the person's own ✕, Esc or "Xem chỉ số mới" (D-A11Y-04): the full chime, sound only (the hatch vibrated)
+      cueSound("full");
       // Back to where it came from; "Xem chỉ số mới" opens the explainer, which takes the focus itself
       if (!explainRef.current) document.querySelector<HTMLElement>("[data-header-level]")?.focus({ preventScroll: true });
       onClose(explainRef.current);

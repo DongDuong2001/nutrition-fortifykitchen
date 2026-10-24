@@ -153,6 +153,8 @@ def celebration(browser, size, tag):
     pg.wait_for_timeout(5600)
     if trace:
         browser.stop_tracing()
+    # D-A11Y-04: nothing sounds by itself while the celebration plays (the full chime comes with the badge's landing, after the person's tap)
+    check(pg.evaluate("window.__h1tSoundCount || 0") == 0, f"{tag} sound: none through the intro and the waiting card")
     gaps = pg.evaluate("window.__lvFrames || []")[2:]
     gaps_sorted = sorted(gaps)
     p95 = gaps_sorted[int(len(gaps_sorted) * 0.95) - 1] if gaps else 999
@@ -206,6 +208,7 @@ def celebration(browser, size, tag):
     pg.wait_for_timeout(250)
     pg.screenshot(path=os.path.join(SHOTS, f"celebration-landing-{w}.png"))
     pg.wait_for_timeout(500)
+    check(pg.evaluate("window.__h1tSoundCount || 0") == 1, f"{tag} sound: the full chime once, when the badge has landed ({pg.evaluate('window.__h1tSoundCount || 0')})")
     check(pg.locator("[data-level-up]").count() == 0, f"{tag} close: gone")
     check(pg.locator("[data-header-level].m-level-land [data-level-badge='3']").count() == 1, f"{tag} close: the header shows Level 3 and pulses")
     ex = pg.get_by_role("dialog", name="Level là gì?")
@@ -235,8 +238,10 @@ def celebration(browser, size, tag):
     check("Bạn vừa" not in text and "HLV Khánh vừa nâng Level cho bạn." in text, f"{tag} skip: the subtitle")
     pg.wait_for_timeout(600)
     pg.screenshot(path=os.path.join(SHOTS, f"celebration-L5-waiting-{w}.png"))
+    check(pg.evaluate("window.__h1tSoundCount || 0") == 0, f"{tag} ✕ sound: still none before the person's tap")
     dlg.get_by_role("button", name="Đóng").click()
     pg.wait_for_timeout(700)
+    check(pg.evaluate("window.__h1tSoundCount || 0") == 1, f"{tag} ✕ sound: +1 after ✕ ({pg.evaluate('window.__h1tSoundCount || 0')})")
     check(pg.locator("[data-level-up]").count() == 0 and pg.get_by_role("dialog", name="Level là gì?").count() == 0, f"{tag} ✕: closes, no explainer")
     check(pg.evaluate("document.activeElement && document.activeElement.hasAttribute('data-header-level')"), f"{tag} ✕: the focus goes back to the header badge")
     ctx.close()

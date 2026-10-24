@@ -66,22 +66,9 @@ import { cue } from "./cue";
 import { effectiveCoaching } from "./coaching-link";
 import { countedForLevel } from "./level-nutrients";
 import { goalDayFrom } from "./goal-day";
+import { addMark, checkGoals, type AddMark } from "./goal-check";
 import { queueMoment, takeAddSource } from "./goal-moments";
-import {
-  FIRST_FOOD,
-  emitGoal,
-  firstFoodDue,
-  goalsMet,
-  loadFirstFoodSeen,
-  loadGoalRecord,
-  momentFor,
-  reachedGoals,
-  saveFirstFoodSeen,
-  saveGoalRecord,
-  seenToday,
-  withGoals,
-  type GoalDay,
-} from "./goals";
+import { emitGoal, loadFirstFoodSeen, loadGoalRecord, saveFirstFoodSeen, saveGoalRecord, type GoalDay } from "./goals";
 import { haptic } from "./haptics";
 import { HOME_ROUTE } from "./nav";
 import { generateUuid, isUuid } from "./uuid";
@@ -593,9 +580,6 @@ function onDayText(day: string, todayIso: string): string {
 }
 
 
-/** How long after an add the change it makes still counts as local (lib/goals): the next change of the day is the add's own. */
-const LOCAL_ADD_WINDOW_MS = 3000;
-
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [demo, setDemo] = useState(false);
@@ -654,8 +638,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Goals (lib/goals): the day's numbers at the last look (null: not looked yet), and whether the next change of the day comes from a
   // local add, with what the account had before it. Only a local add can reach a goal, never a refetch.
   const goalBefore = useRef<GoalDay | null>(null);
-  const pendingGoalCheck = useRef(false);
-  const goalAdd = useRef({ hadEntries: true, hadRecents: true, at: 0 });
+  const goalMark = useRef<AddMark | null>(null);
   const goalSnapshot = useRef({ hadEntries: true, hadRecents: true });
   // Gần đây has answered (live: /recents returned); an add before that gets no first-food moment
   const recentsAnswered = useRef(false);
@@ -1031,7 +1014,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setAccountId(now);
     // The new account's day is a first look: what is over 100 % there does not vibrate
     goalBefore.current = null;
-    pendingGoalCheck.current = false;
+    goalMark.current = null;
     recentsAnswered.current = false;
     loadData(now, false, todayIso ?? getTodayIsoVN());
     // The profile is per account too: without this, account B would keep A's targets until a reload
@@ -1258,9 +1241,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   /** An add made here: the next change of the day may reach a goal, and what the account had before it decides the first-food moment. */
   goalSnapshot.current = { hadEntries: edits.added.length > 0 || Object.keys(archive).length > 0, hadRecents: recentFoods.length > 0 };
-  const markLocalAdd = useCallback(() => {
-    pendingGoalCheck.current = true;
-    goalAdd.current = { ...goalSnapshot.current, at: Date.now() };
+  const markLocalAdd = useCallback((day: string) => {
+    goalMark.current = addMark(day, getTodayIsoVN(), goalSnapshot.current, Date.now());
   }, []);
 
   // Add a food entry
@@ -1287,7 +1269,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       };
 
       setEdits((prev) => ({ ...prev, added: [...prev.added, newEntry] }));
-      markLocalAdd();
+      markLocalAdd(day);
       cue("add");
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
@@ -1326,7 +1308,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         day,
       }));
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
-      markLocalAdd();
+      markLocalAdd(day);
       cue("add");
       setToast({
         message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}${onDayText(day, getTodayIsoVN())}`,
@@ -1513,7 +1495,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!day) return;
     const entries = withNewIds(copied, day);
     setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
-    markLocalAdd();
+    markLocalAdd(day);
     cue("add");
     setToast({
       message,
@@ -1600,7 +1582,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         [...entries].reverse().reduce((list, e) => pushRecent(list, { foodId: e.foodId, servingLabel: e.displayQty }), prev)
       );
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
-      markLocalAdd();
+      markLocalAdd(day);
       cue("add");
       setToast({
         message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}${onDayText(day, getTodayIsoVN())}${
@@ -1626,7 +1608,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (!result.ok) return result;
       const entry = { ...result.entry, day };
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
-      markLocalAdd();
+      markLocalAdd(day);
       cue("add");
       setToast({
         message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}${onDayText(day, getTodayIsoVN())}`,
@@ -1789,25 +1771,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated || !todayIso) return;
     const after = goalDayFrom(compositeData, countedForLevel(level));
-    const before = goalBefore.current;
-    const added = goalAdd.current;
-    // An add into an earlier day changes nothing today, so its mark would wait for a refetch: only the change that follows the add counts
-    const localAdd = pendingGoalCheck.current && Date.now() - added.at < LOCAL_ADD_WINDOW_MS;
+    const mark = goalMark.current;
+    goalMark.current = null;
+    const out = checkGoals({
+      before: goalBefore.current,
+      after,
+      mark,
+      now: Date.now(),
+      today: todayIso,
+      record: loadGoalRecord(),
+      source: mark ? takeAddSource() : null,
+      firstFood: { seen: loadFirstFoodSeen(), recentsAnswered: recentsAnswered.current, demo },
+    });
     goalBefore.current = after;
-    pendingGoalCheck.current = false;
-    const record = loadGoalRecord();
-    const reached = reachedGoals(before, after, { localAdd, isToday: true, seen: seenToday(record, todayIso) });
-    saveGoalRecord(withGoals(record, todayIso, goalsMet(after)));
-    if (!localAdd) return;
-    const source = takeAddSource();
-    const first = recentsAnswered.current && firstFoodDue({ seen: loadFirstFoodSeen(), hadEntries: added.hadEntries, hadRecents: added.hadRecents, demo });
-    if (first) saveFirstFoodSeen();
-    const keys = first ? [FIRST_FOOD, ...reached] : reached;
-    const moment = momentFor(keys);
-    if (!moment) return;
-    emitGoal({ date: todayIso, keys, moment });
-    // Ngày tập records its nutrient goals and replays none of them here; a T3 it reached stays queued (the column is only here)
-    queueMoment(todayIso, source === "training" ? keys.filter((key) => key === "column") : keys);
+    saveGoalRecord(out.record);
+    if (out.firstFoodUsed) saveFirstFoodSeen();
+    if (!out.moment) return;
+    emitGoal({ date: todayIso, keys: out.keys, moment: out.moment });
+    queueMoment(todayIso, out.queue);
   }, [compositeData, hydrated, todayIso, level, demo]);
 
   // Memoised, and without the toast state (DiaryToastState): a toast does not re-render every useDiary() consumer
