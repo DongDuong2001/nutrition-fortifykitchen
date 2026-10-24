@@ -562,3 +562,6 @@
 - [ ] (Dong) `course_unlocks` is a table the brief did not list: a code course must stay open for a learner after they typed the code, and a page image is fetched by a plain request, so the unlock is remembered server-side and checked against its code on every request (revoking the code shuts it again).
 - [ ] (Hao, Dong) PDFs are hidden from learners until `finish` (a `ready` flag), so a cancelled upload leaves nothing visible; the web removes the lesson on cancel.
 - [ ] (Dong) The old documents routes and tables (000017) stay untouched; nothing here drops them.
+## Courses API review fixes (feat/courses-api, 24/10/2026)
+- [ ] (Dong) The brief's backup line names the volume `courses_data`; the compose project is `name: nutrition` (deploy/docker-compose.prod.yml), so the volume on the VPS is `nutrition_courses_data`. With the shorter name `docker run -v courses_data:/d` creates a new empty volume and backs up nothing, so the runbook says `nutrition_courses_data`. Check on the VPS with `docker volume ls | grep courses` before relying on it. If no answer: as in the runbook.
+- [ ] (Dong) COURSES_MIN_FREE_BYTES (default 2147483648) is read by the API but not passed by deploy/docker-compose.prod.yml, so production uses the default. Add `COURSES_MIN_FREE_BYTES: ...` under the api's environment if you want another floor. If no answer: the 2 GiB default.

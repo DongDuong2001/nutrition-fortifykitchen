@@ -675,12 +675,14 @@ Tài liệu as courses: **Khoá → Phần → Bài**. A lesson is a PDF (its pa
 | `POST /courses/{id}/parts` · `PATCH …/parts/{pid}` · `DELETE …/parts/{pid}` · `POST …/parts/reorder` | coach, admin | `{title}`; reorder `{ids}` = every part once |
 | `POST /courses/{id}/lessons` | coach, admin | text: `{partId,title,kind:"text",content}` (≤ 1,000,000 bytes); PDF: `{partId,title,kind:"pdf",pageCount}` (1-60), hidden from learners until finished |
 | `PATCH …/lessons/{lid}` · `DELETE …/lessons/{lid}` · `POST …/lessons/reorder` | coach, admin | `{title?,partId?,content?}` (a lesson moved to another part goes last; `content` only for a written lesson); reorder `{partId, ids}` |
-| `PUT …/lessons/{lid}/pages/{n}` | coach, admin | `{data}`: the page as base64 **WebP** (checked by its RIFF/WEBP header), ≤ 1 MiB decoded; `n` from 1 to the lesson's `pageCount` |
+| `PUT …/lessons/{lid}/pages/{n}` | coach, admin | `{data}`: the page as base64 **WebP** (checked by its RIFF/WEBP header), ≤ 1 MiB decoded; `n` from 1 to the lesson's `pageCount`; **`507 STORAGE_FULL`** when the disk holding `COURSES_DIR` has less than 2 GiB free (nothing is written: no row, no file) |
 | `POST …/lessons/{lid}/finish` | coach, admin | the lesson becomes visible once every page is there (`409` until then) |
 | `GET/POST /courses/{id}/codes` · `DELETE …/codes/{codeId}` | coach, admin | `POST` returns the value **once** (`{id,code,createdAt,expiresAt}`); the list never has values; only for a course with `access: code`; revoking again is `404` |
 
 - **Caps (MaxBytesReader, 413):** JSON bodies 4 KB; a lesson's text body 1.1 MB (the text itself ≤ 1,000,000 bytes); a page upload body 1.45 MB (≤ 1 MiB of image as base64: the API's CSRF rule only takes JSON bodies from the browser); at most 60 pages a lesson. The 60 page uploads of one PDF have their own limit (180 a minute per user, outside the 60 a minute of other writes).
 - **Storage:** `COURSES_DIR` (default `data/courses`; a docker volume in production), `<course id>/<lesson id>/<page>.webp`, written through a temp file and a rename. The API reads a page only after the access check; the files are never served statically.
+- **Room:** before a page is written the API asks the disk (statfs) how much is free; below `MinFreeBytes` = 2 GiB (`COURSES_MIN_FREE_BYTES` changes it) it answers `507` with `error.code = "STORAGE_FULL"` and writes nothing. A disk that cannot be read is a `500`, not a guess.
+- **Unfinished lessons:** a PDF lesson stays hidden (`ready = false`) with its pages on disk when the coach's tab dies halfway. Each new PDF lesson of a course deletes the course's unfinished PDF lessons older than 24 h, with their folders (a failure of that is logged and never stops the new lesson).
 - **No draft state:** a text lesson is visible when saved; a PDF when finished.
 
 ---

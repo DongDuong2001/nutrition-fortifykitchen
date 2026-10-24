@@ -240,15 +240,25 @@ Only after staging is checked: the same five steps with the production URI (`~/b
 
 ## The disk for the page images (before the API of this PR runs)
 
-The API writes the PDF pages as images under `COURSES_DIR` (`/data/courses`), never served as static files. `deploy/docker-compose.prod.yml` of this PR mounts a named volume `courses_data` there and the API's Dockerfile creates the folder owned by its non-root user; on the VPS:
+The API writes the PDF pages as images under `COURSES_DIR` (`/data/courses`), never served as static files. `deploy/docker-compose.prod.yml` of this PR mounts a named volume `courses_data` there and the API's Dockerfile creates the folder owned by its non-root user. A lesson is up to 60 MB and the VPS disk is near its limit, so look at the room first, on the VPS, **before the deploy**:
 
 ```bash
-cd /var/www/nutrition-meals && git fetch && git checkout <the merged sha>
-docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod up -d --build api
+ssh deploy@14.225.210.185
+df -h /          # the API refuses a page (507 STORAGE_FULL) when less than 2 GiB is free, and the image build needs room too: free some first if it is close
+```
+
+Then the deploy, with the images' backup before it (the images are not in Postgres, so the database backup does not hold them; the compose project is named `nutrition`, so the volume is `nutrition_courses_data`, not `courses_data`: with the shorter name Docker would make a new empty volume and back up nothing):
+
+```bash
+cd /var/www/nutrition-meals
+docker volume inspect nutrition_courses_data >/dev/null && echo "the volume exists"     # not there yet on the very first deploy: skip the backup line
+mkdir -p ~/backups && docker run --rm -v nutrition_courses_data:/d -v ~/backups:/b alpine tar czf /b/courses-$(date +%Y%m%d).tgz -C /d .
+tar tzf ~/backups/courses-$(date +%Y%m%d).tgz | head -3                                 # lists files once a lesson has pages
+nice -n 19 deploy/deploy.sh <the merged sha>                                            # fetches, checks out and builds; nice keeps the site answering while it builds
 docker compose -f deploy/docker-compose.prod.yml exec api sh -c 'touch /data/courses/.w && rm /data/courses/.w && echo writable'   # prints writable
 ```
 
-Add the volume (`docker volume inspect nutrition_courses_data`) to the backup you already take of the database: the images are not in Postgres.
+Keep taking the `courses-….tgz` backup with the database backup from then on. If a coach sees "Máy chủ đã hết chỗ lưu bài", `df -h /` says why: free some space (old images: `docs/ops/server-disk.md`); the pages already stored are fine.
 
 ## Rollback of 000022
 
