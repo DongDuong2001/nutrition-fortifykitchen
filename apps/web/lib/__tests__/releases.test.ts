@@ -6,7 +6,7 @@ const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
 
 // 2026-10-23a's tour (the night of 23→24/10): each PR of the night that adds a step appends its title here
-const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xóa món của bạn", "Vuốt món để xóa hoặc mở tùy chọn", "Tài liệu thành khóa học"];
+const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xóa món của bạn", "Vuốt món để xóa hoặc mở tùy chọn", "Tài liệu thành khóa học", "Chúc mừng khi bạn đạt mục tiêu"];
 
 describe("RELEASES", () => {
   it("is newest first with unique ids", () => {
@@ -201,6 +201,7 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Sửa và xóa Món ăn của tôi");
     expect(r?.items.map((i) => i.title)).toContain("Ảnh chia sẻ: tên bữa màu xanh như Hôm nay");
     expect(r?.items.map((i) => i.title)).toContain("Vuốt món để xóa hoặc mở tùy chọn");
+    expect(r?.items.map((i) => i.title)).toContain("Âm thanh và chúc mừng nhỏ khi đạt mục tiêu");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 
@@ -396,7 +397,7 @@ describe("joinedTour (what Thử ngay runs)", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
     expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-23a", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
-    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 36 }, (_, i) => i));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 37 }, (_, i) => i));
     expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A, ...T23A]);
   });
 
