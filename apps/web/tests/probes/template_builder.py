@@ -152,8 +152,11 @@ def run(browser):
         pg.wait_for_timeout(400)
         over = pg.evaluate("() => document.documentElement.scrollWidth - innerWidth")
         check(over <= 0, f"{name}: the editor does not scroll sideways ({over})")
-        pg.locator("#tpl-micros").scroll_into_view_if_needed()
-        pg.screenshot(path=str(SHOTS_MICROS / f"template-micros-{name}.png"), full_page=True)
+        # The save toast has gone (it would sit on the shot); a phone shows the screen as it is (nav bar included) from Tổng down, a desktop the whole page
+        pg.locator("[role=status]", has_text="Đã lưu").first.wait_for(state="hidden", timeout=8000)
+        pg.evaluate("() => document.getElementById('tpl-total')?.scrollIntoView({ block: 'start' })")
+        pg.wait_for_timeout(300)
+        pg.screenshot(path=str(SHOTS_MICROS / f"template-micros-{name}.png"), full_page=w >= 1024)
     pg.evaluate("document.documentElement.style.fontSize = ''")
     pg.set_viewport_size({"width": 390, "height": 844})
     pg.wait_for_timeout(300)

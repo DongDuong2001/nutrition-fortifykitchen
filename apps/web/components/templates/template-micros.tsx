@@ -24,9 +24,9 @@ export function TemplateMacros({ values, targets }: { values: HomeValues; target
         return (
           <div key={key} className="flex min-w-0 flex-col gap-0.5">
             <dt className="text-cap text-secondary">{label}</dt>
-            <dd className="m-0 font-condensed text-callout font-extrabold leading-none tabular-nums">
-              {value === null ? "—" : `${formatAmount(value, "g")} g`}
-              {target !== null && <span className="ml-1 whitespace-nowrap font-sans text-xs font-normal text-secondary">/ {formatAmount(target, "g")} g</span>}
+            <dd className="m-0 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 font-condensed text-callout font-extrabold leading-none tabular-nums">
+              <span className="whitespace-nowrap">{value === null ? "—" : `${formatAmount(value, "g")} g`}</span>
+              {target !== null && <span className="whitespace-nowrap font-sans text-xs font-normal text-secondary">/ {formatAmount(target, "g")} g</span>}
             </dd>
           </div>
         );
