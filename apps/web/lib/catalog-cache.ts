@@ -107,6 +107,18 @@ export function withCatalogFood(saved: SavedCatalog, food: FoodItem): SavedCatal
   return { at: saved.at, foods: [food, ...saved.foods.filter((f) => f.id !== food.id)] };
 }
 
+/** The copy without the food `id` (Xóa món), its age as it was. */
+export function withoutCatalogFood(saved: SavedCatalog, id: string): SavedCatalog {
+  return saved.foods.some((f) => f.id === id) ? { at: saved.at, foods: saved.foods.filter((f) => f.id !== id) } : saved;
+}
+
+/** A deleted own food leaves the device's copy too, so an app opened while the copy is fresh does not list it. The copy keeps its age. */
+export async function removeFromCatalogCache(account: string | null, id: string): Promise<void> {
+  const saved = await readCatalogCache(account);
+  if (!saved || !saved.foods.some((f) => f.id === id)) return;
+  await writeChunks(account, saved.at, withoutCatalogFood(saved, id).foods);
+}
+
 /**
  * A food the user just made goes into the device's copy too, so an app reopened while the copy is fresh shows it
  * (review 07:00). Without a copy there is nothing to change: the next load reads /foods, which has it. It goes in front of

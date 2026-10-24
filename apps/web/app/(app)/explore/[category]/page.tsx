@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import { IconTile } from "@/components/ui/icon-tile";
 import { AppHeader } from "@/components/ui/app-header";
@@ -14,6 +14,8 @@ import { foodGroupAccent, foodGroupText } from "@/lib/food-group-colors";
 import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods } from "@/lib/fortify-kitchen";
 import { collapseTwins } from "@/lib/food-rows";
 import { useBack } from "@/hooks/use-back";
+import { OwnFoodMenuButton, OwnFoodMenuSheet, useOwnFoodDelete } from "@/components/foods/own-food-actions";
+import type { FoodItem } from "@/lib/catalog";
 
 /** The 4 × 28 px accent bar before a title. */
 function AccentBar({ color }: { color: string }) {
@@ -27,6 +29,10 @@ export default function ExploreCategoryPage() {
   const minhHao = params?.category === MINH_HAO_SLUG;
   const category = minhHao ? undefined : FOOD_CATEGORIES.find((c) => c.key === params?.category);
   const { foods: catalogue, pending, failed, retry } = useCatalogFoods();
+  // Job C: every row of Món ăn của tôi has a ⋯ (Sửa món, Xóa món)
+  const own = category?.key === "cua_toi";
+  const [menuFood, setMenuFood] = useState<FoodItem | null>(null);
+  const { requestDelete, confirm } = useOwnFoodDelete();
   if (!category && !minhHao) notFound();
 
   // Fortify Kitchen's rows are plain foods, each its own row: no raw / cooked twins to fold
@@ -60,6 +66,7 @@ export default function ExploreCategoryPage() {
         <FoodListCard
           foods={foods}
           valueColor={foodGroupText(groupKey)}
+          rowAction={own ? (food, first) => <OwnFoodMenuButton food={food} onOpen={setMenuFood} tour={first} /> : undefined}
           empty={
             waiting ? (
               <CatalogStatus failed={failed} onRetry={retry} />
@@ -76,6 +83,12 @@ export default function ExploreCategoryPage() {
           }
         />
       </main>
+      {own && (
+        <>
+          <OwnFoodMenuSheet food={menuFood} onClose={() => setMenuFood(null)} onDelete={(food) => requestDelete(food)} />
+          {confirm}
+        </>
+      )}
     </AppShell>
   );
 }

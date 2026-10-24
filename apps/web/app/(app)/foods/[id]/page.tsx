@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
@@ -38,6 +38,7 @@ import { getRecipe, syncRecipeFoods } from "@/lib/recipe-store";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { HOME_ROUTE } from "@/lib/nav";
+import { editFoodHref, useOwnFoodDelete } from "@/components/foods/own-food-actions";
 import { navigateFromSheet } from "@/lib/sheet-history";
 
 function FoodDetailInner() {
@@ -58,12 +59,20 @@ function FoodDetailInner() {
     setRecipesReady(true);
   }, [foodId]);
   const { version: catalogVersion, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
-  const food = useMemo(() => {
+  const liveFood = useMemo(() => {
     return catalogFoodById(foodId);
     // recipesReady: the stored recipes are put into the catalogue by then. catalogVersion: so is the live catalogue.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodId, recipesReady, catalogVersion]);
+  // Xóa món takes the food out of the catalogue and the page goes back: it keeps drawing the food while it slides away (no "Không tìm thấy món" flash)
+  const lastFood = useRef(liveFood);
+  if (liveFood) lastFood.current = liveFood;
+  const [leaving, setLeaving] = useState(false);
+  const food = liveFood ?? (leaving ? lastFood.current : undefined);
   const recipe = useMemo(() => (isRecipe && recipesReady ? getRecipe(foodId) : null), [isRecipe, recipesReady, foodId]);
+
+  // Job C: Sửa món and Xóa món on one's own food (the toast's Hoàn tác brings it back); the page leaves itself after a delete
+  const { requestDelete, confirm: confirmDelete } = useOwnFoodDelete();
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
@@ -307,6 +316,17 @@ function FoodDetailInner() {
           So sánh
         </PillButton>
 
+        {isOwnFood(food) && !food.demoOnly && (
+          <div data-align-group="food-detail" className="flex flex-col gap-2">
+            <PillButton variant="secondary" href={editFoodHref(food, searchParams.get("meal"))}>
+              Sửa món
+            </PillButton>
+            <PillButton variant="danger" onClick={() => requestDelete(food, () => { setLeaving(true); goBack(); })}>
+              Xóa món
+            </PillButton>
+          </div>
+        )}
+
         {food.recipe && (
           <PillButton
             variant="secondary"
@@ -343,6 +363,7 @@ function FoodDetailInner() {
       </main>
 
       <SourceSheet food={food} open={sourceOpen} onClose={() => setSourceOpen(false)} />
+      {confirmDelete}
 
       <ComparePicker
         open={compareOpen}

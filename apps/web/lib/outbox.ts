@@ -14,7 +14,7 @@ import { postTab, onTab } from "./tab-sync";
  */
 
 export type OutboxState = "queued" | "sending" | "held";
-export type OutboxKind = "diary" | "profile" | "weight" | "favourite" | "template";
+export type OutboxKind = "diary" | "profile" | "weight" | "favourite" | "template" | "food";
 
 export interface OutboxItem {
   /** This one write (an entry can have several queued). Absent before cc-49: `${id}:${createdAt}`. */
@@ -25,7 +25,7 @@ export interface OutboxItem {
   id: string;
   /** Absent = a diary write. */
   kind?: OutboxKind;
-  /** A side write that replaces the one before it for the same thing (last write wins): "profile", "weight:<date>", "fav:<foodId>", "template:<id>". */
+  /** A side write that replaces the one before it for the same thing (last write wins): "profile", "weight:<date>", "fav:<foodId>", "template:<id>", "food:<id>". */
   entity?: string;
   /** The day an add is for. "" for an edit or delete (they name the entry by id). */
   date: string;
@@ -52,6 +52,11 @@ export interface OutboxItem {
   retries?: number;
   /** Not sent before this time (ms), backoff with jitter. */
   nextAttemptAt?: number;
+  /**
+   * Not sent before this time (ms) whatever else asks (a forced sync, Thử lại): the undo window of Xóa món. Written with the same
+   * time in nextAttemptAt, which the service worker honours.
+   */
+  notBefore?: number;
   /** Stopped retrying after MAX_ATTEMPTS: waits for Thử lại. */
   parked?: boolean;
   /**

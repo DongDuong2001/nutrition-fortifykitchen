@@ -540,3 +540,12 @@
 ## Custom food update (feat/custom-food-update, 24/10/2026)
 - [ ] (Dong) PUT /foods/custom/{id} does not set an `updated_at`: nutrition.foods has no such column and nothing reads one, so no migration 000020 was written. If you want one (a sync or a "đã sửa" mark), it is a new column on foods plus the touch trigger the other tables use.
 - [ ] (Dong) The integration tests ran on PostgreSQL 16 (the Homebrew one; Docker was not running), the migrations are written for 17. The new SQL is a plain UPDATE, DELETE and INSERT; run scripts/test-integration.sh on 17 before the merge if you want it exact.
+
+## Sửa và xóa Món ăn của tôi (feat/my-foods-crud, 24/10/2026)
+- [ ] (Hao) The brief writes "Xoá", "Huỷ" and "Tuỳ chọn"; docs/voice-audit.md and the cc2_18 probe require "Xóa", "Hủy" and "Tùy" (the app's spelling everywhere else). This job follows the repo's rule, so the probe stays green. Say which spelling wins and one pass changes it.
+- [ ] (Hao) A food made only on this device in the live app (not a uuid) has no server row: Sửa món on it saves in the catalogue of this device only, and Xóa món removes it from this device (nothing to delete on the server).
+- [ ] (Dong) The delete is held 8 s in the outbox and the service worker honours it through nextAttemptAt; a forced sync in the page honours the new `notBefore`. If the sw ever sends items whatever their nextAttemptAt, the undo window could be cut short; it does not today (public/sw.js drainOutbox).
+- [ ] (Hao) Xóa món is not offered for foods of the shared catalogue, only for the user's own (Món ăn của tôi). Dishes made from ingredients are deleted whole; their server copies go with them.
+## Sửa món review fixes (feat/my-foods-crud, 24/10/2026)
+- [ ] (Dong) apps/api/internal/nutrition/service.go `round()` keeps every per-100 g value to 2 decimals, so a micro under 0,005 per 100 g (manganese 0,004) is saved as 0 whatever the web sends; Sửa món now sends an untouched field at full precision, so only this rounding is left. #96 is not changed here. If no answer: as is (values this small are rare on a label).
+- [ ] (Hao) Sửa món on a refused PUT (405, 404, 500 alike) says "Chưa sửa được món. Thử lại sau nhé." with no status code. Deploy the API with #96 with or before the web with #97, or Sửa món says this until it is.

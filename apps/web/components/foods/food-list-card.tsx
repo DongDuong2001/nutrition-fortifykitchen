@@ -18,10 +18,12 @@ export interface FoodListCardProps {
   empty?: React.ReactNode;
   /** Colour of each row's kcal (a group's list page); default: the text colour. */
   valueColor?: string;
+  /** A control at the end of each row, outside its link (the ⋯ of Món ăn của tôi). `first` is true for the first row (the tip points at it). */
+  rowAction?: (food: FoodItem, first: boolean) => React.ReactNode;
 }
 
 /** One Card holding a titled list of food rows with dividers (UI-RULES row pattern). */
-export function FoodListCard({ title, action, foods, withCategory, empty, valueColor }: FoodListCardProps) {
+export function FoodListCard({ title, action, foods, withCategory, empty, valueColor, rowAction }: FoodListCardProps) {
   // cc-58: the first 50 rows, then "Xem thêm" (a new list, from another query, starts again)
   const listKey = `${foods.length}:${foods[0]?.food.id ?? ""}`;
   const [more, setMore] = useState({ listKey, extra: 0 });
@@ -46,6 +48,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty, valueC
               value={foodRowKcal(food, grams)}
               valueColor={valueColor}
               withBorderTop={i > 0 || !!title}
+              trailing={rowAction?.(food, i === 0)}
             />
           ))}
       {foods.length > limit && (

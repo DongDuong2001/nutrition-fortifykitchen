@@ -12,7 +12,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -432,5 +432,14 @@ describe("the Chép ngày ăn mẫu tip (feat/ngay-mau)", () => {
   it("copy has no colon, like the other tips", () => {
     expect(tip?.body).not.toContain(":");
     expect(tip?.title).not.toContain(":");
+  });
+});
+
+describe("pickTip: the ⋯ of Món ăn của tôi (Job C)", () => {
+  it("shows on that list only, once, and never after the ⋯ was used", () => {
+    expect(ids(ctx({ pathname: "/explore/cua_toi" }), flags())).toBe("own-food-menu");
+    expect(ids(ctx({ pathname: "/explore/dam" }), flags())).toBeNull();
+    expect(ids(ctx({ pathname: "/explore/cua_toi" }), flags({ seen: ["own-food-menu"] }))).toBeNull();
+    expect(ids(ctx({ pathname: "/explore/cua_toi" }), flags({ used: ["own-food-menu"] }))).toBeNull();
   });
 });

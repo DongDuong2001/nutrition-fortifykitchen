@@ -145,11 +145,13 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved" | "left" | "share";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved" | "left" | "share" | "foodDeleted";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
   undoIds?: string[];
+  /** "foodDeleted" (Xóa món): what Hoàn tác does. */
+  undoFood?: () => void;
   /** "moved": where each moved entry was, for Hoàn tác. */
   undoMoves?: SlotMove[];
   /** cc-64 (2b): "added" toasts that follow one another into the same meal update one toast ("Đã thêm 3 món …"): how many, and the toast's id. */
@@ -197,6 +199,8 @@ interface DiaryContextValue {
   dismissToastAfterAction: (shown: ToastInfo) => void;
   /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. "share": with a Chia sẻ action (share-spotlight). */
   notify: (message: string, kind?: "notice" | "share") => void;
+  /** A message with Hoàn tác that runs `onUndo`, for as long as a delete's undo stays (8 s): Xóa món. */
+  notifyUndo: (message: string, onUndo: () => void) => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
   pauseToast: () => void;
   resumeToast: () => void;
@@ -1313,6 +1317,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast({ message, kind, mealSlot: null, durationMs: ADDED_TOAST_MS });
   }, []);
 
+  const notifyUndo = useCallback((message: string, onUndo: () => void) => {
+    setToast({ message, kind: "foodDeleted", mealSlot: null, durationMs: UNDO_TOAST_MS, undoFood: onUndo });
+  }, []);
+
   const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);
 
   const toggleFavourite = useCallback((food: FoodItem) => {
@@ -1756,6 +1764,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       dismissToast,
       dismissToastAfterAction,
       notify,
+      notifyUndo,
       pauseToast,
       resumeToast,
       setHighlightedMeal,
@@ -1808,6 +1817,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       dismissToast,
       dismissToastAfterAction,
       notify,
+      notifyUndo,
       pauseToast,
       resumeToast,
       setHighlightedMeal,

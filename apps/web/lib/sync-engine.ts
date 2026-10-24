@@ -5,6 +5,7 @@ import { getTodayIsoVN } from "./date";
 import { generateUuid } from "./uuid";
 import type { AddedDiaryEntry } from "./diary-edits";
 import { isRecipeId } from "./recipe";
+import { removeCatalogFood } from "./catalog";
 import { reportClientError } from "./client-errors";
 import { afterFailure } from "./backoff";
 import { clearSessionExpired, clearStorageAlert, raiseSessionExpired, raiseStorageAlert } from "./sync-state";
@@ -77,6 +78,8 @@ export async function loadOfflineOutbox(): Promise<void> {
   void requestPersistentStorage();
   const scope = currentScope();
   await loadOutbox(scope);
+  // Xóa món waiting out its undo window (the app was closed or reloaded inside it): the food stays out of the catalogue
+  for (const id of pendingFoodDeleteIds()) removeCatalogFood(id);
   // Hotfix 20/10: writes the server held with the 409 for a past day go back to queued, once per app version, and are sent with made_at
   if (scope && (await prepareOutbox(scope)) > 0) void syncOfflineOutbox({ force: true });
 }
@@ -437,7 +440,9 @@ async function runOutbox(retryHeld: boolean, force: boolean, onProgress?: SyncOp
       if (!item) continue;
       // Waiting after a failure (backoff) and parked ones stay put unless the person asked (Thử lại) or the network just came back (force)
       const waiting = !force && (item.nextAttemptAt ?? 0) > Date.now();
-      if (blocked.has(item.id) || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
+      // An undo window (Xóa món) is never cut short, not even by Thử lại or a sync forced when the network came back
+      const embargoed = (item.notBefore ?? 0) > Date.now();
+      if (blocked.has(item.id) || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || embargoed || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
         blocked.add(item.id);
         continue;
       }
@@ -461,6 +466,7 @@ async function runOutbox(retryHeld: boolean, force: boolean, onProgress?: SyncOp
     }
     // Writes refused for good leave after FINAL_OUTBOX_KEEP_MS (their notice was shown when they were refused)
     const now = Date.now();
+    syncAfterEmbargo(readItems(scope), now);
     reportOutboxAge(readItems(scope), now);
     const gone = readItems(scope).filter((item) => !pruneOutbox([item], now).length);
     if (gone.length > 0) await removeItems(scope, gone.map(itemKey));
@@ -493,17 +499,29 @@ export async function moveAddToToday(key: string): Promise<string | null> {
   return item.id;
 }
 
+let embargoTimer: ReturnType<typeof setTimeout> | undefined;
+/** The outbox runs again when the first undo window still open ends (a timer in this page; the item itself holds the time, so a reload finds it). */
+function syncAfterEmbargo(items: readonly OutboxItem[], now: number): void {
+  clearTimeout(embargoTimer);
+  const ends = items.map((item) => item.notBefore ?? 0).filter((at) => at > now);
+  if (ends.length === 0) return;
+  embargoTimer = setTimeout(() => void syncOfflineOutbox(), Math.min(...ends) - now + 50);
+}
+
 /**
  * A change the user made to something that is one value on the server (profile, weight, a favourite, a day's training
  * minutes): it goes through the same outbox as the diary. The newest change of the same thing replaces the ones before it
  * (last write wins, by `updatedAt`), so a long offline stretch sends one request per thing, not one per tap.
  */
-export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PUT" | "POST" | "DELETE"; path: string; payload: Record<string, unknown>; day?: string }): Promise<WriteResult> {
+export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PUT" | "POST" | "DELETE"; path: string; payload: Record<string, unknown>; day?: string; holdMs?: number }): Promise<WriteResult> {
   if (frozen) return Promise.resolve({ state: "queued" });
   const scope = currentScope();
   const now = Date.now();
+  // holdMs: the write waits that long in the outbox (an undo window), whatever asks for it sooner
+  const held = write.holdMs ? { notBefore: now + write.holdMs, nextAttemptAt: now + write.holdMs } : {};
   // The thing's id is its entity, so writes of one thing are sent in order (the chain below) and its older queued ones go
-  const item = makeItem({ id: write.entity, date: "", payload: write.payload, method: write.method, path: write.path, kind: write.kind, entity: write.entity, day: write.day }, { updatedAt: now });
+  const item = makeItem({ id: write.entity, date: "", payload: write.payload, method: write.method, path: write.path, kind: write.kind, entity: write.entity, day: write.day }, { updatedAt: now, ...held });
+  if (!scope && write.holdMs) return Promise.resolve({ state: "saved" });
   if (!scope) {
     return sendWrite(item).then((sent) => (sent.outcome === "saved" ? { state: "saved" } : { state: sent.outcome === "held" ? "held" : "queued", status: sent.status }));
   }
@@ -522,6 +540,10 @@ export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PU
       void syncOfflineOutbox();
       return { state: "queued" };
     }
+    if (current.notBefore && current.notBefore > Date.now()) {
+      syncAfterEmbargo(readItems(scope), Date.now());
+      return { state: "queued" };
+    }
     const { outcome, status, final, busy } = await attempt(scope, current);
     if (busy) return { state: "queued" };
     if (outcome === "saved") return { state: "saved" };
@@ -534,6 +556,21 @@ export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PU
   return run;
 }
 
+
+/** Takes back a side write that has not left the device (Hoàn tác of Xóa món). False: nothing of it waits, or its request already went out. */
+export async function cancelSideWrite(entity: string): Promise<boolean> {
+  const scope = currentScope();
+  if (!scope) return false;
+  const waiting = readItems(scope).filter((item) => item.entity === entity && (item.attempts ?? 0) === 0 && !sendingKeys.has(item.key));
+  if (waiting.length === 0) return false;
+  await removeItems(scope, waiting.map(itemKey));
+  return true;
+}
+
+/** The own foods whose Xóa món waits in the outbox (their delete has not been sent): the catalogue must not show them. */
+export function pendingFoodDeleteIds(): Set<string> {
+  return new Set(readItems(currentScope()).flatMap((item) => (item.kind === "food" && item.method === "DELETE" && item.entity ? [item.entity.slice("food:".length)] : [])));
+}
 
 /**
  * Undo of a delete. One that never left the device is taken back (the server never saw it); one that was attempted may

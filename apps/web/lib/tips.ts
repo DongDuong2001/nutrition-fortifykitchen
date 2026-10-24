@@ -357,6 +357,15 @@ export const TIPS: readonly Tip[] = [
     used: ["hero-hold"],
     when: today,
   },
+  // Job C (feat/my-foods-crud): the ⋯ at the end of a row in Món ăn của tôi has no label a newcomer would look for
+  {
+    id: "own-food-menu",
+    target: "own-food-menu",
+    title: "Sửa hoặc xóa món của bạn",
+    body: "Chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn đã tạo. Xóa nhầm thì bấm Hoàn tác trong 8 giây.",
+    used: ["own-food-menu"],
+    when: (c) => c.pathname === "/explore/cua_toi",
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */

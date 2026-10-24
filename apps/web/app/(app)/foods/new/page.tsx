@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { catalogFoodById } from "@/lib/catalog";
+import { editFormOf, editedValues, type EditForm } from "@/lib/own-foods";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
@@ -49,9 +52,11 @@ function CreateFoodInner() {
   // ?from=<food id> starts a recipe from a catalogue dish that has one (Tùy chỉnh món này).
   const editId = searchParams.get("recipe");
   const fromId = searchParams.get("from");
+  // Job C: ?edit=<food id> is Sửa món on an own food: Tự nhập, filled in from the food, saved with PUT (same id)
+  const editFoodId = searchParams.get("edit");
   const requestedMode = searchParams.get("mode");
   const [mode, setMode] = useState<"nutrition" | "recipe">(
-    editId || fromId ? "recipe" : requestedMode === "nutrition" || requestedMode === "manual" ? "nutrition" : "recipe"
+    editFoodId ? "nutrition" : editId || fromId ? "recipe" : requestedMode === "nutrition" || requestedMode === "manual" ? "nutrition" : "recipe"
   );
   const recipeState = useRecipeDraft();
   const [recipeMissing, setRecipeMissing] = useState(false);
@@ -108,6 +113,27 @@ function CreateFoodInner() {
   // + Thêm vi chất khác: the keys added under the main block, in the order they were picked
   const [added, setAdded] = useState<string[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  // Sửa món: the form starts with the food's own values (once, when the food is there: the catalogue may still be on its way)
+  const { version: catalogVersion, pending: catalogPending } = useCatalogFoods();
+  const editFood = editFoodId ? catalogFoodById(editFoodId) : undefined;
+  const filled = useRef(false);
+  // What the form started with: a field still equal to it was not touched and is saved exactly as the food had it (lib/own-foods editedValues)
+  const startForm = useRef<EditForm | null>(null);
+  useEffect(() => {
+    if (!editFood || filled.current) return;
+    filled.current = true;
+    const form = editFormOf(editFood);
+    startForm.current = form;
+    setNameVi(form.nameVi);
+    setServingSize(form.servingSize);
+    setServingUnit(form.servingUnit);
+    setValues(form.values);
+    setAdded(form.added);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editFood, catalogVersion]);
+  const editMissing = !!editFoodId && !editFood && !catalogPending;
+  const [saveError, setSaveError] = useState<string | null>(null);
   // The button's tip (lib/tips food-new-nutrients) waits for the button, which only Tự nhập shows
   const manual = mode === "nutrition";
   useEffect(() => {
@@ -172,7 +198,7 @@ function CreateFoodInner() {
       saveRecipeDraft();
       return;
     }
-    if (mealSlot === null || isSubmitting) return;
+    if ((mealSlot === null && !editFoodId) || isSubmitting) return;
 
     const errName = validateField("nameVi", nameVi);
     const errSize = validateField("servingSize", servingSize);
@@ -188,7 +214,20 @@ function CreateFoodInner() {
     try {
       const parsedSize = parseNumberInput(servingSize) || 100;
       // A field taken off with its × has dropped its value, so this is exactly what the form shows
-      const { calories: parsedCals, ...nutrition } = customFoodPayload(values);
+      const { calories: parsedCals, ...nutrition } = customFoodPayload(editFoodId && startForm.current ? editedValues(startForm.current, values) : values);
+
+      if (editFoodId) {
+        setSaveError(null);
+        try {
+          await apiClient.updateFood(editFoodId, { nameVi: nameVi.trim(), servingUnit, servingSize: parsedSize, calories: parsedCals ?? 0, ...nutrition });
+        } catch (err) {
+          setSaveError(err instanceof Error ? err.message : "Không lưu được thay đổi. Thử lại nhé.");
+          return;
+        }
+        goBack();
+        return;
+      }
+      if (mealSlot === null) return;
 
       const createdFood = await apiClient.createFood({
         nameVi: nameVi.trim(),
@@ -213,23 +252,23 @@ function CreateFoodInner() {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={mode === "recipe" ? recipeMissing : isSubmitting || mealSlot === null}
+          disabled={mode === "recipe" ? recipeMissing : isSubmitting || (mealSlot === null && !editFoodId) || (!!editFoodId && !editFood)}
           className="glass-cobalt flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 text-body-lg font-bold text-on-accent m-tint transition-press disabled:opacity-50"
         >
-          {mode === "recipe" ? "Lưu món" : `Lưu và thêm vào ${mealNameVi}`}
+          {mode === "recipe" ? "Lưu món" : editFoodId ? "Lưu thay đổi" : `Lưu và thêm vào ${mealNameVi}`}
         </button>
       }
     >
       <AppHeader
         variant="sub"
-        title={editId ? "Sửa món" : "Tạo món mới"}
+        title={editId || editFoodId ? "Sửa món" : "Tạo món mới"}
         onBack={goBack}
       />
 
       {/* Form Content */}
       <main className="flex flex-1 flex-col">
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
-        {!editId && (
+        {!editId && !editFoodId && (
           <div data-tour="create-mode" className="flex flex-col gap-2">
             <Segmented
               label="Cách tạo món"
@@ -262,6 +301,8 @@ function CreateFoodInner() {
               <p className="m-0 text-xs leading-snug text-secondary">Món được lưu vào tài khoản. Danh sách nguyên liệu chỉ có trên máy này.</p>
             </>
           )
+        ) : editMissing ? (
+          <p className="m-0 text-callout text-secondary">Món này không còn trong danh sách.</p>
         ) : (
         <>
         {/* Name Field */}
@@ -384,6 +425,9 @@ function CreateFoodInner() {
           </button>
         </div>
         <NutrientPickerSheet open={pickerOpen} onClose={() => setPickerOpen(false)} added={added} onPick={pickNutrient} />
+        <AlertLine show={!!saveError} gap={4} className="m-0 text-cap font-medium leading-snug text-destructive-text">
+          {saveError}
+        </AlertLine>
         </>
         )}
       </form>
