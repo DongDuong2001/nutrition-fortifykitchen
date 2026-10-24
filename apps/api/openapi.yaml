@@ -160,6 +160,16 @@ components:
           $ref: '#/components/schemas/CustomEnergyKcal'
         customTargets:
           $ref: '#/components/schemas/CustomTargets'
+        level:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: The user's Level (migration 000021), set by an admin or a coach, never by the user. 0 for a new profile.
+        levelSeen:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: The last Level the user was shown the Level-up celebration or card for. 0 for a new profile.
 
     MacroMode:
       type: string
@@ -562,10 +572,17 @@ paths:
                   $ref: '#/components/schemas/CustomEnergyKcal'
                 customTargets:
                   $ref: '#/components/schemas/CustomTargets'
+                levelSeen:
+                  type: integer
+                  minimum: 0
+                  maximum: 5
+                  description: Optional, 0–5. Above the stored level is saved as the level. Left out keeps it.
       description: >-
         The five target settings (macroMode, macroRatios, macroFixed, customEnergyKcal, customTargets) are optional
         each: a key left out keeps the stored value, JSON null clears it, and an invalid value is a 400 whose
-        error.fields names the field.
+        error.fields names the field. levelSeen may be sent (a whole number 0–5, else 400 on error.fields.levelSeen);
+        above the stored level is saved as the level, and the rest of the save goes through. A request that sends level
+        is refused with 400 (error.fields.level "level is set by your coach") and nothing is saved.
       responses:
         '200':
           description: Profile updated successfully

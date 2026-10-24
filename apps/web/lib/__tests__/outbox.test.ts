@@ -405,6 +405,29 @@ describe("S6: profile, weight and favourites go through the outbox, newest wins"
     expect(bodies["PUT /me/profile"][0]).toMatchObject({ display_name: "Tên mới", macroMode: "keto", customEnergyKcal: 2000, macroRatios: null });
   });
 
+  it("profile-level: levelSeen goes with the profile save only when given; level is never sent", async () => {
+    const { bodies } = server({ "PUT /me/profile": [200, 200] });
+    // A whole Profile can reach queueProfile (it carries the coaching state): its level must not travel
+    const withLevel = { ...profile, level: 4, levelSeen: 2 } as typeof profile;
+    await apiClient.queueProfile(withLevel);
+    await apiClient.queueProfile(withLevel, undefined, 4);
+    const [plain, seen] = bodies["PUT /me/profile"] as Record<string, unknown>[];
+    expect(Object.keys(plain)).not.toContain("levelSeen");
+    expect(Object.keys(plain)).not.toContain("level");
+    expect(seen).toMatchObject({ sex: "male", levelSeen: 4 });
+    expect(Object.keys(seen)).not.toContain("level");
+  });
+
+  it("profile-level: a levelSeen waiting offline is carried into a later profile write", async () => {
+    server({ "PUT /me/profile": [503] });
+    await apiClient.queueProfile(profile, undefined, 3);
+    await apiClient.queueProfile({ ...profile, displayName: "Tên mới" });
+    const { bodies } = server({ "PUT /me/profile": [200] });
+    await syncOfflineOutbox({ force: true });
+    expect(bodies["PUT /me/profile"]).toHaveLength(1);
+    expect(bodies["PUT /me/profile"][0]).toMatchObject({ display_name: "Tên mới", levelSeen: 3 });
+  });
+
   it("backend-sync: Ngày ăn mẫu offline: PUT by id, a later delete replaces it, a non-uuid id is never sent", async () => {
     const id = "aaaaaaaa-0000-4000-8000-0000000000aa";
     const template = { id, name: "Ngày tập", tag: "tap" as const, meals: [{ slot: "breakfast" as const, items: [{ foodId: FOOD, servingLabel: "1 tô", grams: 500 }] }], createdAt: "2026-10-19T01:00:00.000Z" };

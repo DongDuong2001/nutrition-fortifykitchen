@@ -53,6 +53,10 @@ func (s *DefaultService) GetProfile(ctx context.Context, userID uuid.UUID) (*Pro
 }
 
 func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, req UpsertProfileRequest) (*Profile, error) {
+	levelSeen, levelErrs := ParseLevelFields(req)
+	if levelErrs != nil {
+		return nil, levelErrs
+	}
 	if req.Sex != "male" && req.Sex != "female" {
 		return nil, ErrInvalidSex
 	}
@@ -102,6 +106,7 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 	}
 
 	p := &Profile{
+		SetLevelSeen:           levelSeen,
 		Settings:               settings,
 		UserID:                 userID,
 		Sex:                    req.Sex,

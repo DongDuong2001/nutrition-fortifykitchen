@@ -33,6 +33,13 @@ type Profile struct {
 	// UpdatedAtJS is updated_at again under the web's name: the web compares it with the device's last change.
 	UpdatedAtJS time.Time `json:"updatedAt"`
 
+	// The user's Level (migration 000021), 0–5, camelCase like the target settings. Level is set by an admin or a coach,
+	// never by the user's own save; LevelSeen is the last Level the user was shown the Level-up celebration or card for.
+	Level     int `json:"level"`
+	LevelSeen int `json:"levelSeen"`
+	// SetLevelSeen is what a save writes to level_seen: nil keeps the stored value (never serialised).
+	SetLevelSeen *int `json:"-"`
+
 	// Settings is what a save changes in the target settings (never serialised).
 	Settings TargetSettingsPatch `json:"-"`
 }
@@ -61,6 +68,10 @@ type UpsertProfileRequest struct {
 	MacroFixed       Nullable `json:"macroFixed"`
 	CustomEnergyKcal Nullable `json:"customEnergyKcal"`
 	CustomTargets    Nullable `json:"customTargets"`
+
+	// LevelSeen may be sent (0–5, stored at most as the user's level). Level is only here so a request that sends it is refused.
+	LevelSeen Nullable `json:"levelSeen"`
+	Level     Nullable `json:"level"`
 }
 
 type UpsertWeightRequest struct {
