@@ -61,6 +61,15 @@ export const TARGET_MEALS: { id: MealSlot; name: string; label: string }[] = [
   { id: "dinner", label: "Tối" },
 ].map((m) => ({ ...m, id: m.id as MealSlot, name: MEAL_SLOTS.find((s) => s.id === m.id)?.nameVi ?? m.label }));
 
+/**
+ * The meals the ⋯ menu's Chuyển sang bữa… offers: the meals the day shows, in its own order, so on a day that shows Trước tập a
+ * food can be moved out of it and into it, as the hold-and-drag does. Chọn nhiều món keeps TARGET_MEALS (the four), where Trước tập
+ * is not a copy target.
+ */
+export function moveTargets(meals: readonly { slot: MealSlot; label: string }[]): { id: MealSlot; label: string }[] {
+  return meals.map((m) => ({ id: m.slot, label: m.label }));
+}
+
 /** The entries as new added entries (new ids and time), into one meal or each in its own meal. */
 export function copyHomeEntries(entries: readonly HomeEntry[], target: CopyTarget, idPrefix: string, addedAt: string): AddedDiaryEntry[] {
   return entries.map((e, i) => ({

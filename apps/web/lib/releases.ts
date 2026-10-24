@@ -66,15 +66,18 @@ export const RELEASES: readonly Release[] = [
         body: "Huy hiệu Level của bạn nằm ngay cạnh logo ở Hôm nay, chạm để xem Level là gì. Khi HLV nâng Level, app chúc mừng bạn và Hôm nay hiện thêm vi chất ngay.",
       },
       // feat/hero-sources (Job A, overnight 23→24/10)
-      { icon: "bars", title: "Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen (hoặc dòng Chất xơ) là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
+      { icon: "bars", title: "Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào", body: "Giữ ngón tay trên một chất ở thẻ đen là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được." },
       // feat/my-foods-crud (Job C, overnight 23→24/10)
       { icon: "meal", title: "Sửa và xóa Món ăn của tôi", body: "Món bạn tự tạo giờ sửa được số liệu và xóa được. Xóa nhầm thì bấm Hoàn tác trong 8 giây, nhật ký đã ghi vẫn giữ số cũ." },
       // fix/share-meal-cobalt (24/10): a look, no control to teach (no tour step, no tip)
       { icon: "share", title: "Ảnh chia sẻ: tên bữa màu xanh như Hôm nay", body: "Tên các bữa trong ảnh chia sẻ giờ cũng màu xanh, giống ở màn Hôm nay." },
+      // feat/food-swipe (Job I, overnight 23→24/10)
+      { icon: "select", title: "Vuốt món để xóa hoặc mở tùy chọn", body: "Ở Hôm nay, vuốt món sang trái để xóa, sang phải để sửa, chuyển bữa hoặc xóa. Xóa nhầm thì bấm Hoàn tác." },
     ],
     tour: [
       { target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." },
       { target: "nav-explore", title: "Sửa hoặc xóa món của bạn", body: "Vào Khám phá › Món ăn của tôi, chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn tạo." },
+      { target: "home-food-list", fallback: "meal-pill", title: "Vuốt món để xóa hoặc mở tùy chọn", body: "Vuốt một món sang trái để xóa, sang phải để mở tùy chọn." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item

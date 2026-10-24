@@ -533,7 +533,7 @@
 ## feat/level-ui (24/10)
 - Share image, Level 3+: in "Chi tiết béo & xơ" the long names (Béo không bão hòa đơn / đa, Xơ hòa tan, Xơ không tan) wrap to 3 lines beside "chưa có dữ liệu" (share-L5.png). origin/main 86d8b69 draws it the same way, so it is not from feat/level-ui. Own fix later: the name on one line and "chưa có dữ liệu" under it (or "—"). Hao to confirm which.
 ## Hero hold (feat/hero-sources, 24/10/2026)
-- [ ] (Hao) The hold is 500 ms, the length the meal row already uses (components/food-list.tsx LONG_PRESS_MS), not the "about 450 ms" of the brief: one hold length in the app. lib/hold.ts repeats the constant instead of importing it so this PR does not touch food-list.tsx (feat/food-swipe edits it); one import can replace the copy after both merge.
+- [x] (Hao) CLOSED 24/10 (feat/food-swipe): the hold is 500 ms, one length in the app. components/home/food-list.tsx now imports HOLD_MS and HOLD_MOVE_PX from lib/hold and its two local constants are gone.
 - [ ] (Hao) On Chất xơ a tap already opened the sources sheet, so the hold on it only does the same thing earlier; kept because the tip and the release item name Chất xơ with the others. Say if you would rather the tip left Chất xơ out.
 - [ ] (Hao) The sheet of a macro lists the day's foods even when a meal or one food is picked on Hôm nay (the title says "hôm nay"; the vi chất rows already behave this way).
 - [ ] (Hao) Adding a step to 2026-10-23a's tour pushes 22a's last step ("Chia sẻ ngày ăn") out of the 8-step Thử ngay for a user who skipped both releases (lib/releases.ts MAX_TOUR_STEPS).
@@ -551,3 +551,8 @@
 - [ ] (Hao) Sửa món on a refused PUT (405, 404, 500 alike) says "Chưa sửa được món. Thử lại sau nhé." with no status code. Deploy the API with #96 with or before the web with #97, or Sửa món says this until it is.
 ## polish_1020 node budget (fix/probe-polish-1020, 24/10/2026)
 - [ ] (Hao) The add sheet is about 11 % bigger than when check 3 was written (598 nodes on 20/10, 665 at lunch today, 35 rows against 34). The budget is now 680 at a pinned 12:30. If the sheet should stay near 600, the per-category trim or the shortlists need another pass; that is an app change, not this probe fix.
+## Swipe a food on Hôm nay (feat/food-swipe, 24/10/2026)
+- [ ] (Hao) "Nhân đôi" is not in the ⋯ menu: no duplicate action exists in the app (the add sheet's Gần đây adds the same food again). If you want it, it is one more row that calls the same add with the entry's food and portion.
+- [ ] (Hao) "The ⋯ menu is also reachable from the edit screen": the edit screen (/entry/<id>) already has Xóa and the meal switch, so no second menu was added there. Say if you want the ⋯ itself in its header.
+- [ ] (Hao) The brief writes "Xoá" and "Tuỳ chọn"; docs/voice-audit.md and the cc2_18 probe require "Xóa" and "Tùy" (the app's spelling, and the diary's own delete toast "Đã xóa 1 món" that a swipe delete shows). This job follows the repo's rule.
+- [ ] (Hao) The buttons are 56 px wide (≥ 44 px) because the food list card is 178 px wide at 390; 25 % and 60 % are of that width (44 px and 107 px).

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { TARGET_MEALS, actionBarLabel, selectTitle, type CopyTarget } from "@/lib/multi-select";
+import type { MealSlot } from "@/lib/meal-slot";
 
 const HEAD_BUTTON =
   "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-callout font-bold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
@@ -108,6 +109,7 @@ export function MealTargetSheet({
   description,
   withKeep,
   initial,
+  meals,
   confirmLabel,
   onConfirm,
 }: {
@@ -119,12 +121,14 @@ export function MealTargetSheet({
   withKeep: boolean;
   /** The meal that starts picked when there is no "Giữ nguyên bữa". */
   initial: CopyTarget;
+  /** The meals offered; left out, the four of TARGET_MEALS. */
+  meals?: readonly { id: MealSlot; label: string }[];
   confirmLabel: string;
   onConfirm: (target: CopyTarget) => void;
 }) {
   return (
     <Sheet open={open} onClose={onClose} title={title} titleId="select-target-title" description={description} desktopDialog>
-      <TargetBody withKeep={withKeep} initial={initial} confirmLabel={confirmLabel} onClose={onClose} onConfirm={onConfirm} />
+      <TargetBody withKeep={withKeep} initial={initial} meals={meals ?? TARGET_MEALS} confirmLabel={confirmLabel} onClose={onClose} onConfirm={onConfirm} />
     </Sheet>
   );
 }
@@ -133,12 +137,14 @@ export function MealTargetSheet({
 function TargetBody({
   withKeep,
   initial,
+  meals,
   confirmLabel,
   onClose,
   onConfirm,
 }: {
   withKeep: boolean;
   initial: CopyTarget;
+  meals: readonly { id: MealSlot; label: string }[];
   confirmLabel: string;
   onClose: () => void;
   onConfirm: (target: CopyTarget) => void;
@@ -146,7 +152,7 @@ function TargetBody({
   const [target, setTarget] = useState<CopyTarget>(withKeep ? "keep" : initial === "keep" ? "breakfast" : initial);
   const options: { id: CopyTarget; label: string }[] = [
     ...(withKeep ? [{ id: "keep" as const, label: "Giữ nguyên bữa" }] : []),
-    ...TARGET_MEALS.map((m) => ({ id: m.id as CopyTarget, label: m.label })),
+    ...meals.map((m) => ({ id: m.id as CopyTarget, label: m.label })),
   ];
   return (
     <>

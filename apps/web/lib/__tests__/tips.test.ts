@@ -3,6 +3,14 @@ import { canVibrate } from "../haptics";
 import { DEFAULT_FLAGS, markSeenIn, markShareLaterIn, markTipShownIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
 import { TIPS, pickTip, type TipContext } from "../tips";
 
+describe("hero-hold copy (Hao 24/10)", () => {
+  it("teaches the hold on Tinh bột, Đạm and Chất béo only: Chất xơ already opens its foods on a tap", () => {
+    const tip = TIPS.find((t) => t.id === "hero-hold");
+    expect(tip?.body).toBe("Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen là thấy những món nào góp vào số đó.");
+    expect(tip?.body).not.toContain("Chất xơ");
+  });
+});
+
 const ctx = (over: Partial<TipContext> = {}): TipContext => ({ pathname: "/app", pastDay: false, foodsToday: 2, ...over });
 const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DEFAULT_FLAGS, ...over });
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
@@ -12,7 +20,7 @@ describe("the tips table", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-share", "home-logged", "meal-add", "day-template", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
       "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
-      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu",
+      "food-new", "food-new-nutrients", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard", "meal-focus", "hero-macro", "hero-hold", "own-food-menu", "food-swipe",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -119,7 +127,10 @@ describe("pickTip: pull to refresh (cc-51)", () => {
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day"] }))).toBe("meal-focus");
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus"] }))).toBe("hero-macro");
     expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro"] }))).toBe("hero-hold");
-    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe(null);
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe("food-swipe");
+    // Job I: the swipe tip is for a finger only, and the first swipe is what ends it
+    expect(ids(ctx({ touch: false, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold"] }))).toBe(null);
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh", "share-day", "meal-focus", "hero-macro", "hero-hold", "food-swipe"] }))).toBe(null);
   });
 });
 

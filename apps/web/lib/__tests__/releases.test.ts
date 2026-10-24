@@ -6,7 +6,7 @@ const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
 
 // 2026-10-23a's tour (the night of 23→24/10): each PR of the night that adds a step appends its title here
-const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xóa món của bạn"];
+const T23A = ["Giữ để xem món nào góp vào", "Sửa hoặc xóa món của bạn", "Vuốt món để xóa hoặc mở tùy chọn"];
 
 describe("RELEASES", () => {
   it("is newest first with unique ids", () => {
@@ -192,9 +192,14 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(r?.items.map((i) => i.title)).toContain("Góp ý & báo lỗi ngay trong app");
     expect(r?.items.map((i) => i.title)).toContain("Tài liệu của app ngay trong Cài đặt");
     expect(r?.tour?.map((s) => s.title)).toEqual(T23A);
-    expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm, Chất béo hoặc Chất xơ để xem món nào góp vào");
+    expect(r?.items.map((i) => i.title)).toContain("Giữ Tinh bột, Đạm hoặc Chất béo để xem món nào góp vào");
+    // Hao 24/10: a tap on Chất xơ already opened its foods, so the hold there is not something new to teach
+    const hold = r?.items.find((i) => i.title.startsWith("Giữ Tinh bột"));
+    expect(hold?.body).toBe("Giữ ngón tay trên một chất ở thẻ đen là thấy những món nào góp vào, kèm phần trăm mục tiêu. Đang xem kcal của một chất thì chạm Món nào? cũng mở được.");
+    expect(hold?.title + (hold?.body ?? "")).not.toContain("Chất xơ");
     expect(r?.items.map((i) => i.title)).toContain("Sửa và xóa Món ăn của tôi");
     expect(r?.items.map((i) => i.title)).toContain("Ảnh chia sẻ: tên bữa màu xanh như Hôm nay");
+    expect(r?.items.map((i) => i.title)).toContain("Vuốt món để xóa hoặc mở tùy chọn");
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
 
@@ -390,7 +395,7 @@ describe("joinedTour (what Thử ngay runs)", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
     expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-23a", "2026-10-22a", "2026-10-21c", "2026-10-21b", "2026-10-21a", "2026-10-20b", "2026-10-20a", "2026-10-19b", "2026-10-19a", "2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
-    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 34 }, (_, i) => i));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 35 }, (_, i) => i));
     expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F, ...T19A, ...T19B, ...T20A, ...T20B, ...T21A, ...T21B, ...T21C, ...T22A, ...T23A]);
   });
 

@@ -353,7 +353,7 @@ export const TIPS: readonly Tip[] = [
     id: "hero-hold",
     target: "hero-macro",
     title: "Giữ để xem món nào góp vào",
-    body: "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen, hoặc Chất xơ ở cột bên phải, là thấy những món nào góp vào số đó.",
+    body: "Giữ Tinh bột, Đạm hay Chất béo ở thẻ đen là thấy những món nào góp vào số đó.",
     used: ["hero-hold"],
     when: today,
   },
@@ -365,6 +365,15 @@ export const TIPS: readonly Tip[] = [
     body: "Chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn đã tạo. Xóa nhầm thì bấm Hoàn tác trong 8 giây.",
     used: ["own-food-menu"],
     when: (c) => c.pathname === "/explore/cua_toi",
+  },
+  // Job I (feat/food-swipe): a swipe on a food of today, which nothing on the row says; only where a finger swipes. Marked used by the first swipe.
+  {
+    id: "food-swipe",
+    target: "home-food-list",
+    title: "Vuốt món để xóa hoặc mở tùy chọn",
+    body: "Vuốt trái để xóa, vuốt phải để mở tùy chọn. Xóa nhầm thì bấm Hoàn tác.",
+    used: ["food-swipe"],
+    when: (c) => today(c) && c.touch === true,
   },
 ];
 
