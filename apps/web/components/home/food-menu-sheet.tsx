@@ -8,6 +8,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { kcalLabel } from "@/lib/kcal";
 import { portionLabel, type HomeEntry, type HomeMeal } from "@/lib/home";
 import { moveTargets } from "@/lib/multi-select";
+import { navigateFromSheet } from "@/lib/sheet-history";
 import type { MealTargetSheet as MealTargetSheetType } from "./select-mode";
 
 /**
@@ -55,7 +56,8 @@ export function FoodMenuSheet({
             onClick={() => {
               const target = shown;
               onClose();
-              if (target) router.push(`/entry/${target.id}`);
+              // The sheet's own history.back() is 50 ms behind onClose: its entry becomes the edit screen, so nothing is taken back
+              if (target) navigateFromSheet(router, `/entry/${target.id}`);
             }}
           >
             Sửa
