@@ -485,8 +485,11 @@
   }
 }
 
+/* "only light": the browser's own auto-darkening (Android Chrome's Auto Dark, Samsung Internet) leaves the app alone. It recoloured the rows and
+   the list behind them differently and showed boxes (Hao 24/10). The app's own dark mode, under data-theme="dark" below, sets color-scheme
+   dark. The same word is in the document's metadata (colorScheme in app/layout.tsx). */
 :root {
-  color-scheme: light;
+  color-scheme: only light;
 }
 
 /* cc-66 (S16): "Increase contrast" (iOS, macOS, Windows): darker edges and dividers, the stronger secondary text and a

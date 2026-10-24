@@ -34,6 +34,8 @@ export const metadata: Metadata = {
 // viewportFit "cover" lets the app draw under the notch; AppHeader and BottomNav pad with env(safe-area-inset-*).
 export const viewport: Viewport = {
   themeColor: INK_COLOR,
+  // The browser's auto-darkening stays off until the app's own dark mode ships (globals.css, :root)
+  colorScheme: "only light",
   viewportFit: "cover",
   // cc-64 (N3): the on-screen keyboard shrinks the layout viewport, so a sheet's button is not left under it
   interactiveWidget: "resizes-content",
