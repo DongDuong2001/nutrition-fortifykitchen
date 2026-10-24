@@ -198,6 +198,26 @@ describe("the coach builds a course", () => {
     expect((await refusal(api.createCourse({ title: "x", access: "level", minLevel: 6 }))).status).toBe(400);
   });
 
+  it("a page can be made to fail on purpose (sessionStorage h1t_mock_fail_page = n:times): a 503 that many times, then it goes", async () => {
+    const session = new Map<string, string>([["h1t_mock_fail_page", "2:2"]]);
+    globalThis.sessionStorage = { getItem: (k: string) => session.get(k) ?? null, setItem: (k: string, v: string) => void session.set(k, v), removeItem: (k: string) => void session.delete(k) } as Storage;
+    const api = coach();
+    const { id } = await api.addPdfLesson("c-an-quanh", { partId: "p-aq-1", title: "Ba trang", pageCount: 3 });
+    await api.uploadPage("c-an-quanh", id, 1, "UklGRg==");
+    expect((await refusal(api.uploadPage("c-an-quanh", id, 2, "UklGRg=="))).status).toBe(503);
+    expect((await refusal(api.uploadPage("c-an-quanh", id, 2, "UklGRg=="))).status).toBe(503);
+    await api.uploadPage("c-an-quanh", id, 2, "UklGRg==");
+    expect(session.has("h1t_mock_fail_page")).toBe(false);
+    await api.uploadPage("c-an-quanh", id, 3, "UklGRg==");
+  });
+
+  it("nothing fails unless that key is set", async () => {
+    globalThis.sessionStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} } as unknown as Storage;
+    const api = coach();
+    const { id } = await api.addPdfLesson("c-an-quanh", { partId: "p-aq-1", title: "Ba trang", pageCount: 3 });
+    await api.uploadPage("c-an-quanh", id, 2, "UklGRg==");
+  });
+
   it("a PDF lesson is hidden until its pages are in and it is finished; the caps are the server's", async () => {
     const api = coach();
     expect((await refusal(api.addPdfLesson("c-an-quanh", { partId: "p-aq-1", title: "x", pageCount: 61 }))).status).toBe(400);

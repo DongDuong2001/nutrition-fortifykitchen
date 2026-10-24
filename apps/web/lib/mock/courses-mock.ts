@@ -303,6 +303,22 @@ const uploadedMemory = new Map<string, string>();
 
 // ---- the API ----
 
+/**
+ * Probes and demos only (the mock is never in a live build): sessionStorage `h1t_mock_fail_page` = "<n>:<times>" makes the PUT of page
+ * n fail with a 503 that many times, so the retry of lib/lesson-upload can be watched. True when this call must fail.
+ */
+function injectedFailure(n: number): boolean {
+  try {
+    const [page, times] = (sessionStorage.getItem("h1t_mock_fail_page") ?? "").split(":").map(Number);
+    if (page !== n || !(times > 0)) return false;
+    if (times > 1) sessionStorage.setItem("h1t_mock_fail_page", `${page}:${times - 1}`);
+    else sessionStorage.removeItem("h1t_mock_fail_page");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function mockCoursesApi(v: CourseViewer): CoursesApi {
   const mutate = <T>(fn: (state: State) => T): T => {
     const state = structuredClone(load());
@@ -490,6 +506,7 @@ export function mockCoursesApi(v: CourseViewer): CoursesApi {
       const { lesson } = lessonOf(find(load(), courseId), lessonId);
       if (lesson.kind !== "pdf" || n < 1 || n > lesson.pageCount) throw new CoursesError(404);
       if (Math.floor((data.length * 3) / 4) > MAX_PAGE_BYTES) throw new CoursesError(413);
+      if (injectedFailure(n)) throw new CoursesError(503);
       const src = `data:image/webp;base64,${data}`;
       try {
         localStorage.setItem(`${PAGE_KEY}${lessonId}_${n}`, src);

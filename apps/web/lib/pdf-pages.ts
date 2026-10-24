@@ -55,26 +55,39 @@ export async function openPdf(file: File): Promise<OpenedPdf> {
     void doc.destroy();
     throw new PdfError("too-long");
   }
+  // One canvas for every page, emptied after each: Safari counts canvas memory per tab and, after a few dozen 1600 px canvases left for the
+  // garbage collector, refuses new ones (a 60-page PDF on an iPhone stopped halfway)
+  const canvas = document.createElement("canvas");
+  const empty = () => {
+    canvas.width = 0;
+    canvas.height = 0;
+  };
   return {
     pageCount: doc.numPages,
     async render(n) {
       const page = await doc.getPage(n);
       const viewport = page.getViewport({ scale: scaleFor(page.getViewport({ scale: 1 }).width) });
-      const canvas = document.createElement("canvas");
       canvas.width = Math.round(viewport.width);
       canvas.height = Math.round(viewport.height);
-      const context = canvas.getContext("2d");
-      if (!context) throw new PdfError("no-webp");
-      await page.render({ canvasContext: context, viewport }).promise;
-      page.cleanup();
-      for (const quality of QUALITIES) {
-        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
-        // A browser that cannot encode WebP answers with a PNG: the API would refuse it, so say so now
-        if (!blob || blob.type !== "image/webp") throw new PdfError("no-webp");
-        if (blob.size <= MAX_PAGE_BYTES) return toBase64(blob);
+      try {
+        const context = canvas.getContext("2d");
+        if (!context) throw new PdfError("no-webp");
+        await page.render({ canvasContext: context, viewport }).promise;
+        page.cleanup();
+        for (const quality of QUALITIES) {
+          const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+          // A browser that cannot encode WebP answers with a PNG: the API would refuse it, so say so now
+          if (!blob || blob.type !== "image/webp") throw new PdfError("no-webp");
+          if (blob.size <= MAX_PAGE_BYTES) return await toBase64(blob);
+        }
+        throw new PdfError("too-big");
+      } finally {
+        empty();
       }
-      throw new PdfError("too-big");
     },
-    destroy: () => void doc.destroy(),
+    destroy: () => {
+      empty();
+      void doc.destroy();
+    },
   };
 }

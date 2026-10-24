@@ -5,9 +5,12 @@ says so under the field -> the right code opens the course -> a lesson -> page 3
 at Level 2 against Level 3. Coach: makes a course (code access), adds a part, uploads a 3-page PDF (converted in the browser, progress in
 the button), adds a written lesson, reorders, makes a code; a learner opens the new course with that code and sees the three pages under
 the watermark. /documents redirects; Cài đặt no longer lists Tài liệu.
+Review fixes (24/10): Thêm bài is marked unsaved while a lesson is written or a PDF is converted and sent, closing it mid-upload asks
+(Dừng / Tiếp tục tải), a page that fails once is sent again (the mock fails page 2 once on sessionStorage h1t_mock_fail_page), and 60 pages
+are drawn on one canvas (counted on Chromium; WebKit cannot make WebP from a canvas, so it must say so at page 1 and keep nothing).
 Screenshots: .screenshots/courses/*.png (390×844 and 1440×900). Run with: ALIGN_BASE_URL=http://localhost:3120 npm run probe -- tests/probes/courses.py
 """
-# PROBE_COVERS: app/(app)/explore/documents/** app/(app)/documents/** components/courses/** components/explore/courses-carousel.tsx hooks/use-courses.ts lib/courses.ts lib/mock/courses-mock.ts lib/course-logic.ts lib/pdf-pages.ts
+# PROBE_COVERS: app/(app)/explore/documents/** app/(app)/documents/** components/courses/** lib/lesson-upload.ts components/explore/courses-carousel.tsx hooks/use-courses.ts lib/courses.ts lib/mock/courses-mock.ts lib/course-logic.ts lib/pdf-pages.ts
 import os
 import re
 import sys
@@ -20,6 +23,11 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3120")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots" / "courses"
 SHOTS.mkdir(parents=True, exist_ok=True)
 PDF = Path(__file__).resolve().parent / "fixtures" / "three-pages.pdf"
+SIXTY = Path(__file__).resolve().parent / "fixtures" / "sixty-pages.pdf"
+# Counts the canvases the page makes (pdfjs and lib/pdf-pages): Safari refuses new ones after a few dozen big ones, so a 60-page PDF must reuse one
+# A slow server: each page the mock stores takes 150 ms, so the 60 pages take long enough to answer a question in the middle
+SLOW_PAGES = "(() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('h1t_mock_course_page_v1_')) { const t = Date.now(); while (Date.now() - t < 150); } return o.call(this, k, v); }; })();"
+COUNT_CANVASES = "window.__canvases = 0; (() => { const o = Document.prototype.createElement; Document.prototype.createElement = function (t, ...r) { if (String(t).toLowerCase() === 'canvas') window.__canvases++; return o.call(this, t, ...r); }; })();"
 NO_INSTALL = "try { sessionStorage.setItem('h1t_install_shown', '1'); } catch (e) {}"
 problems = []
 
@@ -305,6 +313,132 @@ def coach_flow(browser, w, h):
     ctx.close()
 
 
+def unsaved(pg):
+    """What the app update reads (components/unsaved-work-watch.tsx): true while the page holds work a reload would lose."""
+    return pg.evaluate("() => !!(window.h1tUnsaved && window.h1tUnsaved())")
+
+
+def open_add_lesson(pg):
+    """A coach makes a course with a part and opens Thêm bài."""
+    go(pg, "/explore/documents?as=coach")
+    pg.get_by_role("button", name="Khóa mới").click()
+    pg.wait_for_timeout(700)
+    pg.locator("#course-title").fill("Khóa tải lên")
+    pg.get_by_role("button", name="Tạo khóa").click()
+    pg.wait_for_url(re.compile(r".*/explore/documents/c-[0-9a-f]{8}$"), timeout=8000)
+    pg.wait_for_timeout(900)
+    pg.get_by_role("button", name="Thêm phần").click()
+    pg.wait_for_timeout(600)
+    pg.locator("#course-part-name").fill("Phần A")
+    pg.get_by_role("button", name="Thêm phần").last.click()
+    pg.wait_for_timeout(800)
+    # The toast of the part has gone before the sheet opens, or it sits over the buttons in the screenshots
+    pg.get_by_role("status").filter(has_text="Đã thêm phần").wait_for(state="hidden", timeout=10000)
+    pg.get_by_role("button", name="Thêm bài").click()
+    pg.wait_for_timeout(700)
+
+
+def pick_pdf(pg, path, name, pages):
+    pg.get_by_test_id("course-pdf-input").set_input_files(str(path))
+    pg.locator(f"text={pages} trang").first.wait_for(timeout=15000)
+    pg.locator("#course-lesson-title").fill(name)
+
+
+def upload_label(pg):
+    loc = pg.locator("[data-tour=course-add-lesson-go]")
+    return (loc.inner_text() or "").strip() if loc.count() else ""
+
+
+def stop_upload_flow(browser):
+    """Closing the sheet while pages are on their way asks first; Tiếp tục tải goes on, Dừng keeps nothing half-made. Marked unsaved all along."""
+    tag = "390"
+    ctx, pg = new_page(browser, 390, 844)
+    ctx.add_init_script(SLOW_PAGES)
+    open_add_lesson(pg)
+    check(not unsaved(pg), f"{tag}: an open, empty Thêm bài holds nothing back")
+    pick_pdf(pg, SIXTY, "Bài tải lên dở", 60)
+    pg.get_by_role("button", name="Thêm vào khóa").click()
+    pg.locator("[data-tour=course-add-lesson-go]", has_text="Đang chuyển trang").wait_for(timeout=10000)
+    check(unsaved(pg), f"{tag}: the conversion and upload are marked unsaved (an update would not reload)")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(500)
+    ask = pg.get_by_role("alertdialog")
+    check(ask.count() == 1 and "Đang tải bài lên. Dừng lại?" in ask.inner_text(), f"{tag}: closing the sheet asks 'Đang tải bài lên. Dừng lại?' ({ask.inner_text()[:60] if ask.count() else ''!r})")
+    check(ask.get_by_role("button", name="Tiếp tục tải").count() == 1 and ask.get_by_role("button", name="Dừng").count() == 1, f"{tag}: with Tiếp tục tải and Dừng")
+    check(pg.get_by_role("dialog", name="Thêm bài").count() == 1, f"{tag}: and the sheet is still there")
+    shot(pg, f"{tag}-c5-stop-upload-question.png")
+    ask.get_by_role("button", name="Tiếp tục tải").click()
+    pg.wait_for_timeout(600)
+    check(pg.get_by_role("alertdialog").count() == 0 and "Đang chuyển trang" in upload_label(pg), f"{tag}: Tiếp tục tải goes on ({upload_label(pg)!r})")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+    pg.get_by_role("alertdialog").get_by_role("button", name="Dừng").click()
+    pg.wait_for_timeout(1500)
+    check(pg.get_by_role("dialog", name="Thêm bài").count() == 0, f"{tag}: Dừng closes the sheet")
+    check("Bài tải lên dở" not in text(pg) and pg.locator("li[data-align-group=coach-lessons]").count() == 0, f"{tag}: and the half lesson is gone")
+    check(not unsaved(pg), f"{tag}: nothing is held back any more")
+    ctx.close()
+
+
+def retry_flow(browser):
+    """A page that fails once is sent again; the coach sees it, and the lesson is not thrown away."""
+    tag = "390"
+    ctx, pg = new_page(browser, 390, 844)
+    ctx.add_init_script("try { sessionStorage.setItem('h1t_mock_fail_page', '2:1'); } catch (e) {}")
+    open_add_lesson(pg)
+    pick_pdf(pg, PDF, "Bài thử lại", 3)
+    pg.get_by_role("button", name="Thêm vào khóa").click()
+    note = pg.get_by_role("status").filter(has_text="chưa lên được")
+    note.wait_for(timeout=10000)
+    check("Trang 2 chưa lên được. Đang thử lại…" in note.inner_text(), f"{tag}: a page that did not go says so and that it is tried again ({note.inner_text()!r})")
+    shot(pg, f"{tag}-c6-retried-page.png")
+    pg.get_by_role("dialog", name="Thêm bài").wait_for(state="detached", timeout=15000)
+    pg.wait_for_timeout(900)
+    check("Bài thử lại" in text(pg) and "PDF · 3 trang" in text(pg), f"{tag}: after the second try the lesson is added with its 3 pages")
+    ctx.close()
+
+
+def written_lesson_marks(browser):
+    tag = "390"
+    ctx, pg = new_page(browser, 390, 844)
+    open_add_lesson(pg)
+    pg.get_by_role("tab", name="Viết bài").click()
+    pg.locator("#course-lesson-title").fill("Bài chưa lưu")
+    pg.locator("#course-lesson-text").fill("Một ý chưa lưu.")
+    pg.wait_for_timeout(300)
+    check(unsaved(pg), f"{tag}: a written lesson not yet saved is marked unsaved")
+    pg.get_by_role("button", name="Thêm vào khóa").click()
+    pg.wait_for_timeout(1200)
+    check(not unsaved(pg) and "Bài chưa lưu" in text(pg), f"{tag}: saved, nothing is held back")
+    ctx.close()
+
+
+def sixty_pages(browser, name):
+    """60 pages in one go: the lesson is added and the pages came from one canvas (not 60 left for the garbage collector).
+    A browser that cannot make WebP from a canvas (WebKit answers with a PNG, on a Mac and on an iPhone) stops at page 1 with its message
+    and keeps nothing: there the check is that it says so, leaves no half lesson and still has not made a canvas per page."""
+    ctx, pg = new_page(browser, 390, 844)
+    ctx.add_init_script(COUNT_CANVASES)
+    open_add_lesson(pg)
+    webp = pg.evaluate("() => new Promise((r) => { const c = document.createElement('canvas'); c.width = 4; c.height = 4; c.toBlob((b) => r(b && b.type), 'image/webp', 0.8); })") == "image/webp"
+    pick_pdf(pg, SIXTY, "Sáu mươi trang", 60)
+    pg.get_by_role("button", name="Thêm vào khóa").click()
+    if webp:
+        pg.get_by_role("dialog", name="Thêm bài").wait_for(state="detached", timeout=170000)
+        pg.wait_for_timeout(900)
+        check("PDF · 60 trang" in text(pg), f"{name}: 60 pages, the lesson is added")
+    else:
+        pg.get_by_role("alert").filter(has_text="chưa tạo được ảnh trang").wait_for(timeout=20000)
+        check(True, f"{name}: no WebP from a canvas here, so it says so on page 1 (Dùng Chrome hoặc Edge)")
+        check(not unsaved(pg), f"{name}: and holds nothing back")
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(1000)
+        check("Sáu mươi trang" not in text(pg) and pg.locator("li[data-align-group=coach-lessons]").count() == 0, f"{name}: no half lesson is left")
+    made = pg.evaluate("() => window.__canvases")
+    check(made <= 3, f"{name}: the pages were drawn on {made} canvas(es), not one each")
+    ctx.close()
+
+
 def misc(browser):
     ctx, pg = new_page(browser)
     pg.goto(BASE + "/documents", wait_until="networkidle")
@@ -320,6 +454,10 @@ def run(browser):
     learner_flow(browser, 1440, 900, False)
     coach_flow(browser, 390, 844)
     coach_flow(browser, 1440, 900)
+    stop_upload_flow(browser)
+    retry_flow(browser)
+    written_lesson_marks(browser)
+    sixty_pages(browser, "chromium")
     misc(browser)
 
 
@@ -329,6 +467,16 @@ with sync_playwright() as p:
         run(b)
     finally:
         b.close()
+    # Safari counts canvas memory per tab (and an iPhone refuses new canvases after a few dozen big ones): the same 60 pages on WebKit
+    try:
+        w = p.webkit.launch()
+    except Exception as err:  # the browser is not installed on this machine
+        print(f"[SKIP] webkit is not installed ({str(err).splitlines()[0][:80]}): the 60-page check ran on Chromium only")
+    else:
+        try:
+            sixty_pages(w, "webkit")
+        finally:
+            w.close()
 
 print(f"\n{len(problems)} problem(s)")
 for m in problems:
