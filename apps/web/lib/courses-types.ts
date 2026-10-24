@@ -1,5 +1,5 @@
 /**
- * The shapes and the refusal of the courses API, shared by the live client (lib/courses.ts) and the mock (lib/courses-mock.ts).
+ * The shapes and the refusal of the courses API, shared by the live client (lib/courses.ts) and the mock (lib/mock/courses-mock.ts).
  */
 import type { Level, Role } from "./coaching-link";
 import type { CourseAccess, CourseDetail, CourseLock, CourseSummary, LessonView } from "./course-logic";

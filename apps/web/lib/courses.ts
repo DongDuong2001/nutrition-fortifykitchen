@@ -1,12 +1,11 @@
 /**
  * Khoá học through the Go API (docs/07 §2.14, apps/api/internal/courses, migration 000022). The learner's calls (list, open, a lesson,
  * a page, progress) and the coach's (create, edit, reorder, upload pages, codes) are one `CoursesApi`: live mode talks to the server,
- * which decides access; mock mode (demo, the gates) keeps the same courses in this browser (lib/courses-mock.ts) under the same rules.
+ * which decides access; mock mode (demo, the gates) keeps the same courses in this browser (lib/mock/courses-mock.ts) under the same rules.
  */
 import { apiFetch } from "./api-client";
 import { isLiveMode } from "./api-mode";
 import type { CourseLock, CourseSummary } from "./course-logic";
-import { mockCoursesApi } from "./courses-mock";
 import { CoursesError, type CourseCode, type CourseViewer, type CoursesApi } from "./courses-types";
 
 export * from "./courses-types";
@@ -86,14 +85,28 @@ export function onProgressSaved(cb: () => void): () => void {
   return () => void saved.delete(cb);
 }
 
+/**
+ * The mock, read on the first call: its sample courses are ~600 lines of demo data that a live build must not load (a live build also
+ * swaps the module for an empty stand-in, next.config.ts), so nothing here imports it up front. Every method waits for it.
+ */
+function lazyMockApi(viewer: CourseViewer): CoursesApi {
+  let loaded: Promise<CoursesApi> | undefined;
+  const mock = () => (loaded ??= import("./mock/courses-mock").then((m) => m.mockCoursesApi(viewer)));
+  return new Proxy({} as CoursesApi, {
+    get: (_target, name) => (name === "then" ? undefined : (...args: unknown[]) => mock().then((api) => (api[name as keyof CoursesApi] as (...a: unknown[]) => unknown)(...args))),
+  });
+}
+
 /** The API for this build: the server in live mode, this browser's mock otherwise. `viewer` only matters to the mock. */
 export function coursesApi(viewer: CourseViewer): CoursesApi {
-  const api = isLiveMode() ? liveApi() : mockCoursesApi(viewer);
-  return {
-    ...api,
-    async progress(courseId, lessonId, body) {
-      await api.progress(courseId, lessonId, body);
-      saved.forEach((cb) => cb());
-    },
-  };
+  const api = isLiveMode() ? liveApi() : lazyMockApi(viewer);
+  return new Proxy(api, {
+    get: (target, name, receiver) =>
+      name === "progress"
+        ? async (courseId: string, lessonId: string, body: { lastPage: number; completed?: boolean }) => {
+            await target.progress(courseId, lessonId, body);
+            saved.forEach((cb) => cb());
+          }
+        : Reflect.get(target, name, receiver),
+  });
 }

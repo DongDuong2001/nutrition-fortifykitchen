@@ -23,7 +23,7 @@ beforeEach(async () => {
     removeItem: (k: string) => void store.delete(k),
   } as Storage;
   // Each test starts from the samples: the module keeps its state for the page view, so reload it
-  (await import("../courses-mock")).resetMockCourses();
+  (await import("../mock/courses-mock")).resetMockCourses();
 });
 
 describe("the library never needs access; opening does", () => {
@@ -80,7 +80,7 @@ describe("a code opens one course, only while it is live", () => {
     const saved = JSON.parse(store.get("h1t_mock_courses_v1") as string);
     for (const c of saved.codes) c.expiresAt = new Date(Date.now() - 1000).toISOString();
     store.set("h1t_mock_courses_v1", JSON.stringify(saved));
-    (await import("../courses-mock")).resetMockCourses();
+    (await import("../mock/courses-mock")).resetMockCourses();
     expect((await refusal(learner().open("c-hit1set", "HKX7M2PB4D"))).kind).toBe("bad-code");
   });
 

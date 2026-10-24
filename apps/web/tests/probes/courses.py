@@ -7,7 +7,7 @@ the button), adds a written lesson, reorders, makes a code; a learner opens the 
 the watermark. /documents redirects; Cài đặt no longer lists Tài liệu.
 Screenshots: .screenshots/courses/*.png (390×844 and 1440×900). Run with: ALIGN_BASE_URL=http://localhost:3120 npm run probe -- tests/probes/courses.py
 """
-# PROBE_COVERS: app/(app)/explore/documents/** app/(app)/documents/** components/courses/** components/explore/courses-carousel.tsx hooks/use-courses.ts lib/courses.ts lib/courses-mock.ts lib/course-logic.ts lib/pdf-pages.ts
+# PROBE_COVERS: app/(app)/explore/documents/** app/(app)/documents/** components/courses/** components/explore/courses-carousel.tsx hooks/use-courses.ts lib/courses.ts lib/mock/courses-mock.ts lib/course-logic.ts lib/pdf-pages.ts
 import os
 import re
 import sys

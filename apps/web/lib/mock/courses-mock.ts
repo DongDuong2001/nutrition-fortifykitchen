@@ -1,10 +1,11 @@
 /**
  * Khoá học in mock mode (demo and the gates): the same courses, rules and refusals as the API (docs/07 §2.14) kept in this browser's
  * localStorage, shared by the accounts on it so a coach's code opens the course for a learner here. The sample courses are the design
- * boards' (design/courses). Live mode never imports the data below: lib/courses.ts picks this file only when the build is not live.
+ * boards' (design/courses). Live mode never loads the data below: lib/courses.ts imports this file only when the build is not live (dynamically), and a live build
+ * swaps it for lib/mock/live/courses-mock.ts (next.config.ts), so not one sample course ships to the browser.
  */
-import { currentAccountId } from "./auth-actions";
-import { canManageClients } from "./coaching-link";
+import { currentAccountId } from "../auth-actions";
+import { canManageClients } from "../coaching-link";
 import {
   completesAt,
   courseLock,
@@ -14,9 +15,9 @@ import {
   type CoursePart,
   type CourseSummary,
   type LessonView,
-} from "./course-logic";
-import { CoursesError, MAX_LESSON_PAGES, MAX_PAGE_BYTES, MAX_TEXT_BYTES, normalizeCode, type CourseCode, type CoursesApi, type CourseViewer } from "./courses-types";
-import { codeFromBytes, randomBytes } from "./mock-coach-server";
+} from "../course-logic";
+import { CoursesError, MAX_LESSON_PAGES, MAX_PAGE_BYTES, MAX_TEXT_BYTES, normalizeCode, type CourseCode, type CoursesApi, type CourseViewer } from "../courses-types";
+import { codeFromBytes, randomBytes } from "../mock-coach-server";
 
 const KEY = "h1t_mock_courses_v1";
 const PAGE_KEY = "h1t_mock_course_page_v1_";
