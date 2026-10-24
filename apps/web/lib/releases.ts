@@ -57,6 +57,11 @@ export const RELEASES: readonly Release[] = [
         title: "Tự tạo ngày ăn mẫu",
         body: "Ở Khám phá › Ngày ăn mẫu, chạm Tạo ngày ăn mẫu rồi thêm món vào từng bữa. Không cần ghi vào nhật ký trước.",
       },
+      {
+        icon: "bars",
+        title: "Xem vi chất khi tạo ngày ăn mẫu",
+        body: "Thẻ Tổng của ngày ăn mẫu có thêm tinh bột, đạm, chất béo, chất xơ, và mục Vi chất cho biết đạt bao nhiêu. Thử vài bộ bữa rồi so ngay, không cần ghi vào nhật ký.",
+      },
       { icon: "bars", title: "Kcal từ đạm, tinh bột, béo", body: "Chạm Tinh bột, Đạm hoặc Chất béo ở thẻ đen để xem số kcal từ nó và phần của nó trong tổng kcal. Chạm lần nữa để quay lại." },
       { icon: "select", title: "Món ăn có biểu tượng cho dễ tìm", body: "Mỗi món trong danh sách thêm món, ở Khám phá và trang món có biểu tượng, nhìn là nhận ra ngay." },
       { icon: "bars", title: "Thêm danh sách Giàu …", body: "Khám phá có thêm Giàu Zinc, Selenium, Phosphorus, Vitamin A, B6, B12, Folate, E và K, xếp theo lượng trong 100 g hoặc mỗi khẩu phần." },

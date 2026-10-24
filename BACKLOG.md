@@ -29,3 +29,4 @@ The core stays free: logging, barcode, the full nutrient report. Pro charges for
 
 ## Share image (from cc-47)
 - [ ] **Share image: draw anyway in the fallback face, measuring the height in that face** (today a picture whose fonts do not embed shows Không tạo được ảnh. Tải lại trang rồi thử lại.).
+- (Hao 24/10) Ngày ăn mẫu list: the saved-day cards get "x/N đạt" (vi chất) so days can be compared without opening each one.
