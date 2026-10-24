@@ -1,5 +1,6 @@
 import React from "react";
 import { MicroRow } from "@/components/home/nutrient-column";
+import { ExtraRow, GroupTitle, LevelSummary } from "@/components/nutrients/column-parts";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-title";
 import { formatAmount } from "@/lib/format";
@@ -65,38 +66,14 @@ export function TemplateMicros({
           <p className="m-0 p-4 text-cap leading-snug text-secondary">Thêm món vào các bữa để xem vi chất của cả ngày.</p>
         ) : (
           <>
-            <p data-template-summary className="m-0 flex flex-col gap-2 px-3 pb-2 pt-3 text-text">
-              <span className="block text-body-lg font-bold leading-none">
-                <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
-                  {summary.reached}/{summary.total}
-                </span>{" "}
-                đạt
-              </span>
-              {summary.lacking.length > 0 && (
-                <span className="text-sm leading-5">
-                  <span className="text-text/75">Thiếu nhiều nhất:</span> <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
-                </span>
-              )}
-            </p>
+            <LevelSummary summary={summary} />
             {groups.map((group) => (
               <section key={group.title} aria-label={group.title} className="flex flex-col">
-                <h3 className="relative m-0 p-3 font-display text-body-lg font-extrabold uppercase leading-5 tracking-[0.01em] text-text before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-divider before:content-['']">
-                  {group.title}
-                </h3>
+                <GroupTitle title={group.title} />
                 {group.ids.map((id) => {
                   const def = getNutrientDefinition(id);
                   if (!def) return null;
-                  if (isExtra(id)) {
-                    const amount = extras[id] ?? null;
-                    return (
-                      <div key={id} data-align-group="home-nutrient" data-extra className="flex min-h-11 items-center justify-between gap-2 px-3 py-1">
-                        <span className="min-w-0 break-words text-callout font-semibold leading-snug text-text">{def.name}</span>
-                        <span className="shrink-0 text-xs leading-tight text-secondary tabular-nums">
-                          {amount === null ? "chưa có dữ liệu" : `${formatAmount(amount, def.unit)} ${def.unit}`}
-                        </span>
-                      </div>
-                    );
-                  }
+                  if (isExtra(id)) return <ExtraRow key={id} name={def.name} unit={def.unit} amount={extras[id] ?? null} />;
                   return <MicroRow key={id} id={id} name={def.name} unit={def.unit} value={values.nutrients[id] ?? null} target={targets[id] ?? null} />;
                 })}
               </section>

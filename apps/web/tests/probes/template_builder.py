@@ -112,7 +112,7 @@ def run(browser):
     check(diary_count(pg) == logged, f"nothing went into the diary ({diary_count(pg)} = {logged})")
     total_before = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
     # Vi chất: the Level's own list with "x/N đạt", the macros under the kcal
-    summary = pg.locator("[data-template-summary]").first.inner_text() if pg.locator("[data-template-summary]").count() else ""
+    summary = pg.locator("[data-level-summary]").first.inner_text() if pg.locator("[data-level-summary]").count() else ""
     counts = re.search(r"(\d+)/(\d+)\s*đạt", summary)
     rows = pg.locator("[data-nutrient-row]").count()
     check(counts is not None and int(counts.group(2)) == 22 and rows == 22, f"Vi chất counts and lists all 22 whatever the Level ({summary!r}, {rows} rows)")
