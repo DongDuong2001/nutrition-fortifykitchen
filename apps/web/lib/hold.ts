@@ -1,6 +1,6 @@
 /**
- * Press and hold (Job A, hero hold): how long and how far a finger may move. The same hold a meal row uses for the edit screen
- * (components/home/food-list.tsx LONG_PRESS_MS / MOVE_LIMIT_PX); a move past the limit is a scroll, never a hold.
+ * Press and hold: how long and how far a finger may move. The one hold of the app, the hero's macros and a meal row (components/home/
+ * food-list.tsx) both use it; a move past the limit is a scroll, never a hold.
  */
 export const HOLD_MS = 500;
 export const HOLD_MOVE_PX = 10;

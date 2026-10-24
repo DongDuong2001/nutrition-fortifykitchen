@@ -7,6 +7,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { kcalLabel } from "@/lib/kcal";
 import { portionLabel, type HomeEntry, type HomeMeal } from "@/lib/home";
+import { moveTargets } from "@/lib/multi-select";
 import type { MealTargetSheet as MealTargetSheetType } from "./select-mode";
 
 /**
@@ -19,11 +20,14 @@ export function FoodMenuSheet({
   onClose,
   onDelete,
   onMove,
+  meals,
 }: {
   entry: HomeEntry | null;
   onClose: () => void;
   onDelete: (entry: HomeEntry) => void;
   onMove: (entry: HomeEntry, slot: HomeMeal["slot"]) => void;
+  /** The meals the day shows (Trước tập among them when it has a food): Chuyển sang bữa… lists them in that order */
+  meals: readonly Pick<HomeMeal, "slot" | "label">[];
 }) {
   const router = useRouter();
   const [shown, setShown] = useState<HomeEntry | null>(entry);
@@ -34,6 +38,8 @@ export function FoodMenuSheet({
   useEffect(() => {
     if (entry && !Picker) void import("./select-mode").then((m) => setPicker(() => m.MealTargetSheet));
   }, [entry, Picker]);
+
+  const targets = moveTargets(meals);
 
   // Drawn on the body: the list card has its own clip and its day slides, and a sheet is fixed to the screen
   const [mounted, setMounted] = useState(false);
@@ -80,7 +86,8 @@ export function FoodMenuSheet({
           title={`Chuyển ${shown.name} sang`}
           description={`${portionLabel(shown)} · ${kcalLabel(shown.kcal)}`}
           withKeep={false}
-          initial={shown.slot !== "pre_workout" ? shown.slot : "breakfast"}
+          meals={targets}
+          initial={targets.some((m) => m.id === shown.slot) ? shown.slot : "breakfast"}
           confirmLabel="Chuyển"
           onConfirm={(target) => {
             if (target === "keep") return;

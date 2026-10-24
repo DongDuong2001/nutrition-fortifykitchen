@@ -5,6 +5,7 @@ import {
   chosenEntries,
   chosenKcal,
   copyHomeEntries,
+  moveTargets,
   ddMm,
   mealFullySelected,
   pastCopySubtitle,
@@ -173,5 +174,29 @@ describe("delete and move several entries", () => {
       ["c", "lunch"],
       ["d", "snack"],
     ]);
+  });
+});
+
+describe("moveTargets: the meals the ⋯ menu's Chuyển sang bữa… offers (review 24/10)", () => {
+  const day = (...slots: Array<[HomeEntry["slot"], string]>) => slots.map(([slot, label]) => ({ slot, label }));
+  const four = day(["breakfast", "Sáng"], ["lunch", "Trưa"], ["snack", "Bữa phụ"], ["dinner", "Tối"]);
+  const five = day(["breakfast", "Sáng"], ["lunch", "Trưa"], ["pre_workout", "Trước tập"], ["snack", "Bữa phụ"], ["dinner", "Tối"]);
+
+  it("a day that shows Trước tập offers it, in the day's own order, so a food can be moved into it", () => {
+    expect(moveTargets(five)).toEqual([
+      { id: "breakfast", label: "Sáng" },
+      { id: "lunch", label: "Trưa" },
+      { id: "pre_workout", label: "Trước tập" },
+      { id: "snack", label: "Bữa phụ" },
+      { id: "dinner", label: "Tối" },
+    ]);
+  });
+
+  it("a day without it offers the four meals, as Chọn nhiều món does", () => {
+    expect(moveTargets(four)).toEqual(TARGET_MEALS.map((m) => ({ id: m.id, label: m.label })));
+  });
+
+  it("Chọn nhiều món's own targets stay the four (Trước tập is not a copy target)", () => {
+    expect(TARGET_MEALS.map((m) => m.id)).toEqual(["breakfast", "lunch", "snack", "dinner"]);
   });
 });

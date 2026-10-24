@@ -19,10 +19,8 @@ import { Expand } from "@/components/ui/expand";
 import { useCoarsePointer, useRowSwipe } from "@/lib/use-row-swipe";
 import { SWIPE_ACTION_PX } from "@/lib/row-swipe";
 import { wasSwipedAway } from "@/lib/row-swipe-open";
+import { HOLD_MOVE_PX, HOLD_MS } from "@/lib/hold";
 import { FoodMenuSheet } from "./food-menu-sheet";
-
-const LONG_PRESS_MS = 500;
-const MOVE_LIMIT_PX = 10;
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
@@ -141,13 +139,13 @@ function FoodRow({
           } else {
             router.push(`/entry/${entry.id}`);
           }
-        }, LONG_PRESS_MS);
+        }, HOLD_MS);
       }}
       onPointerMove={(e) => {
         if (swipeable) sw.onPointerMove(e);
         if (drag.onPointerMove(e)) return;
         const o = origin.current;
-        if (o && Math.hypot(e.clientX - o.x, e.clientY - o.y) > MOVE_LIMIT_PX) cancel();
+        if (o && Math.hypot(e.clientX - o.x, e.clientY - o.y) > HOLD_MOVE_PX) cancel();
       }}
       onPointerUp={(e) => {
         if (swipeable) sw.onPointerUp(e);
@@ -522,6 +520,7 @@ export function FoodList({
           onClose={() => setMenuEntry(null)}
           onDelete={(e) => deleteEntries([e.id], dayKey)}
           onMove={(e, slot) => onMoveFood?.(e.id, slot)}
+          meals={meals}
         />
       )}
       {anyMissing && (

@@ -71,6 +71,21 @@ def wrap_buttons(pg, entry_id):
     return w.locator("button").nth(0), w.locator("button").nth(1)  # ⋯ (left), Xóa (right)
 
 
+def open_move(pg, cdp, eid):
+    """Swipe the food right, tap its ⋯, Chuyển sang bữa…: the meal picker."""
+    row = pg.locator(f"button[data-entry-id='{eid}']")
+    row.scroll_into_view_if_needed()
+    pg.wait_for_timeout(300)
+    swipe(pg, cdp, row, 40)
+    more, _ = wrap_buttons(pg, eid)
+    mb = more.bounding_box()
+    pg.touchscreen.tap(mb["x"] + mb["width"] / 2, mb["y"] + mb["height"] / 2)
+    pg.wait_for_timeout(700)
+    pg.locator("[role=dialog]").filter(visible=True).first.get_by_role("button", name=re.compile("Chuyển sang bữa")).click()
+    pg.wait_for_timeout(700)
+    return pg.locator("[role=dialog]").filter(visible=True).first
+
+
 def toast(pg):
     t = pg.locator("[role=status]").filter(has_text=re.compile("Đã xóa|Đã xóa"))
     return re.sub(r"\s+", " ", t.first.inner_text()) if t.count() else ""
@@ -141,6 +156,24 @@ def run(browser):
     in_dinner = pg.locator(f"section[data-meal-slot=dinner] button[data-entry-id='{eid}']").count()
     check(in_dinner == 1, "390: Chuyển sang bữa… moves the food to Bữa tối")
     pg.screenshot(path=str(SHOTS / "390-5-moved.png"))
+
+    # 3b. Trước tập (the sample day shows it): the picker lists it in the day's order and starts on the food's own meal;
+    # a food can be moved into it and out of it, as the hold-and-drag does (review 24/10)
+    picker = open_move(pg, cdp, eid)
+    radios = [re.sub(r"\s+", " ", t).strip() for t in picker.get_by_role("radio").all_inner_texts()]
+    check(radios == ["Sáng", "Trưa", "Trước tập", "Bữa phụ", "Tối"], f"390: the picker lists the day's meals in order, Trước tập among them ({radios})")
+    check(picker.get_by_role("radio", name="Tối").get_attribute("aria-checked") == "true", "390: …and starts on the food's own meal (Tối)")
+    picker.get_by_role("radio", name="Trước tập").click()
+    picker.get_by_role("button", name="Chuyển", exact=True).click()
+    pg.wait_for_timeout(1200)
+    check(pg.locator(f"section[data-meal-slot=pre_workout] button[data-entry-id='{eid}']").count() == 1, "390: a food moves into Trước tập")
+    picker = open_move(pg, cdp, eid)
+    check(picker.get_by_role("radio", name="Trước tập").get_attribute("aria-checked") == "true", "390: a food in Trước tập opens the picker on Trước tập, not on Sáng")
+    pg.screenshot(path=str(SHOTS / "390-5b-picker-pre-workout.png"))
+    picker.get_by_role("radio", name="Trưa").click()
+    picker.get_by_role("button", name="Chuyển", exact=True).click()
+    pg.wait_for_timeout(1200)
+    check(pg.locator(f"section[data-meal-slot=lunch] button[data-entry-id='{eid}']").count() == 1, "390: …and out of Trước tập into Trưa")
 
     # 4. a long right swipe opens the menu at once, the row is back
     row = pg.locator(f"button[data-entry-id='{eid}']")
