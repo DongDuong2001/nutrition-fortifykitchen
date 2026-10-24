@@ -24,6 +24,7 @@ import { SHEET_EXIT_MS } from "@/components/ui/sheet";
 import { RecipeBuilder, useRecipeDraft } from "@/components/foods/recipe-builder";
 import { draftToRecipe, recipeDraftFromFood, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
 import { getRecipe, saveRecipe } from "@/lib/recipe-store";
+import { cue } from "@/lib/cue";
 import { useBack } from "@/hooks/use-back";
 import { markUsed } from "@/lib/onboarding-store";
 import { setPresent } from "@/lib/tour-bus";
@@ -95,6 +96,7 @@ function CreateFoodInner() {
       setRecipeSaveError("Không lưu được món vào máy này. Bộ nhớ đầy hoặc đang bị chặn. Thử lại sau khi giải phóng dung lượng.");
       return;
     }
+    cue("save");
     markUsed("create-food");
     const meal = searchParams.get("meal");
     router.push(`/foods/${id}${meal ? `?meal=${meal}` : ""}`);
@@ -224,6 +226,7 @@ function CreateFoodInner() {
           setSaveError(err instanceof Error ? err.message : "Không lưu được thay đổi. Thử lại nhé.");
           return;
         }
+        cue("save");
         goBack();
         return;
       }

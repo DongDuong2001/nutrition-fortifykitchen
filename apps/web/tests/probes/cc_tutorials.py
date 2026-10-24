@@ -47,17 +47,17 @@ OLD_TIPS = [
 RETURNING = {"tourDone": True, "seen": OLD_TIPS + ["meal-focus", "hero-macro", "hero-hold", "food-swipe"], "used": ["share-day"], "whatsNewSeen": "2026-10-18b"}
 # The newest 8 of the joined tour on Hôm nay: 22a's seven that are on Hôm nay: V3's meal +, Ngày tập pill and Khám phá tab, feat/ngay-mau's two
 # (the ⋯ of the day, the Chép ngày ăn mẫu pill, which is the meal headers when the day has food) and custom-food-nutrients' + Thêm vi chất khác
-# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's four (hero-hold: Giữ để xem món nào góp vào; own-food-menu: Sửa hoặc xóa món của bạn, the Khám phá tab; food-swipe: Vuốt món để xóa hoặc mở tùy chọn; courses: Tài liệu thành khóa học, the Khám phá tab); 22a gives up its last three; 22a gives up its last one (Chia sẻ ngày ăn).
+# (the + of the bar) and share-spotlight's share button; So sánh món is in the portion panel; then 23a's five (feat/sound-goals's hero step last; hero-hold: Giữ để xem món nào góp vào; own-food-menu: Sửa hoặc xóa món của bạn, the Khám phá tab; food-swipe: Vuốt món để xóa hoặc mở tùy chọn; courses: Tài liệu thành khóa học, the Khám phá tab); 22a gives up its last three; 22a gives up its last one (Chia sẻ ngày ăn).
 # 21c's Minh Hào step (the oldest) is cut by the cap
 STEPS = [
     ("Thêm vào từng bữa", ["meal-add", "nav-add"]),
     ("Ngày tập", ["training-pill", "day-date"]),
     ("Nhóm món có màu", ["nav-explore"]),
-    ("Lưu cả ngày thành mẫu", ["day-menu", "home-hero"]),
     ("Giữ để xem món nào góp vào", ["hero-macro", "home-hero"]),
     ("Sửa hoặc xóa món của bạn", ["nav-explore"]),
     ("Vuốt món để xóa hoặc mở tùy chọn", ["home-food-list", "meal-pill"]),
     ("Tài liệu thành khóa học", ["explore-courses", "nav-explore"]),
+    ("Chúc mừng khi bạn đạt mục tiêu", ["home-hero", "home-food-list"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
@@ -214,14 +214,14 @@ def skipped(browser):
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
     check(ring_holds(pg, ["nav-explore"]) is not None, "skip: the ring is on the Khám phá tab")
     # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the Khám phá tab gone, step 3 has
-    # nothing: step 4 (Lưu cả ngày thành mẫu, the ⋯ of the day, or the hero) shows
+    # nothing: step 4 (Giữ để xem món nào góp vào, the macro, or the hero) shows
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"nav-explore\"], [data-tour=\"explore-minh-hao\"], [data-tour=\"dish-parts\"]').forEach(el => el.remove())")
     for _ in range(30):
         pg.wait_for_timeout(500)
         if "Mới · 4/8" in step_text(pg):
             break
-    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3 is skipped and the day's ⋯ shows ({step_text(pg)[:30]!r})")
-    check(ring_holds(pg, ["day-menu", "home-hero"]) is not None, "gone mid-step: the ring is on the day's ⋯")
+    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3 is skipped and the hero's step shows ({step_text(pg)[:30]!r})")
+    check(ring_holds(pg, ["hero-macro", "home-hero"]) is not None, "gone mid-step: the ring is on the hero's macro")
     shot(pg, "skipped")
     # With the ⋯, the hero, the template pill, the meal headers, the + of the bar, the share button and the macros gone too, the last steps have no target: the tour ends
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-menu\"], [data-tour=\"home-hero\"], [data-tour=\"day-template-pill\"], [data-tour=\"meal-pill\"], [data-tour=\"add-nutrient\"], [data-tour=\"nav-add\"], [data-tour=\"home-share\"], [data-tour=\"hero-macro\"], [data-tour=\"home-food-list\"]').forEach(el => el.removeAttribute('data-tour'))")

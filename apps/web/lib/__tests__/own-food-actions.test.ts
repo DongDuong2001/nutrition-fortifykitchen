@@ -5,6 +5,9 @@ import { deleteOwnFood } from "../own-food-actions";
 import { apiClient } from "../api-client";
 import { OWN_FOOD_HOLD_MS, OWN_FOOD_UNDO_MS } from "../own-foods";
 
+vi.mock("../cue", () => ({ cue: vi.fn() }));
+const { cue } = await import("../cue");
+
 // Job C: what one Xóa món does end to end, and what its Hoàn tác undoes.
 
 function memoryStorage(): Storage {
@@ -54,6 +57,22 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+});
+
+describe("deleteOwnFood sounds (feat/sound-goals)", () => {
+  it("Xóa món plays the remove cue, its Hoàn tác the undo cue", () => {
+    vi.mocked(cue).mockClear();
+    deleteOwnFood(mine, notifyUndo, notify);
+    expect(vi.mocked(cue).mock.calls).toEqual([["remove"]]);
+    toasts[0].undo();
+    expect(vi.mocked(cue).mock.calls).toEqual([["remove"], ["undo"]]);
+  });
+  it("a delete that did nothing (the food is not there) is silent", () => {
+    deleteOwnFood(mine, notifyUndo, notify);
+    vi.mocked(cue).mockClear();
+    expect(deleteOwnFood(mine, notifyUndo, notify)).toBe(false);
+    expect(cue).not.toHaveBeenCalled();
+  });
 });
 
 describe("deleteOwnFood", () => {

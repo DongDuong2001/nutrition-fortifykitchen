@@ -811,6 +811,16 @@
   --m-switch-shift: 16px;
   --m-tab-in: 200ms;
   --m-tab-shift: 12px;
+  /* feat/sound-goals: goal moments run 420–700 ms, once per goal per day (components/home, lib/goal-fx). --ease-pop is .m-level-land's overshoot. */
+  --m-goal-pop: 420ms;
+  --m-goal-sheen: 650ms;
+  --m-goal-ring: 700ms;
+  --m-goal-spark: 600ms;
+  --m-goal-hold: 2400ms;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Lesson done and code accepted (components/courses): the check draws in 200 ms, the shackle swings open in 220 ms */
+  --m-check-draw: 200ms;
+  --m-lock-open: 220ms;
 }
 
 @keyframes m-rise-in {
@@ -866,6 +876,156 @@
   to {
     opacity: 0;
     transform: scale(1.6);
+  }
+}
+
+/* Goal moments (feat/sound-goals; boards in design/sound-goals). One run each, added by lib/goal-fx and taken off on animationend; never on
+   the share image; nothing loops. T1: the percent pops and the bar gets one sheen. T2: + the hero's ring and the label. T3: + the column
+   counter's sparks and a staggered sheen down the column. */
+/* T1: the percent (or the column counter) takes the hit */
+.m-goal-pop {
+  display: inline-block;
+  animation: m-goal-pop var(--m-goal-pop) var(--ease-pop) backwards;
+}
+@keyframes m-goal-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* T1: one light band across the bar (the bar track already clips: overflow-hidden). The track holds only its fill, no absolute child, so being
+   relative for the run moves nothing; keeping it off the track otherwise leaves every other bar of the app pixel-for-pixel as it was. */
+.m-goal-sheen {
+  position: relative;
+}
+.m-goal-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 25%, rgb(255 255 255 / 0.8) 50%, transparent 75%);
+  transform: translateX(-100%);
+  pointer-events: none;
+  animation: m-goal-sheen var(--m-goal-sheen) var(--ease-out) var(--m-goal-delay, 120ms) 1 both;
+}
+@keyframes m-goal-sheen {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+/* T2: one sky ring leaves the hero card (Level-up rings twice in cobalt on the badge; this is once, sky, on the card) */
+.m-goal-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--color-sky);
+  opacity: 0;
+  pointer-events: none;
+  animation: m-goal-ring var(--m-goal-ring) var(--ease-out) 80ms 1 backwards;
+}
+@keyframes m-goal-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+/* T2 and T3: the label that says what was reached glides in like a SwitchGlide (80 ms out, 200 ms in) */
+.m-goal-label {
+  animation: m-goal-label 200ms var(--ease-out) 80ms backwards;
+}
+@keyframes m-goal-label {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes m-goal-fade {
+  from {
+    opacity: 0;
+  }
+}
+/* Lesson done: the check draws in (its path carries pathLength="1"); backwards, so once the class is off the path is whole */
+.m-check-draw path {
+  stroke-dasharray: 1;
+  animation: m-check-draw var(--m-check-draw) var(--ease-out) backwards;
+}
+@keyframes m-check-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+/* Lesson done: the success ring is an overlay that fades over the ink ring, so box-shadow itself never animates. In 160 ms when marked, out in 120 ms when unmarked. */
+.m-done-ring {
+  position: relative;
+}
+.m-done-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--color-success);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--m-fade) var(--ease-out);
+}
+.m-done-ring[data-done]::before {
+  opacity: 1;
+  transition-duration: var(--m-press);
+}
+/* Code accepted: the shackle is open (rotated around its left leg) and swings from shut; the lock's state pill is the tile's */
+.m-lock-open .m-shackle {
+  transform-box: view-box;
+  transform-origin: 8px 11px;
+  transform: rotate(-24deg);
+  animation: m-lock-open var(--m-lock-open) var(--ease-pop) backwards;
+}
+@keyframes m-lock-open {
+  from {
+    transform: none;
+  }
+}
+/* T3: ten sparks out of the column counter, in a layer beside the card (lib/goal-fx spawnSparks) */
+.m-goal-sparks {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.m-goal-sparks > i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--spark, var(--color-cobalt));
+  opacity: 0;
+  animation: m-goal-spark var(--m-goal-spark) var(--ease-out) var(--spark-delay, 60ms) 1 backwards;
+}
+@keyframes m-goal-spark {
+  from {
+    opacity: 1;
+    transform: rotate(var(--a)) translateX(4px) scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(var(--a)) translateX(var(--d, 44px)) scale(1);
   }
 }
 
@@ -1343,6 +1503,27 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-level-land,
   .m-level-land::after {
     animation: none;
+  }
+  /* Goal moments: nothing scales, slides or flies; the label fades in 120 ms; sound and haptics follow their own switches */
+  .m-goal-pop,
+  .m-goal-sheen::after,
+  .m-goal-ring::after,
+  .m-goal-sparks > i {
+    animation: none;
+  }
+  .m-goal-sparks {
+    display: none;
+  }
+  .m-goal-label {
+    animation: m-goal-fade 120ms var(--ease-out) backwards;
+  }
+  /* Lesson done and code accepted: the check is whole, the shackle shows open with no swing, the ring only fades */
+  .m-check-draw path,
+  .m-lock-open .m-shackle {
+    animation: none;
+  }
+  .m-done-ring::before {
+    transition: opacity var(--m-fade) var(--ease-out);
   }
   .m-sheet,
   .m-scrim,

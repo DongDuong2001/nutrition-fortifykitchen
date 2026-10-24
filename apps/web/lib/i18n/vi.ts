@@ -35,6 +35,8 @@ export const vi = {
   "settings.app.tips.hint": "Bật lại để xem mẹo lần đầu",
   "settings.app.haptics": "Rung khi chạm",
   "settings.app.haptics.hint": "Rung nhẹ khi lưu, xóa hay hoàn tác",
+  "settings.app.sound": "Âm thanh",
+  "settings.app.sound.hint": "Khi thêm món và khi đạt mục tiêu",
   "settings.app.language": "Ngôn ngữ",
   "settings.app.language.vi": "Tiếng Việt",
   "settings.app.language.en": "English",

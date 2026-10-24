@@ -36,7 +36,7 @@ describe("motion classes", () => {
   });
 
   it.each(classes.filter((c) => !NAMES_ONLY.includes(c)))(".%s has a reduced-motion rule", (name) => {
-    expect(reduced).toMatch(new RegExp(`\\.${name}[\\s,{.\\[]`));
+    expect(reduced).toMatch(new RegExp(`\\.${name}[\\s,{.\\[:]`));
   });
 
   it("reduced motion: nothing moves; what fades takes 120 ms at most", () => {
@@ -51,7 +51,9 @@ describe("motion classes", () => {
     const frames = [...css.matchAll(/@keyframes ([a-z-]+) \{([\s\S]*?)\n\}/g)];
     for (const [, name, body] of frames) {
       const props = [...body.matchAll(/^\s*([a-z-]+):/gm)].map((m) => m[1]);
-      for (const prop of props) expect([name, prop]).toEqual([name, expect.stringMatching(/^(transform|opacity)$/)]);
+      // The check's draw-in is a stroke-dashoffset: one named exception (as .m-bar has for its colour), on a path no layout depends on
+      const allowed = name === "m-check-draw" ? /^(transform|opacity|stroke-dashoffset)$/ : /^(transform|opacity)$/;
+      for (const prop of props) expect([name, prop]).toEqual([name, expect.stringMatching(allowed)]);
     }
     for (const [selector, body] of rules(motion)) {
       const props = decl(body, "transition").flatMap((t) => t.split(",").map((p) => p.trim().split(/\s+/)[0]));
@@ -331,5 +333,52 @@ describe("glide tokens", () => {
       ["components/overview/overview-frame.tsx", /<EnterGlide id=\{current\}/],
     ];
     for (const [file, pattern] of uses) expect([file, pattern.test(readFileSync(path.join(ROOT, file), "utf8"))]).toEqual([file, true]);
+  });
+});
+
+// feat/sound-goals: the goal moments (T1 pop and sheen, T2 ring and label, T3 sparks) live inside the motion section.
+describe("goal moments", () => {
+  it("are motion classes with a reduced rule each, the pseudo-element ones included", () => {
+    expect(classes).toEqual(expect.arrayContaining(["m-goal-pop", "m-goal-sheen", "m-goal-ring", "m-goal-label", "m-goal-sparks"]));
+    expect(reduced).toMatch(/\.m-goal-sheen::after/);
+    expect(reduced).toMatch(/\.m-goal-ring::after/);
+  });
+  it("reduced motion: no pop, sheen, ring or sparks; the label fades in 120 ms (m-goal-fade)", () => {
+    expect(reduced).toMatch(/\.m-goal-sparks \{\s*display: none;/);
+    expect(reduced).toMatch(/\.m-goal-label \{\s*animation: m-goal-fade 120ms var\(--ease-out\) backwards;/);
+    expect(css).toMatch(/@keyframes m-goal-fade \{\s*from \{\s*opacity: 0;/);
+  });
+  it("run 420 to 700 ms, with the overshoot of .m-level-land, from tokens", () => {
+    expect(motion).toMatch(/--m-goal-pop: 420ms;/);
+    expect(motion).toMatch(/--m-goal-sheen: 650ms;/);
+    expect(motion).toMatch(/--m-goal-ring: 700ms;/);
+    expect(motion).toMatch(/--ease-pop: cubic-bezier\(0\.34, 1\.56, 0\.64, 1\);/);
+    expect(main).toMatch(/\.m-goal-pop \{\s*display: inline-block;\s*animation: m-goal-pop var\(--m-goal-pop\) var\(--ease-pop\) backwards;/);
+  });
+  it("move only transform and opacity, once, and add no layout of their own", () => {
+    for (const name of ["m-goal-pop", "m-goal-sheen", "m-goal-ring", "m-goal-label", "m-goal-spark"]) {
+      const body = css.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?)\\n\\}`))?.[1] ?? "";
+      expect(body).not.toBe("");
+      for (const [, prop] of body.matchAll(/^\s*([a-z-]+):/gm)) expect([name, prop]).toEqual([name, expect.stringMatching(/^(transform|opacity)$/)]);
+    }
+    expect(main).not.toMatch(/\.m-goal-[a-z-]+[^{]*\{[^}]*animation:[^;}]*infinite/);
+  });
+
+  // Lesson done and code accepted (components/courses), with the lead fixes that keep them inside the rules above
+  it("the check draws in from stroke-dashoffset 1 over a stroke-dasharray of 1 (an offset does nothing without a dash), with a backwards fill (whole once the class is off), from tokens", () => {
+    expect(motion).toMatch(/--m-check-draw: 200ms;/);
+    expect(main).toMatch(/\.m-check-draw path \{\s*stroke-dasharray: 1;\s*animation: m-check-draw var\(--m-check-draw\) var\(--ease-out\) backwards;/);
+    expect(css).toMatch(/@keyframes m-check-draw \{\s*from \{\s*stroke-dashoffset: 1;/);
+    expect(main).not.toMatch(/m-check-draw[^;]*forwards/);
+  });
+  it("the shackle is open in the base rule and swings from shut; the reduced rule is only animation: none (no transform in the reduced block)", () => {
+    expect(main).toMatch(/\.m-lock-open \.m-shackle \{[^}]*transform: rotate\(-24deg\);[^}]*animation: m-lock-open var\(--m-lock-open\) var\(--ease-pop\) backwards;/);
+    expect(css).toMatch(/@keyframes m-lock-open \{\s*from \{\s*transform: none;/);
+    expect(reduced).toMatch(/\.m-lock-open \.m-shackle \{\s*animation: none;\s*\}/);
+  });
+  it("the success ring is an overlay: opacity in 160 ms (--m-press) when marked, out in 120 ms (--m-fade), a reduced rule of its own", () => {
+    expect(main).toMatch(/\.m-done-ring::before \{[^}]*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
+    expect(main).toMatch(/\.m-done-ring\[data-done\]::before \{\s*opacity: 1;\s*transition-duration: var\(--m-press\);/);
+    expect(reduced).toMatch(/\.m-done-ring::before \{\s*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
   });
 });

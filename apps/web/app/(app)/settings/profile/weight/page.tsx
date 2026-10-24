@@ -14,6 +14,7 @@ import { formatNumber } from "@/lib/format";
 import { nutrientName } from "@/lib/nutrients";
 import { parseWeightKg, validateSetupDraft } from "@/lib/onboarding";
 import { profileToDraft, targetRangeText, targetsFor } from "@/lib/profile";
+import { cue } from "@/lib/cue";
 
 const STEP_KG = 0.1;
 
@@ -55,6 +56,7 @@ export default function WeightPage() {
     setError(message);
     if (message || weight === null) return;
     updateProfile({ weightKg: weight });
+    cue("save");
     router.push("/settings/profile");
   }
 

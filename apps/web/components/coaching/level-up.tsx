@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { MAX_LEVEL } from "@/lib/coaching-link";
+import { cueSound } from "@/lib/cue";
 import { haptic } from "@/lib/haptics";
 import { levelUpAnnouncement, levelUpReward, levelUpSubtitle, type LevelStep } from "@/lib/level-copy";
 import s from "./level-up.module.css";
@@ -166,6 +167,8 @@ export function LevelUp({ step, coachName, onClose }: { step: LevelStep; coachNa
   useEffect(() => {
     if (phase !== "land") return;
     const done = () => {
+      // The badge has landed, after the person's own ✕, Esc or "Xem chỉ số mới" (D-A11Y-04): the full chime, sound only (the hatch vibrated)
+      cueSound("full");
       // Back to where it came from; "Xem chỉ số mới" opens the explainer, which takes the focus itself
       if (!explainRef.current) document.querySelector<HTMLElement>("[data-header-level]")?.focus({ preventScroll: true });
       onClose(explainRef.current);

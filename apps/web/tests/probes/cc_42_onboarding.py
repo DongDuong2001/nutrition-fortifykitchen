@@ -114,6 +114,8 @@ def shot(pg, name):
 
 def targets_ok(pg, selector, label):
     """Every button and link inside `selector` is at least 44 px high (the + circle's 36 px disc sits in a 44 px button)."""
+    # A card or sheet that is still entering is scaled a little (a 44 px button reads 43,9): measure it once it has settled
+    pg.wait_for_function("(sel) => { const e = document.querySelector(sel); return !e || getComputedStyle(e).transform === 'none'; }", arg=selector, timeout=3000)
     small = pg.evaluate(
         """(sel) => [...document.querySelectorAll(sel + ' button, ' + sel + ' a, ' + sel + ' input')]
           .filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })

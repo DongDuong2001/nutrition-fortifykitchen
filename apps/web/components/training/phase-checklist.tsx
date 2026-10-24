@@ -3,7 +3,9 @@
 import React from "react";
 import { type TrainingCheckItem, type TrainingPhase } from "@/lib/training";
 import { IconButton } from "@/components/ui/icon-button";
+import { GoalCheck, GoalLabel } from "@/components/ui/goal-label";
 import { SectionHeader } from "@/components/ui/section-title";
+import type { DayDone } from "@/hooks/use-training-moment";
 
 // V3 Training: the salt rows and the fast-carb row carry their macro's colour (a dot before the name, the dose in text colour)
 function macroTone(id: string): { dot: string; text: string } | null {
@@ -26,6 +28,9 @@ export interface PhaseChecklistProps {
   readOnly?: boolean;
   variant?: "mobile" | "desktop";
   className?: string;
+  /** feat/sound-goals: Ngày tập done, on the phase whose tick completed the day */
+  dayDone?: DayDone | null;
+  onPopEnd?: () => void;
 }
 
 export function PhaseChecklist({
@@ -38,6 +43,8 @@ export function PhaseChecklist({
   readOnly = false,
   variant = "mobile",
   className = "",
+  dayDone = null,
+  onPopEnd,
 }: PhaseChecklistProps) {
   if (phases.length === 0) return null;
 
@@ -122,8 +129,26 @@ export function PhaseChecklist({
         return (
           <div key={ph.id} data-align-group={isDesktop ? undefined : "training-content"} className={sectionClass}>
             <div className="flex justify-between items-baseline pb-1">
-              <SectionHeader>{ph.name}</SectionHeader>
-              <span className={`font-semibold text-secondary tabular-nums ${isDesktop ? "text-sm" : "text-cap"}`}>
+              <SectionHeader>
+                {dayDone?.phaseId === ph.id ? (
+                  dayDone.text ? (
+                    <GoalLabel key={dayDone.key}>
+                      <GoalCheck size={16} />
+                      {dayDone.text}
+                    </GoalLabel>
+                  ) : (
+                    <GoalLabel key={dayDone.key} plain>
+                      {ph.name}
+                    </GoalLabel>
+                  )
+                ) : (
+                  ph.name
+                )}
+              </SectionHeader>
+              <span
+                onAnimationEnd={dayDone?.phaseId === ph.id && dayDone.pop ? onPopEnd : undefined}
+                className={`font-semibold text-secondary tabular-nums ${isDesktop ? "text-sm" : "text-cap"} ${dayDone?.phaseId === ph.id && dayDone.pop ? "m-goal-pop" : ""}`}
+              >
                 {completedCount} / {totalCount}
               </span>
             </div>

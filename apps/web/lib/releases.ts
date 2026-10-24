@@ -79,6 +79,12 @@ export const RELEASES: readonly Release[] = [
       { icon: "share", title: "Ảnh chia sẻ: tên bữa màu xanh như Hôm nay", body: "Tên các bữa trong ảnh chia sẻ giờ cũng màu xanh, giống ở màn Hôm nay." },
       // feat/food-swipe (Job I, overnight 23→24/10)
       { icon: "select", title: "Vuốt món để xóa hoặc mở tùy chọn", body: "Ở Hôm nay, vuốt món sang trái để xóa, sang phải để sửa, chuyển bữa hoặc xóa. Xóa nhầm thì bấm Hoàn tác." },
+      // feat/sound-goals (Hao 24/10): one item, one tour step on the hero; no tip (the switch is visible in Cài đặt)
+      {
+        icon: "home",
+        title: "Âm thanh và chúc mừng nhỏ khi đạt mục tiêu",
+        body: "Có âm thanh khi thêm món, và chúc mừng nhỏ ngay trên Hôm nay khi bạn đạt mục tiêu. Xong một bài học hay mở khóa một khóa học cũng có. Tắt ở Cài đặt › Âm thanh.",
+      },
     ],
     tour: [
       { target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." },
@@ -90,6 +96,7 @@ export const RELEASES: readonly Release[] = [
         title: "Tài liệu thành khóa học",
         body: "Ở Khám phá, mục Tài liệu giờ là các khóa học của HLV. Mở bằng mã hoặc khi bạn đủ Level, và app nhớ trang bạn đang đọc.",
       },
+      { target: "home-hero", fallback: "home-food-list", title: "Chúc mừng khi bạn đạt mục tiêu", body: "Đạt một mục tiêu là con số đó nhảy lên, kèm một tiếng nhẹ. Tắt ở Cài đặt › Âm thanh." },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item

@@ -40,15 +40,18 @@ export const NutrientColumn = memo(function NutrientColumn({
   /** Today only (cc-51 D4): a tapped nutrient opens the foods that add to it */
   onNutrient?: (id: string) => void;
   /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
-  summary?: { reached: number; total: number; lacking: string[] };
+  summary?: { reached: number; total: number; lacking: string[]; done?: boolean };
   /** C3: Chất xơ in its own section above the first group (not counted in x/N đạt), against the day's fibre target. A number,
    *  not an object, so the memoised column still skips a render when nothing changed. Left out: no Chất xơ row. */
   fiberTarget?: number | null;
 }) {
   return (
+    // feat/sound-goals: the card is overflow-hidden, so the ten sparks of Đủ chất fly in a layer beside it (lib/goal-fx), in this wrapper
+    <div className="relative flex w-[180px] flex-none self-start lg:w-80 lg:self-stretch">
     <aside
       aria-label="Vi chất"
-      className={`relative flex flex-none flex-col bg-card w-[180px] self-start overflow-hidden rounded-card lg:w-80 lg:self-stretch lg:border lg:border-card-border lg:shadow-card ${
+      data-fx="column"
+      className={`relative flex w-full flex-none flex-col bg-card overflow-hidden rounded-card lg:border lg:border-card-border lg:shadow-card ${
         selected ? "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[3px] before:bg-cobalt before:content-['']" : ""
       }`}
     >
@@ -56,7 +59,7 @@ export const NutrientColumn = memo(function NutrientColumn({
           Whole-pixel heights (a 40 px numeral line, 20 px text lines) keep the whole-row cut of the area clean. */}
       {summary && <LevelSummary summary={summary} />}
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
-      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "") + (fiberTarget !== undefined ? "+fiber" : "")}>
+      <ColumnScroll fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}${summary.done ? "d" : ""}` : "") + (fiberTarget !== undefined ? "+fiber" : "")}>
         {fiberTarget !== undefined && (
           <section aria-label="Chất xơ" className="flex shrink-0 flex-col">
             <MicroRow
@@ -94,6 +97,8 @@ export const NutrientColumn = memo(function NutrientColumn({
         </Link>
       </div>
     </aside>
+    <div data-fx="sparks" aria-hidden="true" className="pointer-events-none absolute inset-0 z-20" />
+    </div>
   );
 });
 
@@ -169,7 +174,7 @@ export function MicroRow({
           </span>
           <span className="text-cap leading-tight text-text/70 tabular-nums">{amount}</span>
         </span>
-        <span className="shrink-0 whitespace-nowrap font-condensed text-base font-extrabold leading-none text-text tabular-nums lg:text-[1.125rem]">
+        <span data-fx="pct" className="shrink-0 whitespace-nowrap font-condensed text-base font-extrabold leading-none text-text tabular-nums lg:text-[1.125rem]">
           {value === null ? "" : pctLabel(value, target)}
         </span>
       </div>

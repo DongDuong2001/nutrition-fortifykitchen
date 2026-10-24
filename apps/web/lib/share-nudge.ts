@@ -7,6 +7,8 @@ import { pctOf } from "./home";
  * tip showed, never with tips off. Pure.
  */
 export const SHARE_NUDGE_TEXT = "Hôm nay ăn khá đủ chất — chia sẻ nhé?";
+/** feat/sound-goals: the words after Đủ chất (T3), which replace the 80 % words on that add (same cap, same tips-off gate). */
+export const SHARE_FULL_TEXT = "Đủ chất hôm nay! Chia sẻ nhé?";
 export const SHARE_NUDGE_MS = 4000;
 const KCAL_PCT = 80;
 const LEVEL_PCT = 80;
@@ -36,4 +38,9 @@ export function dayWellFed({
 export function shareNudgeDue({ flags, todayIso, was, now }: { flags: OnboardingFlags; todayIso: string; was: boolean | null; now: boolean }): boolean {
   if (flags.tipsOff || !now || was !== false) return false;
   return flags.shareNudgeIso !== todayIso && flags.shareTipIso !== todayIso;
+}
+
+/** The toast's words: "full" after the Đủ chất moment, "well" for the 80 % day. */
+export function shareNudgeText(kind: "well" | "full"): string {
+  return kind === "full" ? SHARE_FULL_TEXT : SHARE_NUDGE_TEXT;
 }

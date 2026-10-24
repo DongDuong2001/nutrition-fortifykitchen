@@ -22,6 +22,16 @@ describe("the shared pieces", () => {
     expect(renderToStaticMarkup(<LevelSummary summary={{ reached: 22, total: 22, lacking: [] }} />)).not.toContain("Thiếu nhiều nhất");
   });
 
+  it("LevelSummary with `done` (Hôm nay only, feat/sound-goals): the line says Đủ chất hôm nay instead of Thiếu nhiều nhất; the builder passes none", () => {
+    const done = renderToStaticMarkup(<LevelSummary summary={{ reached: 22, total: 22, lacking: [], done: true }} />);
+    expect(done).toContain('data-fx="done-line"');
+    expect(done).toContain("Đủ chất hôm nay");
+    expect(done).not.toContain("Thiếu nhiều nhất");
+    const plain = renderToStaticMarkup(<LevelSummary summary={summary} />);
+    expect(plain).not.toContain("done-line");
+    expect(plain).toContain('data-fx="count"');
+  });
+
   it("GroupTitle: an h3 with the hairline; only a snapping column marks it as a row", () => {
     const plain = renderToStaticMarkup(<GroupTitle title="Khoáng chất" />);
     expect(plain).toMatch(/<h3[^>]*>Khoáng chất<\/h3>/);

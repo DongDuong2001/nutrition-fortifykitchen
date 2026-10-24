@@ -6,6 +6,7 @@ import { LevelBadge } from "@/components/profile/level-badge";
 import { toLevel } from "@/lib/coaching-link";
 import { dayMonth, progressText, segmentsOn, tileBackground, type CourseSummary } from "@/lib/course-logic";
 import { CheckGlyph, LockGlyph } from "@/components/courses/course-glyphs";
+import { GoalLabel } from "@/components/ui/goal-label";
 
 /** UI-RULES §6: 10 slanted segments (skewX −14°, 4 px apart), white filled and white 30 % empty, on a coloured tile. */
 export function ProgressSegments({ done, total }: { done: number; total: number }) {
@@ -32,13 +33,20 @@ const STATE_WORDS = { code: "Cần mã", level: "Mở ở", done: "Xong", learni
 const PILL = "inline-flex min-h-7 max-w-full flex-wrap items-center gap-x-1 self-start rounded-full bg-ink/20 px-2.5 py-0.5 text-cap font-semibold text-on-accent";
 
 /** `simple`: an open course says only "Đã mở" (the Khám phá carousel), not how far the user is. */
-export function StatePill({ course, simple = false, className = "" }: { course: CourseSummary; simple?: boolean; className?: string }) {
+export function StatePill({ course, simple = false, className = "", unlocking = false }: { course: CourseSummary; simple?: boolean; className?: string; unlocking?: boolean }) {
   const state = stateOf(course);
   const shown = simple && state !== "code" && state !== "level" ? "open" : state;
+  // feat/sound-goals: a code just accepted, on the code sheet's own tile: the shackle swings open and the word glides to "Đã mở"
   return (
-    <span className={`${PILL} ${className}`}>
+    <span className={`${PILL} ${unlocking ? "m-lock-open" : ""} ${className}`}>
       {shown === "code" ? <LockGlyph /> : shown !== "level" && !simple && <CheckGlyph size={14} />}
-      <span className="whitespace-nowrap">{STATE_WORDS[shown]}</span>
+      {unlocking ? (
+        <GoalLabel plain>
+          <span className="whitespace-nowrap">{STATE_WORDS.open}</span>
+        </GoalLabel>
+      ) : (
+        <span className="whitespace-nowrap">{STATE_WORDS[shown]}</span>
+      )}
       {/* The badge is the Level tag at pill size (13 px text, 20 px high), as the design board */}
       {shown === "level" && <LevelBadge level={toLevel(course.minLevel)} className="px-1.5! py-0.5! text-micro!" />}
     </span>

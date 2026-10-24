@@ -27,6 +27,8 @@ export interface AppSettings {
   installPrompt: InstallPromptState;
   /** "Rung khi chạm" (cc-51, Android): null until the user touches the switch (lib/haptics hapticsWanted) */
   haptics: boolean | null;
+  /** "Âm thanh" (feat/sound-goals): null until the user touches the switch (lib/sound soundWanted) */
+  sound: boolean | null;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -48,6 +50,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   onboarding: DEFAULT_FLAGS,
   installPrompt: DEFAULT_INSTALL_PROMPT,
   haptics: null,
+  sound: null,
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -82,6 +85,7 @@ export function loadSettings(storage: KeyValueStorage | null = accountStorage())
       onboarding: parseFlags(parsed.onboarding),
       installPrompt: normalizeInstallPrompt(parsed.installPrompt),
       haptics: typeof parsed.haptics === "boolean" ? parsed.haptics : null,
+      sound: typeof parsed.sound === "boolean" ? parsed.sound : null,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

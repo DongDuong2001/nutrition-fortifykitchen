@@ -21,7 +21,7 @@ Version 1 · 21/10/2026 · owner Hao · built from Apple's Human Interface Guide
 | D-PRIN-05 | **Flexibility.** Works by touch, keyboard and screen reader, at any text size, from 320 px to 1440 px wide. | auto + review |
 | D-PRIN-06 | **Simplicity is not minimalism.** Fewest steps and fewest words, but never hide what people need behind extra taps. | review |
 | D-PRIN-07 | **Craft.** Every control responds at touch-down. Scrolling stays at 60 fps. Icons align to the pixel. | auto + review |
-| D-PRIN-08 | **Delight comes from the other seven.** No confetti or decoration that delays the task. | review |
+| D-PRIN-08 | **Delight comes from the other seven.** No confetti or decoration that delays the task. Exception: the Đủ chất moment's 10 sparks (≤ 600 ms, once a day, never blocks). | review |
 
 ## 2 · Layout
 
@@ -83,7 +83,7 @@ Version 1 · 21/10/2026 · owner Hao · built from Apple's Human Interface Guide
 | D-MOT-01 | Motion has a purpose: it shows where something came from or went, or that an action landed. No motion for decoration. | review | ✅ |
 | D-MOT-02 | **Motion is never the only signal.** Every animated change also changes text, an icon or `aria-live`. | review | ✅ |
 | D-MOT-03 | **Never block input during an animation.** Every animation can be interrupted, and a tap mid-transition acts at once. | auto (probe) | ✅ |
-| D-MOT-04 | Feedback animations are short and precise (press 160 ms, sheets 300–350 ms; tokens in `globals.css`). | auto (`motion.test`) | ✅ |
+| D-MOT-04 | Feedback animations are short and precise (press 160 ms, sheets 300–350 ms; tokens in `globals.css`). Goal moments run 420–700 ms, once per goal per day, and never block. | auto (`motion.test`) | ✅ |
 | D-MOT-05 | Things people do all day (chips, rows, toggles) get minimal motion. | review | ✅ |
 | D-MOT-06 | Motion follows the gesture: a sheet that came up goes down, and back slides the opposite way to forward (`nav-direction`). | review | ✅ |
 | D-MOT-07 | Under `prefers-reduced-motion`, slides become fades, springs tighten (no bounce), and there is no scale, zoom or blur animation. | auto | ✅ |
@@ -138,6 +138,7 @@ Version 1 · 21/10/2026 · owner Hao · built from Apple's Human Interface Guide
 | D-FB-04 | Feedback reaches screen readers through `aria-live="polite"` and never steals focus. | auto | ✅ |
 | D-FB-05 | Errors appear next to the field or section, say what happened and how to fix it, and never blame the user. No "Oops", and no "chúng tôi" in errors. | review | ✅ |
 | D-FB-06 | When something cannot be done (offline, read-only day), say so and why, in place. | review | ✅ |
+| D-SND-01 | **Sound only answers the person's own tap** (an add, a delete, an undo, a save, a goal an add reached): never for errors, scrolling, typing, a sheet opening or anything the app does by itself. One switch (Cài đặt › Âm thanh, on by default); on iOS it follows the Ring/Silent switch (`audioSession` ambient), and an iPhone without that API starts off. | review | ✅ |
 
 ## 11 · Loading, empty and offline
 

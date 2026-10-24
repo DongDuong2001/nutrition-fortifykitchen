@@ -45,6 +45,7 @@ import {
   groupMeals,
   heroLabel,
   modeEntries,
+  pctOf,
   sumEntries,
   targetOf,
   toggleFood,
@@ -57,7 +58,9 @@ import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
 import { FoodList } from "./food-list";
 import { loadFlags, markShareNudgeDay, markUsed, onboardingDisabled } from "@/lib/onboarding-store";
-import { SHARE_NUDGE_TEXT, dayWellFed, shareNudgeDue } from "@/lib/share-nudge";
+import { columnSummary } from "@/lib/goal-moments";
+import { cue } from "@/lib/cue";
+import { dayWellFed, shareNudgeDue, shareNudgeText } from "@/lib/share-nudge";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
@@ -84,6 +87,7 @@ import {
 import { formatDayLabel } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
+import { useGoalMoment } from "./use-goal-moment";
 import { NutrientColumn } from "./nutrient-column";
 import type { HeroMacro } from "@/lib/macro-kcal";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -440,19 +444,20 @@ function HomeContent() {
   // Chia sẻ (lib/share-nudge). It waits until Hôm nay is on screen and the toast up now (an add's Hoàn tác) has gone.
   const dayValues = useMemo(() => valuesFromDay(day), [day]);
   const wellFed = dayWellFed({ kcal: dayValues.kcal, kcalTarget: day.calories.targetMin, values: dayValues.nutrients, targets: nutrientTargets, ids: countedIds });
-  const [nudgePending, setNudgePending] = useState(false);
+  // "full": the Đủ chất moment played, and its words replace the 80 % ones (one toast a day, whichever comes first)
+  const [nudgePending, setNudgePending] = useState<"well" | "full" | null>(null);
   useEffect(() => {
     if (!hydrated || isPast || !todayIso) return;
     const was = lastWellFed?.iso === viewIso ? lastWellFed.value : null;
     lastWellFed = { iso: viewIso, value: wellFed };
-    if (!onboardingDisabled() && shareNudgeDue({ flags: loadFlags(), todayIso, was, now: wellFed })) setNudgePending(true);
+    if (!onboardingDisabled() && shareNudgeDue({ flags: loadFlags(), todayIso, was, now: wellFed })) setNudgePending((kind) => kind ?? "well");
   }, [hydrated, isPast, todayIso, viewIso, wellFed]);
   const { toast } = useDiaryToast();
   useEffect(() => {
     if (!nudgePending || toast || pathname !== HOME_ROUTE || isPast || !todayIso) return;
-    setNudgePending(false);
+    setNudgePending(null);
     markShareNudgeDay(todayIso);
-    notify(SHARE_NUDGE_TEXT, "share");
+    notify(shareNudgeText(nudgePending), "share");
   }, [nudgePending, toast, pathname, isPast, todayIso, notify]);
   // feat/hero-macro-kcal: a macro tapped on the hero shows its kcal; a change of day or of the selected meal clears it
   const [heroMacro, setHeroMacro] = useState<HeroMacro | null>(null);
@@ -466,6 +471,23 @@ function HomeContent() {
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
   );
+  // feat/sound-goals: Chất xơ counts toward Đủ chất, so the column's slot reads it (RA2) and follows the numbers (RA3); today only
+  const columnCounts = useMemo(
+    () => (levelCounts && !isPast ? columnSummary(levelCounts, pctOf(shown.fiber, macroTargets.fiber)) : levelCounts),
+    [levelCounts, isPast, shown.fiber, macroTargets.fiber]
+  );
+  // The goal an add reached plays here once Hôm nay shows today and nothing is in the way (lib/goal-moments, §4)
+  const { heroMoment, announce } = useGoalMoment({
+    todayIso,
+    viewingToday: !isPast,
+    sheetOpen: isCalendarOpen || isSaveDayOpen || isPickerOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null || sourcesOf !== null,
+    selecting,
+    levelUpPlaying: levelUpPlaying !== null,
+    // After Đủ chất the share toast offers Chia sẻ, once a day, never with tips off (shareNudgeDue)
+    onPlayed: (moment) => {
+      if (moment.tier === 3 && todayIso && !onboardingDisabled() && shareNudgeDue({ flags: loadFlags(), todayIso, was: false, now: true })) setNudgePending("full");
+    },
+  });
   // cc-57: on the very first app load the frame and the hero come first, with a skeleton where the food list and the nutrient
   // column (the heavy part) follow in a second, low-priority render. Every later visit (a tab, Back) draws it all at once: a
   // first frame with an empty list was a blank frame. (The sheet over Hôm nay no longer remounts it, so + never redraws it.)
@@ -592,6 +614,7 @@ function HomeContent() {
     });
     if (!template) return;
     setTemplates([template, ...savedTemplates]);
+    cue("save");
     const totals = templateSaveSummary(template.meals, CATALOG_FOODS);
     notify(templateSavedMessage(template.name, totals.itemCount, totals.kcal));
   }
@@ -856,6 +879,10 @@ function HomeContent() {
           </div>
         )}
         <main className="relative mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+          {/* D-MOT-02: a goal that changes no label says so here ("Vitamin C đạt mục tiêu"); the hero's own h2 is aria-live for the rest */}
+          <p aria-live="polite" className="sr-only">
+            {announce}
+          </p>
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -872,6 +899,7 @@ function HomeContent() {
               setHeroMacro(m);
             }}
             onSources={isPast ? undefined : openMacroSources}
+            moment={heroMoment}
           />
           <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 ${
               selecting ? "mt-2" : "mx-3 mt-2 items-start gap-2 pb-4"
@@ -926,7 +954,7 @@ function HomeContent() {
                 values={shown}
                 extras={extras}
                 groups={groups}
-                summary={levelCounts}
+                summary={columnCounts}
                 fiberTarget={macroTargets.fiber}
                 targets={nutrientTargets}
                 selected={selected}

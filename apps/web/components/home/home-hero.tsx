@@ -3,6 +3,7 @@ import { formatAmount, formatRange } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelColor, getLevelLabel } from "@/lib/levels";
+import { GoalCheck, GoalLabel } from "@/components/ui/goal-label";
 import { LevelBar } from "@/components/ui/level-bar";
 import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
@@ -15,6 +16,12 @@ import { haptic } from "@/lib/haptics";
 const PILL = "m-on-ink-press -my-1.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-on-dark no-underline hover:text-sky";
 const PILL_FACE =
   "inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-muted-on-dark px-2 text-callout font-bold leading-none whitespace-nowrap";
+
+/** The hero label during a goal moment: `text` for 2,4 s, then the usual label glides back. `key` makes each run a new element. */
+export interface HeroMoment {
+  key: number;
+  text: string | null;
+}
 
 export interface HeroPill {
   key: string;
@@ -52,6 +59,7 @@ export function HomeHero({
   macro = null,
   onMacro,
   onSources,
+  moment = null,
 }: {
   label: string;
   pills: HeroPill[];
@@ -73,6 +81,8 @@ export function HomeHero({
   onMacro?: (macro: HeroMacro | null) => void;
   /** Job A: hold a macro (or right-click it), or "Món nào?" while one is picked, opens the foods behind it. Without it (a past day, the share image) there is no hold. */
   onSources?: (macro: HeroMacro) => void;
+  /** feat/sound-goals: the label a goal moment shows for 2,4 s (a check and the text), and the key of the glide back to the usual one */
+  moment?: HeroMoment | null;
 }) {
   const hold = useHold<HeroMacro>((m) => {
     haptic("longPress");
@@ -102,16 +112,30 @@ export function HomeHero({
       <section
         aria-label="Tổng kcal và dinh dưỡng đa lượng"
         data-tour="home-hero"
+        data-fx={share ? undefined : "hero"}
         // A tap on the card (not on one of its controls) clears a picked macro
         onClick={picked ? (e) => !(e.target as HTMLElement).closest("button, a") && onMacro?.(null) : undefined}
-        className={`mx-3 mt-2 flex flex-none flex-col gap-2 rounded-2xl ${share ? "" : "lg:mx-0"} bg-ink px-4 pt-3 pb-4 text-on-dark ${
+        className={`relative mx-3 mt-2 flex flex-none flex-col gap-2 rounded-2xl ${share ? "" : "lg:mx-0"} bg-ink px-4 pt-3 pb-4 text-on-dark ${
           selected ? "ring-2 ring-inset ring-sky" : ""
         }`}
       >
         {/* cc-64: with large text the pills wrap under the label instead of running past the card */}
         <div data-align-group="home-hero" className="flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <h2 aria-live="polite" className={`m-0 min-w-0 text-xs font-bold leading-snug text-sky ${share ? "whitespace-nowrap" : "break-words"}`}>
-            {shownLabel}
+            {moment && !picked ? (
+              moment.text ? (
+                <GoalLabel key={moment.key}>
+                  <GoalCheck />
+                  {moment.text}
+                </GoalLabel>
+              ) : (
+                <GoalLabel key={moment.key} plain>
+                  {shownLabel}
+                </GoalLabel>
+              )
+            ) : (
+              shownLabel
+            )}
           </h2>
           <div className="flex shrink-0 items-center gap-2">
             {/* Job A: the visible way to the hold's sheet, beside the label so the card does not grow when a macro is picked */}
@@ -144,14 +168,14 @@ export function HomeHero({
           <span className={`text-sm text-on-dark/80 ${share ? "whitespace-nowrap" : ""}`}>
             {picked ? "kcal" : `/ ${formatRange(kcalTarget.min, kcalTarget.max)} kcal`}
           </span>
-          <span ref={pctRef} className="ml-1 font-display text-[2.5rem] font-extrabold italic leading-none tabular-nums tracking-display">
+          <span ref={pctRef} data-fx={share ? undefined : "kcal-pct"} className="ml-1 font-display text-[2.5rem] font-extrabold italic leading-none tabular-nums tracking-display">
             {picked ? pctLabel(shownKcal, values.kcal) : pctLabel(shownKcal, kcalTarget.min)}
           </span>
           {picked && <span className="text-sm text-on-dark/80">tổng kcal</span>}
           {!picked && finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
-        <div data-align-group="home-hero">
+        <div data-align-group="home-hero" data-fx={share ? undefined : "kcal-bar"}>
           <LevelBar label={picked ? `${HERO_MACRO_LABEL[picked]} trong tổng kcal` : "Kcal so với mục tiêu ngày"} pct={kcalPct} surface="dark" heightClass="h-[10px]" />
         </div>
 
@@ -197,6 +221,7 @@ export function HomeHero({
                   </span>
                   {/* The percent takes its level's colour (V3-SPEC §1); unknown stays white */}
                   <span
+                    data-fx={share ? undefined : "pct"}
                     className="shrink-0 whitespace-nowrap font-condensed text-base font-extrabold leading-none tabular-nums"
                     style={pct === null ? undefined : { color: getLevelColor(getLevel(pct)) }}
                   >
