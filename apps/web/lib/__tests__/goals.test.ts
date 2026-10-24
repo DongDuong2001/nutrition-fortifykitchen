@@ -73,6 +73,13 @@ describe("goalsMet (100 % as the bars round it)", () => {
     const met = goalsMet(day(0, { macros: { carbs: a(100), protein: a(100), fat: a(80) } }));
     expect(met).toEqual(["macro:carbs", "macro:protein"]);
   });
+  it("column needs Chất xơ ≥ 100 % too (RA2): every counted nutrient at 100 % with Chất xơ short is no Đủ chất", () => {
+    const short = goalsMet(day(100, { fiber: a(99) }));
+    expect(short).not.toContain("column");
+    expect(short).toContain("vitamin_c");
+    expect(goalsMet(day(100, { fiber: a(100) }))).toContain("column");
+  });
+
   it("column needs every counted nutrient and Chất xơ; an unknown value or target never counts as reached", () => {
     expect(goalsMet(day(100, { fiber: a(50) }))).not.toContain("column");
     const unknown = day(100);

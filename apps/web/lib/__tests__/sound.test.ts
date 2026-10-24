@@ -82,6 +82,7 @@ describe("soundDue (at most one sound per 120 ms)", () => {
 class FakeContext {
   static made = 0;
   state = "suspended";
+  resumed = 0;
   currentTime = 0;
   destination = {};
   oscillators: { frequency: number; started: number; stopped: number }[] = [];
@@ -90,6 +91,7 @@ class FakeContext {
     FakeContext.made += 1;
   }
   resume() {
+    this.resumed += 1;
     this.state = "running";
     return Promise.resolve();
   }
@@ -172,6 +174,42 @@ describe("playSound (Web Audio, one context)", () => {
     expect(context().state).toBe("running");
   });
 
+  it.each(["pointerdown", "pointerup", "touchend", "keydown"])("%s makes and resumes the context (a touch pointerdown is no user activation)", async (type) => {
+    const { armSound } = await import("../sound");
+    armSound();
+    fire(type);
+    expect(FakeContext.made).toBe(1);
+    expect(context().state).toBe("running");
+  });
+
+  it("listens passive and in the capture phase on all four, and resumes on each until it runs", async () => {
+    const calls: [string, unknown][] = [];
+    vi.stubGlobal("window", {
+      ...(globalThis as unknown as { window: object }).window,
+      addEventListener: (type: string, fn: () => void, opts: unknown) => {
+        calls.push([type, opts]);
+        (listeners[type] ??= []).push(fn);
+      },
+    });
+    const { armSound } = await import("../sound");
+    armSound();
+    const unlock = calls.filter(([type]) => ["pointerdown", "pointerup", "touchend", "keydown"].includes(type));
+    expect(unlock.map(([type]) => type).sort()).toEqual(["keydown", "pointerdown", "pointerup", "touchend"]);
+    for (const [, opts] of unlock) expect(opts).toEqual({ passive: true, capture: true });
+    fire("pointerdown");
+    context().state = "suspended";
+    fire("pointerup");
+    expect(context().resumed).toBe(2);
+  });
+
+  it("a running context is not resumed again, and one context is made ever", async () => {
+    const { armSound } = await import("../sound");
+    armSound();
+    for (const type of ["pointerdown", "pointerup", "touchend", "keydown", "pointerdown"]) fire(type);
+    expect(FakeContext.made).toBe(1);
+    expect(context().resumed).toBe(1);
+  });
+
   it("plays each note as a sine at f plus one at 3,98·f, the overtone 0,35 of the length", async () => {
     const { armSound, playSound } = await import("../sound");
     armSound();
@@ -224,6 +262,49 @@ describe("playSound (Web Audio, one context)", () => {
     context().state = "interrupted";
     fire("visibilitychange");
     expect(context().state).toBe("running");
+  });
+
+  describe("a context that is not running when the sound is asked for", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+    /** A context whose resume() settles when the test says so. */
+    async function suspended() {
+      const { armSound, playSound } = await import("../sound");
+      armSound();
+      fire("pointerdown");
+      let settle: (ok: boolean) => void = () => undefined;
+      context().state = "suspended";
+      context().resume = () => new Promise<void>((resolve, reject) => void (settle = (ok) => (ok ? resolve() : reject(new Error("no")))));
+      playSound("add", null);
+      return settle;
+    }
+
+    it("resume settles within 100 ms of the call: the sound plays", async () => {
+      const settle = await suspended();
+      await vi.advanceTimersByTimeAsync(60);
+      settle(true);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(context().oscillators).toHaveLength(2);
+    });
+
+    it("resume settles late (an iOS interruption): the sound is skipped, not played out of step with its tap", async () => {
+      const settle = await suspended();
+      await vi.advanceTimersByTimeAsync(101);
+      settle(true);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(context().oscillators).toHaveLength(0);
+    });
+
+    it("resume rejects: skipped silently", async () => {
+      const settle = await suspended();
+      settle(false);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(context().oscillators).toHaveLength(0);
+    });
   });
 
   it("a context that will not resume skips the sound silently", async () => {

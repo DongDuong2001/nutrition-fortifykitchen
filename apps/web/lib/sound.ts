@@ -6,7 +6,7 @@ import { isIosDevice } from "./pwa";
  * add, a delete, an undo, a save, a goal reached. Never for errors, scrolling, typing, a tab switch, a sheet opening or anything
  * the app does by itself. lib/cue plays them with their haptic; nothing else calls playSound.
  *
- * iOS: one AudioContext, made and resumed on the first pointerdown (a chime that plays after the + sheet closes still sounds),
+ * iOS: one AudioContext, made and resumed on the first user activation (a chime that plays after the + sheet closes still sounds),
  * resumed again when the app comes back from the background. `navigator.audioSession.type = "ambient"` follows the Ring/Silent
  * switch and mixes with the person's music; an iPhone without that API would ignore the switch, so sound is off there by default.
  */
@@ -58,6 +58,10 @@ export const SOUNDS: Readonly<Record<SoundKind, readonly Note[]>> = {
 };
 
 export const SOUND_GAP_MS = 120;
+/** A sound whose context was not running plays only if resume() settles this soon after the call; later it is out of step with its tap. */
+export const RESUME_WAIT_MS = 100;
+/** A touch pointerdown is not a user activation (HTML spec; touch counts at pointerup / touchend); keydown covers Esc and Enter. */
+const UNLOCK_EVENTS = ["pointerdown", "pointerup", "touchend", "keydown"] as const;
 // The mockup's synth (design/sound-goals, cue()): an overtone at 3,98·f, 0,18 as loud, 0,35 of the note's length
 const OVERTONE = { mul: 3.98, gain: 0.18, length: 0.35 };
 const MASTER_GAIN = 0.22;
@@ -104,11 +108,11 @@ function unlock(): void {
   resume(ctx).catch(() => undefined);
 }
 
-/** Once, at start-up: the first pointerdown anywhere makes the context; coming back from the background resumes it. */
+/** Once, at start-up: the first tap or key anywhere makes the context and each one resumes it until it runs; coming back from the background resumes it too. */
 export function armSound(): void {
   if (armed || typeof window === "undefined") return;
   armed = true;
-  window.addEventListener("pointerdown", unlock, { passive: true, capture: true });
+  for (const type of UNLOCK_EVENTS) window.addEventListener(type, unlock, { passive: true, capture: true });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && ctx) resume(ctx).catch(() => undefined);
   });
@@ -171,6 +175,14 @@ export function playSound(kind: SoundKind, setting: boolean | null): void {
     }
   };
   if (c.state === "running") return play();
-  // An iOS context goes "interrupted" after a call or the lock screen: resume it, and skip the sound if it will not
-  c.resume().then(play, () => undefined);
+  // An iOS context goes "interrupted" after a call or the lock screen: resume it, and skip the sound if it will not or is late
+  let late = false;
+  const timer = setTimeout(() => void (late = true), RESUME_WAIT_MS);
+  c.resume().then(
+    () => {
+      clearTimeout(timer);
+      if (!late) play();
+    },
+    () => clearTimeout(timer)
+  );
 }
