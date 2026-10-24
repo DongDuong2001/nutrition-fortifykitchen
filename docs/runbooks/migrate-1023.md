@@ -193,3 +193,77 @@ psql17 -At < ~/migrations-1023/nutrition-grants.sql | diff $B.grants.sql - && ec
 
   `$B.dp.txt` and `$B.ddp.txt` are the same grants as `\dp` / `\ddp` printed them, to compare by eye.
 - Loading a dump without the `DROP SCHEMA` stops at once with `ERROR: schema "nutrition" already exists`. The extensions (`pg_trgm`, `unaccent`, `pgcrypto`) are in `public` and are not touched.
+
+---
+
+# 000022 courses (feat/courses-api, 24/10): run sheet addition
+
+Tài liệu becomes courses: seven new tables, no existing table touched, so nothing is lost on the way back (`000022_courses.down.sql` drops only them). **Order: 000021, then 000022, on staging and then prod, then deploy the API of this PR (it reads `profiles.level` from 000021 and the new tables). The web (feat/courses-web) goes after the API.** Not rehearsed in Docker: tried on a local Postgres 16 only (every migration in order, 000022 up twice, down, up again; all seven tables have RLS on and no policy).
+
+| # | File | Touches | Applied when this shows it |
+|---|---|---|---|
+| **000022** | `000022_courses` | `nutrition.courses`, `course_parts`, `course_lessons`, `course_lesson_pages`, `course_codes`, `course_unlocks`, `course_progress` | `\dt nutrition.course*` lists seven tables |
+
+The old `nutrition.documents` and `document_access_codes` (000017) are left as they are; the web stops reading them once feat/courses-web is deployed. Every old document becomes a one-lesson text course by a script of yours (see OPEN_QUESTIONS, "Tài liệu → khoá học"), not by this migration.
+
+## 000022 on staging (`hitmicro-staging`)
+
+Use the same helper (`psql17`) and the same backup habit as 000021 above.
+
+```bash
+cd ~/Documents/HITMicro/nutrition-fortifykitchen && git fetch origin
+mkdir -p ~/migrations-1023 ~/backups && for f in migrations/000022_courses.up.sql migrations/000022_courses.down.sql; do
+  git show origin/feat/courses-api:$f > ~/migrations-1023/$(basename $f)     # origin/main once the PR is merged
+done
+M=~/migrations-1023 && ls -l $M
+read -rs DATABASE_URL && export DATABASE_URL       # the hitmicro-staging session pooler URI, Enter
+# 1. Backup of the schema with owners and grants (as for 000021)
+B=~/backups/staging-before-000022-$(date +%Y%m%d-%H%M)
+docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c 'pg_dump "$DATABASE_URL" --schema=nutrition -Fc' > $B.dump && ls -l $B.dump
+# 2. Already there? (0 = not applied yet; 7 = applied, stop here)
+psql17 -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'nutrition' AND table_name LIKE 'course%'"
+# 3. Dry run, rolled back: must end without ERROR
+( echo 'BEGIN;'; cat $M/000022_courses.up.sql; echo 'ROLLBACK;' ) | psql17 -q
+# 4. For real
+( echo 'BEGIN;'; cat $M/000022_courses.up.sql; echo 'COMMIT;' ) | psql17 -q
+# 5. Checks: seven tables, RLS on for each, and no policy (only the API reads them)
+psql17 -Atc "SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'nutrition' AND tablename LIKE 'course%' ORDER BY 1"
+psql17 -Atc "SELECT count(*) FROM pg_policies WHERE schemaname = 'nutrition' AND tablename LIKE 'course%'"
+unset DATABASE_URL
+```
+
+Step 5: seven rows, every one `t`, and `0` policies.
+
+## 000022 on production (the VPS)
+
+Only after staging is checked: the same five steps with the production URI (`~/backups/prod-before-000022-…`).
+
+## The disk for the page images (before the API of this PR runs)
+
+The API writes the PDF pages as images under `COURSES_DIR` (`/data/courses`), never served as static files. `deploy/docker-compose.prod.yml` of this PR mounts a named volume `courses_data` there and the API's Dockerfile creates the folder owned by its non-root user. A lesson is up to 60 MB and the VPS disk is near its limit, so look at the room first, on the VPS, **before the deploy**:
+
+```bash
+ssh deploy@14.225.210.185
+df -h /          # the API refuses a page (507 STORAGE_FULL) when less than 2 GiB is free, and the image build needs room too: free some first if it is close
+```
+
+Then the deploy, with the images' backup before it (the images are not in Postgres, so the database backup does not hold them; the compose project is named `nutrition`, so the volume is `nutrition_courses_data`, not `courses_data`: with the shorter name Docker would make a new empty volume and back up nothing):
+
+```bash
+cd /var/www/nutrition-meals
+docker volume inspect nutrition_courses_data >/dev/null && echo "the volume exists"     # not there yet on the very first deploy: skip the backup line
+mkdir -p ~/backups && docker run --rm -v nutrition_courses_data:/d -v ~/backups:/b alpine tar czf /b/courses-$(date +%Y%m%d).tgz -C /d .
+tar tzf ~/backups/courses-$(date +%Y%m%d).tgz | head -3                                 # lists files once a lesson has pages
+nice -n 19 deploy/deploy.sh <the merged sha>                                            # fetches, checks out and builds; nice keeps the site answering while it builds
+docker compose -f deploy/docker-compose.prod.yml exec api sh -c 'touch /data/courses/.w && rm /data/courses/.w && echo writable'   # prints writable
+```
+
+Keep taking the `courses-….tgz` backup with the database backup from then on. If a coach sees "Máy chủ đã hết chỗ lưu bài", `df -h /` says why: free some space (old images: `docs/ops/server-disk.md`); the pages already stored are fine.
+
+## Rollback of 000022
+
+```bash
+( echo 'BEGIN;'; cat $M/000022_courses.down.sql; echo 'COMMIT;' ) | psql17 -q
+```
+
+Every course, part, lesson, code and progress row is lost; the images stay in the volume and are not read. Roll the API back first (the previous image), then run the down file.

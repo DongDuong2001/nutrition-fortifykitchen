@@ -21,6 +21,7 @@ import (
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/csrf"
 	"nutrition-api/internal/daytemplates"
+	"nutrition-api/internal/courses"
 	"nutrition-api/internal/documents"
 	"nutrition-api/internal/diary"
 	"nutrition-api/internal/library"
@@ -134,6 +135,15 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	dayTemplatesHandler := daytemplates.NewHandler(daytemplates.NewService(daytemplates.NewRepository(pool)))
 
 	documentsHandler := documents.NewHandler(documents.NewService(documents.NewRepository(pool)))
+
+	// Khoá học (migration 000022): the page images are kept on disk under cfg.CoursesDir, never served as static files
+	coursesService := courses.NewService(courses.NewRepository(pool), courses.NewDiskStore(cfg.CoursesDir))
+	if cfg.CoursesMinFreeBytes > 0 {
+		coursesService.SetMinFree(cfg.CoursesMinFreeBytes)
+	}
+	coursesHandler := courses.NewHandler(coursesService)
+	// A 60-page PDF is 60 uploads: its own limit (180 a minute), outside the 60 a minute of the other writes
+	coursePageLimiter := ratelimit.NewUserRateLimiter(180)
 
 	coachingRepo := coaching.NewRepository(pool)
 	coachingService := coaching.NewService(coachingRepo)
@@ -315,11 +325,45 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 				r.Delete("/document-codes/{id}", documentsHandler.RevokeCode)
 			})
 
+			// Khoá học (migration 000022). The library never needs access; opening does (open, a code of that course, or a Level); a coach or an admin sees all
+			r.Get("/courses", coursesHandler.List)
+			r.Get("/courses/{id}", coursesHandler.Get)
+			r.Post("/courses/{id}/open", coursesHandler.Open)
+			r.Get("/courses/{id}/lessons/{lid}", coursesHandler.Lesson)
+			r.Get("/courses/{id}/lessons/{lid}/pages/{n}", coursesHandler.Page)
+			r.Put("/courses/{id}/lessons/{lid}/progress", coursesHandler.Progress)
+			r.Group(func(r chi.Router) {
+				r.Use(authMiddleware.RequireRole("coach", "admin"))
+				r.Post("/courses", coursesHandler.CreateCourse)
+				r.Patch("/courses/{id}", coursesHandler.UpdateCourse)
+				r.Delete("/courses/{id}", coursesHandler.DeleteCourse)
+				r.Post("/courses/{id}/parts", coursesHandler.CreatePart)
+				r.Post("/courses/{id}/parts/reorder", coursesHandler.ReorderParts)
+				r.Patch("/courses/{id}/parts/{pid}", coursesHandler.RenamePart)
+				r.Delete("/courses/{id}/parts/{pid}", coursesHandler.DeletePart)
+				r.Post("/courses/{id}/lessons", coursesHandler.CreateLesson)
+				r.Post("/courses/{id}/lessons/reorder", coursesHandler.ReorderLessons)
+				r.Patch("/courses/{id}/lessons/{lid}", coursesHandler.UpdateLesson)
+				r.Delete("/courses/{id}/lessons/{lid}", coursesHandler.DeleteLesson)
+				r.Post("/courses/{id}/lessons/{lid}/finish", coursesHandler.FinishLesson)
+				r.Get("/courses/{id}/codes", coursesHandler.ListCodes)
+				r.Post("/courses/{id}/codes", coursesHandler.CreateCode)
+				r.Delete("/courses/{id}/codes/{codeId}", coursesHandler.RevokeCode)
+			})
+
 			// Coaching routes (Level 4 application & status)
 			r.Route("/coaches", func(r chi.Router) {
 				r.Post("/apply", coachingHandler.Apply)
 				r.Get("/my-application", coachingHandler.GetMyApplication)
 			})
+		})
+
+		// Khoá học: the page images of a PDF lesson (a coach or an admin). Outside the group above so a 60-page PDF has its own limit
+		r.Group(func(r chi.Router) {
+			r.Use(authMiddleware.Authenticate)
+			r.Use(coursePageLimiter.LimitWrites)
+			r.Use(authMiddleware.RequireRole("coach", "admin"))
+			r.Put("/courses/{id}/lessons/{lid}/pages/{n}", coursesHandler.UploadPage)
 		})
 
 		// Admin Protected Routes (Role == "admin")

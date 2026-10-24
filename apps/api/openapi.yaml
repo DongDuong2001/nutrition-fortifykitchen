@@ -960,6 +960,194 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /courses:
+    get:
+      summary: Khoá học library (every course with its lock and the caller's progress; never needs access)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: '{ items: [{ id, title, subtitle, tone, access, minLevel?, lessonCount, doneCount, unlocked, lock? }] }'
+    post:
+      summary: Create a course (coach, admin)
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: The course
+        '403':
+          description: Not a coach or admin
+
+  /courses/{id}:
+    get:
+      summary: One course with its parts and lessons and the caller's progress; 403 COURSE_LOCKED (fields.lock = code | level, fields.minLevel) when it does not open
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: '{ id, title, ..., parts: [{ id, title, lessons: [{ id, title, kind, pageCount, minutes, ready, done, lastPage }] }], lessonCount, doneCount, resume? }'
+        '403':
+          description: COURSE_LOCKED
+        '404':
+          description: No such course
+    patch:
+      summary: Change a course's title, subtitle, tone or access (coach, admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The course
+    delete:
+      summary: Delete a course with its parts, lessons, codes and page images (coach, admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deleted
+
+  /courses/{id}/open:
+    post:
+      summary: Open a code course with one of its live codes { code }; 403 BAD_CODE for a wrong, lapsed, revoked or other course's code
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The course, as GET /courses/{id}
+        '403':
+          description: BAD_CODE
+
+  /courses/{id}/lessons/{lid}:
+    get:
+      summary: One lesson (a written lesson with its markdown) after the course's access check
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The lesson
+        '403':
+          description: COURSE_LOCKED
+
+  /courses/{id}/lessons/{lid}/pages/{n}:
+    get:
+      summary: A PDF lesson's page image (WebP), after the same access check; Cache-Control private, no-store
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: n
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: image/webp
+        '403':
+          description: COURSE_LOCKED
+        '404':
+          description: No such page
+    put:
+      summary: Store one page image { data: base64 WebP, at most 1 MiB } (coach, admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: n
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Stored
+        '413':
+          description: Body over the cap
+
+  /courses/{id}/lessons/{lid}/progress:
+    put:
+      summary: The caller's own progress { lastPage, completed? }; the same call again changes nothing
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Saved
+
   /days/{date}:
     get:
       summary: Get daily meal logs, training minutes, and nutrient totals

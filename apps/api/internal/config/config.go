@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -18,6 +19,10 @@ type Config struct {
 	SentryDSN         string
 	Environment       string
 	AllowedOrigins    []string
+	// CoursesDir is where the course page images are kept (a docker volume in production); never served as static files
+	CoursesDir string
+	// CoursesMinFreeBytes is the room that disk must still have for a page to be written (COURSES_MIN_FREE_BYTES); 0 = the default, 2 GiB
+	CoursesMinFreeBytes uint64
 }
 
 // Validate checks for critical security misconfigurations in production environments
@@ -82,6 +87,18 @@ func Load() *Config {
 		}
 	}
 
+	coursesDir := os.Getenv("COURSES_DIR")
+	if coursesDir == "" {
+		coursesDir = "data/courses"
+	}
+
+	var coursesMinFree uint64
+	if v := os.Getenv("COURSES_MIN_FREE_BYTES"); v != "" {
+		if n, err := strconv.ParseUint(v, 10, 64); err == nil {
+			coursesMinFree = n
+		}
+	}
+
 	supabaseURL := os.Getenv("SUPABASE_URL")
 	jwksURL := os.Getenv("SUPABASE_JWKS_URL")
 	if jwksURL == "" && supabaseURL != "" {
@@ -100,5 +117,8 @@ func Load() *Config {
 		SentryDSN:         os.Getenv("SENTRY_DSN"),
 		Environment:       env,
 		AllowedOrigins:    origins,
+		CoursesDir:        coursesDir,
+
+		CoursesMinFreeBytes: coursesMinFree,
 	}
 }

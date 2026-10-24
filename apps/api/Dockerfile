@@ -23,7 +23,8 @@ WORKDIR /app
 
 COPY --from=builder /app/bin/server /app/server
 
-RUN chown -R appuser:appgroup /app
+# The course page images (COURSES_DIR): a named volume mounted here starts with this owner, so the non-root user can write
+RUN mkdir -p /data/courses && chown -R appuser:appgroup /app /data/courses
 
 USER appuser
 

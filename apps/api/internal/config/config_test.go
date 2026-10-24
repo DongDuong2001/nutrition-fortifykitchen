@@ -64,3 +64,20 @@ func TestConfig_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestLoad_CoursesMinFreeBytes(t *testing.T) {
+	for _, tt := range []struct {
+		env  string
+		want uint64
+	}{
+		{"", 0}, // 0: the courses package keeps its own default, 2 GiB
+		{"5368709120", 5368709120},
+		{"lots", 0}, // not a number: the default, never a crash at startup
+		{"-1", 0},
+	} {
+		t.Setenv("COURSES_MIN_FREE_BYTES", tt.env)
+		if got := Load().CoursesMinFreeBytes; got != tt.want {
+			t.Errorf("COURSES_MIN_FREE_BYTES=%q: %d, want %d", tt.env, got, tt.want)
+		}
+	}
+}

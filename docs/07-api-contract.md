@@ -657,6 +657,34 @@ The code travels in the request body, never the URL, so it stays out of server l
 Guessing a code is bounded by the per-user write limit (60 a minute); a 50-bit code is out of reach at that rate.
 
 
+### 2.14. Courses (Khoá học, migration 000022)
+Tài liệu as courses: **Khoá → Phần → Bài**. A lesson is a PDF (its pages are images the coach's browser made; the PDF itself is never stored or sent) or markdown text. This replaces §2.13 for the app (the old tables and routes stay until the web stops using them).
+- **Envelope:** as the rest of the API, every JSON success is `{"data": …}` (a list is `{"data": {"items": […]}}`) and every error is `{"error": {"code", "message", "fields"?}}`; a page image is the raw WebP bytes. The shapes below are the `data`.
+- **Who may open a course** (the coach picks per course): `open` (every signed-in user); `code` (one of that course's own live codes, 10 symbols, only the SHA-256 is stored, 30 days, revocable; a code opens every lesson of that course only); `level` (`profiles.level` ≥ `minLevel`, 1 to 5). A coach or an admin (`profiles.role`) sees everything. **The library (`GET /courses`) never needs access; opening does.** A user who opened a code course stays unlocked while that code is live (not revoked, not lapsed): `course_unlocks` joins the code on every check.
+- A lock answers `403 {"error":{"code":"COURSE_LOCKED","fields":{"lock":"code"|"level","minLevel":"3"}}}` (`minLevel` only for a level lock); a wrong, lapsed, revoked or another course's code answers `403 BAD_CODE`. An unknown course, lesson or page, a lesson asked through another course's path, and an id that is not a UUID are all `404`.
+
+| Route | Who | Body / result |
+|---|---|---|
+| `GET /courses` | signed in | `{items:[{id,title,subtitle,tone,access,minLevel?,lessonCount,doneCount,unlocked,lock?,createdAt,updatedAt}]}` (`tone` 0-7: the gradient pair of the design) |
+| `GET /courses/{id}` | open to the caller | the course + `parts:[{id,title,lessons:[{id,title,kind,pageCount,minutes,ready,done,lastPage}]}]`, `lessonCount`, `doneCount`, `resume:{lessonId,page}?` (the first lesson not finished, at the page they stopped on). Learners see only `ready` lessons; `Cache-Control: private, no-store` |
+| `POST /courses/{id}/open` | signed in | `{code}` → the same as `GET /courses/{id}` after recording the unlock; 403 `BAD_CODE` |
+| `GET /courses/{id}/lessons/{lid}` | open to the caller | one lesson; a written one carries `content` (markdown) |
+| `GET /courses/{id}/lessons/{lid}/pages/{n}` | open to the caller | `image/webp`, `Cache-Control: private, no-store`, never a static file |
+| `PUT /courses/{id}/lessons/{lid}/progress` | the caller | `{lastPage, completed?}` (1-60; omitted `completed` leaves it; the same call again changes nothing); only for oneself |
+| `POST /courses` · `PATCH /courses/{id}` · `DELETE /courses/{id}` | coach, admin | `{title, subtitle?, tone?, access, minLevel?}` (`level` needs 1-5, any other access clears it); delete removes parts, lessons, codes, progress and the page files |
+| `POST /courses/{id}/parts` · `PATCH …/parts/{pid}` · `DELETE …/parts/{pid}` · `POST …/parts/reorder` | coach, admin | `{title}`; reorder `{ids}` = every part once |
+| `POST /courses/{id}/lessons` | coach, admin | text: `{partId,title,kind:"text",content}` (≤ 1,000,000 bytes); PDF: `{partId,title,kind:"pdf",pageCount}` (1-60), hidden from learners until finished |
+| `PATCH …/lessons/{lid}` · `DELETE …/lessons/{lid}` · `POST …/lessons/reorder` | coach, admin | `{title?,partId?,content?}` (a lesson moved to another part goes last; `content` only for a written lesson); reorder `{partId, ids}` |
+| `PUT …/lessons/{lid}/pages/{n}` | coach, admin | `{data}`: the page as base64 **WebP** (checked by its RIFF/WEBP header), ≤ 1 MiB decoded; `n` from 1 to the lesson's `pageCount`; **`507 STORAGE_FULL`** when the disk holding `COURSES_DIR` has less than 2 GiB free (nothing is written: no row, no file) |
+| `POST …/lessons/{lid}/finish` | coach, admin | the lesson becomes visible once every page is there (`409` until then) |
+| `GET/POST /courses/{id}/codes` · `DELETE …/codes/{codeId}` | coach, admin | `POST` returns the value **once** (`{id,code,createdAt,expiresAt}`); the list never has values; only for a course with `access: code`; revoking again is `404` |
+
+- **Caps (MaxBytesReader, 413):** JSON bodies 4 KB; a lesson's text body 1.1 MB (the text itself ≤ 1,000,000 bytes); a page upload body 1.45 MB (≤ 1 MiB of image as base64: the API's CSRF rule only takes JSON bodies from the browser); at most 60 pages a lesson. The 60 page uploads of one PDF have their own limit (180 a minute per user, outside the 60 a minute of other writes).
+- **Storage:** `COURSES_DIR` (default `data/courses`; a docker volume in production), `<course id>/<lesson id>/<page>.webp`, written through a temp file and a rename. The API reads a page only after the access check; the files are never served statically.
+- **Room:** before a page is written the API asks the disk (statfs) how much is free; below `MinFreeBytes` = 2 GiB (`COURSES_MIN_FREE_BYTES` changes it) it answers `507` with `error.code = "STORAGE_FULL"` and writes nothing. A disk that cannot be read is a `500`, not a guess.
+- **Unfinished lessons:** a PDF lesson stays hidden (`ready = false`) with its pages on disk when the coach's tab dies halfway. Each new PDF lesson of a course deletes the course's unfinished PDF lessons older than 24 h, with their folders (a failure of that is logged and never stops the new lesson).
+- **No draft state:** a text lesson is visible when saved; a PDF when finished.
+
 ---
 
 ## 3. Business Invariants Enforced by API

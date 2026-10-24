@@ -47,6 +47,10 @@ services:
       - .env.prod
     environment:
       GOMEMLIMIT: 200MiB
+      # Khoá học: the PDF pages as images, one folder per course and lesson. Never served as static files; back this volume up with the database
+      COURSES_DIR: /data/courses
+    volumes:
+      - courses_data:/data/courses
     mem_limit: 256m
     security_opt:
       - no-new-privileges:true
@@ -86,5 +90,6 @@ services:
     logging: *default-logging
 
 volumes:
+  courses_data:
   caddy_data:
   caddy_config:
