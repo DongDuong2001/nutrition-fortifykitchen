@@ -21,7 +21,7 @@ import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
 // The device's copy of the catalogue (and IndexedDB behind it) is loaded when the catalogue is read or written, not with the page
 const catalogCache = () => import("./catalog-cache");
-import { normaliseCoaching } from "./coaching-link";
+import { normaliseCoaching, serverLevelOf } from "./coaching-link";
 import type { GoalType, MacroFixedGrams, MacroRatios, MacroTargetMode, SexType } from "./targets";
 
 // perf/live-bundle: no `export *` of the nutrients, the catalogue, the coaches or the ranking any more: every screen
@@ -97,6 +97,8 @@ export function mapApiProfileToProfile(raw: any): Profile {
     customTargets: parseCustomTargets(data.customTargets),
     updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : undefined,
     ...normaliseCoaching(data),
+    // level and levelSeen (migration 000021) without a coach object: normaliseCoaching above zeroes a Level that has no coach
+    serverLevel: serverLevelOf(data),
   };
 }
 

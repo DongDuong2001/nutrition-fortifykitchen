@@ -50,6 +50,8 @@ export interface AppHeaderProps {
   wordmark?: boolean;
   /** Phone, with `wordmark`: takes the wordmark's place (the home screen's "Về hôm nay" on a past day). */
   phoneStart?: React.ReactNode;
+  /** With `wordmark`: right after the wordmark (the title from 1024 px), on the same row. The home screen's Level badge. */
+  wordmarkAfter?: React.ReactNode;
   /** Desktop width: "narrow" (560 px column) or "wide" (left-aligned at the 32 px gutter). Daily defaults to wide. */
   layout?: "narrow" | "wide";
   /** Desktop: the page's main already has 32 px padding, so the header adds none. */
@@ -65,6 +67,18 @@ export interface AppHeaderProps {
   /** "page": the row shares both edges with the page body, checked from 1024 px (data-align-from="lg"); default: left edge only. */
   alignMode?: "left" | "page";
   className?: string;
+}
+
+/** The wordmark (or the title from 1024 px) and what follows it on one row; without `after`, the children as they were. */
+function WordmarkRow({ after, children }: { after?: React.ReactNode; children: React.ReactNode }) {
+  if (!after) return <>{children}</>;
+  return (
+    <div className="flex items-center gap-2">
+      {children}
+      {/* From 1024 px the 44 px control must not make the title's row taller (the title keeps its top on every screen) */}
+      <span className="flex items-center lg:h-0">{after}</span>
+    </div>
+  );
 }
 
 /** V3-SPEC §4: Back and trailing actions are 44 px Liquid Glass circles on a phone; plain icon buttons from 1024 px. */
@@ -125,6 +139,7 @@ export function AppHeader({
   desktopStat,
   wordmark = false,
   phoneStart,
+  wordmarkAfter,
   layout,
   flush = false,
   compact = false,
@@ -208,7 +223,7 @@ export function AppHeader({
               accessibility tree, so the page keeps its h1 */}
           <div className={`min-w-0 flex-1 ${dateRow ? "max-lg:col-start-1 max-lg:row-start-1" : ""} ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
             {wordmark ? (
-              <>
+              <WordmarkRow after={wordmarkAfter}>
                 {phoneStart ? (
                   <div className="lg:hidden">{phoneStart}</div>
                 ) : (
@@ -229,7 +244,7 @@ export function AppHeader({
                     {title}
                   </Title>
                 )}
-              </>
+              </WordmarkRow>
             ) : (
               title && (
                 <div className={back ? "flex min-h-11 items-center" : undefined}>

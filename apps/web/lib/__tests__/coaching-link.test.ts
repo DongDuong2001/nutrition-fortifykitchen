@@ -6,14 +6,16 @@ import {
   coachingAvailable,
   effectiveCoaching,
   canReview,
-  dismissLevelNotice,
   dismissLevelZeroHint,
   isConsistent,
   leaveCoach,
   levelNotice,
+  levelUp,
   linkCoach,
   normaliseCode,
   normaliseCoaching,
+  seenPatch,
+  serverLevelOf,
   setClientLevel,
   showLevelZeroHint,
   toLevel,
@@ -61,11 +63,11 @@ describe("defaults and reading", () => {
 });
 
 describe("link, leave and set", () => {
-  it("linking sets Level 1 and keeps the card to be shown", () => {
+  it("linking sets Level 1 and keeps the celebration (0 → 1) to be played", () => {
     const s = linkCoach(NO_COACHING, KHANH);
     expect(s).toMatchObject({ level: 1, coach: KHANH, levelSeen: 0 });
     expect(isConsistent(s)).toBe(true);
-    expect(levelNotice(s)).toEqual({ kind: "linked", from: 0, to: 1 });
+    expect(levelUp(s)).toEqual({ from: 0, to: 1 });
   });
 
   it("leaving sets Level 0 and no coach, and shows no card", () => {
@@ -87,7 +89,7 @@ describe("link, leave and set", () => {
     const steps: ((x: CoachingState) => CoachingState)[] = [
       (x) => linkCoach(x, KHANH),
       (x) => setClientLevel(x, 4),
-      (x) => dismissLevelNotice(x),
+      (x) => ({ ...x, ...seenPatch(x, false) }),
       (x) => setClientLevel(x, 2),
       (x) => leaveCoach(x),
       (x) => setClientLevel(x, 3),
@@ -102,19 +104,27 @@ describe("link, leave and set", () => {
 });
 
 describe("one-time cards", () => {
-  it("raised and lowered name both Levels", () => {
-    expect(levelNotice(linked(3, 2))).toEqual({ kind: "raised", from: 2, to: 3 });
+  it("a lower Level is the calm card, naming both Levels", () => {
     expect(levelNotice(linked(1, 2))).toEqual({ kind: "lowered", from: 2, to: 1 });
   });
 
-  it("none at the Level already seen, and none at Level 0", () => {
+  it("a higher Level is no card: it is the celebration (levelUp)", () => {
+    expect(levelNotice(linked(3, 2))).toBeNull();
+    expect(levelNotice(linked(1, 0))).toBeNull();
+  });
+
+  it("none at the Level already seen, and none at Level 0 with nothing seen", () => {
     expect(levelNotice(linked(2, 2))).toBeNull();
     expect(levelNotice(NO_COACHING)).toBeNull();
   });
 
+  it("needs no coach: a Level the API lowered (live mode) is a card too", () => {
+    expect(levelNotice({ ...NO_COACHING, level: 1, levelSeen: 3 })).toEqual({ kind: "lowered", from: 3, to: 1 });
+  });
+
   it("dismissing marks the Level seen, once", () => {
-    const s = dismissLevelNotice(linked(3, 2));
-    expect(s.levelSeen).toBe(3);
+    const s = { ...linked(1, 2), ...seenPatch(linked(1, 2), false) };
+    expect(s.levelSeen).toBe(1);
     expect(levelNotice(s)).toBeNull();
   });
 
@@ -123,6 +133,31 @@ describe("one-time cards", () => {
     expect(showLevelZeroHint(dismissLevelZeroHint(NO_COACHING))).toBe(false);
     expect(showLevelZeroHint(linked(2))).toBe(false);
     expect(showLevelZeroHint({ ...NO_COACHING, role: "coach" })).toBe(false);
+  });
+});
+
+describe("levelUp: the celebration's trigger", () => {
+  it("plays when the Level is above the one seen, from any Level", () => {
+    expect(levelUp(linked(3, 2))).toEqual({ from: 2, to: 3 });
+    expect(levelUp(linked(5, 4))).toEqual({ from: 4, to: 5 });
+  });
+
+  it("0 → 1 is a promotion too (joining a coach in mock mode)", () => {
+    expect(levelUp(linked(1, 0))).toEqual({ from: 0, to: 1 });
+  });
+
+  it("needs no coach object (live mode reads the Level from the profile)", () => {
+    expect(levelUp({ ...NO_COACHING, level: 2, levelSeen: 0 })).toEqual({ from: 0, to: 2 });
+  });
+
+  it("never at the Level seen or below it", () => {
+    expect(levelUp(linked(2, 2))).toBeNull();
+    expect(levelUp(linked(1, 3))).toBeNull();
+    expect(levelUp(NO_COACHING)).toBeNull();
+  });
+
+  it("once: after it is seen it does not play again", () => {
+    expect(levelUp({ ...linked(3, 1), ...seenPatch(linked(3, 1), false) })).toBeNull();
   });
 });
 
@@ -153,7 +188,7 @@ describe("live-mode guard", () => {
     expect(effectiveCoaching(coached, false)).toBe(coached);
   });
 
-  it("live mode: no coach and Level 0 whatever was stored, so the invariant holds", () => {
+  it("live mode without the API's Level: no coach and Level 0 whatever was stored, as before", () => {
     const live = effectiveCoaching(coached, true);
     expect(live).toMatchObject({ level: 0, coach: null, levelSeen: 0 });
     expect(isConsistent(live)).toBe(true);
@@ -165,9 +200,52 @@ describe("live-mode guard", () => {
     expect(effectiveCoaching({ ...coached, role: "admin" }, false).role).toBe("admin");
   });
 
+  it("live mode with the API's Level: that Level and levelSeen, still no coach", () => {
+    const live = effectiveCoaching(coached, true, { level: 4, levelSeen: 2 });
+    expect(live).toMatchObject({ role: "user", level: 4, levelSeen: 2, coach: null });
+    expect(levelUp(live)).toEqual({ from: 2, to: 4 });
+  });
+
+  it("mock mode ignores a Level from the API: the mock coach decides", () => {
+    expect(effectiveCoaching(coached, false, { level: 5, levelSeen: 5 })).toBe(coached);
+  });
+
   it("the guard does not touch the stored state", () => {
     effectiveCoaching(coached, true);
     expect(coached.level).toBe(3);
+  });
+});
+
+describe("serverLevelOf: the Level fields of GET /me", () => {
+  it("reads level and levelSeen", () => {
+    expect(serverLevelOf({ level: 3, levelSeen: 1 })).toEqual({ level: 3, levelSeen: 1 });
+  });
+
+  it("none when the API does not send level (an API before the Level columns)", () => {
+    expect(serverLevelOf({})).toBeUndefined();
+    expect(serverLevelOf({ levelSeen: 2 })).toBeUndefined();
+    expect(serverLevelOf(null)).toBeUndefined();
+    expect(serverLevelOf(undefined)).toBeUndefined();
+  });
+
+  it("a missing or bad levelSeen is 0; a bad level is 0", () => {
+    expect(serverLevelOf({ level: 2 })).toEqual({ level: 2, levelSeen: 0 });
+    expect(serverLevelOf({ level: 2, levelSeen: 9 })).toEqual({ level: 2, levelSeen: 0 });
+    expect(serverLevelOf({ level: 7, levelSeen: 1 })).toEqual({ level: 0, levelSeen: 1 });
+  });
+});
+
+describe("seenPatch: where levelSeen is written", () => {
+  it("mock mode: on the stored profile", () => {
+    expect(seenPatch(linked(3, 2), false, undefined)).toEqual({ levelSeen: 3 });
+  });
+
+  it("live mode with the API's Level: on the profile's server Level (sent with the next profile save)", () => {
+    expect(seenPatch({ ...NO_COACHING, level: 4, levelSeen: 2 }, true, { level: 4, levelSeen: 2 })).toEqual({ serverLevel: { level: 4, levelSeen: 4 } });
+  });
+
+  it("live mode without it: nothing to write (Level 0, nothing shown)", () => {
+    expect(seenPatch(NO_COACHING, true, undefined)).toBeNull();
   });
 });
 

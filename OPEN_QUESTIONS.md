@@ -529,3 +529,6 @@
 - [ ] (Dong) Tài liệu is served by the Go API (apps/api/internal/documents, migration 000017: nutrition.documents and nutrition.document_access_codes, docs/07 §2.13). Run migration 000017. In live mode only role coach or admin can make codes: set Coach Khánh's profile role to coach. The ACCESS_CODE lines this branch added to .env.example are unused now; remove them (the file is blocked to agents).
 ## Food emoji (feat/food-emoji, 23/10/2026)
 - [ ] (Hao) Custom 3D chicken icons will replace 🐔 (ức, phi lê, lườn, gà xé, thịt gà, a chicken with no cut named) and 🍗 (đùi, má đùi, cánh, chân, gà rán, gà nướng, gà nguyên con); lib/food-emoji.ts, TODO there. Send the icons, and say whether pork (🍖 sườn and chân giò, 🥓 ba chỉ) gets them too.
+
+## feat/level-ui (24/10)
+- Share image, Level 3+: in "Chi tiết béo & xơ" the long names (Béo không bão hòa đơn / đa, Xơ hòa tan, Xơ không tan) wrap to 3 lines beside "chưa có dữ liệu" (share-L5.png). origin/main 86d8b69 draws it the same way, so it is not from feat/level-ui. Own fix later: the name on one line and "chưa có dữ liệu" under it (or "—"). Hao to confirm which.

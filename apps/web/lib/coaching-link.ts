@@ -3,7 +3,8 @@
  * Pure: no React, no storage. The invariant everything keeps: Level 0 if and only if there is no coach.
  * - linking to a coach sets Level 1; leaving sets Level 0 (and no coach);
  * - only the coach changes a Level afterwards, between 1 and 5;
- * - `levelSeen` is the Level the user was last told about, so one card can say what changed (cards are shown once).
+ * - `levelSeen` is the Level the user was last told about: a higher Level plays the celebration once, a lower one shows a card once.
+ * Live mode has no coach object: the Level comes from the API's profile (`level`, `levelSeen`, ServerLevel) when it sends them.
  * The UI word is "Level", never "Mức".
  */
 export type Role = "user" | "coach" | "admin";
@@ -26,6 +27,12 @@ export interface CoachingState {
   levelSeen: Level;
   /** The Level 0 hint ("Có huấn luyện viên? …") was dismissed. */
   hintSeen: boolean;
+}
+
+/** `level` and `levelSeen` of GET /me (migration 000021). The coach or an admin sets the level; the web only ever writes levelSeen. */
+export interface ServerLevel {
+  level: Level;
+  levelSeen: Level;
 }
 
 export const NO_COACHING: CoachingState = { role: "user", level: 0, coach: null, levelSeen: 0, hintSeen: false };
@@ -88,21 +95,18 @@ export function setClientLevel(state: CoachingState, level: number): CoachingSta
   return { ...state, level: next };
 }
 
-export type LevelNotice = { kind: "linked" | "raised" | "lowered"; from: Level; to: Level };
+export type LevelNotice = { kind: "lowered"; from: Level; to: Level };
 
-/**
- * The one-time card the user should see: just linked (first time at Level 1+), raised, or lowered. None once they
- * have dismissed it (levelSeen equals the Level) and none at Level 0.
- */
-export function levelNotice(state: CoachingState): LevelNotice | null {
-  if (state.coach === null || state.level === 0 || state.level === state.levelSeen) return null;
-  if (state.levelSeen === 0) return { kind: "linked", from: 0, to: state.level };
-  return { kind: state.level > state.levelSeen ? "raised" : "lowered", from: state.levelSeen, to: state.level };
+/** The calm one-time card: the Level went down since the user last saw it. A higher Level is the celebration instead (levelUp). */
+export function levelNotice(state: Pick<CoachingState, "level" | "levelSeen">): LevelNotice | null {
+  return state.level < state.levelSeen ? { kind: "lowered", from: state.levelSeen, to: state.level } : null;
 }
 
-export function dismissLevelNotice(state: CoachingState): CoachingState {
-  return { ...state, levelSeen: state.level };
+/** The Level-up celebration plays once when the Level is above the one seen (0 → 1 too). No coach object is needed. */
+export function levelUp(state: Pick<CoachingState, "level" | "levelSeen">): { from: Level; to: Level } | null {
+  return state.level > state.levelSeen ? { from: state.levelSeen, to: state.level } : null;
 }
+
 
 /** The Level 0 card ("Có huấn luyện viên?") shows once, to a user with no coach. */
 export function showLevelZeroHint(state: CoachingState): boolean {
@@ -121,13 +125,30 @@ export function coachingAvailable(live: boolean): boolean {
   return !live;
 }
 
+/** The Level fields of the API's profile; undefined when it does not send `level` (an API from before migration 000021). */
+export function serverLevelOf(raw: unknown): ServerLevel | undefined {
+  if (typeof raw !== "object" || raw === null || typeof (raw as Record<string, unknown>).level !== "number") return undefined;
+  const v = raw as Record<string, unknown>;
+  return { level: toLevel(v.level), levelSeen: toLevel(v.levelSeen) };
+}
+
 /**
  * What the screens read. In live mode the role can only come from the API, which does not return it yet, so it is
- * "user" whatever the browser's stored profile holds (that is editable by the user), with no coach and Level 0.
+ * "user" whatever the browser's stored profile holds (that is editable by the user), with no coach; the Level is the
+ * API's (`server`) when it sends one, else 0.
  */
-export function effectiveCoaching(state: CoachingState, live: boolean): CoachingState {
+export function effectiveCoaching(state: CoachingState, live: boolean, server?: ServerLevel): CoachingState {
   if (coachingAvailable(live)) return state;
-  return { ...state, role: "user", level: 0, coach: null, levelSeen: 0 };
+  return { ...state, role: "user", coach: null, level: server?.level ?? 0, levelSeen: server?.levelSeen ?? 0 };
+}
+
+/**
+ * Where "seen at this Level" is written: the stored profile in mock mode; in live mode the profile's server Level, which the
+ * next profile save sends as levelSeen. Null when there is nothing to write (live mode without the API's Level).
+ */
+export function seenPatch(state: CoachingState, live: boolean, server?: ServerLevel): { levelSeen: Level } | { serverLevel: ServerLevel } | null {
+  if (!live) return { levelSeen: state.level };
+  return server ? { serverLevel: { level: server.level, levelSeen: state.level } } : null;
 }
 
 /** Coach and admin see the client list. */

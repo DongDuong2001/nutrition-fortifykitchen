@@ -16,7 +16,7 @@ import { formatAmount } from "./format";
 import { applyCustomTargets, CUSTOM_TARGETS_ENABLED, parseCustomTargets, type CustomTargets } from "./custom-targets";
 import { ageOf } from "./rda";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
-import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
+import { NO_COACHING, normaliseCoaching, serverLevelOf, type CoachingState, type ServerLevel } from "./coaching-link";
 import { cleanDisplayName, validateDisplayName } from "./display-name";
 
 export { PROFILE_KEY, cleanDisplayName };
@@ -38,6 +38,8 @@ export interface Profile extends CoachingState {
   customEnergyKcal?: number;
   /** cc-73b: a custom daily target per vitamin or mineral (lib/custom-targets). Read only while the flag is on. */
   customTargets?: CustomTargets;
+  /** The Level of GET /me (live mode), when the API sends it; live mode reads its Level from here, not from a coach. */
+  serverLevel?: ServerLevel;
   /** The server's updatedAt of the profile this device last adopted (GET /me). */
   updatedAt?: string;
   /** When the target settings were last changed on this device (ms). */
@@ -177,6 +179,7 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
     targetsSynced: stored.targetsSynced === true ? true : undefined,
     // Role, Level, coach: a profile saved before they existed loads as user, Level 0, no coach
     ...normaliseCoaching(stored),
+    serverLevel: serverLevelOf(stored.serverLevel),
   };
   return profileFromDraft(draft, base, currentYear);
 }

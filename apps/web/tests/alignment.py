@@ -349,12 +349,12 @@ def main():
             else:
                 print(f"[PASS] / select @ {vp['name']} [select-bar] ({pairs} pairs)")
 
-        # cc-28c: the Level explainer's rows (a user at Level 2 opens it from the label above the column)
+        # cc-28c: the Level explainer's rows (a user at Level 2 opens it from the header badge, feat/level-ui)
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
             page.goto(f"{BASE_URL}/app?level=2", wait_until="networkidle")
             page.wait_for_timeout(600)
-            page.get_by_role("button", name="Level 2 · HLV Khánh").click()
+            page.locator("[data-header-level] >> visible=true").first.click()
             page.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=5000)
             res = check_align_groups(page, "level-row")
             pairs = res["pairs"].get("level-row", 0)

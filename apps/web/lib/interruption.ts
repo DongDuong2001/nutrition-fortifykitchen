@@ -8,12 +8,14 @@
  * (see interruptionBlockedByUi). Pure module state, no React; the hosts subscribe to be told when to look again.
  * One exception (share-spotlight, Hao 22/10): once "Có gì mới" has opened and closed, one tip that is made to follow it (the share tip)
  * may open right after it, in the same app open (followWhatsNew).
+ * The Level-up celebration (feat/level-ui) ranks after Có gì mới and before the install pop-up: it plays first, or in the place of
+ * that tip right after Có gì mới (claimLevelUp).
  */
 import { HOME_ROUTE } from "@/lib/nav";
 
-export type Interruption = "whats-new" | "install" | "tip";
+export type Interruption = "whats-new" | "level-up" | "install" | "tip";
 
-const RANK: Record<Interruption, number> = { "whats-new": 0, install: 1, tip: 2 };
+const RANK: Record<Interruption, number> = { "whats-new": 0, "level-up": 1, install: 2, tip: 3 };
 
 let shown: Interruption | null = null;
 let followed = false;
@@ -72,13 +74,23 @@ export function claimInterruption(kind: Interruption): boolean {
 
 /** "Có gì mới" opened this app open and nothing has followed it yet: the one tip that may follow it can open now. */
 export function mayFollowWhatsNew(): boolean {
-  return shown === "whats-new" && !followed;
+  return shown === "whats-new" && !followed && !due.has("level-up");
 }
 
 /** That tip is about to open: true when it may (and then nothing else follows). */
 export function claimFollowWhatsNew(): boolean {
   if (!mayFollowWhatsNew()) return false;
   followed = true;
+  notify();
+  return true;
+}
+
+/** The Level-up celebration is about to play: first this app open, or right after Có gì mới (then nothing else follows). */
+export function claimLevelUp(): boolean {
+  if (claimInterruption("level-up")) return true;
+  if (shown !== "whats-new" || followed) return false;
+  followed = true;
+  due.delete("level-up");
   notify();
   return true;
 }

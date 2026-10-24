@@ -4,8 +4,8 @@ Production build, clock fixed at 2026-10-15 10:00, demo mode (the sample account
 - Level 0: the one-time hint card on Hôm nay (44 px close, gone for good once closed) leads to /settings/coach.
 - /settings/coach: no coach -> the code field; a wrong code shows the error; the right code (any case) links;
   with a coach: name, "Level 1 · do HLV đặt", the explainer, Rời HLV with its confirm.
-- Hôm nay: the "Level 1 · HLV Khánh" label opens the explainer; the linked card; a raise or a lower by the coach
-  (the mock server) shows its card once. None of this is in the share image.
+- Hôm nay (feat/level-ui): linking plays the Level-up celebration once (0 → 1), the header badge opens the explainer; a raise
+  by the coach (the mock server) plays it again, a lower shows the calm card once. None of this is in the share image.
 - /join/<code>: confirm sheet then Hôm nay; a wrong code; signed out keeps the code and goes to sign-up.
 - Setup: the optional coach code field, used when setup is done.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28c.py
@@ -93,6 +93,21 @@ def set_server_level(pg, level):
     )
 
 
+def celebration(pg, level, subtitle, tag):
+    """The Level-up celebration plays once: its title and subtitle, then ✕ closes it."""
+    stage = pg.locator("[data-level-up]")
+    stage.wait_for(state="attached", timeout=8000)
+    dlg = pg.get_by_role("dialog", name=re.compile(f"Lên Level {level}"))
+    pg.wait_for_timeout(4200)
+    text = squash(dlg.inner_text())
+    check(subtitle in text, f"{tag}: the celebration says {subtitle!r} ({text[:80]!r})")
+    dlg.get_by_role("button", name="Đóng").click()
+    # the badge lands (480 ms), then the header badge takes the hit (450 ms): measured after both
+    pg.wait_for_timeout(1100)
+    check(stage.count() == 0, f"{tag}: the celebration closes")
+    return text
+
+
 def run(browser, size, tag):
     w = size["width"]
     ctx, pg, errors = new_page(browser, size)
@@ -151,13 +166,13 @@ def run(browser, size, tag):
     dlg.get_by_role("button", name="Đóng").click()
     pg.wait_for_timeout(300)
 
-    # Hôm nay: the label and the linked card
+    # Hôm nay: the celebration for 0 → 1, then the header badge
     home(pg)
-    card = pg.locator("[data-level-card]")
-    check(card.count() == 1 and "Bạn đang được HLV Khánh theo dõi · Level 1" in squash(card.inner_text()), f"{tag} linked: the card")
-    label = pg.get_by_role("button", name="Level 1 · HLV Khánh")
-    check(label.count() == 1 and label.bounding_box()["height"] >= 43.5, f"{tag} linked: the label above the column")
-    label.click()
+    celebration(pg, 1, "HLV Khánh đang theo dõi bạn.", f"{tag} linked")
+    check(pg.locator("[data-level-card]").count() == 0, f"{tag} linked: no card any more (the celebration said it)")
+    label = pg.get_by_role("button", name="Level 1, HLV Khánh. Xem Level").locator("visible=true")
+    check(label.count() == 1 and label.first.bounding_box()["height"] >= 43.5, f"{tag} linked: the header badge ({label.count()}, {label.first.bounding_box() if label.count() else None})")
+    label.first.click()
     pg.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=4000)
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(300)
@@ -169,26 +184,15 @@ def run(browser, size, tag):
     check(snap and "HLV Khánh" not in snap["text"] and "theo dõi" not in snap["text"] and "LEVEL" in snap["text"].upper(), f"{tag} share: no coach label or card in the image")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(300)
-    card.get_by_role("button", name="Đóng thông báo").click()
-    pg.wait_for_timeout(300)
-    check(pg.locator("[data-level-card]").count() == 0, f"{tag} linked: the card closes")
 
-    # the coach raises to 3, then lowers to 1
+    # the coach raises to 3 (the celebration, once), then lowers to 1 (the calm card)
     set_server_level(pg, 3)
     home(pg)
-    card = pg.locator("[data-level-card]")
-    text = squash(card.inner_text()) if card.count() else ""
-    check("HLV Khánh đã nâng bạn lên Level 3: thêm" in text and "Phosphorus" in text and "Vitamin B1" in text and "chi tiết béo và xơ" in text, f"{tag} raised: the card ({text!r})")
-    check(card.get_by_role("button", name="Xem").count() == 1, f"{tag} raised: Xem opens the explainer")
-    card.get_by_role("button", name="Xem").click()
-    pg.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=4000)
-    check(pg.get_by_role("dialog").locator("li[aria-current=true]").count() == 1, f"{tag} raised: Level 3 is the current one")
-    pg.keyboard.press("Escape")
-    pg.wait_for_timeout(300)
-    pg.locator("[data-level-card]").get_by_role("button", name="Đóng thông báo").click()
-    pg.wait_for_timeout(300)
+    text = celebration(pg, 3, "HLV Khánh vừa nâng Level cho bạn.", f"{tag} raised")
+    check("Phosphorus" in text and "Vitamin B1" in text and "chi tiết béo và xơ" in text, f"{tag} raised: what it adds ({text!r})")
     home(pg)
-    check(pg.locator("[data-level-card]").count() == 0, f"{tag} raised: shown once")
+    pg.wait_for_timeout(3000)
+    check(pg.locator("[data-level-up]").count() == 0, f"{tag} raised: shown once")
     check(pg.locator("aside[aria-label='Vi chất'] h3").first.text_content().strip() == "Chi tiết béo & xơ", f"{tag} raised: Hôm nay now lists the Level 3 groups")
     set_server_level(pg, 1)
     home(pg)
@@ -208,7 +212,8 @@ def run(browser, size, tag):
     pg.wait_for_timeout(400)
     check("Bạn chưa có huấn luyện viên" in body(pg), f"{tag} leave: back to no coach")
     home(pg)
-    check(pg.get_by_role("button", name=re.compile("^Level \\d · HLV")).count() == 0, f"{tag} leave: no label on Hôm nay")
+    check(pg.get_by_role("button", name=re.compile("^Level \\d, HLV")).count() == 0, f"{tag} leave: no coach on the header badge")
+    check(pg.get_by_role("link", name="Nhập mã huấn luyện viên").locator("visible=true").count() == 1, f"{tag} leave: '+ HLV' in the header")
     check(pg.locator("aside[aria-label='Vi chất'] h3").all_text_contents() == ["Khoáng chất", "Vitamin"], f"{tag} leave: the basic list is back")
     check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag}: no console errors {errors[:1]}")
     ctx.close()
@@ -223,7 +228,7 @@ def run(browser, size, tag):
     pg.wait_for_url(re.compile(r"^[^?]*/app$"), timeout=8000)
     pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(500)
-    check("Bạn đang được HLV Khánh theo dõi · Level 1" in body(pg), f"{tag} join: linked and on Hôm nay")
+    celebration(pg, 1, "HLV Khánh đang theo dõi bạn.", f"{tag} join: linked and on Hôm nay")
     pg.goto(BASE + "/join/H1T-NOPE", wait_until="networkidle")
     pg.wait_for_timeout(500)
     check("Mã không đúng. Kiểm tra lại với HLV của bạn." in body(pg), f"{tag} join: a wrong code")

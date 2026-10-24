@@ -72,7 +72,7 @@ export default function CoachClientPage() {
                 <span className="text-cap font-semibold text-secondary">Level hiện tại</span>
                 <span className="text-callout font-bold text-text">Level {client.level}</span>
               </div>
-              <LevelBadge level={toLevel(client.level)} size="share" />
+              <LevelBadge level={toLevel(client.level)} />
             </Card>
 
             <section aria-labelledby="coach-level-pick" className="flex flex-col gap-2">
