@@ -13,7 +13,9 @@ import { Segmented } from "@/components/ui/segmented";
 import { Sheet } from "@/components/ui/sheet";
 import { MEAL_DOT } from "@/components/home/meal-dot";
 import { TagDot } from "@/components/templates/template-parts";
+import { TemplateMacros, TemplateMicros } from "@/components/templates/template-micros";
 import { useDiary } from "@/lib/diary-store";
+import { useCoaching } from "@/hooks/use-coaching";
 import { lastInAppPath, useBack } from "@/hooks/use-back";
 import { useUnsavedWork } from "@/lib/unsaved-work";
 import { useDayTemplateRows } from "@/hooks/use-day-templates";
@@ -37,7 +39,9 @@ import {
   type DayTemplateTag,
 } from "@/lib/day-templates";
 import { formatAmount, formatRange } from "@/lib/format";
-import { SLOT_LABEL, pctLabel, pctOf } from "@/lib/home";
+import { SLOT_LABEL, pctLabel, pctOf, targetOf } from "@/lib/home";
+import { columnGroups, countedForLevel, levelSummary } from "@/lib/level-nutrients";
+import { templateNutrition } from "@/lib/template-micros";
 import { getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
 import { markUsed } from "@/lib/onboarding-store";
 import { SHEET_BACK_DELAY_MS } from "@/lib/sheet-history";
@@ -137,6 +141,18 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
   const totals = useMemo(() => templateTotals(draft, CATALOG_FOODS), [draft, version]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const perMeal = useMemo(() => templateMealKcal(draft, CATALOG_FOODS), [draft, version]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const nutrition = useMemo(() => templateNutrition(draft, CATALOG_FOODS), [draft, version]);
+  // Vi chất at the user's Level, against the day's targets (the same list and rule as Hôm nay)
+  const { level } = useCoaching();
+  const groups = useMemo(() => columnGroups(level), [level]);
+  const countedIds = useMemo(() => countedForLevel(level), [level]);
+  const microTargets = useMemo(() => Object.fromEntries(countedIds.map((id) => [id, targetOf(data, id)])), [countedIds, data]);
+  const macroTargets = useMemo(
+    () => ({ protein: targetOf(data, "protein"), carbs: targetOf(data, "carbs"), fat: targetOf(data, "fat"), fiber: targetOf(data, "fiber") }),
+    [data]
+  );
+  const summary = useMemo(() => levelSummary(nutrition.values.nutrients, microTargets, countedIds), [nutrition, microTargets, countedIds]);
   const kcalMin = data.calories.targetMin;
   const kcalMax = data.calories.targetMax;
   const pct = pctOf(totals.kcal, kcalMin);
@@ -297,9 +313,12 @@ function EditorForm({ id, template, onDeleted }: { id: string; template: DayTemp
             <span className="ml-1 font-display text-display font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(totals.kcal, kcalMin)}</span>
           </div>
           <LevelBar label={`Kcal so với mục tiêu ngày: ${formatAmount(totals.kcal, "kcal")} trên ${formatAmount(kcalMin, "kcal")}`} pct={pct} heightClass="h-[10px]" />
+          <TemplateMacros values={nutrition.values} targets={macroTargets} />
           <p className="m-0 text-xs leading-snug text-secondary">Đủ để so mục tiêu khi áp dụng</p>
         </Card>
       </section>
+
+      <TemplateMicros values={nutrition.values} extras={nutrition.extras} groups={groups} targets={microTargets} summary={summary} empty={foodCount === 0} />
 
       <div className="mt-1 flex flex-col items-center gap-1">
         {/* A day built from scratch is applied once it is saved (Áp dụng would leave it unsaved) */}

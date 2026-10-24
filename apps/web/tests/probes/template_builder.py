@@ -62,6 +62,8 @@ def run(browser):
     plus = pg.get_by_role("link", name="Thêm vào Bữa sáng")
     box = plus.bounding_box()
     check(box is not None and box["width"] >= 44 and box["height"] >= 44, f"each meal has a 44 px + ({box})")
+    check(pg.get_by_role("heading", name="Vi chất").count() == 1 and pg.get_by_text("Thêm món vào các bữa để xem vi chất của cả ngày.").count() == 1, "an empty day has the Vi chất section with a line to add foods, no rows")
+    check(pg.locator("[data-nutrient-row]").count() == 0, "…and no nutrient rows (an unknown is never 0)")
     pg.screenshot(path=str(SHOTS / "template-builder-empty.png"))
 
     plus.click()
@@ -106,6 +108,15 @@ def run(browser):
     check(diary_count(pg) == logged, f"still nothing in the diary ({diary_count(pg)} = {logged})")
     check(diary_count(pg) == logged, f"nothing went into the diary ({diary_count(pg)} = {logged})")
     total_before = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
+    # Vi chất: the Level's own list with "x/N đạt", the macros under the kcal
+    summary = pg.locator("[data-template-summary]").first.inner_text() if pg.locator("[data-template-summary]").count() else ""
+    counts = re.search(r"(\d+)/(\d+)\s*đạt", summary)
+    rows = pg.locator("[data-nutrient-row]").count()
+    check(counts is not None and rows > 0 and int(counts.group(2)) == rows, f"Vi chất shows x/N đạt and one row per nutrient of the Level ({summary!r}, {rows} rows)")
+    check(pg.locator("dl[data-align-group=template-macros] dt").all_inner_texts() == ["Đạm", "Tinh bột", "Chất béo", "Chất xơ"], "Tổng lists Đạm, Tinh bột, Chất béo, Chất xơ")
+    micros_before = pg.locator("[data-nutrient-row]").all_inner_texts()
+    over = pg.evaluate("() => document.documentElement.scrollWidth > innerWidth")
+    check(not over, "the page does not scroll sideways")
     pg.screenshot(path=str(SHOTS / "template-builder-added.png"))
 
     # Change the portion
@@ -121,6 +132,7 @@ def run(browser):
     pg.wait_for_timeout(600)
     total_after = pg.locator("#tpl-total ~ * .font-display").first.inner_text()
     check(total_after != total_before, f"a new portion changes the total live ({total_before} → {total_after})")
+    check(pg.locator("[data-nutrient-row]").all_inner_texts() != micros_before, "…and the vi chất with it")
 
     # Lưu lists it, Áp dụng copies it
     pg.get_by_role("button", name="Lưu").first.click()
