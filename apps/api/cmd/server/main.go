@@ -137,7 +137,11 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	documentsHandler := documents.NewHandler(documents.NewService(documents.NewRepository(pool)))
 
 	// Khoá học (migration 000022): the page images are kept on disk under cfg.CoursesDir, never served as static files
-	coursesHandler := courses.NewHandler(courses.NewService(courses.NewRepository(pool), courses.NewDiskStore(cfg.CoursesDir)))
+	coursesService := courses.NewService(courses.NewRepository(pool), courses.NewDiskStore(cfg.CoursesDir))
+	if cfg.CoursesMinFreeBytes > 0 {
+		coursesService.SetMinFree(cfg.CoursesMinFreeBytes)
+	}
+	coursesHandler := courses.NewHandler(coursesService)
 	// A 60-page PDF is 60 uploads: its own limit (180 a minute), outside the 60 a minute of the other writes
 	coursePageLimiter := ratelimit.NewUserRateLimiter(180)
 

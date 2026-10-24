@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -11,19 +12,25 @@ import (
 	"github.com/google/uuid"
 
 	"nutrition-api/internal/documents"
+	"nutrition-api/internal/logger"
 )
 
 type Service struct {
 	repo  Repository
 	store Store
 	now   func() time.Time
+	// minFree is the room the disk must keep before a page is written (MinFreeBytes unless COURSES_MIN_FREE_BYTES says otherwise)
+	minFree uint64
 	// newCode is documents.NewCode (the coach join code's format); a test swaps it
 	newCode func() (string, error)
 }
 
 func NewService(repo Repository, store Store) *Service {
-	return &Service{repo: repo, store: store, now: time.Now, newCode: documents.NewCode}
+	return &Service{repo: repo, store: store, now: time.Now, minFree: MinFreeBytes, newCode: documents.NewCode}
 }
+
+// SetMinFree changes how much room the disk must keep before a page is written.
+func (s *Service) SetMinFree(n uint64) { s.minFree = n }
 
 // access is the one check behind every read: the course's lock for this viewer. A course that is not there is ErrNotFound.
 func (s *Service) access(ctx context.Context, uid, courseID uuid.UUID) (Viewer, *Course, error) {
@@ -330,7 +337,31 @@ func (s *Service) CreateLesson(ctx context.Context, course uuid.UUID, in LessonI
 	if _, err := s.repo.Course(ctx, course); err != nil {
 		return nil, err
 	}
+	if in.Kind == "pdf" {
+		s.sweepUnready(ctx, course)
+	}
 	return s.repo.CreateLesson(ctx, course, in, minutes)
+}
+
+// sweepUnready deletes the course's PDF lessons that were never finished and are older than a day (a coach's tab died halfway: the web
+// only cleans up while it is still open), with their page folders. It runs when a new PDF lesson is made, so a course that is being
+// worked on cleans itself. A failure is logged, never the coach's problem: the lesson being made goes ahead, and the next one tries again.
+func (s *Service) sweepUnready(ctx context.Context, course uuid.UUID) {
+	ids, err := s.repo.UnreadyBefore(ctx, course, s.now().Add(-StaleUnready))
+	if err != nil {
+		logger.Log.Warn().Err(err).Msg("courses: could not list unfinished lessons")
+		return
+	}
+	for _, id := range ids {
+		// The row first: a folder is only removed when nothing points at it any more
+		if err := s.repo.DeleteLesson(ctx, course, id); err != nil && !errors.Is(err, ErrNotFound) {
+			logger.Log.Warn().Err(err).Str("lesson", id.String()).Msg("courses: could not delete an unfinished lesson")
+			continue
+		}
+		if err := s.store.RemoveLesson(course, id); err != nil {
+			logger.Log.Warn().Err(err).Str("lesson", id.String()).Msg("courses: could not remove an unfinished lesson's pages")
+		}
+	}
 }
 
 func (s *Service) UpdateLesson(ctx context.Context, course, lesson uuid.UUID, p LessonPatch) (*Lesson, error) {
@@ -380,6 +411,14 @@ func (s *Service) UploadPage(ctx context.Context, course, lesson uuid.UUID, page
 	}
 	if !IsWebP(data) {
 		return &FieldError{Field: "data", Msg: "a WebP image"}
+	}
+	// Room first: below minFree nothing is written, neither the row nor the file (a lesson is up to 60 MB and the VPS disk is near its limit)
+	free, err := s.store.FreeBytes()
+	if err != nil {
+		return fmt.Errorf("check free space: %w", err)
+	}
+	if free < s.minFree {
+		return ErrStorageFull
 	}
 	// The row first: it checks that the lesson is this course's PDF and the page is one of its pages, before anything is written
 	if err := s.repo.AddPage(ctx, course, lesson, page, len(data)); err != nil {

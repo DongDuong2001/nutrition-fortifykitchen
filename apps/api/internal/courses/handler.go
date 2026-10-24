@@ -40,6 +40,9 @@ func (h *Handler) failed(w http.ResponseWriter, err error, msg string) {
 		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid request")
 	case errors.Is(err, ErrTooLarge):
 		response.Error(w, http.StatusRequestEntityTooLarge, response.CodeValidationFailed, "Body too large")
+	case errors.Is(err, ErrStorageFull):
+		// 507: the server cannot keep the page. The web says so in words ("Máy chủ đã hết chỗ lưu bài. Báo cho HLV nhé.")
+		response.Error(w, http.StatusInsufficientStorage, "STORAGE_FULL", "Not enough room left to store the lesson")
 	case errors.Is(err, ErrNotReady):
 		response.Error(w, http.StatusConflict, response.CodeConflict, "The lesson does not have all its pages yet")
 	case errors.Is(err, ErrNotFound):

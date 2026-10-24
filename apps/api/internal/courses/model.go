@@ -42,6 +42,11 @@ const (
 	MaxPageBodyBytes = 1_450_000
 	MaxLevel         = 5
 	ToneCount        = 8
+	// MinFreeBytes is the room the disk must still have before a page is written: below it an upload is refused (507 STORAGE_FULL),
+	// so a 60 MB lesson can never fill the VPS (its disk is near its limit). COURSES_MIN_FREE_BYTES changes it.
+	MinFreeBytes uint64 = 2 << 30
+	// StaleUnready is how long a PDF lesson may stay unfinished: after that its pages are not coming (the coach's tab died) and they go.
+	StaleUnready = 24 * time.Hour
 )
 
 var (
@@ -52,6 +57,8 @@ var (
 	ErrTooLarge   = errors.New("body too large")
 	ErrNotReady   = errors.New("lesson is not finished uploading")
 	ErrPageNumber = errors.New("page number is outside the lesson's pages")
+	// ErrStorageFull: the disk has less than MinFreeBytes left, so nothing is written (answered 507 STORAGE_FULL).
+	ErrStorageFull = errors.New("not enough room left to store the page")
 )
 
 // FieldError is ErrInvalid with the field that was wrong.

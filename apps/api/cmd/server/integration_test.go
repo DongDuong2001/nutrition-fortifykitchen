@@ -31,6 +31,10 @@ const testSecret = "integration-secret-0123456789abcdef"
 // One folder of course page images per test, shared by every client of that test (they are one server)
 var coursesDirs sync.Map
 
+// coursesMinFree is the room the test server wants left on the disk before it writes a page: 1 byte, so the machine running the tests
+// is never "full" (the default is 2 GiB); the 507 test raises it past any disk.
+var coursesMinFree uint64 = 1
+
 func coursesDir(t *testing.T) string {
 	dir, _ := coursesDirs.LoadOrStore(t.Name(), t.TempDir())
 	return dir.(string)
@@ -91,7 +95,7 @@ func setup(t *testing.T) (*apiClient, *pgxpool.Pool, uuid.UUID) {
 
 	os.Setenv("SUPABASE_JWT_SECRET", testSecret)
 	t.Cleanup(func() { os.Unsetenv("SUPABASE_JWT_SECRET") })
-	cfg := &config.Config{Port: "8080", Environment: "test", AllowedOrigins: []string{"*"}, SupabaseJWTSecret: testSecret, CoursesDir: coursesDir(t)}
+	cfg := &config.Config{Port: "8080", Environment: "test", AllowedOrigins: []string{"*"}, SupabaseJWTSecret: testSecret, CoursesDir: coursesDir(t), CoursesMinFreeBytes: coursesMinFree}
 
 	user := uuid.New()
 	email := fmt.Sprintf("it-%s@example.com", user.String()[:8])

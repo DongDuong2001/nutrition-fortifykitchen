@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"syscall"
 
 	"github.com/google/uuid"
 )
@@ -19,6 +20,8 @@ type Store interface {
 	Open(course, lesson uuid.UUID, page int) (io.ReadSeekCloser, int64, error)
 	RemoveLesson(course, lesson uuid.UUID) error
 	RemoveCourse(course uuid.UUID) error
+	// FreeBytes is the room left on the disk that holds the pages (what a process that is not root may still write).
+	FreeBytes() (uint64, error)
 }
 
 // DiskStore is the Store on a directory (a docker volume in production: COURSES_DIR).
@@ -92,4 +95,17 @@ func (s *DiskStore) RemoveCourse(course uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+// FreeBytes is the free space of the volume under the root. The root is made when it is not there yet (a first upload), so the
+// answer is the volume the pages will go to, not an error.
+func (s *DiskStore) FreeBytes() (uint64, error) {
+	if err := os.MkdirAll(s.root, 0o750); err != nil {
+		return 0, fmt.Errorf("make pages folder: %w", err)
+	}
+	var st syscall.Statfs_t
+	if err := syscall.Statfs(s.root, &st); err != nil {
+		return 0, fmt.Errorf("free space: %w", err)
+	}
+	return uint64(st.Bavail) * uint64(st.Bsize), nil
 }

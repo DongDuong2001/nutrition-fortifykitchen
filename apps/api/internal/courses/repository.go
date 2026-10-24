@@ -33,6 +33,8 @@ type Repository interface {
 	CreateLesson(ctx context.Context, course uuid.UUID, in LessonInput, minutes int) (*Lesson, error)
 	UpdateLesson(ctx context.Context, course, lesson uuid.UUID, p LessonPatch, minutes *int) (*Lesson, error)
 	DeleteLesson(ctx context.Context, course, lesson uuid.UUID) error
+	// UnreadyBefore: the PDF lessons of the course that were made before `cutoff` and never finished (ready = false), whose pages are not coming.
+	UnreadyBefore(ctx context.Context, course uuid.UUID, cutoff time.Time) ([]uuid.UUID, error)
 	ReorderLessons(ctx context.Context, course, part uuid.UUID, ids []uuid.UUID) error
 	AddPage(ctx context.Context, course, lesson uuid.UUID, page, bytes int) error
 	FinishLesson(ctx context.Context, course, lesson uuid.UUID) (*Lesson, error)
@@ -393,6 +395,23 @@ func (r *PostgresRepository) DeleteLesson(ctx context.Context, course, lesson uu
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (r *PostgresRepository) UnreadyBefore(ctx context.Context, course uuid.UUID, cutoff time.Time) ([]uuid.UUID, error) {
+	rows, err := r.pool.Query(ctx, `SELECT id FROM nutrition.course_lessons WHERE course_id = $1 AND kind = 'pdf' AND NOT ready AND created_at < $2`, course, cutoff)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
 }
 
 func (r *PostgresRepository) AddPage(ctx context.Context, course, lesson uuid.UUID, page, bytes int) error {
