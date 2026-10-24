@@ -19,6 +19,9 @@ export function momentText(key: string): { announce: string; label: string | nul
   return { announce: `${nutrientName(key)} đạt mục tiêu`, label: null };
 }
 
+/** How long a moment's hero label holds before the usual one glides back (--m-goal-hold). */
+export const GOAL_LABEL_HOLD_MS = 2400;
+
 export interface QueuedMoment {
   /** The day the add was made on */
   date: string;

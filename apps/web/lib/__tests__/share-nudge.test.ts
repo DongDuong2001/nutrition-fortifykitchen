@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "../onboarding-flags";
-import { SHARE_NUDGE_TEXT, dayWellFed, shareNudgeDue } from "../share-nudge";
+import { SHARE_FULL_TEXT, SHARE_NUDGE_TEXT, dayWellFed, shareNudgeDue, shareNudgeText } from "../share-nudge";
 
 const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DEFAULT_FLAGS, ...over });
 const ids = ["vitamin_c", "iron", "calcium", "zinc", "magnesium", "potassium"];
@@ -49,5 +49,22 @@ describe("shareNudgeDue: once a day, when the day first gets there", () => {
 
   it("says so in the words of the brief", () => {
     expect(SHARE_NUDGE_TEXT).toBe("Hôm nay ăn khá đủ chất — chia sẻ nhé?");
+  });
+});
+
+// feat/sound-goals §5 "After T3": the Đủ chất moment offers Chia sẻ with its own words, under the same once-a-day cap and tips-off gate.
+describe("after Đủ chất (T3)", () => {
+  const flags = { ...DEFAULT_FLAGS };
+  it("the words: 'Đủ chất hôm nay! Chia sẻ nhé?' for the full column, the 80 % words otherwise", () => {
+    expect(SHARE_FULL_TEXT).toBe("Đủ chất hôm nay! Chia sẻ nhé?");
+    expect(shareNudgeText("full")).toBe(SHARE_FULL_TEXT);
+    expect(shareNudgeText("well")).toBe(SHARE_NUDGE_TEXT);
+  });
+  it("goes through shareNudgeDue({ was: false, now: true }): due on a normal day", () => {
+    expect(shareNudgeDue({ flags, todayIso: "2026-10-24", was: false, now: true })).toBe(true);
+  });
+  it("tips off: never; the 80 % nudge already shown today: never again (one or the other, never both)", () => {
+    expect(shareNudgeDue({ flags: { ...flags, tipsOff: true }, todayIso: "2026-10-24", was: false, now: true })).toBe(false);
+    expect(shareNudgeDue({ flags: { ...flags, shareNudgeIso: "2026-10-24" }, todayIso: "2026-10-24", was: false, now: true })).toBe(false);
   });
 });

@@ -13,19 +13,30 @@ import { formatAmount } from "@/lib/format";
  * reaches about 11 px below its 40 px line. The space after the label is outside it, so the names can go to the next line where the share
  * image keeps the label on one line (share-sheet markLines).
  */
-export function LevelSummary({ summary }: { summary: { reached: number; total: number; lacking: string[] } }) {
+export function LevelSummary({ summary }: { summary: { reached: number; total: number; lacking: string[]; done?: boolean } }) {
   return (
     <p data-level-summary className="m-0 flex flex-none flex-col gap-2 px-3 pb-2 pt-3 text-text">
       <span className="block text-body-lg font-bold leading-none">
-        <span className="font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
+        {/* feat/sound-goals: the counter pops on a goal moment (inline-block for good, so the class changes no layout); only the live column is animated */}
+        <span data-fx="count" className="inline-block font-condensed text-[2.5rem] font-extrabold leading-none tabular-nums text-cobalt">
           {summary.reached}/{summary.total}
         </span>{" "}
         đạt
       </span>
-      {summary.lacking.length > 0 && (
-        <span className="text-sm leading-5">
-          <span className="text-text/75">Thiếu nhiều nhất:</span> <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
+      {summary.done ? (
+        // Hôm nay only (the Ngày ăn mẫu builder passes no `done`): the line follows the numbers, so "Thiếu nhiều nhất" is back when a delete takes the column under
+        <span data-fx="done-line" className="inline-flex items-center gap-1 text-callout font-bold leading-5 text-cobalt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M5 12.5l4.5 4.5L19 7.5" />
+          </svg>
+          Đủ chất hôm nay
         </span>
+      ) : (
+        summary.lacking.length > 0 && (
+          <span className="text-sm leading-5">
+            <span className="text-text/75">Thiếu nhiều nhất:</span> <b className="text-callout font-bold text-text">{summary.lacking.join(", ")}</b>
+          </span>
+        )
       )}
     </p>
   );

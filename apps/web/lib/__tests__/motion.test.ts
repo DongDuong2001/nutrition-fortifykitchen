@@ -36,7 +36,7 @@ describe("motion classes", () => {
   });
 
   it.each(classes.filter((c) => !NAMES_ONLY.includes(c)))(".%s has a reduced-motion rule", (name) => {
-    expect(reduced).toMatch(new RegExp(`\\.${name}[\\s,{.\\[]`));
+    expect(reduced).toMatch(new RegExp(`\\.${name}[\\s,{.\\[:]`));
   });
 
   it("reduced motion: nothing moves; what fades takes 120 ms at most", () => {
@@ -333,3 +333,33 @@ describe("glide tokens", () => {
     for (const [file, pattern] of uses) expect([file, pattern.test(readFileSync(path.join(ROOT, file), "utf8"))]).toEqual([file, true]);
   });
 });
+
+// feat/sound-goals: the goal moments (T1 pop and sheen, T2 ring and label, T3 sparks) live inside the motion section.
+describe("goal moments", () => {
+  it("are motion classes with a reduced rule each, the pseudo-element ones included", () => {
+    expect(classes).toEqual(expect.arrayContaining(["m-goal-pop", "m-goal-sheen", "m-goal-ring", "m-goal-label", "m-goal-sparks"]));
+    expect(reduced).toMatch(/\.m-goal-sheen::after/);
+    expect(reduced).toMatch(/\.m-goal-ring::after/);
+  });
+  it("reduced motion: no pop, sheen, ring or sparks; the label fades in 120 ms (m-goal-fade)", () => {
+    expect(reduced).toMatch(/\.m-goal-sparks \{\s*display: none;/);
+    expect(reduced).toMatch(/\.m-goal-label \{\s*animation: m-goal-fade 120ms var\(--ease-out\) backwards;/);
+    expect(css).toMatch(/@keyframes m-goal-fade \{\s*from \{\s*opacity: 0;/);
+  });
+  it("run 420 to 700 ms, with the overshoot of .m-level-land, from tokens", () => {
+    expect(motion).toMatch(/--m-goal-pop: 420ms;/);
+    expect(motion).toMatch(/--m-goal-sheen: 650ms;/);
+    expect(motion).toMatch(/--m-goal-ring: 700ms;/);
+    expect(motion).toMatch(/--ease-pop: cubic-bezier\(0\.34, 1\.56, 0\.64, 1\);/);
+    expect(main).toMatch(/\.m-goal-pop \{\s*display: inline-block;\s*animation: m-goal-pop var\(--m-goal-pop\) var\(--ease-pop\) backwards;/);
+  });
+  it("move only transform and opacity, once, and add no layout of their own", () => {
+    for (const name of ["m-goal-pop", "m-goal-sheen", "m-goal-ring", "m-goal-label", "m-goal-spark"]) {
+      const body = css.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?)\\n\\}`))?.[1] ?? "";
+      expect(body).not.toBe("");
+      for (const [, prop] of body.matchAll(/^\s*([a-z-]+):/gm)) expect([name, prop]).toEqual([name, expect.stringMatching(/^(transform|opacity)$/)]);
+    }
+    expect(main).not.toMatch(/\.m-goal-[a-z-]+[^{]*\{[^}]*animation:[^;}]*infinite/);
+  });
+});
+
