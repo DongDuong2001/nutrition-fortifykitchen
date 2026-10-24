@@ -43,11 +43,12 @@ export const RELEASES: readonly Release[] = [
         body: "Cài đặt có mục Góp ý & hỗ trợ. Báo lỗi, báo sai số liệu hay yêu cầu thêm món, app soạn sẵn email cho bạn.",
       },
       { icon: "home", title: "Hôm nay dễ đọc hơn", body: "Số to hơn, chữ đậm hơn. Chất xơ có dòng riêng ở đầu cột vi chất, ngay dưới số vi chất đạt." },
-      // feat/documents: Tài liệu in Cài đặt › Hỗ trợ. No tour, as this entry has none (its controls are text buttons, data-tour documents-edit and documents-upload are there for one)
+      // feat/courses-web (24/10): Tài liệu became courses and moved from Cài đặt › Hỗ trợ to Khám phá; this item replaces the one that named
+      // the old place. The tour step points at the Khám phá carousel (the Khám phá tab where the carousel is not on screen, as from Hôm nay).
       {
-        icon: "home",
-        title: "Tài liệu của app ngay trong Cài đặt",
-        body: "Cài đặt › Tài liệu có các hướng dẫn và quy tắc HLV viết cho bạn. HLV gửi mã truy cập, nhập mã là đọc được ngay trong app.",
+        icon: "bars",
+        title: "Tài liệu thành khóa học",
+        body: "Chia phần, mở bằng mã hoặc theo Level, nhớ chỗ đang học. Xem ở Khám phá › Tài liệu, chạm Học tiếp để vào đúng trang bạn đang đọc.",
       },
       { icon: "home", title: "Dễ dùng hơn trên máy tính", body: "Rê chuột lên món là thấy sáng lên, các hàng Khám phá có nút xem tiếp, nút Thêm luôn hiện trong hộp thêm món, Esc thoát chọn nhiều món và thanh bên luôn ở yên khi cuộn." },
       { icon: "target", title: "Tự chọn thời gian tập", body: "Ngày tập có thêm nút Tùy chỉnh để chọn từ 30 đến 480 phút. Muối, tinh bột nhanh và natri tính theo số phút bạn chọn." },
@@ -78,6 +79,12 @@ export const RELEASES: readonly Release[] = [
       { target: "hero-macro", fallback: "home-hero", title: "Giữ để xem món nào góp vào", body: "Giữ Đạm, Tinh bột hoặc Chất béo thêm chút xíu là thấy các món góp vào. Chạm nhẹ một cái thì chỉ đổi sang kcal." },
       { target: "nav-explore", title: "Sửa hoặc xóa món của bạn", body: "Vào Khám phá › Món ăn của tôi, chạm dấu ⋯ ở cuối dòng để sửa hoặc xóa món bạn tạo." },
       { target: "home-food-list", fallback: "meal-pill", title: "Vuốt món để xóa hoặc mở tùy chọn", body: "Vuốt một món sang trái để xóa, sang phải để mở tùy chọn." },
+      {
+        target: "explore-courses",
+        fallback: "nav-explore",
+        title: "Tài liệu thành khóa học",
+        body: "Ở Khám phá, mục Tài liệu giờ là các khóa học của HLV. Mở bằng mã hoặc khi bạn đủ Level, và app nhớ trang bạn đang đọc.",
+      },
     ],
   },
   // Overnight 22→23/10 (the Chrome audit of main f13f64c), on top of 22b. PR 3, units and counts; PR 1 (one sheet in the + flow) adds its item

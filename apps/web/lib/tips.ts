@@ -375,6 +375,16 @@ export const TIPS: readonly Tip[] = [
     used: ["food-swipe"],
     when: (c) => today(c) && c.touch === true,
   },
+  // feat/courses-web (24/10): Học tiếp opens the lesson not finished yet at the page where the user stopped. It is on the library (the row under the
+  // tabs) and on a course (the blue button); used by a tap on either.
+  {
+    id: "course-resume",
+    target: "course-resume",
+    title: "Học tiếp đúng chỗ đang dừng",
+    body: "Chạm Học tiếp để mở bài chưa xong, ở đúng trang bạn đã đọc tới.",
+    used: ["course-resume"],
+    when: (c) => c.pathname === "/explore/documents" || /^\/explore\/documents\/[^/]+$/.test(c.pathname ?? ""),
+  },
 ];
 
 /** design-floor: at most one tip in this long (V3, 22/10). */
