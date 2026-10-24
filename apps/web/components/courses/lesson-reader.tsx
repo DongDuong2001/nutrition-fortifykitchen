@@ -15,6 +15,11 @@ import { CoursesError, type CoursesApi } from "@/lib/courses";
 import { rememberCourse } from "@/lib/course-recent";
 import { parseMarkdown, type Span } from "@/lib/mini-markdown";
 import { CheckGlyph, ChevronGlyph, LessonTile } from "@/components/courses/course-glyphs";
+import { GoalLabel } from "@/components/ui/goal-label";
+import { cue } from "@/lib/cue";
+import { courseMomentDue, loadFinishedCourses, saveFinishedCourses, withFinishedCourse } from "@/lib/course-moments";
+import { playFx, prefersReducedMotion } from "@/lib/goal-fx";
+import { ANNOUNCE_MS, GOAL_LABEL_HOLD_MS } from "@/lib/goal-moments";
 import { ProtectedSurface, Watermark } from "@/components/courses/protected-surface";
 
 const PROGRESS_DELAY_MS = 700;
@@ -252,6 +257,37 @@ function Reading({
   const doneRef = useRef(done);
   doneRef.current = done;
 
+  // feat/sound-goals §5b. Marked done: the check draws in once and the success ring fades in (the ring is data-done on the button); a tap
+  // plays the `save` cue, the reader marking it by itself (the last page on screen) looks the same and makes no sound (D-A11Y-04).
+  // The mark that makes every lesson of the course done also rings the button and says "Xong khóa học" for 2,4 s (once per course per account).
+  const [drawn, setDrawn] = useState(0);
+  const [finished, setFinished] = useState<{ key: number; text: boolean } | null>(null);
+  const [announce, setAnnounce] = useState("");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const moments = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => moments.current.forEach(clearTimeout), []);
+  // The ring is a class for one run: added once the button has rendered its new state (its className follows `done`, which would wipe it)
+  useEffect(() => {
+    if (finished?.text && !prefersReducedMotion() && buttonRef.current) playFx(buttonRef.current, "m-goal-ring");
+  }, [finished]);
+  const markedDone = (byTap: boolean) => {
+    setDrawn((n) => n + 1);
+    const lessons = course.parts.flatMap((p) => p.lessons).map((l) => ({ id: l.id, done: l.id === lesson.id ? false : l.done }));
+    const last = courseMomentDue(lessons, lesson.id, course.id, loadFinishedCourses());
+    let said = "Đã xong bài này";
+    if (last) {
+      saveFinishedCourses(withFinishedCourse(loadFinishedCourses(), course.id));
+      said = `Xong khóa học ${course.title}`;
+      setFinished({ key: Date.now(), text: true });
+      moments.current.push(setTimeout(() => setFinished({ key: Date.now(), text: false }), GOAL_LABEL_HOLD_MS));
+      if (byTap) cue("day");
+    } else if (byTap) {
+      cue("save");
+    }
+    setAnnounce(said);
+    moments.current.push(setTimeout(() => setAnnounce(""), ANNOUNCE_MS));
+  };
+
   const save = useCallback(
     (force = false) => {
       const page = current.current;
@@ -274,7 +310,9 @@ function Reading({
     doneRef.current = true;
     dirty.current = true;
     setDone(true);
+    markedDone(false);
     later();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [later]);
 
   // The place is the page under a line a fifth of the way down the screen (the one at the top of it)
@@ -357,9 +395,11 @@ function Reading({
   useInView(end, "0px", 0.5, (v) => {
     if (!v || (pdf && !touched.current)) return;
     if (!pdf) {
+      if (doneRef.current) return;
       doneRef.current = true;
       dirty.current = true;
       setDone(true);
+      markedDone(false);
       later();
     }
   });
@@ -369,6 +409,7 @@ function Reading({
     doneRef.current = nextDone;
     dirty.current = true;
     setDone(nextDone);
+    if (nextDone) markedDone(true);
     if (timer.current) clearTimeout(timer.current);
     save(true);
   };
@@ -393,15 +434,33 @@ function Reading({
 
         <section ref={end} aria-label="Kết thúc bài" className="flex flex-col gap-3 pt-1">
           <button
+            ref={buttonRef}
             type="button"
             aria-pressed={done}
             onClick={toggle}
             data-done={done || undefined}
-            className={`flex min-h-[52px] cursor-pointer items-center justify-center gap-2 rounded-full border-0 bg-card text-body-lg font-bold transition-press active:scale-[0.97] motion-reduce:active:scale-100 ${done ? "text-success shadow-[inset_0_0_0_2px_var(--color-success)]" : "text-text shadow-[inset_0_0_0_2px_var(--color-text)]"}`}
+            // The ink ring stays under the success overlay (m-done-ring), so a box-shadow never animates
+            className={`m-done-ring flex min-h-[52px] cursor-pointer items-center justify-center gap-2 rounded-full border-0 bg-card text-body-lg font-bold shadow-[inset_0_0_0_2px_var(--color-text)] transition-press active:scale-[0.97] motion-reduce:active:scale-100 ${done ? "text-success" : "text-text"}`}
           >
-            {done && <CheckGlyph size={20} />}
-            {done ? "Đã xong bài này" : "Đánh dấu đã xong"}
+            {done && <CheckGlyph key={drawn} size={20} draw={drawn > 0} />}
+            {finished?.text ? (
+              <GoalLabel key={finished.key} plain>
+                Xong khóa học
+              </GoalLabel>
+            ) : finished ? (
+              <GoalLabel key={finished.key} plain>
+                {done ? "Đã xong bài này" : "Đánh dấu đã xong"}
+              </GoalLabel>
+            ) : done ? (
+              "Đã xong bài này"
+            ) : (
+              "Đánh dấu đã xong"
+            )}
           </button>
+          {/* D-MOT-02: marked done says so in words, for a screen reader too */}
+          <p aria-live="polite" className="sr-only">
+            {announce}
+          </p>
           {next ? (
             <Link href={`/explore/documents/${course.id}/${next.id}`} data-align-group="reader-end" className="m-tint flex min-h-16 items-center gap-3 rounded-card border border-transparent bg-card px-4 py-2 text-text no-underline shadow-ring transition-press">
               <LessonTile kind={next.kind} background={pairBackground(partToneIndex(course.tone, Math.max(0, partAt)))} />

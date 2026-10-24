@@ -16,15 +16,19 @@ SEED = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "fi
 WATCH = """() => {
   window.__fx = [];
   const t0 = performance.now();
-  const describe = (el) => (el.closest('[data-nutrient-row]')?.getAttribute('data-nutrient-row') || el.closest('[data-hero-macro]')?.getAttribute('data-hero-macro') || el.getAttribute('data-fx') || el.tagName.toLowerCase());
+  const describe = (el) => (el.closest('[role=dialog]') && el.closest('[role=dialog]') !== el ? 'dialog ' : '') + (el.closest('[data-nutrient-row]')?.getAttribute('data-nutrient-row') || el.closest('[data-hero-macro]')?.getAttribute('data-hero-macro') || el.getAttribute('data-fx') || el.tagName.toLowerCase());
   new MutationObserver((list) => {
     for (const m of list) {
       if (m.type === 'childList') {
-        m.addedNodes.forEach((n) => { if (n.nodeType === 1 && n.classList?.contains('m-goal-sparks')) window.__fx.push({ cls: 'm-goal-sparks', at: Math.round(performance.now() - t0), what: 'sparks' }); });
+        m.addedNodes.forEach((n) => {
+          if (n.nodeType !== 1) return;
+          if (n.classList?.contains('m-goal-sparks')) window.__fx.push({ cls: 'm-goal-sparks', at: Math.round(performance.now() - t0), what: 'sparks' });
+          for (const el of [n, ...n.querySelectorAll('[class*="m-check-draw"], [class*="m-lock-open"]')]) for (const c of el.classList || []) if (/^m-(check-draw|lock-open)$/.test(c)) window.__fx.push({ cls: c, at: Math.round(performance.now() - t0), what: describe(el) });
+        });
         continue;
       }
       const el = m.target;
-      for (const c of el.classList) if (c.startsWith('m-goal-') && !(m.oldValue || '').split(' ').includes(c)) window.__fx.push({ cls: c, at: Math.round(performance.now() - t0), what: describe(el) });
+      for (const c of el.classList) if (/^m-(goal-|check-draw$|lock-open$)/.test(c) && !(m.oldValue || '').split(' ').includes(c)) window.__fx.push({ cls: c, at: Math.round(performance.now() - t0), what: describe(el) });
     }
   }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
 }"""

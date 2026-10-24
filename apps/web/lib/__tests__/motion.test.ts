@@ -51,7 +51,9 @@ describe("motion classes", () => {
     const frames = [...css.matchAll(/@keyframes ([a-z-]+) \{([\s\S]*?)\n\}/g)];
     for (const [, name, body] of frames) {
       const props = [...body.matchAll(/^\s*([a-z-]+):/gm)].map((m) => m[1]);
-      for (const prop of props) expect([name, prop]).toEqual([name, expect.stringMatching(/^(transform|opacity)$/)]);
+      // The check's draw-in is a stroke-dashoffset: one named exception (as .m-bar has for its colour), on a path no layout depends on
+      const allowed = name === "m-check-draw" ? /^(transform|opacity|stroke-dashoffset)$/ : /^(transform|opacity)$/;
+      for (const prop of props) expect([name, prop]).toEqual([name, expect.stringMatching(allowed)]);
     }
     for (const [selector, body] of rules(motion)) {
       const props = decl(body, "transition").flatMap((t) => t.split(",").map((p) => p.trim().split(/\s+/)[0]));
@@ -361,5 +363,22 @@ describe("goal moments", () => {
     }
     expect(main).not.toMatch(/\.m-goal-[a-z-]+[^{]*\{[^}]*animation:[^;}]*infinite/);
   });
-});
 
+  // Lesson done and code accepted (components/courses), with the lead fixes that keep them inside the rules above
+  it("the check draws in from stroke-dashoffset 1 with a backwards fill (whole once the class is off), from tokens", () => {
+    expect(motion).toMatch(/--m-check-draw: 200ms;/);
+    expect(main).toMatch(/\.m-check-draw path \{\s*animation: m-check-draw var\(--m-check-draw\) var\(--ease-out\) backwards;/);
+    expect(css).toMatch(/@keyframes m-check-draw \{\s*from \{\s*stroke-dashoffset: 1;/);
+    expect(main).not.toMatch(/m-check-draw[^;]*forwards/);
+  });
+  it("the shackle is open in the base rule and swings from shut; the reduced rule is only animation: none (no transform in the reduced block)", () => {
+    expect(main).toMatch(/\.m-lock-open \.m-shackle \{[^}]*transform: rotate\(-24deg\);[^}]*animation: m-lock-open var\(--m-lock-open\) var\(--ease-pop\) backwards;/);
+    expect(css).toMatch(/@keyframes m-lock-open \{\s*from \{\s*transform: none;/);
+    expect(reduced).toMatch(/\.m-lock-open \.m-shackle \{\s*animation: none;\s*\}/);
+  });
+  it("the success ring is an overlay: opacity in 160 ms (--m-press) when marked, out in 120 ms (--m-fade), a reduced rule of its own", () => {
+    expect(main).toMatch(/\.m-done-ring::before \{[^}]*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
+    expect(main).toMatch(/\.m-done-ring\[data-done\]::before \{\s*opacity: 1;\s*transition-duration: var\(--m-press\);/);
+    expect(reduced).toMatch(/\.m-done-ring::before \{\s*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
+  });
+});

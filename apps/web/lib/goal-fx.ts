@@ -36,7 +36,7 @@ export function playFx(el: FxElement, cls: string, delayMs = 0): void {
   timer = setTimeout(done, SETTLE_MS + delayMs);
 }
 
-const reduced = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+export const prefersReducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
 /** The sheen's own delay in the CSS (--m-goal-delay default), so a staggered row starts after it as a single bar does. */
 const SHEEN_DELAY_MS = 120;
@@ -89,7 +89,7 @@ export function spawnSparks(): void {
 /** Runs the moment's plan on the live screen. */
 export function runMoment(moment: Moment): void {
   const plan = fxPlan(moment);
-  const motionless = reduced();
+  const motionless = prefersReducedMotion();
   for (const step of plan.steps) if (!motionless || step.cls === "m-goal-label") runStep(step);
   if (plan.sparks && !motionless) spawnSparks();
 }
